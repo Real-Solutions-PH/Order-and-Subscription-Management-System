@@ -1,0 +1,692 @@
+'use client';
+
+import React, { useState, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
+import {
+  Minus,
+  Plus,
+  Trash2,
+  MapPin,
+  Clock,
+  CreditCard,
+  Tag,
+  CheckCircle,
+  ShoppingBag,
+  ArrowLeft,
+  User,
+  UserPlus,
+} from 'lucide-react';
+import {
+  deliveryZones,
+  timeSlots,
+  paymentMethods,
+  formatPeso,
+} from '@/lib/mock-data';
+import { useCart } from '@/context/CartContext';
+import { useToast } from '@/context/ToastContext';
+import Link from 'next/link';
+
+export default function CheckoutPage() {
+  const router = useRouter();
+  const { items, updateQuantity, removeItem, clearCart, total, itemCount } = useCart();
+  const { showToast } = useToast();
+
+  // Guest vs Account mode
+  const [checkoutMode, setCheckoutMode] = useState<'guest' | 'account'>('guest');
+
+  // Address fields
+  const [street, setStreet] = useState('');
+  const [city, setCity] = useState('');
+  const [barangay, setBarangay] = useState('');
+  const [zip, setZip] = useState('');
+  const [selectedZone, setSelectedZone] = useState('');
+
+  // Delivery slot
+  const [deliveryDate, setDeliveryDate] = useState('');
+  const [deliveryTimeSlot, setDeliveryTimeSlot] = useState('');
+
+  // Payment
+  const [selectedPayment, setSelectedPayment] = useState('');
+
+  // Promo
+  const [promoCode, setPromoCode] = useState('');
+  const [appliedPromo, setAppliedPromo] = useState<string | null>(null);
+  const [promoError, setPromoError] = useState('');
+
+  // Generate next 7 days
+  const nextDays = useMemo(() => {
+    const days: { label: string; value: string }[] = [];
+    const today = new Date();
+    for (let i = 1; i <= 7; i++) {
+      const d = new Date(today);
+      d.setDate(today.getDate() + i);
+      const dayName = d.toLocaleDateString('en-US', { weekday: 'short' });
+      const monthDay = d.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+      });
+      days.push({
+        label: `${dayName}, ${monthDay}`,
+        value: d.toISOString().split('T')[0],
+      });
+    }
+    return days;
+  }, []);
+
+  // Delivery fee
+  const zone = deliveryZones.find(z => z.name === selectedZone);
+  const deliveryFee = zone ? zone.fee : 0;
+
+  // Discount
+  const discount = appliedPromo === 'PREPFLOW15' ? Math.round(total * 0.15) : 0;
+
+  // Grand total
+  const grandTotal = total + deliveryFee - discount;
+
+  function handleApplyPromo() {
+    if (promoCode.toUpperCase() === 'PREPFLOW15') {
+      setAppliedPromo('PREPFLOW15');
+      setPromoError('');
+      showToast('Promo code applied! 15% discount', 'success');
+    } else {
+      setAppliedPromo(null);
+      setPromoError('Invalid promo code');
+    }
+  }
+
+  function handlePlaceOrder() {
+    if (items.length === 0) {
+      showToast('Your cart is empty', 'error');
+      return;
+    }
+    showToast('Order placed successfully! Thank you for your order.', 'success');
+    clearCart();
+    router.push('/order-confirmation');
+  }
+
+  if (items.length === 0) {
+    return (
+      <div className="flex min-h-[60vh] flex-col items-center justify-center px-4">
+        <ShoppingBag size={64} style={{ color: '#E5E7EB' }} />
+        <h2
+          className="mt-4 text-xl font-bold"
+          style={{ color: '#1A1A2E' }}
+        >
+          Your cart is empty
+        </h2>
+        <p className="mt-2 text-sm" style={{ color: '#6B7280' }}>
+          Add some meals to get started.
+        </p>
+        <Link
+          href="/"
+          className="mt-6 inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+          style={{ backgroundColor: '#E76F51' }}
+        >
+          <ArrowLeft size={16} />
+          Browse Menu
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen" style={{ backgroundColor: '#FEFAE0' }}>
+      {/* Header */}
+      <div style={{ backgroundColor: '#1B4332' }}>
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+          <h1
+            className="text-3xl font-bold sm:text-4xl"
+            style={{ fontFamily: "'DM Serif Display', serif", color: '#FEFAE0' }}
+          >
+            Checkout
+          </h1>
+          <p className="mt-2 text-sm" style={{ color: 'rgba(254,250,224,0.75)' }}>
+            {itemCount} item{itemCount !== 1 ? 's' : ''} in your cart
+          </p>
+        </div>
+      </div>
+
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:flex lg:gap-8 lg:px-8">
+        {/* Left Column: Form Sections */}
+        <div className="flex-1 space-y-6">
+          {/* Guest / Account Toggle */}
+          <div
+            className="overflow-hidden rounded-2xl bg-white"
+            style={{ border: '1px solid #E5E7EB' }}
+          >
+            <div className="flex">
+              <button
+                onClick={() => setCheckoutMode('guest')}
+                className="flex flex-1 items-center justify-center gap-2 py-3.5 text-sm font-semibold transition-colors"
+                style={
+                  checkoutMode === 'guest'
+                    ? { backgroundColor: '#1B4332', color: '#FFFFFF' }
+                    : { backgroundColor: '#FFFFFF', color: '#6B7280' }
+                }
+              >
+                <User size={16} />
+                Continue as Guest
+              </button>
+              <button
+                onClick={() => setCheckoutMode('account')}
+                className="flex flex-1 items-center justify-center gap-2 py-3.5 text-sm font-semibold transition-colors"
+                style={
+                  checkoutMode === 'account'
+                    ? { backgroundColor: '#1B4332', color: '#FFFFFF' }
+                    : { backgroundColor: '#FFFFFF', color: '#6B7280' }
+                }
+              >
+                <UserPlus size={16} />
+                Create Account
+              </button>
+            </div>
+          </div>
+
+          {/* Account fields if creating account */}
+          {checkoutMode === 'account' && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              className="rounded-2xl bg-white p-6"
+              style={{ border: '1px solid #E5E7EB' }}
+            >
+              <h2
+                className="mb-4 flex items-center gap-2 text-base font-bold"
+                style={{ color: '#1A1A2E' }}
+              >
+                <UserPlus size={18} style={{ color: '#1B4332' }} />
+                Account Details
+              </h2>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="mb-1 block text-sm font-medium" style={{ color: '#1A1A2E' }}>
+                    Full Name
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Juan dela Cruz"
+                    className="w-full rounded-lg px-4 py-2.5 text-sm outline-none transition-colors focus:ring-2"
+                    style={{ border: '1px solid #E5E7EB', color: '#1A1A2E' }}
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-sm font-medium" style={{ color: '#1A1A2E' }}>
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    placeholder="juan@email.com"
+                    className="w-full rounded-lg px-4 py-2.5 text-sm outline-none transition-colors focus:ring-2"
+                    style={{ border: '1px solid #E5E7EB', color: '#1A1A2E' }}
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-sm font-medium" style={{ color: '#1A1A2E' }}>
+                    Phone
+                  </label>
+                  <input
+                    type="tel"
+                    placeholder="+63 917 123 4567"
+                    className="w-full rounded-lg px-4 py-2.5 text-sm outline-none transition-colors focus:ring-2"
+                    style={{ border: '1px solid #E5E7EB', color: '#1A1A2E' }}
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-sm font-medium" style={{ color: '#1A1A2E' }}>
+                    Password
+                  </label>
+                  <input
+                    type="password"
+                    placeholder="Create a password"
+                    className="w-full rounded-lg px-4 py-2.5 text-sm outline-none transition-colors focus:ring-2"
+                    style={{ border: '1px solid #E5E7EB', color: '#1A1A2E' }}
+                  />
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {/* A) Order Summary */}
+          <div
+            className="rounded-2xl bg-white p-6"
+            style={{ border: '1px solid #E5E7EB' }}
+          >
+            <h2
+              className="mb-4 flex items-center gap-2 text-base font-bold"
+              style={{ color: '#1A1A2E' }}
+            >
+              <ShoppingBag size={18} style={{ color: '#1B4332' }} />
+              Order Summary
+            </h2>
+            <div className="space-y-3">
+              {items.map(item => (
+                <div
+                  key={item.meal.id}
+                  className="flex items-center gap-4 rounded-xl p-3 transition-colors hover:bg-gray-50"
+                >
+                  <img
+                    src={item.meal.image}
+                    alt={item.meal.name}
+                    className="h-16 w-16 shrink-0 rounded-lg object-cover"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p
+                      className="text-sm font-semibold leading-tight"
+                      style={{ color: '#1A1A2E' }}
+                    >
+                      {item.meal.name}
+                    </p>
+                    {item.customizations && item.customizations.length > 0 && (
+                      <p className="mt-0.5 text-xs" style={{ color: '#059669' }}>
+                        {item.customizations.join(', ')}
+                      </p>
+                    )}
+                    <p className="mt-1 text-sm font-medium" style={{ color: '#1B4332' }}>
+                      {formatPeso(item.meal.price)}
+                    </p>
+                  </div>
+
+                  {/* Quantity controls */}
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => updateQuantity(item.meal.id, item.quantity - 1)}
+                      className="flex h-7 w-7 items-center justify-center rounded-full transition-colors"
+                      style={{ backgroundColor: '#f3f4f6' }}
+                    >
+                      <Minus size={12} style={{ color: '#1A1A2E' }} />
+                    </button>
+                    <span
+                      className="w-5 text-center text-sm font-bold"
+                      style={{ color: '#1A1A2E' }}
+                    >
+                      {item.quantity}
+                    </span>
+                    <button
+                      onClick={() => updateQuantity(item.meal.id, item.quantity + 1)}
+                      className="flex h-7 w-7 items-center justify-center rounded-full transition-colors"
+                      style={{ backgroundColor: '#f3f4f6' }}
+                    >
+                      <Plus size={12} style={{ color: '#1A1A2E' }} />
+                    </button>
+                  </div>
+
+                  {/* Item total + remove */}
+                  <div className="flex items-center gap-3">
+                    <span
+                      className="text-sm font-bold"
+                      style={{ color: '#1A1A2E' }}
+                    >
+                      {formatPeso(item.meal.price * item.quantity)}
+                    </span>
+                    <button
+                      onClick={() => removeItem(item.meal.id)}
+                      className="rounded-lg p-1.5 transition-colors hover:bg-red-50"
+                    >
+                      <Trash2 size={16} style={{ color: '#DC2626' }} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* B) Delivery Address */}
+          <div
+            className="rounded-2xl bg-white p-6"
+            style={{ border: '1px solid #E5E7EB' }}
+          >
+            <h2
+              className="mb-4 flex items-center gap-2 text-base font-bold"
+              style={{ color: '#1A1A2E' }}
+            >
+              <MapPin size={18} style={{ color: '#1B4332' }} />
+              Delivery Address
+            </h2>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="sm:col-span-2">
+                <label className="mb-1 block text-sm font-medium" style={{ color: '#1A1A2E' }}>
+                  Street Address
+                </label>
+                <input
+                  type="text"
+                  value={street}
+                  onChange={e => setStreet(e.target.value)}
+                  placeholder="123 Rizal Avenue"
+                  className="w-full rounded-lg px-4 py-2.5 text-sm outline-none transition-colors focus:ring-2"
+                  style={{ border: '1px solid #E5E7EB', color: '#1A1A2E' }}
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium" style={{ color: '#1A1A2E' }}>
+                  City
+                </label>
+                <input
+                  type="text"
+                  value={city}
+                  onChange={e => setCity(e.target.value)}
+                  placeholder="Makati City"
+                  className="w-full rounded-lg px-4 py-2.5 text-sm outline-none transition-colors focus:ring-2"
+                  style={{ border: '1px solid #E5E7EB', color: '#1A1A2E' }}
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium" style={{ color: '#1A1A2E' }}>
+                  Barangay
+                </label>
+                <input
+                  type="text"
+                  value={barangay}
+                  onChange={e => setBarangay(e.target.value)}
+                  placeholder="Brgy. San Lorenzo"
+                  className="w-full rounded-lg px-4 py-2.5 text-sm outline-none transition-colors focus:ring-2"
+                  style={{ border: '1px solid #E5E7EB', color: '#1A1A2E' }}
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium" style={{ color: '#1A1A2E' }}>
+                  Zip Code
+                </label>
+                <input
+                  type="text"
+                  value={zip}
+                  onChange={e => setZip(e.target.value)}
+                  placeholder="1229"
+                  className="w-full rounded-lg px-4 py-2.5 text-sm outline-none transition-colors focus:ring-2"
+                  style={{ border: '1px solid #E5E7EB', color: '#1A1A2E' }}
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium" style={{ color: '#1A1A2E' }}>
+                  Delivery Zone
+                </label>
+                <select
+                  value={selectedZone}
+                  onChange={e => setSelectedZone(e.target.value)}
+                  className="w-full rounded-lg px-4 py-2.5 text-sm outline-none transition-colors focus:ring-2"
+                  style={{ border: '1px solid #E5E7EB', color: selectedZone ? '#1A1A2E' : '#9ca3af' }}
+                >
+                  <option value="">Select your zone</option>
+                  {deliveryZones.map(z => (
+                    <option key={z.name} value={z.name}>
+                      {z.name} — {formatPeso(z.fee)} ({z.estimatedTime})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            {zone && (
+              <div
+                className="mt-4 flex items-center gap-2 rounded-lg px-4 py-2.5"
+                style={{ backgroundColor: 'rgba(27,67,50,0.05)' }}
+              >
+                <CheckCircle size={16} style={{ color: '#059669' }} />
+                <span className="text-sm" style={{ color: '#1A1A2E' }}>
+                  Delivery fee: <strong>{formatPeso(zone.fee)}</strong> &middot; Est. {zone.estimatedTime}
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* C) Delivery Slot */}
+          <div
+            className="rounded-2xl bg-white p-6"
+            style={{ border: '1px solid #E5E7EB' }}
+          >
+            <h2
+              className="mb-4 flex items-center gap-2 text-base font-bold"
+              style={{ color: '#1A1A2E' }}
+            >
+              <Clock size={18} style={{ color: '#1B4332' }} />
+              Delivery Slot
+            </h2>
+
+            {/* Date */}
+            <div className="mb-4">
+              <label className="mb-2 block text-sm font-medium" style={{ color: '#1A1A2E' }}>
+                Delivery Date
+              </label>
+              <select
+                value={deliveryDate}
+                onChange={e => setDeliveryDate(e.target.value)}
+                className="w-full rounded-lg px-4 py-2.5 text-sm outline-none sm:w-64"
+                style={{ border: '1px solid #E5E7EB', color: deliveryDate ? '#1A1A2E' : '#9ca3af' }}
+              >
+                <option value="">Choose a date</option>
+                {nextDays.map(d => (
+                  <option key={d.value} value={d.value}>
+                    {d.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Time slot grid */}
+            <div>
+              <label className="mb-2 block text-sm font-medium" style={{ color: '#1A1A2E' }}>
+                Time Slot
+              </label>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                {timeSlots.map(slot => {
+                  const isSelected = deliveryTimeSlot === slot;
+                  return (
+                    <button
+                      key={slot}
+                      onClick={() => setDeliveryTimeSlot(slot)}
+                      className="rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150"
+                      style={
+                        isSelected
+                          ? { backgroundColor: '#1B4332', color: '#FFFFFF' }
+                          : {
+                              backgroundColor: '#FFFFFF',
+                              color: '#1A1A2E',
+                              border: '1px solid #E5E7EB',
+                            }
+                      }
+                    >
+                      {slot}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* D) Payment Method */}
+          <div
+            className="rounded-2xl bg-white p-6"
+            style={{ border: '1px solid #E5E7EB' }}
+          >
+            <h2
+              className="mb-4 flex items-center gap-2 text-base font-bold"
+              style={{ color: '#1A1A2E' }}
+            >
+              <CreditCard size={18} style={{ color: '#1B4332' }} />
+              Payment Method
+            </h2>
+            <div className="space-y-2">
+              {paymentMethods.map(pm => {
+                const isSelected = selectedPayment === pm.id;
+                return (
+                  <label
+                    key={pm.id}
+                    className="flex cursor-pointer items-center gap-4 rounded-xl px-4 py-3 transition-all duration-150"
+                    style={
+                      isSelected
+                        ? {
+                            backgroundColor: 'rgba(27,67,50,0.05)',
+                            border: '2px solid #1B4332',
+                          }
+                        : {
+                            backgroundColor: '#FFFFFF',
+                            border: '2px solid #E5E7EB',
+                          }
+                    }
+                  >
+                    <input
+                      type="radio"
+                      name="payment"
+                      value={pm.id}
+                      checked={isSelected}
+                      onChange={() => setSelectedPayment(pm.id)}
+                      className="h-4 w-4"
+                      style={{ accentColor: '#1B4332' }}
+                    />
+                    <span className="text-xl">{pm.icon}</span>
+                    <span
+                      className="text-sm font-medium"
+                      style={{ color: '#1A1A2E' }}
+                    >
+                      {pm.name}
+                    </span>
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* E) Promo Code */}
+          <div
+            className="rounded-2xl bg-white p-6"
+            style={{ border: '1px solid #E5E7EB' }}
+          >
+            <h2
+              className="mb-4 flex items-center gap-2 text-base font-bold"
+              style={{ color: '#1A1A2E' }}
+            >
+              <Tag size={18} style={{ color: '#1B4332' }} />
+              Promo Code
+            </h2>
+            <div className="flex gap-3">
+              <input
+                type="text"
+                value={promoCode}
+                onChange={e => {
+                  setPromoCode(e.target.value);
+                  setPromoError('');
+                }}
+                placeholder="Enter promo code"
+                className="flex-1 rounded-lg px-4 py-2.5 text-sm uppercase outline-none"
+                style={{ border: '1px solid #E5E7EB', color: '#1A1A2E' }}
+              />
+              <button
+                onClick={handleApplyPromo}
+                className="shrink-0 rounded-lg px-5 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+                style={{ backgroundColor: '#1B4332' }}
+              >
+                Apply
+              </button>
+            </div>
+            {promoError && (
+              <p className="mt-2 text-sm" style={{ color: '#DC2626' }}>
+                {promoError}
+              </p>
+            )}
+            {appliedPromo && (
+              <div
+                className="mt-3 flex items-center gap-2 rounded-lg px-4 py-2.5"
+                style={{ backgroundColor: 'rgba(5,150,105,0.08)' }}
+              >
+                <CheckCircle size={16} style={{ color: '#059669' }} />
+                <span className="text-sm font-medium" style={{ color: '#059669' }}>
+                  {appliedPromo} applied — 15% off!
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Right Column: Sticky Order Total */}
+        <div className="mt-8 lg:mt-0 lg:w-96 lg:shrink-0">
+          <div
+            className="sticky top-24 rounded-2xl bg-white p-6"
+            style={{
+              border: '1px solid #E5E7EB',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
+            }}
+          >
+            <h3 className="text-lg font-bold" style={{ color: '#1A1A2E' }}>
+              Order Total
+            </h3>
+
+            {/* Compact item list */}
+            <div
+              className="mt-4 max-h-52 space-y-2 overflow-y-auto pb-4"
+              style={{ borderBottom: '1px solid #E5E7EB' }}
+            >
+              {items.map(item => (
+                <div
+                  key={item.meal.id}
+                  className="flex items-center justify-between text-sm"
+                >
+                  <span style={{ color: '#1A1A2E' }}>
+                    {item.meal.name}{' '}
+                    <span style={{ color: '#6B7280' }}>x{item.quantity}</span>
+                  </span>
+                  <span className="font-medium" style={{ color: '#1A1A2E' }}>
+                    {formatPeso(item.meal.price * item.quantity)}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            {/* Totals */}
+            <div className="mt-4 space-y-2.5">
+              <div className="flex justify-between text-sm">
+                <span style={{ color: '#6B7280' }}>Subtotal</span>
+                <span style={{ color: '#1A1A2E' }}>{formatPeso(total)}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span style={{ color: '#6B7280' }}>Delivery fee</span>
+                <span style={{ color: '#1A1A2E' }}>
+                  {deliveryFee > 0 ? formatPeso(deliveryFee) : '--'}
+                </span>
+              </div>
+              {discount > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span style={{ color: '#059669' }}>Discount (15%)</span>
+                  <span className="font-semibold" style={{ color: '#059669' }}>
+                    -{formatPeso(discount)}
+                  </span>
+                </div>
+              )}
+              <div
+                className="flex justify-between pt-3 text-lg font-bold"
+                style={{ borderTop: '1px solid #E5E7EB' }}
+              >
+                <span style={{ color: '#1A1A2E' }}>Total</span>
+                <span style={{ color: '#1B4332' }}>{formatPeso(grandTotal)}</span>
+              </div>
+            </div>
+
+            {/* Place Order CTA */}
+            <motion.button
+              whileHover={{ scale: 1.01 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handlePlaceOrder}
+              className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-base font-bold text-white transition-opacity hover:opacity-90"
+              style={{ backgroundColor: '#E76F51' }}
+            >
+              <ShoppingBag size={18} />
+              Place Order &middot; {formatPeso(grandTotal)}
+            </motion.button>
+
+            <p className="mt-3 text-center text-xs" style={{ color: '#6B7280' }}>
+              By placing your order, you agree to our Terms of Service and Privacy Policy.
+            </p>
+
+            {/* Back to menu */}
+            <Link
+              href="/"
+              className="mt-4 flex items-center justify-center gap-2 text-sm font-medium transition-colors hover:underline"
+              style={{ color: '#1B4332' }}
+            >
+              <ArrowLeft size={14} />
+              Continue Shopping
+            </Link>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

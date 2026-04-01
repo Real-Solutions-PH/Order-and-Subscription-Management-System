@@ -1,0 +1,109 @@
+@import "tailwindcss";
+
+:root {
+  --color-primary: #1B4332;
+  --color-primary-light: #2D6A4F;
+  --color-primary-lighter: #40916C;
+  --color-accent: #E76F51;
+  --color-accent-light: #F4A261;
+  --color-surface: #FEFAE0;
+  --color-surface-white: #FFFFFF;
+  --color-surface-dark: #1A1A2E;
+  --color-text-primary: #1A1A2E;
+  --color-text-secondary: #6B7280;
+  --color-text-inverse: #FEFAE0;
+  --color-success: #059669;
+  --color-warning: #D97706;
+  --color-error: #DC2626;
+  --color-info: #2563EB;
+  --color-border: #E5E7EB;
+  --color-border-focus: #1B4332;
+
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-elevated: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+  --shadow-modal: 0 20px 60px rgba(0,0,0,0.15);
+}
+
+@theme inline {
+  --font-display: 'DM Serif Display', serif;
+  --font-body: 'DM Sans', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --color-background: var(--color-surface);
+  --color-foreground: var(--color-text-primary);
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+}
+
+/* Skeleton shimmer animation */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 8px;
+}
+
+/* Success pulse animation */
+@keyframes pulse-success {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.05); opacity: 0.8; }
+}
+
+.pulse-success {
+  animation: pulse-success 0.6s ease-in-out;
+}
+
+/* Float animation for hero */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Page transition */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-enter {
+  animation: fadeInUp 0.2s ease-out;
+}
+
+/* Print styles */
+@media print {
+  .no-print { display: none !important; }
+  body { background: white !important; }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
