@@ -1,4 +1,4 @@
-import { cn } from '@/lib/utils';
+import { cn } from "@/lib/utils";
 
 interface SkeletonProps extends React.HTMLAttributes<HTMLDivElement> {
   className?: string;
@@ -7,10 +7,7 @@ interface SkeletonProps extends React.HTMLAttributes<HTMLDivElement> {
 export function Skeleton({ className, ...props }: SkeletonProps) {
   return (
     <div
-      className={cn(
-        'animate-pulse rounded-md bg-gray-200',
-        className,
-      )}
+      className={cn("animate-pulse rounded-md bg-gray-200", className)}
       {...props}
     />
   );
@@ -19,7 +16,7 @@ export function Skeleton({ className, ...props }: SkeletonProps) {
 /** Card-shaped skeleton block. */
 export function SkeletonCard({ className }: { className?: string }) {
   return (
-    <div className={cn('rounded-2xl bg-white p-6 space-y-4', className)}>
+    <div className={cn("rounded-2xl bg-white p-6 space-y-4", className)}>
       <Skeleton className="h-4 w-1/3" />
       <Skeleton className="h-8 w-1/2" />
       <Skeleton className="h-3 w-2/3" />
@@ -43,7 +40,10 @@ export function SkeletonRow({ cols = 5 }: { cols?: number }) {
 /** Meal card skeleton matching MealCard dimensions. */
 export function SkeletonMealCard() {
   return (
-    <div className="rounded-2xl bg-white overflow-hidden" style={{ border: '1px solid #E5E7EB' }}>
+    <div
+      className="rounded-2xl bg-white overflow-hidden"
+      style={{ border: "1px solid #E5E7EB" }}
+    >
       <Skeleton className="h-48 w-full rounded-none" />
       <div className="p-4 space-y-3">
         <Skeleton className="h-4 w-3/4" />
@@ -64,7 +64,10 @@ export function SkeletonMealCard() {
 /** KPI card skeleton for admin dashboard. */
 export function SkeletonKPI() {
   return (
-    <div className="rounded-2xl bg-white p-5 space-y-3" style={{ border: '1px solid #F3F4F6' }}>
+    <div
+      className="rounded-2xl bg-white p-5 space-y-3"
+      style={{ border: "1px solid #F3F4F6" }}
+    >
       <div className="flex items-center justify-between">
         <Skeleton className="h-3 w-24" />
         <Skeleton className="h-8 w-8 rounded-lg" />
@@ -78,7 +81,10 @@ export function SkeletonKPI() {
 /** Chart area skeleton. */
 export function SkeletonChart({ className }: { className?: string }) {
   return (
-    <div className={cn('rounded-2xl bg-white p-6', className)} style={{ border: '1px solid #F3F4F6' }}>
+    <div
+      className={cn("rounded-2xl bg-white p-6", className)}
+      style={{ border: "1px solid #F3F4F6" }}
+    >
       <Skeleton className="h-4 w-32 mb-4" />
       <Skeleton className="h-64 w-full rounded-xl" />
     </div>

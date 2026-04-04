@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuthContext } from '@/context/AuthContext';
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuthContext } from "@/context/AuthContext";
 
 interface RequireRoleProps {
   role: string;
@@ -18,18 +18,22 @@ function LoadingSkeleton() {
   );
 }
 
-export default function RequireRole({ role, children, fallback }: RequireRoleProps) {
+export default function RequireRole({
+  role,
+  children,
+  fallback,
+}: RequireRoleProps) {
   const { isAuthenticated, isLoading, roles, openAuthModal } = useAuthContext();
   const router = useRouter();
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      router.replace('/');
-      openAuthModal('login');
+      router.replace("/");
+      openAuthModal("login");
       return;
     }
     if (!isLoading && isAuthenticated && !roles.includes(role)) {
-      router.replace('/');
+      router.replace("/");
     }
   }, [isLoading, isAuthenticated, roles, role, router, openAuthModal]);
 

@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { api } from '@/lib/api-client';
-import { queryKeys } from './query-keys';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { api } from "@/lib/api-client";
+import { queryKeys } from "./query-keys";
 
 /** User's notifications. */
 export function useNotifications(params?: { skip?: number; limit?: number }) {
@@ -25,14 +25,24 @@ export function useNotificationMutations() {
   const qc = useQueryClient();
 
   const sendNotification = useMutation({
-    mutationFn: (data: { user_id: string; channel: string; subject: string; body: string }) =>
-      api.notifications.send(data),
+    mutationFn: (data: {
+      user_id: string;
+      channel: string;
+      subject: string;
+      body: string;
+    }) => api.notifications.send(data),
   });
 
   const updateTemplate = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: { subject?: string; body_template?: string; is_active?: boolean } }) =>
-      api.notifications.updateTemplate(id, data),
-    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.notificationTemplates }),
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: { subject?: string; body_template?: string; is_active?: boolean };
+    }) => api.notifications.updateTemplate(id, data),
+    onSuccess: () =>
+      qc.invalidateQueries({ queryKey: queryKeys.notificationTemplates }),
   });
 
   return {

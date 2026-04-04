@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useQuery } from '@tanstack/react-query';
-import { api } from '@/lib/api-client';
-import { queryKeys } from './query-keys';
+import { useQuery } from "@tanstack/react-query";
+import { api } from "@/lib/api-client";
+import { queryKeys } from "./query-keys";
 
 /** Dashboard overview metrics. */
 export function useDashboardMetrics(period?: string) {
@@ -21,7 +21,10 @@ export function useMRRBreakdown() {
 }
 
 /** Churn analysis. */
-export function useChurnData(params?: { period_start?: string; period_end?: string }) {
+export function useChurnData(params?: {
+  period_start?: string;
+  period_end?: string;
+}) {
   return useQuery({
     queryKey: queryKeys.analytics.churn(params as Record<string, unknown>),
     queryFn: () => api.analytics.churn(params),

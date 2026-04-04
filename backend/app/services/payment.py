@@ -64,9 +64,7 @@ logger = logging.getLogger(__name__)
 class PaymentService:
     """Service layer for payment lifecycle and PayMongo integration (stubs)."""
 
-    def __init__(
-        self, session: AsyncSession, cache: RedisCache | None = None
-    ) -> None:
+    def __init__(self, session: AsyncSession, cache: RedisCache | None = None) -> None:
         self.session = session
         self.cache = cache
         self.payment_repo = PaymentRepository(session)
@@ -258,9 +256,7 @@ class PaymentService:
         else:
             logger.warning("Unhandled webhook event type: %s", event_type)
 
-    async def _handle_payment_paid(
-        self, resource: dict[str, Any], event_id: str
-    ) -> None:
+    async def _handle_payment_paid(self, resource: dict[str, Any], event_id: str) -> None:
         """Handle a payment.paid webhook event."""
         intent_id = resource.get("attributes", {}).get("payment_intent_id")
         if not intent_id:
@@ -292,9 +288,7 @@ class PaymentService:
             {"payment_id": str(payment.id), "order_id": str(payment.order_id)},
         )
 
-    async def _handle_payment_failed(
-        self, resource: dict[str, Any], event_id: str
-    ) -> None:
+    async def _handle_payment_failed(self, resource: dict[str, Any], event_id: str) -> None:
         """Handle a payment.failed webhook event."""
         intent_id = resource.get("attributes", {}).get("payment_intent_id")
         if not intent_id:
@@ -329,9 +323,7 @@ class PaymentService:
             {"payment_id": str(payment.id), "order_id": str(payment.order_id)},
         )
 
-    async def _handle_payment_refunded(
-        self, resource: dict[str, Any], event_id: str
-    ) -> None:
+    async def _handle_payment_refunded(self, resource: dict[str, Any], event_id: str) -> None:
         """Handle a payment.refunded webhook event."""
         intent_id = resource.get("attributes", {}).get("payment_intent_id")
         if not intent_id:
@@ -499,9 +491,7 @@ class PaymentService:
             raise BadRequestException("Promo code is not currently active")
 
         if promo.min_order_amount and data.order_amount < promo.min_order_amount:
-            raise BadRequestException(
-                f"Minimum order amount of {promo.min_order_amount} required"
-            )
+            raise BadRequestException(f"Minimum order amount of {promo.min_order_amount} required")
 
         can_use = await self.promo_repo.validate_usage(promo.id, user_id)
         if not can_use:
@@ -554,9 +544,7 @@ class PaymentService:
             is_default=pm.is_default,
         )
 
-    async def list_payment_methods(
-        self, user_id: UUID | str, tenant_id: UUID | str
-    ) -> list[PaymentMethodResponse]:
+    async def list_payment_methods(self, user_id: UUID | str, tenant_id: UUID | str) -> list[PaymentMethodResponse]:
         """Return all saved payment methods for a user."""
         methods = await self.method_repo.get_by_user(user_id, tenant_id)
         return [
@@ -606,13 +594,9 @@ class PaymentService:
             discount_amount=Decimal("0"),
         )
 
-    async def list_promo_codes(
-        self, tenant_id: UUID | str, skip: int = 0, limit: int = 50
-    ) -> list[PromoCodeResponse]:
+    async def list_promo_codes(self, tenant_id: UUID | str, skip: int = 0, limit: int = 50) -> list[PromoCodeResponse]:
         """Return all promo codes for a tenant."""
-        promos = await self.promo_repo.get_all(
-            skip=skip, limit=limit, tenant_id=tenant_id
-        )
+        promos = await self.promo_repo.get_all(skip=skip, limit=limit, tenant_id=tenant_id)
         return [
             PromoCodeResponse(
                 id=p.id,
@@ -633,9 +617,7 @@ class PaymentService:
 class InvoiceService:
     """Service layer for invoice generation and retrieval."""
 
-    def __init__(
-        self, session: AsyncSession, cache: RedisCache | None = None
-    ) -> None:
+    def __init__(self, session: AsyncSession, cache: RedisCache | None = None) -> None:
         self.session = session
         self.cache = cache
         self.invoice_repo = InvoiceRepository(session)
@@ -675,9 +657,7 @@ class InvoiceService:
 
         # Load order with items
         stmt = (
-            select(Order)
-            .where(Order.id == order_id, Order.tenant_id == tenant_id)
-            .options(selectinload(Order.items))
+            select(Order).where(Order.id == order_id, Order.tenant_id == tenant_id).options(selectinload(Order.items))
         )
         result = await self.session.execute(stmt)
         order = result.scalar_one_or_none()

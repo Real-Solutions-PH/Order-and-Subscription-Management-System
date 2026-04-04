@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import React, {
   createContext,
@@ -8,13 +8,13 @@ import React, {
   useCallback,
   useEffect,
   type ReactNode,
-} from 'react';
-import { useAuth } from '@/hooks/useAuth';
-import { getAccessToken } from '@/lib/api-client';
-import { parseJwt } from '@/lib/jwt';
-import type { UserResponse } from '@/lib/api-client';
+} from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { getAccessToken } from "@/lib/api-client";
+import { parseJwt } from "@/lib/jwt";
+import type { UserResponse } from "@/lib/api-client";
 
-type AuthTab = 'login' | 'register';
+type AuthTab = "login" | "register";
 
 interface AuthContextType {
   user: UserResponse | null;
@@ -24,12 +24,12 @@ interface AuthContextType {
   isLoading: boolean;
   isAdmin: boolean;
 
-  login: ReturnType<typeof useAuth>['login'];
+  login: ReturnType<typeof useAuth>["login"];
   isLoggingIn: boolean;
-  register: ReturnType<typeof useAuth>['register'];
+  register: ReturnType<typeof useAuth>["register"];
   isRegistering: boolean;
-  logout: ReturnType<typeof useAuth>['logout'];
-  updateProfile: ReturnType<typeof useAuth>['updateProfile'];
+  logout: ReturnType<typeof useAuth>["logout"];
+  updateProfile: ReturnType<typeof useAuth>["updateProfile"];
   isUpdatingProfile: boolean;
 
   isAuthModalOpen: boolean;
@@ -43,7 +43,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const auth = useAuth();
   const [isAuthModalOpen, setAuthModalOpen] = useState(false);
-  const [authModalTab, setAuthModalTab] = useState<AuthTab>('login');
+  const [authModalTab, setAuthModalTab] = useState<AuthTab>("login");
 
   const { roles, permissions } = useMemo(() => {
     const token = getAccessToken();
@@ -56,9 +56,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [auth.user]);
 
-  const isAdmin = roles.includes('admin');
+  const isAdmin = roles.includes("admin");
 
-  const openAuthModal = useCallback((tab: AuthTab = 'login') => {
+  const openAuthModal = useCallback((tab: AuthTab = "login") => {
     setAuthModalTab(tab);
     setAuthModalOpen(true);
   }, []);
@@ -99,6 +99,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export function useAuthContext() {
   const context = useContext(AuthContext);
-  if (!context) throw new Error('useAuthContext must be used within AuthProvider');
+  if (!context)
+    throw new Error("useAuthContext must be used within AuthProvider");
   return context;
 }

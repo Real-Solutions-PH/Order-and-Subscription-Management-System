@@ -97,9 +97,7 @@ async def get_current_user_profile(
 ) -> Any:
     """Return the authenticated user's profile."""
     service = UserService(session)
-    return await service.get_user(
-        current_user["sub"], current_user["tenant_id"]
-    )
+    return await service.get_user(current_user["sub"], current_user["tenant_id"])
 
 
 @router.patch("/users/me", response_model=UserResponse)
@@ -110,6 +108,4 @@ async def update_current_user_profile(
 ) -> Any:
     """Update the authenticated user's profile."""
     service = UserService(session)
-    return await service.update_user(
-        current_user["sub"], current_user["tenant_id"], data
-    )
+    return await service.update_user(current_user["sub"], current_user["tenant_id"], data)

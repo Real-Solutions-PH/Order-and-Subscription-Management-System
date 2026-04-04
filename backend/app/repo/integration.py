@@ -24,29 +24,21 @@ class WebhookRepository(BaseRepository[Webhook]):
 
     model = Webhook
 
-    async def get_active(
-        self, tenant_id: UUID | str | None = None
-    ) -> list[Webhook]:
+    async def get_active(self, tenant_id: UUID | str | None = None) -> list[Webhook]:
         """Return all active webhooks."""
         stmt = select(Webhook).where(Webhook.is_active.is_(True))
         stmt = self._apply_tenant_filter(stmt, tenant_id)
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
 
-    async def get_by_event(
-        self, tenant_id: UUID | str, event_type: str
-    ) -> list[Webhook]:
+    async def get_by_event(self, tenant_id: UUID | str, event_type: str) -> list[Webhook]:
         """Return active webhooks subscribed to a specific event type.
 
         The ``events`` column is a JSON list of event-type strings.
         Filtering is done in Python after fetching active webhooks.
         """
         webhooks = await self.get_active(tenant_id)
-        return [
-            wh
-            for wh in webhooks
-            if isinstance(wh.events, list) and event_type in wh.events
-        ]
+        return [wh for wh in webhooks if isinstance(wh.events, list) and event_type in wh.events]
 
 
 class WebhookEventRepository(BaseRepository[WebhookEvent]):
@@ -54,14 +46,10 @@ class WebhookEventRepository(BaseRepository[WebhookEvent]):
 
     model = WebhookEvent
 
-    async def get_by_webhook(
-        self, webhook_id: UUID | str
-    ) -> list[WebhookEvent]:
+    async def get_by_webhook(self, webhook_id: UUID | str) -> list[WebhookEvent]:
         """Return all events for a specific webhook."""
         stmt = (
-            select(WebhookEvent)
-            .where(WebhookEvent.webhook_id == webhook_id)
-            .order_by(WebhookEvent.created_at.desc())
+            select(WebhookEvent).where(WebhookEvent.webhook_id == webhook_id).order_by(WebhookEvent.created_at.desc())
         )
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
@@ -85,9 +73,7 @@ class IntegrationConfigRepository(BaseRepository[IntegrationConfig]):
 
     model = IntegrationConfig
 
-    async def get_by_type(
-        self, tenant_id: UUID | str, system_type: IntegrationSystemType
-    ) -> IntegrationConfig | None:
+    async def get_by_type(self, tenant_id: UUID | str, system_type: IntegrationSystemType) -> IntegrationConfig | None:
         """Find the configuration for a specific integration system type."""
         stmt = select(IntegrationConfig).where(
             IntegrationConfig.tenant_id == tenant_id,
@@ -96,13 +82,9 @@ class IntegrationConfigRepository(BaseRepository[IntegrationConfig]):
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
 
-    async def get_active(
-        self, tenant_id: UUID | str | None = None
-    ) -> list[IntegrationConfig]:
+    async def get_active(self, tenant_id: UUID | str | None = None) -> list[IntegrationConfig]:
         """Return all active integration configs."""
-        stmt = select(IntegrationConfig).where(
-            IntegrationConfig.is_active.is_(True)
-        )
+        stmt = select(IntegrationConfig).where(IntegrationConfig.is_active.is_(True))
         stmt = self._apply_tenant_filter(stmt, tenant_id)
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
@@ -132,9 +114,7 @@ class AuditLogRepository(BaseRepository[AuditLog]):
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
 
-    async def get_by_actor(
-        self, tenant_id: UUID | str, actor_id: UUID | str
-    ) -> list[AuditLog]:
+    async def get_by_actor(self, tenant_id: UUID | str, actor_id: UUID | str) -> list[AuditLog]:
         """Return audit entries performed by a specific actor."""
         stmt = (
             select(AuditLog)
@@ -158,9 +138,7 @@ class AuditLogRepository(BaseRepository[AuditLog]):
         from sqlalchemy import func
 
         stmt = select(AuditLog).where(AuditLog.tenant_id == tenant_id)
-        count_stmt = select(func.count()).select_from(AuditLog).where(
-            AuditLog.tenant_id == tenant_id
-        )
+        count_stmt = select(func.count()).select_from(AuditLog).where(AuditLog.tenant_id == tenant_id)
 
         if filters:
             if "action" in filters:
@@ -168,9 +146,7 @@ class AuditLogRepository(BaseRepository[AuditLog]):
                 count_stmt = count_stmt.where(AuditLog.action == filters["action"])
             if "resource_type" in filters:
                 stmt = stmt.where(AuditLog.resource_type == filters["resource_type"])
-                count_stmt = count_stmt.where(
-                    AuditLog.resource_type == filters["resource_type"]
-                )
+                count_stmt = count_stmt.where(AuditLog.resource_type == filters["resource_type"])
             if "actor_id" in filters:
                 stmt = stmt.where(AuditLog.actor_id == filters["actor_id"])
                 count_stmt = count_stmt.where(AuditLog.actor_id == filters["actor_id"])

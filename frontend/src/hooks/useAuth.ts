@@ -1,8 +1,15 @@
-'use client';
+"use client";
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { api, setAccessToken, setRefreshToken, type LoginRequest, type RegisterRequest, type UserUpdate } from '@/lib/api-client';
-import { queryKeys } from './query-keys';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  api,
+  setAccessToken,
+  setRefreshToken,
+  type LoginRequest,
+  type RegisterRequest,
+  type UserUpdate,
+} from "@/lib/api-client";
+import { queryKeys } from "./query-keys";
 
 /** Current user profile query + auth mutations. */
 export function useAuth() {
@@ -39,8 +46,8 @@ export function useAuth() {
 
   const logoutMutation = useMutation({
     mutationFn: () => {
-      const rt = localStorage.getItem('prepflow_refresh_token');
-      return api.auth.logout(rt ?? '');
+      const rt = localStorage.getItem("prepflow_refresh_token");
+      return api.auth.logout(rt ?? "");
     },
     onSettled: () => {
       setAccessToken(null);

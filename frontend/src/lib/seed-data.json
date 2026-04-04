@@ -1,273 +1,675 @@
 {
   "meals": [
     {
-      "id": 1, "name": "Garlic Butter Chicken with Jasmine Rice", "price": 285,
-      "calories": 520, "protein": 42, "carbs": 45, "fat": 18,
+      "id": 1,
+      "name": "Garlic Butter Chicken with Jasmine Rice",
+      "price": 285,
+      "calories": 520,
+      "protein": 42,
+      "carbs": 45,
+      "fat": 18,
       "tags": ["High Protein", "Gluten-Free"],
       "image": "/images/meals/garlic-chicken.png",
       "description": "Juicy chicken breast in garlic butter sauce served with fluffy jasmine rice.",
-      "allergens": ["Dairy"], "ingredients": ["Chicken Breast", "Butter", "Garlic", "Jasmine Rice", "Herbs"]
+      "allergens": ["Dairy"],
+      "ingredients": [
+        "Chicken Breast",
+        "Butter",
+        "Garlic",
+        "Jasmine Rice",
+        "Herbs"
+      ]
     },
     {
-      "id": 2, "name": "Beef Tapa with Garlic Fried Rice & Egg", "price": 310,
-      "calories": 610, "protein": 38, "carbs": 52, "fat": 24,
+      "id": 2,
+      "name": "Beef Tapa with Garlic Fried Rice & Egg",
+      "price": 310,
+      "calories": 610,
+      "protein": 38,
+      "carbs": 52,
+      "fat": 24,
       "tags": ["Filipino Classic"],
       "image": "/images/meals/beef-tapa.png",
       "description": "Classic Filipino beef tapa with sinangag and itlog.",
-      "allergens": ["Eggs", "Soy"], "ingredients": ["Beef Sirloin", "Garlic Rice", "Egg", "Vinegar", "Soy Sauce"]
+      "allergens": ["Eggs", "Soy"],
+      "ingredients": [
+        "Beef Sirloin",
+        "Garlic Rice",
+        "Egg",
+        "Vinegar",
+        "Soy Sauce"
+      ]
     },
     {
-      "id": 3, "name": "Salmon Teriyaki Bowl", "price": 395,
-      "calories": 480, "protein": 35, "carbs": 48, "fat": 16,
+      "id": 3,
+      "name": "Salmon Teriyaki Bowl",
+      "price": 395,
+      "calories": 480,
+      "protein": 35,
+      "carbs": 48,
+      "fat": 16,
       "tags": ["Keto-Friendly"],
       "image": "/images/meals/salmon-bowl.png",
       "description": "Fresh Atlantic salmon glazed with house teriyaki on a bed of mixed grains.",
-      "allergens": ["Fish", "Soy", "Gluten"], "ingredients": ["Salmon Fillet", "Teriyaki Sauce", "Brown Rice", "Edamame", "Sesame"]
+      "allergens": ["Fish", "Soy", "Gluten"],
+      "ingredients": [
+        "Salmon Fillet",
+        "Teriyaki Sauce",
+        "Brown Rice",
+        "Edamame",
+        "Sesame"
+      ]
     },
     {
-      "id": 4, "name": "Vegan Buddha Bowl", "price": 245,
-      "calories": 380, "protein": 18, "carbs": 55, "fat": 12,
+      "id": 4,
+      "name": "Vegan Buddha Bowl",
+      "price": 245,
+      "calories": 380,
+      "protein": 18,
+      "carbs": 55,
+      "fat": 12,
       "tags": ["Vegan", "Dairy-Free"],
       "image": "/images/meals/buddha-bowl.png",
       "description": "Colorful bowl of roasted vegetables, quinoa, and tahini dressing.",
-      "allergens": ["Sesame"], "ingredients": ["Quinoa", "Sweet Potato", "Chickpeas", "Kale", "Tahini"]
+      "allergens": ["Sesame"],
+      "ingredients": ["Quinoa", "Sweet Potato", "Chickpeas", "Kale", "Tahini"]
     },
     {
-      "id": 5, "name": "Chicken Adobo Meal Prep", "price": 265,
-      "calories": 490, "protein": 40, "carbs": 42, "fat": 15,
+      "id": 5,
+      "name": "Chicken Adobo Meal Prep",
+      "price": 265,
+      "calories": 490,
+      "protein": 40,
+      "carbs": 42,
+      "fat": 15,
       "tags": ["Filipino Classic", "High Protein"],
       "image": "/images/meals/chicken-adobo.png",
       "description": "Traditional chicken adobo braised in soy-vinegar sauce with steamed rice.",
-      "allergens": ["Soy"], "ingredients": ["Chicken Thigh", "Soy Sauce", "Vinegar", "Bay Leaves", "Rice"]
+      "allergens": ["Soy"],
+      "ingredients": [
+        "Chicken Thigh",
+        "Soy Sauce",
+        "Vinegar",
+        "Bay Leaves",
+        "Rice"
+      ]
     },
     {
-      "id": 6, "name": "Mediterranean Quinoa Salad", "price": 275,
-      "calories": 420, "protein": 22, "carbs": 48, "fat": 14,
+      "id": 6,
+      "name": "Mediterranean Quinoa Salad",
+      "price": 275,
+      "calories": 420,
+      "protein": 22,
+      "carbs": 48,
+      "fat": 14,
       "tags": ["Vegetarian", "Gluten-Free"],
       "image": "/images/meals/med-quinoa.png",
       "description": "Fresh Mediterranean salad with quinoa, feta, olives, and lemon vinaigrette.",
-      "allergens": ["Dairy"], "ingredients": ["Quinoa", "Feta Cheese", "Olives", "Cucumber", "Tomatoes"]
+      "allergens": ["Dairy"],
+      "ingredients": ["Quinoa", "Feta Cheese", "Olives", "Cucumber", "Tomatoes"]
     },
     {
-      "id": 7, "name": "Korean BBQ Beef with Kimchi Rice", "price": 335,
-      "calories": 560, "protein": 36, "carbs": 50, "fat": 22,
+      "id": 7,
+      "name": "Korean BBQ Beef with Kimchi Rice",
+      "price": 335,
+      "calories": 560,
+      "protein": 36,
+      "carbs": 50,
+      "fat": 22,
       "tags": ["Spicy"],
       "image": "/images/meals/korean-bbq.png",
       "description": "Marinated Korean BBQ beef with kimchi fried rice and pickled vegetables.",
-      "allergens": ["Soy", "Gluten", "Sesame"], "ingredients": ["Beef Ribeye", "Kimchi", "Gochujang", "Rice", "Sesame Oil"]
+      "allergens": ["Soy", "Gluten", "Sesame"],
+      "ingredients": [
+        "Beef Ribeye",
+        "Kimchi",
+        "Gochujang",
+        "Rice",
+        "Sesame Oil"
+      ]
     },
     {
-      "id": 8, "name": "Grilled Fish Sinigang Soup Set", "price": 290,
-      "calories": 350, "protein": 32, "carbs": 28, "fat": 10,
+      "id": 8,
+      "name": "Grilled Fish Sinigang Soup Set",
+      "price": 290,
+      "calories": 350,
+      "protein": 32,
+      "carbs": 28,
+      "fat": 10,
       "tags": ["Filipino Classic", "Low Carb", "Diabetic-Friendly"],
       "image": "/images/meals/fish-sinigang.png",
       "description": "Grilled bangus with sinigang soup, vegetables, and a cup of rice.",
-      "allergens": ["Fish"], "ingredients": ["Bangus", "Tamarind", "Tomatoes", "Kangkong", "Radish"]
+      "allergens": ["Fish"],
+      "ingredients": ["Bangus", "Tamarind", "Tomatoes", "Kangkong", "Radish"]
     },
     {
-      "id": 9, "name": "Tofu Sisig with Brown Rice", "price": 225,
-      "calories": 410, "protein": 20, "carbs": 52, "fat": 14,
+      "id": 9,
+      "name": "Tofu Sisig with Brown Rice",
+      "price": 225,
+      "calories": 410,
+      "protein": 20,
+      "carbs": 52,
+      "fat": 14,
       "tags": ["Vegan", "Filipino Fusion"],
       "image": "/images/meals/tofu-sisig.png",
       "description": "Crispy tofu sisig on a sizzling plate with brown rice.",
-      "allergens": ["Soy"], "ingredients": ["Tofu", "Onions", "Chili", "Calamansi", "Brown Rice"]
+      "allergens": ["Soy"],
+      "ingredients": ["Tofu", "Onions", "Chili", "Calamansi", "Brown Rice"]
     },
     {
-      "id": 10, "name": "Herb-Crusted Pork Tenderloin", "price": 305,
-      "calories": 470, "protein": 38, "carbs": 35, "fat": 18,
+      "id": 10,
+      "name": "Herb-Crusted Pork Tenderloin",
+      "price": 305,
+      "calories": 470,
+      "protein": 38,
+      "carbs": 35,
+      "fat": 18,
       "tags": ["Keto-Friendly"],
       "image": "/images/meals/pork-herb.png",
       "description": "Tender pork loin with herb crust, roasted vegetables, and mashed potatoes.",
-      "allergens": ["Dairy", "Gluten"], "ingredients": ["Pork Tenderloin", "Herbs", "Butter", "Potatoes", "Green Beans"]
+      "allergens": ["Dairy", "Gluten"],
+      "ingredients": [
+        "Pork Tenderloin",
+        "Herbs",
+        "Butter",
+        "Potatoes",
+        "Green Beans"
+      ]
     },
     {
-      "id": 11, "name": "Shrimp Pad Thai", "price": 320,
-      "calories": 500, "protein": 28, "carbs": 58, "fat": 16,
+      "id": 11,
+      "name": "Shrimp Pad Thai",
+      "price": 320,
+      "calories": 500,
+      "protein": 28,
+      "carbs": 58,
+      "fat": 16,
       "tags": ["Gluten-Free"],
       "image": "/images/meals/pad-thai.png",
       "description": "Classic pad Thai with jumbo shrimp, rice noodles, and crushed peanuts.",
-      "allergens": ["Shellfish", "Peanuts", "Eggs"], "ingredients": ["Shrimp", "Rice Noodles", "Peanuts", "Bean Sprouts", "Lime"]
+      "allergens": ["Shellfish", "Peanuts", "Eggs"],
+      "ingredients": [
+        "Shrimp",
+        "Rice Noodles",
+        "Peanuts",
+        "Bean Sprouts",
+        "Lime"
+      ]
     },
     {
-      "id": 12, "name": "Chicken Kare-Kare with Bagoong", "price": 295,
-      "calories": 540, "protein": 35, "carbs": 46, "fat": 20,
+      "id": 12,
+      "name": "Chicken Kare-Kare with Bagoong",
+      "price": 295,
+      "calories": 540,
+      "protein": 35,
+      "carbs": 46,
+      "fat": 20,
       "tags": ["Filipino Classic"],
       "image": "/images/meals/kare-kare.png",
       "description": "Rich peanut-based stew with chicken, eggplant, and shrimp paste on the side.",
-      "allergens": ["Peanuts", "Shellfish"], "ingredients": ["Chicken", "Peanut Butter", "Eggplant", "Banana Blossom", "Bagoong"]
+      "allergens": ["Peanuts", "Shellfish"],
+      "ingredients": [
+        "Chicken",
+        "Peanut Butter",
+        "Eggplant",
+        "Banana Blossom",
+        "Bagoong"
+      ]
     }
   ],
   "customers": [
     {
-      "id": 1, "name": "Maria Santos", "email": "maria.santos@email.com", "phone": "+63 917 123 4567",
-      "planType": "10 meals/week", "status": "active", "monthsSubscribed": 3, "ltv": 18000,
-      "joinDate": "2026-01-05", "lastOrder": "2026-03-28",
+      "id": 1,
+      "name": "Maria Santos",
+      "email": "maria.santos@email.com",
+      "phone": "+63 917 123 4567",
+      "planType": "10 meals/week",
+      "status": "active",
+      "monthsSubscribed": 3,
+      "ltv": 18000,
+      "joinDate": "2026-01-05",
+      "lastOrder": "2026-03-28",
       "notes": ["Prefers extra rice", "Birthday: May 15"],
-      "address": "123 Rizal Ave, Makati City", "dietaryPreferences": ["High Protein"]
+      "address": "123 Rizal Ave, Makati City",
+      "dietaryPreferences": ["High Protein"]
     },
     {
-      "id": 2, "name": "Juan dela Cruz", "email": "juan.delacruz@email.com", "phone": "+63 918 234 5678",
-      "planType": "5 meals/week", "status": "paused", "monthsSubscribed": 6, "ltv": 14700,
-      "joinDate": "2025-10-12", "lastOrder": "2026-03-15",
+      "id": 2,
+      "name": "Juan dela Cruz",
+      "email": "juan.delacruz@email.com",
+      "phone": "+63 918 234 5678",
+      "planType": "5 meals/week",
+      "status": "paused",
+      "monthsSubscribed": 6,
+      "ltv": 14700,
+      "joinDate": "2025-10-12",
+      "lastOrder": "2026-03-15",
       "notes": ["On vacation until April 10", "Loyal customer"],
-      "address": "456 Bonifacio St, Taguig City", "dietaryPreferences": ["Filipino Classic"]
+      "address": "456 Bonifacio St, Taguig City",
+      "dietaryPreferences": ["Filipino Classic"]
     },
     {
-      "id": 3, "name": "Angela Reyes", "email": "angela.reyes@email.com", "phone": "+63 919 345 6789",
-      "planType": "A la carte", "status": "active", "monthsSubscribed": 0, "ltv": 4280,
-      "joinDate": "2025-12-20", "lastOrder": "2026-03-25",
+      "id": 3,
+      "name": "Angela Reyes",
+      "email": "angela.reyes@email.com",
+      "phone": "+63 919 345 6789",
+      "planType": "A la carte",
+      "status": "active",
+      "monthsSubscribed": 0,
+      "ltv": 4280,
+      "joinDate": "2025-12-20",
+      "lastOrder": "2026-03-25",
       "notes": ["Interested in subscribing"],
-      "address": "789 Ayala Blvd, BGC", "dietaryPreferences": ["Vegan", "Dairy-Free"]
+      "address": "789 Ayala Blvd, BGC",
+      "dietaryPreferences": ["Vegan", "Dairy-Free"]
     },
     {
-      "id": 4, "name": "Carlos Mendoza", "email": "carlos.mendoza@corp.com", "phone": "+63 920 456 7890",
-      "planType": "20 meals/week", "status": "active", "monthsSubscribed": 1, "ltv": 7800,
-      "joinDate": "2026-03-01", "lastOrder": "2026-03-30",
-      "notes": ["Corporate account - TechCorp Inc.", "Needs receipts for reimbursement"],
-      "address": "321 EDSA, Ortigas Center", "dietaryPreferences": ["High Protein", "Keto-Friendly"],
+      "id": 4,
+      "name": "Carlos Mendoza",
+      "email": "carlos.mendoza@corp.com",
+      "phone": "+63 920 456 7890",
+      "planType": "20 meals/week",
+      "status": "active",
+      "monthsSubscribed": 1,
+      "ltv": 7800,
+      "joinDate": "2026-03-01",
+      "lastOrder": "2026-03-30",
+      "notes": [
+        "Corporate account - TechCorp Inc.",
+        "Needs receipts for reimbursement"
+      ],
+      "address": "321 EDSA, Ortigas Center",
+      "dietaryPreferences": ["High Protein", "Keto-Friendly"],
       "isCorporate": true
     },
     {
-      "id": 5, "name": "Sofia Garcia", "email": "sofia.garcia@email.com", "phone": "+63 921 567 8901",
-      "planType": "15 meals/week", "status": "active", "monthsSubscribed": 5, "ltv": 31500,
-      "joinDate": "2025-11-01", "lastOrder": "2026-03-29",
+      "id": 5,
+      "name": "Sofia Garcia",
+      "email": "sofia.garcia@email.com",
+      "phone": "+63 921 567 8901",
+      "planType": "15 meals/week",
+      "status": "active",
+      "monthsSubscribed": 5,
+      "ltv": 31500,
+      "joinDate": "2025-11-01",
+      "lastOrder": "2026-03-29",
       "notes": ["VIP customer", "Referred 3 friends", "Allergic to shellfish"],
-      "address": "654 Paseo de Roxas, Makati City", "dietaryPreferences": ["Gluten-Free"],
+      "address": "654 Paseo de Roxas, Makati City",
+      "dietaryPreferences": ["Gluten-Free"],
       "isVIP": true
     },
     {
-      "id": 6, "name": "Ricardo Lim", "email": "ricardo.lim@email.com", "phone": "+63 922 678 9012",
-      "planType": "10 meals/week", "status": "at_risk", "monthsSubscribed": 2, "ltv": 9000,
-      "joinDate": "2026-02-01", "lastOrder": "2026-03-10",
+      "id": 6,
+      "name": "Ricardo Lim",
+      "email": "ricardo.lim@email.com",
+      "phone": "+63 922 678 9012",
+      "planType": "10 meals/week",
+      "status": "at_risk",
+      "monthsSubscribed": 2,
+      "ltv": 9000,
+      "joinDate": "2026-02-01",
+      "lastOrder": "2026-03-10",
       "notes": ["Has not ordered in 3 weeks"],
-      "address": "987 Shaw Blvd, Mandaluyong", "dietaryPreferences": ["Filipino Classic"]
+      "address": "987 Shaw Blvd, Mandaluyong",
+      "dietaryPreferences": ["Filipino Classic"]
     },
     {
-      "id": 7, "name": "Patricia Tan", "email": "patricia.tan@email.com", "phone": "+63 923 789 0123",
-      "planType": "5 meals/week", "status": "churned", "monthsSubscribed": 4, "ltv": 9800,
-      "joinDate": "2025-09-15", "lastOrder": "2026-01-20",
+      "id": 7,
+      "name": "Patricia Tan",
+      "email": "patricia.tan@email.com",
+      "phone": "+63 923 789 0123",
+      "planType": "5 meals/week",
+      "status": "churned",
+      "monthsSubscribed": 4,
+      "ltv": 9800,
+      "joinDate": "2025-09-15",
+      "lastOrder": "2026-01-20",
       "notes": ["Cancelled - moved to Cebu"],
-      "address": "147 Quezon Ave, Quezon City", "dietaryPreferences": ["Vegetarian"]
+      "address": "147 Quezon Ave, Quezon City",
+      "dietaryPreferences": ["Vegetarian"]
     },
     {
-      "id": 8, "name": "David Cruz", "email": "david.cruz@email.com", "phone": "+63 924 890 1234",
-      "planType": "10 meals/week", "status": "active", "monthsSubscribed": 4, "ltv": 18000,
-      "joinDate": "2025-12-01", "lastOrder": "2026-03-31",
+      "id": 8,
+      "name": "David Cruz",
+      "email": "david.cruz@email.com",
+      "phone": "+63 924 890 1234",
+      "planType": "10 meals/week",
+      "status": "active",
+      "monthsSubscribed": 4,
+      "ltv": 18000,
+      "joinDate": "2025-12-01",
+      "lastOrder": "2026-03-31",
       "notes": ["Always orders extra sauce packs"],
-      "address": "258 Katipunan Ave, Quezon City", "dietaryPreferences": ["Spicy", "High Protein"]
+      "address": "258 Katipunan Ave, Quezon City",
+      "dietaryPreferences": ["Spicy", "High Protein"]
     }
   ],
   "orders": [
     {
-      "id": "PF-2026-04-0847", "customerId": 1, "customerName": "Maria Santos",
+      "id": "PF-2026-04-0847",
+      "customerId": 1,
+      "customerName": "Maria Santos",
       "items": [
-        { "mealId": 1, "mealName": "Garlic Butter Chicken with Jasmine Rice", "quantity": 2, "price": 285 },
-        { "mealId": 5, "mealName": "Chicken Adobo Meal Prep", "quantity": 1, "price": 265 },
-        { "mealId": 3, "mealName": "Salmon Teriyaki Bowl", "quantity": 1, "price": 395 }
+        {
+          "mealId": 1,
+          "mealName": "Garlic Butter Chicken with Jasmine Rice",
+          "quantity": 2,
+          "price": 285
+        },
+        {
+          "mealId": 5,
+          "mealName": "Chicken Adobo Meal Prep",
+          "quantity": 1,
+          "price": 265
+        },
+        {
+          "mealId": 3,
+          "mealName": "Salmon Teriyaki Bowl",
+          "quantity": 1,
+          "price": 395
+        }
       ],
-      "total": 1230, "status": "preparing", "deliveryDate": "2026-04-01", "deliverySlot": "11:00 AM - 1:00 PM",
-      "paymentMethod": "GCash", "paymentStatus": "paid",
-      "address": "123 Rizal Ave, Makati City", "notes": "Extra rice for chicken", "createdAt": "2026-03-30T14:30:00"
+      "total": 1230,
+      "status": "preparing",
+      "deliveryDate": "2026-04-01",
+      "deliverySlot": "11:00 AM - 1:00 PM",
+      "paymentMethod": "GCash",
+      "paymentStatus": "paid",
+      "address": "123 Rizal Ave, Makati City",
+      "notes": "Extra rice for chicken",
+      "createdAt": "2026-03-30T14:30:00"
     },
     {
-      "id": "PF-2026-04-0848", "customerId": 4, "customerName": "Carlos Mendoza",
+      "id": "PF-2026-04-0848",
+      "customerId": 4,
+      "customerName": "Carlos Mendoza",
       "items": [
-        { "mealId": 1, "mealName": "Garlic Butter Chicken with Jasmine Rice", "quantity": 4, "price": 285 },
-        { "mealId": 7, "mealName": "Korean BBQ Beef with Kimchi Rice", "quantity": 3, "price": 335 },
-        { "mealId": 10, "mealName": "Herb-Crusted Pork Tenderloin", "quantity": 3, "price": 305 }
+        {
+          "mealId": 1,
+          "mealName": "Garlic Butter Chicken with Jasmine Rice",
+          "quantity": 4,
+          "price": 285
+        },
+        {
+          "mealId": 7,
+          "mealName": "Korean BBQ Beef with Kimchi Rice",
+          "quantity": 3,
+          "price": 335
+        },
+        {
+          "mealId": 10,
+          "mealName": "Herb-Crusted Pork Tenderloin",
+          "quantity": 3,
+          "price": 305
+        }
       ],
-      "total": 3060, "status": "new", "deliveryDate": "2026-04-01", "deliverySlot": "12:00 PM - 2:00 PM",
-      "paymentMethod": "Credit Card", "paymentStatus": "paid",
-      "address": "321 EDSA, Ortigas Center", "notes": "Corporate delivery - reception desk", "createdAt": "2026-03-31T09:15:00"
+      "total": 3060,
+      "status": "new",
+      "deliveryDate": "2026-04-01",
+      "deliverySlot": "12:00 PM - 2:00 PM",
+      "paymentMethod": "Credit Card",
+      "paymentStatus": "paid",
+      "address": "321 EDSA, Ortigas Center",
+      "notes": "Corporate delivery - reception desk",
+      "createdAt": "2026-03-31T09:15:00"
     },
     {
-      "id": "PF-2026-04-0849", "customerId": 5, "customerName": "Sofia Garcia",
+      "id": "PF-2026-04-0849",
+      "customerId": 5,
+      "customerName": "Sofia Garcia",
       "items": [
-        { "mealId": 6, "mealName": "Mediterranean Quinoa Salad", "quantity": 3, "price": 275 },
-        { "mealId": 4, "mealName": "Vegan Buddha Bowl", "quantity": 2, "price": 245 },
-        { "mealId": 1, "mealName": "Garlic Butter Chicken with Jasmine Rice", "quantity": 2, "price": 285 }
+        {
+          "mealId": 6,
+          "mealName": "Mediterranean Quinoa Salad",
+          "quantity": 3,
+          "price": 275
+        },
+        {
+          "mealId": 4,
+          "mealName": "Vegan Buddha Bowl",
+          "quantity": 2,
+          "price": 245
+        },
+        {
+          "mealId": 1,
+          "mealName": "Garlic Butter Chicken with Jasmine Rice",
+          "quantity": 2,
+          "price": 285
+        }
       ],
-      "total": 1885, "status": "ready", "deliveryDate": "2026-04-01", "deliverySlot": "5:00 PM - 7:00 PM",
-      "paymentMethod": "Maya", "paymentStatus": "paid",
-      "address": "654 Paseo de Roxas, Makati City", "notes": "", "createdAt": "2026-03-30T11:00:00"
+      "total": 1885,
+      "status": "ready",
+      "deliveryDate": "2026-04-01",
+      "deliverySlot": "5:00 PM - 7:00 PM",
+      "paymentMethod": "Maya",
+      "paymentStatus": "paid",
+      "address": "654 Paseo de Roxas, Makati City",
+      "notes": "",
+      "createdAt": "2026-03-30T11:00:00"
     },
     {
-      "id": "PF-2026-04-0850", "customerId": 3, "customerName": "Angela Reyes",
+      "id": "PF-2026-04-0850",
+      "customerId": 3,
+      "customerName": "Angela Reyes",
       "items": [
-        { "mealId": 4, "mealName": "Vegan Buddha Bowl", "quantity": 2, "price": 245 },
-        { "mealId": 9, "mealName": "Tofu Sisig with Brown Rice", "quantity": 1, "price": 225 }
+        {
+          "mealId": 4,
+          "mealName": "Vegan Buddha Bowl",
+          "quantity": 2,
+          "price": 245
+        },
+        {
+          "mealId": 9,
+          "mealName": "Tofu Sisig with Brown Rice",
+          "quantity": 1,
+          "price": 225
+        }
       ],
-      "total": 715, "status": "delivering", "deliveryDate": "2026-04-01", "deliverySlot": "6:00 PM - 8:00 PM",
-      "paymentMethod": "GrabPay", "paymentStatus": "paid",
-      "address": "789 Ayala Blvd, BGC", "notes": "Gate code: 4521", "createdAt": "2026-03-30T16:45:00"
+      "total": 715,
+      "status": "delivering",
+      "deliveryDate": "2026-04-01",
+      "deliverySlot": "6:00 PM - 8:00 PM",
+      "paymentMethod": "GrabPay",
+      "paymentStatus": "paid",
+      "address": "789 Ayala Blvd, BGC",
+      "notes": "Gate code: 4521",
+      "createdAt": "2026-03-30T16:45:00"
     },
     {
-      "id": "PF-2026-04-0851", "customerId": 8, "customerName": "David Cruz",
+      "id": "PF-2026-04-0851",
+      "customerId": 8,
+      "customerName": "David Cruz",
       "items": [
-        { "mealId": 7, "mealName": "Korean BBQ Beef with Kimchi Rice", "quantity": 2, "price": 335 },
-        { "mealId": 5, "mealName": "Chicken Adobo Meal Prep", "quantity": 3, "price": 265 },
-        { "mealId": 11, "mealName": "Shrimp Pad Thai", "quantity": 2, "price": 320 }
+        {
+          "mealId": 7,
+          "mealName": "Korean BBQ Beef with Kimchi Rice",
+          "quantity": 2,
+          "price": 335
+        },
+        {
+          "mealId": 5,
+          "mealName": "Chicken Adobo Meal Prep",
+          "quantity": 3,
+          "price": 265
+        },
+        {
+          "mealId": 11,
+          "mealName": "Shrimp Pad Thai",
+          "quantity": 2,
+          "price": 320
+        }
       ],
-      "total": 2105, "status": "delivered", "deliveryDate": "2026-03-31", "deliverySlot": "11:00 AM - 1:00 PM",
-      "paymentMethod": "GCash", "paymentStatus": "paid",
-      "address": "258 Katipunan Ave, Quezon City", "notes": "3 extra sauce packs", "createdAt": "2026-03-29T10:00:00"
+      "total": 2105,
+      "status": "delivered",
+      "deliveryDate": "2026-03-31",
+      "deliverySlot": "11:00 AM - 1:00 PM",
+      "paymentMethod": "GCash",
+      "paymentStatus": "paid",
+      "address": "258 Katipunan Ave, Quezon City",
+      "notes": "3 extra sauce packs",
+      "createdAt": "2026-03-29T10:00:00"
     },
     {
-      "id": "PF-2026-04-0852", "customerId": 6, "customerName": "Ricardo Lim",
+      "id": "PF-2026-04-0852",
+      "customerId": 6,
+      "customerName": "Ricardo Lim",
       "items": [
-        { "mealId": 2, "mealName": "Beef Tapa with Garlic Fried Rice & Egg", "quantity": 2, "price": 310 },
-        { "mealId": 12, "mealName": "Chicken Kare-Kare with Bagoong", "quantity": 1, "price": 295 }
+        {
+          "mealId": 2,
+          "mealName": "Beef Tapa with Garlic Fried Rice & Egg",
+          "quantity": 2,
+          "price": 310
+        },
+        {
+          "mealId": 12,
+          "mealName": "Chicken Kare-Kare with Bagoong",
+          "quantity": 1,
+          "price": 295
+        }
       ],
-      "total": 915, "status": "cancelled", "deliveryDate": "2026-03-28", "deliverySlot": "12:00 PM - 2:00 PM",
-      "paymentMethod": "COD", "paymentStatus": "failed",
-      "address": "987 Shaw Blvd, Mandaluyong", "notes": "Customer unreachable", "createdAt": "2026-03-27T08:30:00"
+      "total": 915,
+      "status": "cancelled",
+      "deliveryDate": "2026-03-28",
+      "deliverySlot": "12:00 PM - 2:00 PM",
+      "paymentMethod": "COD",
+      "paymentStatus": "failed",
+      "address": "987 Shaw Blvd, Mandaluyong",
+      "notes": "Customer unreachable",
+      "createdAt": "2026-03-27T08:30:00"
     },
     {
-      "id": "PF-2026-04-0853", "customerId": 1, "customerName": "Maria Santos",
+      "id": "PF-2026-04-0853",
+      "customerId": 1,
+      "customerName": "Maria Santos",
       "items": [
-        { "mealId": 8, "mealName": "Grilled Fish Sinigang Soup Set", "quantity": 2, "price": 290 },
-        { "mealId": 1, "mealName": "Garlic Butter Chicken with Jasmine Rice", "quantity": 2, "price": 285 }
+        {
+          "mealId": 8,
+          "mealName": "Grilled Fish Sinigang Soup Set",
+          "quantity": 2,
+          "price": 290
+        },
+        {
+          "mealId": 1,
+          "mealName": "Garlic Butter Chicken with Jasmine Rice",
+          "quantity": 2,
+          "price": 285
+        }
       ],
-      "total": 1150, "status": "new", "deliveryDate": "2026-04-02", "deliverySlot": "11:00 AM - 1:00 PM",
-      "paymentMethod": "GCash", "paymentStatus": "paid",
-      "address": "123 Rizal Ave, Makati City", "notes": "", "createdAt": "2026-03-31T20:00:00"
+      "total": 1150,
+      "status": "new",
+      "deliveryDate": "2026-04-02",
+      "deliverySlot": "11:00 AM - 1:00 PM",
+      "paymentMethod": "GCash",
+      "paymentStatus": "paid",
+      "address": "123 Rizal Ave, Makati City",
+      "notes": "",
+      "createdAt": "2026-03-31T20:00:00"
     },
     {
-      "id": "PF-2026-04-0854", "customerId": 5, "customerName": "Sofia Garcia",
+      "id": "PF-2026-04-0854",
+      "customerId": 5,
+      "customerName": "Sofia Garcia",
       "items": [
-        { "mealId": 3, "mealName": "Salmon Teriyaki Bowl", "quantity": 2, "price": 395 },
-        { "mealId": 6, "mealName": "Mediterranean Quinoa Salad", "quantity": 2, "price": 275 },
-        { "mealId": 10, "mealName": "Herb-Crusted Pork Tenderloin", "quantity": 1, "price": 305 }
+        {
+          "mealId": 3,
+          "mealName": "Salmon Teriyaki Bowl",
+          "quantity": 2,
+          "price": 395
+        },
+        {
+          "mealId": 6,
+          "mealName": "Mediterranean Quinoa Salad",
+          "quantity": 2,
+          "price": 275
+        },
+        {
+          "mealId": 10,
+          "mealName": "Herb-Crusted Pork Tenderloin",
+          "quantity": 1,
+          "price": 305
+        }
       ],
-      "total": 1645, "status": "delivered", "deliveryDate": "2026-03-30", "deliverySlot": "5:00 PM - 7:00 PM",
-      "paymentMethod": "Maya", "paymentStatus": "paid",
-      "address": "654 Paseo de Roxas, Makati City", "notes": "", "createdAt": "2026-03-29T12:00:00"
+      "total": 1645,
+      "status": "delivered",
+      "deliveryDate": "2026-03-30",
+      "deliverySlot": "5:00 PM - 7:00 PM",
+      "paymentMethod": "Maya",
+      "paymentStatus": "paid",
+      "address": "654 Paseo de Roxas, Makati City",
+      "notes": "",
+      "createdAt": "2026-03-29T12:00:00"
     }
   ],
   "planTiers": [
-    { "id": 5, "meals": 5, "price": 2450, "perMeal": 490, "savings": 0, "label": "Starter" },
-    { "id": 10, "meals": 10, "price": 4500, "perMeal": 450, "savings": 8, "label": "Popular" },
-    { "id": 15, "meals": 15, "price": 6300, "perMeal": 420, "savings": 14, "label": "Best Value" },
-    { "id": 20, "meals": 20, "price": 7800, "perMeal": 390, "savings": 20, "label": "Family" }
+    {
+      "id": 5,
+      "meals": 5,
+      "price": 2450,
+      "perMeal": 490,
+      "savings": 0,
+      "label": "Starter"
+    },
+    {
+      "id": 10,
+      "meals": 10,
+      "price": 4500,
+      "perMeal": 450,
+      "savings": 8,
+      "label": "Popular"
+    },
+    {
+      "id": 15,
+      "meals": 15,
+      "price": 6300,
+      "perMeal": 420,
+      "savings": 14,
+      "label": "Best Value"
+    },
+    {
+      "id": 20,
+      "meals": 20,
+      "price": 7800,
+      "perMeal": 390,
+      "savings": 20,
+      "label": "Family"
+    }
   ],
   "deliveryZones": [
     { "name": "Makati CBD", "fee": 50, "estimatedTime": "30-45 min" },
     { "name": "BGC / Taguig", "fee": 50, "estimatedTime": "30-45 min" },
-    { "name": "Ortigas / Mandaluyong", "fee": 75, "estimatedTime": "45-60 min" },
+    {
+      "name": "Ortigas / Mandaluyong",
+      "fee": 75,
+      "estimatedTime": "45-60 min"
+    },
     { "name": "Quezon City", "fee": 100, "estimatedTime": "60-90 min" },
     { "name": "Pasig / Cainta", "fee": 100, "estimatedTime": "60-90 min" },
     { "name": "Manila / Ermita", "fee": 75, "estimatedTime": "45-60 min" },
     { "name": "Other Metro Manila", "fee": 150, "estimatedTime": "90-120 min" }
   ],
   "dietaryFilters": [
-    "High Protein", "Keto-Friendly", "Vegan", "Vegetarian", "Gluten-Free",
-    "Filipino Classic", "Dairy-Free", "Low Carb", "Diabetic-Friendly",
-    "Spicy", "Filipino Fusion", "Halal"
+    "High Protein",
+    "Keto-Friendly",
+    "Vegan",
+    "Vegetarian",
+    "Gluten-Free",
+    "Filipino Classic",
+    "Dairy-Free",
+    "Low Carb",
+    "Diabetic-Friendly",
+    "Spicy",
+    "Filipino Fusion",
+    "Halal"
   ],
   "timeSlots": [
-    "8:00 AM - 10:00 AM", "10:00 AM - 12:00 PM", "11:00 AM - 1:00 PM",
-    "12:00 PM - 2:00 PM", "2:00 PM - 4:00 PM", "4:00 PM - 6:00 PM",
-    "5:00 PM - 7:00 PM", "6:00 PM - 8:00 PM"
+    "8:00 AM - 10:00 AM",
+    "10:00 AM - 12:00 PM",
+    "11:00 AM - 1:00 PM",
+    "12:00 PM - 2:00 PM",
+    "2:00 PM - 4:00 PM",
+    "4:00 PM - 6:00 PM",
+    "5:00 PM - 7:00 PM",
+    "6:00 PM - 8:00 PM"
   ],
   "paymentMethods": [
     { "id": "gcash", "name": "GCash", "icon": "phone" },
@@ -301,18 +703,126 @@
       { "name": "Vegan Buddha Bowl", "count": 45 }
     ],
     "menuContribution": [
-      { "name": "Salmon Teriyaki Bowl", "sold": 65, "costPerUnit": 178, "pricePerUnit": 395, "revenue": 25675, "marginPct": 54.9, "cookMins": 15, "packMins": 4 },
-      { "name": "Garlic Butter Chicken", "sold": 89, "costPerUnit": 142, "pricePerUnit": 285, "revenue": 25365, "marginPct": 50.2, "cookMins": 12, "packMins": 3 },
-      { "name": "Korean BBQ Beef", "sold": 58, "costPerUnit": 167, "pricePerUnit": 335, "revenue": 19430, "marginPct": 50.1, "cookMins": 18, "packMins": 4 },
-      { "name": "Chicken Adobo", "sold": 72, "costPerUnit": 106, "pricePerUnit": 265, "revenue": 19080, "marginPct": 60.0, "cookMins": 20, "packMins": 3 },
-      { "name": "Herb-Crusted Pork", "sold": 47, "costPerUnit": 158, "pricePerUnit": 305, "revenue": 14335, "marginPct": 48.2, "cookMins": 22, "packMins": 4 },
-      { "name": "Shrimp Pad Thai", "sold": 42, "costPerUnit": 150, "pricePerUnit": 320, "revenue": 13440, "marginPct": 53.1, "cookMins": 10, "packMins": 3 },
-      { "name": "Beef Tapa", "sold": 40, "costPerUnit": 140, "pricePerUnit": 310, "revenue": 12400, "marginPct": 54.8, "cookMins": 14, "packMins": 3 },
-      { "name": "Chicken Kare-Kare", "sold": 38, "costPerUnit": 148, "pricePerUnit": 295, "revenue": 11210, "marginPct": 49.8, "cookMins": 25, "packMins": 5 },
-      { "name": "Vegan Buddha Bowl", "sold": 45, "costPerUnit": 102, "pricePerUnit": 245, "revenue": 11025, "marginPct": 58.4, "cookMins": 8, "packMins": 3 },
-      { "name": "Med Quinoa Salad", "sold": 36, "costPerUnit": 118, "pricePerUnit": 275, "revenue": 9900, "marginPct": 57.1, "cookMins": 8, "packMins": 3 },
-      { "name": "Fish Sinigang Set", "sold": 30, "costPerUnit": 136, "pricePerUnit": 290, "revenue": 8700, "marginPct": 53.1, "cookMins": 20, "packMins": 4 },
-      { "name": "Tofu Sisig", "sold": 28, "costPerUnit": 90, "pricePerUnit": 225, "revenue": 6300, "marginPct": 60.0, "cookMins": 12, "packMins": 3 }
+      {
+        "name": "Salmon Teriyaki Bowl",
+        "sold": 65,
+        "costPerUnit": 178,
+        "pricePerUnit": 395,
+        "revenue": 25675,
+        "marginPct": 54.9,
+        "cookMins": 15,
+        "packMins": 4
+      },
+      {
+        "name": "Garlic Butter Chicken",
+        "sold": 89,
+        "costPerUnit": 142,
+        "pricePerUnit": 285,
+        "revenue": 25365,
+        "marginPct": 50.2,
+        "cookMins": 12,
+        "packMins": 3
+      },
+      {
+        "name": "Korean BBQ Beef",
+        "sold": 58,
+        "costPerUnit": 167,
+        "pricePerUnit": 335,
+        "revenue": 19430,
+        "marginPct": 50.1,
+        "cookMins": 18,
+        "packMins": 4
+      },
+      {
+        "name": "Chicken Adobo",
+        "sold": 72,
+        "costPerUnit": 106,
+        "pricePerUnit": 265,
+        "revenue": 19080,
+        "marginPct": 60.0,
+        "cookMins": 20,
+        "packMins": 3
+      },
+      {
+        "name": "Herb-Crusted Pork",
+        "sold": 47,
+        "costPerUnit": 158,
+        "pricePerUnit": 305,
+        "revenue": 14335,
+        "marginPct": 48.2,
+        "cookMins": 22,
+        "packMins": 4
+      },
+      {
+        "name": "Shrimp Pad Thai",
+        "sold": 42,
+        "costPerUnit": 150,
+        "pricePerUnit": 320,
+        "revenue": 13440,
+        "marginPct": 53.1,
+        "cookMins": 10,
+        "packMins": 3
+      },
+      {
+        "name": "Beef Tapa",
+        "sold": 40,
+        "costPerUnit": 140,
+        "pricePerUnit": 310,
+        "revenue": 12400,
+        "marginPct": 54.8,
+        "cookMins": 14,
+        "packMins": 3
+      },
+      {
+        "name": "Chicken Kare-Kare",
+        "sold": 38,
+        "costPerUnit": 148,
+        "pricePerUnit": 295,
+        "revenue": 11210,
+        "marginPct": 49.8,
+        "cookMins": 25,
+        "packMins": 5
+      },
+      {
+        "name": "Vegan Buddha Bowl",
+        "sold": 45,
+        "costPerUnit": 102,
+        "pricePerUnit": 245,
+        "revenue": 11025,
+        "marginPct": 58.4,
+        "cookMins": 8,
+        "packMins": 3
+      },
+      {
+        "name": "Med Quinoa Salad",
+        "sold": 36,
+        "costPerUnit": 118,
+        "pricePerUnit": 275,
+        "revenue": 9900,
+        "marginPct": 57.1,
+        "cookMins": 8,
+        "packMins": 3
+      },
+      {
+        "name": "Fish Sinigang Set",
+        "sold": 30,
+        "costPerUnit": 136,
+        "pricePerUnit": 290,
+        "revenue": 8700,
+        "marginPct": 53.1,
+        "cookMins": 20,
+        "packMins": 4
+      },
+      {
+        "name": "Tofu Sisig",
+        "sold": 28,
+        "costPerUnit": 90,
+        "pricePerUnit": 225,
+        "revenue": 6300,
+        "marginPct": 60.0,
+        "cookMins": 12,
+        "packMins": 3
+      }
     ],
     "planDistribution": [
       { "name": "5 meals", "value": 28, "color": "#40916C" },
@@ -321,7 +831,15 @@
       { "name": "20 meals", "value": 19, "color": "#E76F51" }
     ],
     "cohortRetention": [
-      { "month": "Oct", "m1": 100, "m2": 88, "m3": 79, "m4": 72, "m5": 68, "m6": 65 },
+      {
+        "month": "Oct",
+        "m1": 100,
+        "m2": 88,
+        "m3": 79,
+        "m4": 72,
+        "m5": 68,
+        "m6": 65
+      },
       { "month": "Nov", "m1": 100, "m2": 91, "m3": 82, "m4": 75, "m5": 70 },
       { "month": "Dec", "m1": 100, "m2": 86, "m3": 78, "m4": 71 },
       { "month": "Jan", "m1": 100, "m2": 89, "m3": 81 },
@@ -342,22 +860,95 @@
     "deliverySuccessRate": 97.3,
     "deliverySuccessRateLastMonth": 95.6,
     "fulfillmentTrend": [
-      { "week": "W1", "fulfillment": 91, "prepTime": 22, "waste": 8.2, "delivery": 94 },
-      { "week": "W2", "fulfillment": 92, "prepTime": 21, "waste": 7.5, "delivery": 95 },
-      { "week": "W3", "fulfillment": 90, "prepTime": 20, "waste": 7.8, "delivery": 96 },
-      { "week": "W4", "fulfillment": 93, "prepTime": 19, "waste": 7.0, "delivery": 96 },
-      { "week": "W5", "fulfillment": 94, "prepTime": 19, "waste": 6.5, "delivery": 97 },
-      { "week": "W6", "fulfillment": 93, "prepTime": 18, "waste": 6.8, "delivery": 97 },
-      { "week": "W7", "fulfillment": 95, "prepTime": 18, "waste": 6.2, "delivery": 98 },
-      { "week": "W8", "fulfillment": 94, "prepTime": 18, "waste": 6.1, "delivery": 97 }
+      {
+        "week": "W1",
+        "fulfillment": 91,
+        "prepTime": 22,
+        "waste": 8.2,
+        "delivery": 94
+      },
+      {
+        "week": "W2",
+        "fulfillment": 92,
+        "prepTime": 21,
+        "waste": 7.5,
+        "delivery": 95
+      },
+      {
+        "week": "W3",
+        "fulfillment": 90,
+        "prepTime": 20,
+        "waste": 7.8,
+        "delivery": 96
+      },
+      {
+        "week": "W4",
+        "fulfillment": 93,
+        "prepTime": 19,
+        "waste": 7.0,
+        "delivery": 96
+      },
+      {
+        "week": "W5",
+        "fulfillment": 94,
+        "prepTime": 19,
+        "waste": 6.5,
+        "delivery": 97
+      },
+      {
+        "week": "W6",
+        "fulfillment": 93,
+        "prepTime": 18,
+        "waste": 6.8,
+        "delivery": 97
+      },
+      {
+        "week": "W7",
+        "fulfillment": 95,
+        "prepTime": 18,
+        "waste": 6.2,
+        "delivery": 98
+      },
+      {
+        "week": "W8",
+        "fulfillment": 94,
+        "prepTime": 18,
+        "waste": 6.1,
+        "delivery": 97
+      }
     ],
     "dailyPrepBreakdown": [
-      { "meal": "Garlic Butter Chicken", "prepTime": 12, "orders": 89, "wasteKg": 1.2 },
-      { "meal": "Salmon Teriyaki Bowl", "prepTime": 15, "orders": 65, "wasteKg": 0.8 },
-      { "meal": "Korean BBQ Beef", "prepTime": 18, "orders": 58, "wasteKg": 1.5 },
+      {
+        "meal": "Garlic Butter Chicken",
+        "prepTime": 12,
+        "orders": 89,
+        "wasteKg": 1.2
+      },
+      {
+        "meal": "Salmon Teriyaki Bowl",
+        "prepTime": 15,
+        "orders": 65,
+        "wasteKg": 0.8
+      },
+      {
+        "meal": "Korean BBQ Beef",
+        "prepTime": 18,
+        "orders": 58,
+        "wasteKg": 1.5
+      },
       { "meal": "Chicken Adobo", "prepTime": 20, "orders": 72, "wasteKg": 0.6 },
-      { "meal": "Herb-Crusted Pork", "prepTime": 22, "orders": 47, "wasteKg": 1.8 },
-      { "meal": "Shrimp Pad Thai", "prepTime": 10, "orders": 42, "wasteKg": 0.5 }
+      {
+        "meal": "Herb-Crusted Pork",
+        "prepTime": 22,
+        "orders": 47,
+        "wasteKg": 1.8
+      },
+      {
+        "meal": "Shrimp Pad Thai",
+        "prepTime": 10,
+        "orders": 42,
+        "wasteKg": 0.5
+      }
     ],
     "deliveryBreakdown": {
       "onTime": 138,
@@ -412,10 +1003,38 @@
   },
   "demandPlanningData": {
     "mealsByPlanType": [
-      { "plan": "5 meals", "garlic": 12, "adobo": 10, "salmon": 8, "korean": 6, "others": 14 },
-      { "plan": "10 meals", "garlic": 28, "adobo": 22, "salmon": 18, "korean": 16, "others": 36 },
-      { "plan": "15 meals", "garlic": 30, "adobo": 25, "salmon": 22, "korean": 20, "others": 43 },
-      { "plan": "20 meals", "garlic": 19, "adobo": 15, "salmon": 17, "korean": 16, "others": 29 }
+      {
+        "plan": "5 meals",
+        "garlic": 12,
+        "adobo": 10,
+        "salmon": 8,
+        "korean": 6,
+        "others": 14
+      },
+      {
+        "plan": "10 meals",
+        "garlic": 28,
+        "adobo": 22,
+        "salmon": 18,
+        "korean": 16,
+        "others": 36
+      },
+      {
+        "plan": "15 meals",
+        "garlic": 30,
+        "adobo": 25,
+        "salmon": 22,
+        "korean": 20,
+        "others": 43
+      },
+      {
+        "plan": "20 meals",
+        "garlic": 19,
+        "adobo": 15,
+        "salmon": 17,
+        "korean": 16,
+        "others": 29
+      }
     ],
     "demandForecast": [
       { "week": "W1", "forecast": 580, "actual": 562 },

@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { Loader2, Mail, Lock, User, Phone } from 'lucide-react';
-import Modal from '@/components/Modal';
-import { useAuthContext } from '@/context/AuthContext';
-import { useToast } from '@/context/ToastContext';
-import { ApiError } from '@/lib/api-client';
+import React, { useState, useEffect } from "react";
+import { Loader2, Mail, Lock, User, Phone } from "lucide-react";
+import Modal from "@/components/Modal";
+import { useAuthContext } from "@/context/AuthContext";
+import { useToast } from "@/context/ToastContext";
+import { ApiError } from "@/lib/api-client";
 
-type Tab = 'login' | 'register';
+type Tab = "login" | "register";
 
 export default function AuthModal() {
   const {
@@ -22,19 +22,19 @@ export default function AuthModal() {
   const { showToast } = useToast();
 
   const [activeTab, setActiveTab] = useState<Tab>(authModalTab);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   // Login fields
-  const [loginEmail, setLoginEmail] = useState('');
-  const [loginPassword, setLoginPassword] = useState('');
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
 
   // Register fields
-  const [regFirstName, setRegFirstName] = useState('');
-  const [regLastName, setRegLastName] = useState('');
-  const [regEmail, setRegEmail] = useState('');
-  const [regPhone, setRegPhone] = useState('');
-  const [regPassword, setRegPassword] = useState('');
-  const [regConfirm, setRegConfirm] = useState('');
+  const [regFirstName, setRegFirstName] = useState("");
+  const [regLastName, setRegLastName] = useState("");
+  const [regEmail, setRegEmail] = useState("");
+  const [regPhone, setRegPhone] = useState("");
+  const [regPassword, setRegPassword] = useState("");
+  const [regConfirm, setRegConfirm] = useState("");
 
   useEffect(() => {
     setActiveTab(authModalTab);
@@ -42,19 +42,19 @@ export default function AuthModal() {
 
   // Clear errors when switching tabs
   useEffect(() => {
-    setError('');
+    setError("");
   }, [activeTab]);
 
   function resetForms() {
-    setLoginEmail('');
-    setLoginPassword('');
-    setRegFirstName('');
-    setRegLastName('');
-    setRegEmail('');
-    setRegPhone('');
-    setRegPassword('');
-    setRegConfirm('');
-    setError('');
+    setLoginEmail("");
+    setLoginPassword("");
+    setRegFirstName("");
+    setRegLastName("");
+    setRegEmail("");
+    setRegPhone("");
+    setRegPassword("");
+    setRegConfirm("");
+    setError("");
   }
 
   function handleClose() {
@@ -64,26 +64,30 @@ export default function AuthModal() {
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
-    setError('');
+    setError("");
     try {
       await login({ email: loginEmail, password: loginPassword });
-      showToast('Welcome back!', 'success');
+      showToast("Welcome back!", "success");
       resetForms();
     } catch (err) {
-      setError(err instanceof ApiError ? err.detail : 'Login failed. Please try again.');
+      setError(
+        err instanceof ApiError
+          ? err.detail
+          : "Login failed. Please try again.",
+      );
     }
   }
 
   async function handleRegister(e: React.FormEvent) {
     e.preventDefault();
-    setError('');
+    setError("");
 
     if (regPassword.length < 8) {
-      setError('Password must be at least 8 characters.');
+      setError("Password must be at least 8 characters.");
       return;
     }
     if (regPassword !== regConfirm) {
-      setError('Passwords do not match.');
+      setError("Passwords do not match.");
       return;
     }
 
@@ -95,45 +99,49 @@ export default function AuthModal() {
         last_name: regLastName,
         phone: regPhone || undefined,
       });
-      showToast('Account created successfully!', 'success');
+      showToast("Account created successfully!", "success");
       resetForms();
     } catch (err) {
-      setError(err instanceof ApiError ? err.detail : 'Registration failed. Please try again.');
+      setError(
+        err instanceof ApiError
+          ? err.detail
+          : "Registration failed. Please try again.",
+      );
     }
   }
 
   const isPending = isLoggingIn || isRegistering;
 
   const inputClass =
-    'w-full rounded-lg border px-3 py-2.5 text-sm outline-none transition-colors focus:border-[#1B4332] focus:ring-1 focus:ring-[#1B4332]';
+    "w-full rounded-lg border px-3 py-2.5 text-sm outline-none transition-colors focus:border-[#1B4332] focus:ring-1 focus:ring-[#1B4332]";
 
   return (
     <Modal
       isOpen={isAuthModalOpen}
       onClose={handleClose}
-      title={activeTab === 'login' ? 'Welcome Back' : 'Create Account'}
+      title={activeTab === "login" ? "Welcome Back" : "Create Account"}
       size="sm"
     >
       {/* Tab Toggle */}
       <div className="mb-6 flex rounded-xl bg-gray-100 p-1">
         <button
           type="button"
-          onClick={() => setActiveTab('login')}
+          onClick={() => setActiveTab("login")}
           className={`flex-1 rounded-lg py-2.5 text-sm font-semibold transition-all ${
-            activeTab === 'login'
-              ? 'bg-[#1B4332] text-white shadow-sm'
-              : 'text-gray-600 hover:text-gray-800'
+            activeTab === "login"
+              ? "bg-[#1B4332] text-white shadow-sm"
+              : "text-gray-600 hover:text-gray-800"
           }`}
         >
           Sign In
         </button>
         <button
           type="button"
-          onClick={() => setActiveTab('register')}
+          onClick={() => setActiveTab("register")}
           className={`flex-1 rounded-lg py-2.5 text-sm font-semibold transition-all ${
-            activeTab === 'register'
-              ? 'bg-[#1B4332] text-white shadow-sm'
-              : 'text-gray-600 hover:text-gray-800'
+            activeTab === "register"
+              ? "bg-[#1B4332] text-white shadow-sm"
+              : "text-gray-600 hover:text-gray-800"
           }`}
         >
           Create Account
@@ -148,10 +156,12 @@ export default function AuthModal() {
       )}
 
       {/* Login Form */}
-      {activeTab === 'login' && (
+      {activeTab === "login" && (
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-gray-700">Email</label>
+            <label className="mb-1.5 block text-sm font-medium text-gray-700">
+              Email
+            </label>
             <div className="relative">
               <Mail size={16} className="absolute left-3 top-3 text-gray-400" />
               <input
@@ -160,13 +170,15 @@ export default function AuthModal() {
                 value={loginEmail}
                 onChange={(e) => setLoginEmail(e.target.value)}
                 className={`${inputClass} pl-9`}
-                style={{ borderColor: '#D1D5DB' }}
+                style={{ borderColor: "#D1D5DB" }}
                 placeholder="you@example.com"
               />
             </div>
           </div>
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-gray-700">Password</label>
+            <label className="mb-1.5 block text-sm font-medium text-gray-700">
+              Password
+            </label>
             <div className="relative">
               <Lock size={16} className="absolute left-3 top-3 text-gray-400" />
               <input
@@ -175,7 +187,7 @@ export default function AuthModal() {
                 value={loginPassword}
                 onChange={(e) => setLoginPassword(e.target.value)}
                 className={`${inputClass} pl-9`}
-                style={{ borderColor: '#D1D5DB' }}
+                style={{ borderColor: "#D1D5DB" }}
                 placeholder="Enter your password"
               />
             </div>
@@ -184,7 +196,7 @@ export default function AuthModal() {
             type="submit"
             disabled={isPending}
             className="flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
-            style={{ backgroundColor: '#E76F51' }}
+            style={{ backgroundColor: "#E76F51" }}
           >
             {isLoggingIn ? (
               <>
@@ -192,14 +204,14 @@ export default function AuthModal() {
                 Signing in...
               </>
             ) : (
-              'Sign In'
+              "Sign In"
             )}
           </button>
           <p className="text-center text-sm text-gray-500">
-            Don&apos;t have an account?{' '}
+            Don&apos;t have an account?{" "}
             <button
               type="button"
-              onClick={() => setActiveTab('register')}
+              onClick={() => setActiveTab("register")}
               className="font-semibold text-[#1B4332] hover:underline"
             >
               Create one
@@ -209,7 +221,7 @@ export default function AuthModal() {
       )}
 
       {/* Register Form */}
-      {activeTab === 'register' && (
+      {activeTab === "register" && (
         <form onSubmit={handleRegister} className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -217,14 +229,17 @@ export default function AuthModal() {
                 First Name
               </label>
               <div className="relative">
-                <User size={16} className="absolute left-3 top-3 text-gray-400" />
+                <User
+                  size={16}
+                  className="absolute left-3 top-3 text-gray-400"
+                />
                 <input
                   type="text"
                   required
                   value={regFirstName}
                   onChange={(e) => setRegFirstName(e.target.value)}
                   className={`${inputClass} pl-9`}
-                  style={{ borderColor: '#D1D5DB' }}
+                  style={{ borderColor: "#D1D5DB" }}
                   placeholder="John"
                 />
               </div>
@@ -239,13 +254,15 @@ export default function AuthModal() {
                 value={regLastName}
                 onChange={(e) => setRegLastName(e.target.value)}
                 className={inputClass}
-                style={{ borderColor: '#D1D5DB' }}
+                style={{ borderColor: "#D1D5DB" }}
                 placeholder="Doe"
               />
             </div>
           </div>
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-gray-700">Email</label>
+            <label className="mb-1.5 block text-sm font-medium text-gray-700">
+              Email
+            </label>
             <div className="relative">
               <Mail size={16} className="absolute left-3 top-3 text-gray-400" />
               <input
@@ -254,7 +271,7 @@ export default function AuthModal() {
                 value={regEmail}
                 onChange={(e) => setRegEmail(e.target.value)}
                 className={`${inputClass} pl-9`}
-                style={{ borderColor: '#D1D5DB' }}
+                style={{ borderColor: "#D1D5DB" }}
                 placeholder="you@example.com"
               />
             </div>
@@ -264,19 +281,24 @@ export default function AuthModal() {
               Phone <span className="text-gray-400">(optional)</span>
             </label>
             <div className="relative">
-              <Phone size={16} className="absolute left-3 top-3 text-gray-400" />
+              <Phone
+                size={16}
+                className="absolute left-3 top-3 text-gray-400"
+              />
               <input
                 type="tel"
                 value={regPhone}
                 onChange={(e) => setRegPhone(e.target.value)}
                 className={`${inputClass} pl-9`}
-                style={{ borderColor: '#D1D5DB' }}
+                style={{ borderColor: "#D1D5DB" }}
                 placeholder="+63 917 123 4567"
               />
             </div>
           </div>
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-gray-700">Password</label>
+            <label className="mb-1.5 block text-sm font-medium text-gray-700">
+              Password
+            </label>
             <div className="relative">
               <Lock size={16} className="absolute left-3 top-3 text-gray-400" />
               <input
@@ -286,7 +308,7 @@ export default function AuthModal() {
                 value={regPassword}
                 onChange={(e) => setRegPassword(e.target.value)}
                 className={`${inputClass} pl-9`}
-                style={{ borderColor: '#D1D5DB' }}
+                style={{ borderColor: "#D1D5DB" }}
                 placeholder="Min. 8 characters"
               />
             </div>
@@ -303,7 +325,7 @@ export default function AuthModal() {
                 value={regConfirm}
                 onChange={(e) => setRegConfirm(e.target.value)}
                 className={`${inputClass} pl-9`}
-                style={{ borderColor: '#D1D5DB' }}
+                style={{ borderColor: "#D1D5DB" }}
                 placeholder="Re-enter your password"
               />
             </div>
@@ -312,7 +334,7 @@ export default function AuthModal() {
             type="submit"
             disabled={isPending}
             className="flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
-            style={{ backgroundColor: '#E76F51' }}
+            style={{ backgroundColor: "#E76F51" }}
           >
             {isRegistering ? (
               <>
@@ -320,14 +342,14 @@ export default function AuthModal() {
                 Creating account...
               </>
             ) : (
-              'Create Account'
+              "Create Account"
             )}
           </button>
           <p className="text-center text-sm text-gray-500">
-            Already have an account?{' '}
+            Already have an account?{" "}
             <button
               type="button"
-              onClick={() => setActiveTab('login')}
+              onClick={() => setActiveTab("login")}
               className="font-semibold text-[#1B4332] hover:underline"
             >
               Sign in

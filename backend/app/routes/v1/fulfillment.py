@@ -55,9 +55,7 @@ async def list_delivery_zones(
 )
 async def create_delivery_zone(
     data: DeliveryZoneCreate,
-    current_user: dict[str, Any] = Depends(
-        PermissionChecker(["fulfillment:write"])
-    ),
+    current_user: dict[str, Any] = Depends(PermissionChecker(["fulfillment:write"])),
     session: AsyncSession = Depends(get_app_db),
 ) -> Any:
     """Create a new delivery zone (admin)."""
@@ -116,16 +114,12 @@ async def get_fulfillment(
 async def update_fulfillment_status(
     fulfillment_id: UUID,
     data: FulfillmentStatusUpdate,
-    current_user: dict[str, Any] = Depends(
-        PermissionChecker(["fulfillment:write"])
-    ),
+    current_user: dict[str, Any] = Depends(PermissionChecker(["fulfillment:write"])),
     session: AsyncSession = Depends(get_app_db),
 ) -> Any:
     """Update the fulfillment status (admin)."""
     service = FulfillmentService(session)
-    return await service.update_status(
-        fulfillment_id, current_user["tenant_id"], data
-    )
+    return await service.update_status(fulfillment_id, current_user["tenant_id"], data)
 
 
 # ---------------------------------------------------------------------------
@@ -139,16 +133,12 @@ async def update_fulfillment_status(
 )
 async def get_production_report(
     report_date: date,
-    current_user: dict[str, Any] = Depends(
-        PermissionChecker(["fulfillment:read"])
-    ),
+    current_user: dict[str, Any] = Depends(PermissionChecker(["fulfillment:read"])),
     session: AsyncSession = Depends(get_app_db),
 ) -> Any:
     """Get production report for a specific date (admin)."""
     service = FulfillmentService(session)
-    return await service.get_production_report(
-        current_user["tenant_id"], report_date
-    )
+    return await service.get_production_report(current_user["tenant_id"], report_date)
 
 
 # ---------------------------------------------------------------------------
@@ -159,9 +149,7 @@ async def get_production_report(
 @router.get("/fulfillment/{fulfillment_id}/packing-slip")
 async def get_packing_slip(
     fulfillment_id: UUID,
-    current_user: dict[str, Any] = Depends(
-        PermissionChecker(["fulfillment:read"])
-    ),
+    current_user: dict[str, Any] = Depends(PermissionChecker(["fulfillment:read"])),
     session: AsyncSession = Depends(get_app_db),
 ) -> Any:
     """Get packing slip for a fulfillment order.
@@ -193,9 +181,7 @@ async def create_address(
 ) -> Any:
     """Create a new delivery address for the current user."""
     service = AddressService(session)
-    return await service.create_address(
-        current_user["sub"], current_user["tenant_id"], data
-    )
+    return await service.create_address(current_user["sub"], current_user["tenant_id"], data)
 
 
 @router.get("/addresses", response_model=list[AddressResponse])
@@ -205,9 +191,7 @@ async def list_addresses(
 ) -> Any:
     """List all addresses for the current user."""
     service = AddressService(session)
-    return await service.list_addresses(
-        current_user["sub"], current_user["tenant_id"]
-    )
+    return await service.list_addresses(current_user["sub"], current_user["tenant_id"])
 
 
 @router.patch("/addresses/{address_id}", response_model=AddressResponse)
@@ -219,9 +203,7 @@ async def update_address(
 ) -> Any:
     """Update an existing address."""
     service = AddressService(session)
-    return await service.update_address(
-        address_id, current_user["sub"], current_user["tenant_id"], data
-    )
+    return await service.update_address(address_id, current_user["sub"], current_user["tenant_id"], data)
 
 
 @router.delete(
@@ -235,7 +217,5 @@ async def delete_address(
 ) -> Any:
     """Delete an address."""
     service = AddressService(session)
-    await service.delete_address(
-        address_id, current_user["sub"], current_user["tenant_id"]
-    )
+    await service.delete_address(address_id, current_user["sub"], current_user["tenant_id"])
     return MessageResponse(message="Address deleted")

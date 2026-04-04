@@ -1,8 +1,14 @@
-'use client';
+"use client";
 
-import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
-import { useServerCart } from '@/hooks/useCart';
-import type { Meal } from '@/lib/mock-data';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  ReactNode,
+} from "react";
+import { useServerCart } from "@/hooks/useCart";
+import type { Meal } from "@/lib/mock-data";
 
 export interface CartItem {
   meal: Meal;
@@ -32,35 +38,54 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const serverCart = useServerCart();
 
-  const addItem = useCallback((meal: Meal, quantity = 1) => {
-    setItems(prev => {
-      const existing = prev.find(i => i.meal.id === meal.id);
-      if (existing) {
-        return prev.map(i => i.meal.id === meal.id ? { ...i, quantity: i.quantity + quantity } : i);
+  const addItem = useCallback(
+    (meal: Meal, quantity = 1) => {
+      setItems((prev) => {
+        const existing = prev.find((i) => i.meal.id === meal.id);
+        if (existing) {
+          return prev.map((i) =>
+            i.meal.id === meal.id
+              ? { ...i, quantity: i.quantity + quantity }
+              : i,
+          );
+        }
+        return [...prev, { meal, quantity }];
+      });
+      // Fire-and-forget server sync (product_variant_id would be the real UUID in production)
+      serverCart
+        .addItem({ product_variant_id: String(meal.id), quantity })
+        .catch(() => {});
+    },
+    [serverCart],
+  );
+
+  const removeItem = useCallback(
+    (mealId: number) => {
+      const item = items.find((i) => i.meal.id === mealId);
+      setItems((prev) => prev.filter((i) => i.meal.id !== mealId));
+      if (item) {
+        serverCart.removeItem(String(mealId)).catch(() => {});
       }
-      return [...prev, { meal, quantity }];
-    });
-    // Fire-and-forget server sync (product_variant_id would be the real UUID in production)
-    serverCart.addItem({ product_variant_id: String(meal.id), quantity }).catch(() => {});
-  }, [serverCart]);
+    },
+    [items, serverCart],
+  );
 
-  const removeItem = useCallback((mealId: number) => {
-    const item = items.find(i => i.meal.id === mealId);
-    setItems(prev => prev.filter(i => i.meal.id !== mealId));
-    if (item) {
-      serverCart.removeItem(String(mealId)).catch(() => {});
-    }
-  }, [items, serverCart]);
-
-  const updateQuantity = useCallback((mealId: number, quantity: number) => {
-    if (quantity <= 0) {
-      setItems(prev => prev.filter(i => i.meal.id !== mealId));
-      serverCart.removeItem(String(mealId)).catch(() => {});
-    } else {
-      setItems(prev => prev.map(i => i.meal.id === mealId ? { ...i, quantity } : i));
-      serverCart.updateItem({ itemId: String(mealId), quantity }).catch(() => {});
-    }
-  }, [serverCart]);
+  const updateQuantity = useCallback(
+    (mealId: number, quantity: number) => {
+      if (quantity <= 0) {
+        setItems((prev) => prev.filter((i) => i.meal.id !== mealId));
+        serverCart.removeItem(String(mealId)).catch(() => {});
+      } else {
+        setItems((prev) =>
+          prev.map((i) => (i.meal.id === mealId ? { ...i, quantity } : i)),
+        );
+        serverCart
+          .updateItem({ itemId: String(mealId), quantity })
+          .catch(() => {});
+      }
+    },
+    [serverCart],
+  );
 
   const clearCart = useCallback(() => {
     setItems([]);
@@ -71,7 +96,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const itemCount = items.reduce((sum, i) => sum + i.quantity, 0);
 
   return (
-    <CartContext.Provider value={{ items, addItem, removeItem, updateQuantity, clearCart, total, itemCount, isLoading: serverCart.isLoading }}>
+    <CartContext.Provider
+      value={{
+        items,
+        addItem,
+        removeItem,
+        updateQuantity,
+        clearCart,
+        total,
+        itemCount,
+        isLoading: serverCart.isLoading,
+      }}
+    >
       {children}
     </CartContext.Provider>
   );
@@ -79,6 +115,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
 export function useCart() {
   const context = useContext(CartContext);
-  if (!context) throw new Error('useCart must be used within CartProvider');
+  if (!context) throw new Error("useCart must be used within CartProvider");
   return context;
 }

@@ -16,6 +16,7 @@ from app.schemas.base import BaseSchema, PaginatedResponse
 # Category
 # ---------------------------------------------------------------------------
 
+
 class CategoryCreate(BaseSchema):
     name: str = Field(min_length=1, max_length=100)
     parent_id: UUID | None = None
@@ -36,6 +37,7 @@ class CategoryResponse(BaseSchema):
 # ---------------------------------------------------------------------------
 # Product
 # ---------------------------------------------------------------------------
+
 
 class VariantCreate(BaseSchema):
     name: str = Field(min_length=1, max_length=100)
@@ -143,6 +145,7 @@ class ProductListResponse(PaginatedResponse[ProductResponse]):
 # ---------------------------------------------------------------------------
 # Catalog
 # ---------------------------------------------------------------------------
+
 
 class CatalogItemCreate(BaseSchema):
     product_variant_id: UUID

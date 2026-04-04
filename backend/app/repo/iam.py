@@ -17,14 +17,9 @@ class UserRepository(BaseRepository[User]):
 
     model = User
 
-    async def get_by_email(
-        self, email: str, tenant_id: UUID | str
-    ) -> User | None:
+    async def get_by_email(self, email: str, tenant_id: UUID | str) -> User | None:
         """Find a user by email within a tenant."""
-        stmt = (
-            select(User)
-            .where(User.email == email, User.tenant_id == tenant_id)
-        )
+        stmt = select(User).where(User.email == email, User.tenant_id == tenant_id)
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
 
@@ -49,14 +44,9 @@ class RoleRepository(BaseRepository[Role]):
 
     model = Role
 
-    async def get_by_name(
-        self, name: str, tenant_id: UUID | str
-    ) -> Role | None:
+    async def get_by_name(self, name: str, tenant_id: UUID | str) -> Role | None:
         """Find a role by name within a tenant."""
-        stmt = (
-            select(Role)
-            .where(Role.name == name, Role.tenant_id == tenant_id)
-        )
+        stmt = select(Role).where(Role.name == name, Role.tenant_id == tenant_id)
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
 
@@ -65,10 +55,7 @@ class RoleRepository(BaseRepository[Role]):
         stmt = (
             select(Role)
             .where(Role.id == role_id)
-            .options(
-                selectinload(Role.role_permissions)
-                .selectinload(RolePermission.permission)
-            )
+            .options(selectinload(Role.role_permissions).selectinload(RolePermission.permission))
         )
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
@@ -79,13 +66,9 @@ class PermissionRepository(BaseRepository[Permission]):
 
     model = Permission
 
-    async def get_by_resource_action(
-        self, resource: str, action: str
-    ) -> Permission | None:
+    async def get_by_resource_action(self, resource: str, action: str) -> Permission | None:
         """Find a permission by its resource and action combination."""
-        stmt = select(Permission).where(
-            Permission.resource == resource, Permission.action == action
-        )
+        stmt = select(Permission).where(Permission.resource == resource, Permission.action == action)
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
 
@@ -96,9 +79,7 @@ class UserRoleRepository:
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
-    async def assign_role(
-        self, user_id: UUID | str, role_id: UUID | str
-    ) -> UserRole:
+    async def assign_role(self, user_id: UUID | str, role_id: UUID | str) -> UserRole:
         """Assign a role to a user. Returns the created UserRole."""
         user_role = UserRole(user_id=user_id, role_id=role_id)
         self.session.add(user_role)
@@ -106,13 +87,9 @@ class UserRoleRepository:
         await self.session.refresh(user_role)
         return user_role
 
-    async def remove_role(
-        self, user_id: UUID | str, role_id: UUID | str
-    ) -> bool:
+    async def remove_role(self, user_id: UUID | str, role_id: UUID | str) -> bool:
         """Remove a role from a user. Returns True if a record was deleted."""
-        stmt = delete(UserRole).where(
-            UserRole.user_id == user_id, UserRole.role_id == role_id
-        )
+        stmt = delete(UserRole).where(UserRole.user_id == user_id, UserRole.role_id == role_id)
         result = await self.session.execute(stmt)
         await self.session.flush()
         return result.rowcount > 0
@@ -123,9 +100,7 @@ class UserRoleRepository:
             select(UserRole)
             .where(UserRole.user_id == user_id)
             .options(
-                selectinload(UserRole.role)
-                .selectinload(Role.role_permissions)
-                .selectinload(RolePermission.permission)
+                selectinload(UserRole.role).selectinload(Role.role_permissions).selectinload(RolePermission.permission)
             )
         )
         result = await self.session.execute(stmt)

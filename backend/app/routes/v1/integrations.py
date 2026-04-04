@@ -37,9 +37,7 @@ router = APIRouter(prefix="", tags=["integrations"])
 )
 async def register_webhook(
     data: WebhookCreate,
-    current_user: dict[str, Any] = Depends(
-        PermissionChecker(["integrations:write"])
-    ),
+    current_user: dict[str, Any] = Depends(PermissionChecker(["integrations:write"])),
     session: AsyncSession = Depends(get_app_db),
 ) -> Any:
     """Register a new webhook endpoint (admin)."""
@@ -49,9 +47,7 @@ async def register_webhook(
 
 @router.get("/webhooks", response_model=list[WebhookResponse])
 async def list_webhooks(
-    current_user: dict[str, Any] = Depends(
-        PermissionChecker(["integrations:read"])
-    ),
+    current_user: dict[str, Any] = Depends(PermissionChecker(["integrations:read"])),
     session: AsyncSession = Depends(get_app_db),
 ) -> Any:
     """List all active webhooks (admin)."""
@@ -62,9 +58,7 @@ async def list_webhooks(
 @router.delete("/webhooks/{webhook_id}", response_model=MessageResponse)
 async def delete_webhook(
     webhook_id: UUID,
-    current_user: dict[str, Any] = Depends(
-        PermissionChecker(["integrations:write"])
-    ),
+    current_user: dict[str, Any] = Depends(PermissionChecker(["integrations:write"])),
     session: AsyncSession = Depends(get_app_db),
 ) -> Any:
     """Remove a webhook (admin)."""
@@ -79,16 +73,12 @@ async def delete_webhook(
 )
 async def list_webhook_events(
     webhook_id: UUID,
-    current_user: dict[str, Any] = Depends(
-        PermissionChecker(["integrations:read"])
-    ),
+    current_user: dict[str, Any] = Depends(PermissionChecker(["integrations:read"])),
     session: AsyncSession = Depends(get_app_db),
 ) -> Any:
     """List delivery events for a webhook (admin)."""
     service = IntegrationService(session)
-    return await service.get_webhook_events(
-        webhook_id, current_user["tenant_id"]
-    )
+    return await service.get_webhook_events(webhook_id, current_user["tenant_id"])
 
 
 # ---------------------------------------------------------------------------
@@ -103,23 +93,17 @@ async def list_webhook_events(
 )
 async def configure_integration(
     data: IntegrationConfigCreate,
-    current_user: dict[str, Any] = Depends(
-        PermissionChecker(["integrations:write"])
-    ),
+    current_user: dict[str, Any] = Depends(PermissionChecker(["integrations:write"])),
     session: AsyncSession = Depends(get_app_db),
 ) -> Any:
     """Configure an external integration (admin)."""
     service = IntegrationService(session)
-    return await service.configure_integration(
-        current_user["tenant_id"], data
-    )
+    return await service.configure_integration(current_user["tenant_id"], data)
 
 
 @router.get("/integrations", response_model=list[IntegrationConfigResponse])
 async def list_integrations(
-    current_user: dict[str, Any] = Depends(
-        PermissionChecker(["integrations:read"])
-    ),
+    current_user: dict[str, Any] = Depends(PermissionChecker(["integrations:read"])),
     session: AsyncSession = Depends(get_app_db),
 ) -> Any:
     """List all active integrations (admin)."""
@@ -139,9 +123,7 @@ async def query_audit_logs(
     action: str | None = Query(None, description="Filter by action"),
     resource_type: str | None = Query(None, description="Filter by resource type"),
     actor_id: UUID | None = Query(None, description="Filter by actor"),
-    current_user: dict[str, Any] = Depends(
-        PermissionChecker(["audit:read"])
-    ),
+    current_user: dict[str, Any] = Depends(PermissionChecker(["audit:read"])),
     session: AsyncSession = Depends(get_app_db),
 ) -> Any:
     """Query audit trail (admin)."""

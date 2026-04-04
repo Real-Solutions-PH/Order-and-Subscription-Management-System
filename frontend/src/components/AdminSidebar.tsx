@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import React, { useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   ClipboardList,
@@ -12,15 +12,15 @@ import {
   Settings,
   Menu,
   X,
-} from 'lucide-react';
+} from "lucide-react";
 
 const navItems = [
-  { label: 'Dashboard', href: '/admin', icon: LayoutDashboard },
-  { label: 'Orders', href: '/admin/orders', icon: ClipboardList },
-  { label: 'Production', href: '/admin/production', icon: ChefHat },
-  { label: 'Menu', href: '/admin/menu', icon: UtensilsCrossed },
-  { label: 'Customers', href: '/admin/customers', icon: Users },
-  { label: 'Settings', href: '/admin/settings', icon: Settings },
+  { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+  { label: "Orders", href: "/admin/orders", icon: ClipboardList },
+  { label: "Production", href: "/admin/production", icon: ChefHat },
+  { label: "Menu", href: "/admin/menu", icon: UtensilsCrossed },
+  { label: "Customers", href: "/admin/customers", icon: Users },
+  { label: "Settings", href: "/admin/settings", icon: Settings },
 ];
 
 export default function AdminSidebar() {
@@ -28,20 +28,26 @@ export default function AdminSidebar() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   function isActive(href: string) {
-    if (href === '/admin') return pathname === '/admin';
+    if (href === "/admin") return pathname === "/admin";
     return pathname.startsWith(href);
   }
 
   const sidebarContent = (
-    <div className="flex h-full flex-col" style={{ backgroundColor: '#1A1A2E' }}>
+    <div
+      className="flex h-full flex-col"
+      style={{ backgroundColor: "#1A1A2E" }}
+    >
       {/* Logo */}
-      <div className="flex h-16 items-center px-6" style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+      <div
+        className="flex h-16 items-center px-6"
+        style={{ borderBottom: "1px solid rgba(255,255,255,0.1)" }}
+      >
         <span
           className="text-xl font-bold tracking-tight text-white"
           style={{ fontFamily: "'DM Serif Display', serif" }}
         >
-          PrepFlow{' '}
-          <span className="text-sm font-normal" style={{ color: '#40916C' }}>
+          PrepFlow{" "}
+          <span className="text-sm font-normal" style={{ color: "#40916C" }}>
             Admin
           </span>
         </span>
@@ -59,19 +65,20 @@ export default function AdminSidebar() {
               onClick={() => setMobileOpen(false)}
               className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors duration-150"
               style={{
-                color: active ? '#FFFFFF' : 'rgba(255,255,255,0.6)',
-                backgroundColor: active ? '#40916C' : 'transparent',
+                color: active ? "#FFFFFF" : "rgba(255,255,255,0.6)",
+                backgroundColor: active ? "#40916C" : "transparent",
               }}
               onMouseEnter={(e) => {
                 if (!active) {
-                  e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.08)';
-                  e.currentTarget.style.color = '#FFFFFF';
+                  e.currentTarget.style.backgroundColor =
+                    "rgba(255,255,255,0.08)";
+                  e.currentTarget.style.color = "#FFFFFF";
                 }
               }}
               onMouseLeave={(e) => {
                 if (!active) {
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                  e.currentTarget.style.color = 'rgba(255,255,255,0.6)';
+                  e.currentTarget.style.backgroundColor = "transparent";
+                  e.currentTarget.style.color = "rgba(255,255,255,0.6)";
                 }
               }}
             >
@@ -89,9 +96,9 @@ export default function AdminSidebar() {
       {/* Mobile toggle button */}
       <button
         className="fixed left-4 top-4 z-50 rounded-lg p-2 shadow-md lg:hidden"
-        style={{ backgroundColor: '#1A1A2E' }}
+        style={{ backgroundColor: "#1A1A2E" }}
         onClick={() => setMobileOpen(!mobileOpen)}
-        aria-label={mobileOpen ? 'Close sidebar' : 'Open sidebar'}
+        aria-label={mobileOpen ? "Close sidebar" : "Open sidebar"}
       >
         {mobileOpen ? (
           <X size={20} className="text-white" />
@@ -111,7 +118,9 @@ export default function AdminSidebar() {
       {/* Mobile sidebar */}
       <aside
         className="fixed inset-y-0 left-0 z-40 w-64 transform transition-transform duration-200 lg:hidden"
-        style={{ transform: mobileOpen ? 'translateX(0)' : 'translateX(-100%)' }}
+        style={{
+          transform: mobileOpen ? "translateX(0)" : "translateX(-100%)",
+        }}
       >
         {sidebarContent}
       </aside>

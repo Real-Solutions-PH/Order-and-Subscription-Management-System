@@ -21,9 +21,7 @@ _CONFIG_TTL = 300  # 5 minutes
 class TenantService:
     """Business logic for tenant configuration and feature flags."""
 
-    def __init__(
-        self, session: AsyncSession, cache: RedisCache | None = None
-    ) -> None:
+    def __init__(self, session: AsyncSession, cache: RedisCache | None = None) -> None:
         self.session = session
         self.cache = cache
         self.config_repo = TenantConfigRepository(session)
@@ -46,9 +44,7 @@ class TenantService:
 
         return config
 
-    async def update_config(
-        self, tenant_id: UUID | str, data: TenantConfigUpdate
-    ) -> TenantConfig:
+    async def update_config(self, tenant_id: UUID | str, data: TenantConfigUpdate) -> TenantConfig:
         """Update tenant configuration and invalidate the cache."""
         config = await self.config_repo.get_by_tenant_id(tenant_id)
         if config is None:
@@ -58,9 +54,7 @@ class TenantService:
         if not update_data:
             return config
 
-        updated = await self.config_repo.update(
-            config.id, update_data, tenant_id=tenant_id
-        )
+        updated = await self.config_repo.update(config.id, update_data, tenant_id=tenant_id)
         if updated is None:
             raise NotFoundException("TenantConfig", str(tenant_id))
 
@@ -70,15 +64,11 @@ class TenantService:
 
         return updated
 
-    async def get_feature_flags(
-        self, tenant_id: UUID | str
-    ) -> list[FeatureFlag]:
+    async def get_feature_flags(self, tenant_id: UUID | str) -> list[FeatureFlag]:
         """List all feature flags for a tenant."""
         return await self.flag_repo.get_by_tenant(tenant_id)
 
-    async def toggle_feature(
-        self, tenant_id: UUID | str, flag_key: str, enabled: bool
-    ) -> FeatureFlag:
+    async def toggle_feature(self, tenant_id: UUID | str, flag_key: str, enabled: bool) -> FeatureFlag:
         """Toggle a feature flag and invalidate its cache."""
         flag = await self.flag_repo.toggle_flag(tenant_id, flag_key, enabled)
         if flag is None:
@@ -86,15 +76,11 @@ class TenantService:
 
         # Invalidate cache
         if self.cache is not None:
-            await self.cache.delete(
-                f"{_FEATURE_CACHE_PREFIX}{tenant_id}:{flag_key}"
-            )
+            await self.cache.delete(f"{_FEATURE_CACHE_PREFIX}{tenant_id}:{flag_key}")
 
         return flag
 
-    async def check_feature(
-        self, tenant_id: UUID | str, flag_key: str
-    ) -> bool:
+    async def check_feature(self, tenant_id: UUID | str, flag_key: str) -> bool:
         """Check if a feature is enabled, with Redis caching."""
         cache_key = f"{_FEATURE_CACHE_PREFIX}{tenant_id}:{flag_key}"
 

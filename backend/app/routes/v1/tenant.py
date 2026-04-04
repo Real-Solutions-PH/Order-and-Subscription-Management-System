@@ -35,9 +35,7 @@ async def get_tenant_config(
 @router.patch("/config", response_model=TenantConfigResponse)
 async def update_tenant_config(
     data: TenantConfigUpdate,
-    current_user: dict[str, Any] = Depends(
-        PermissionChecker(["tenant:write"])
-    ),
+    current_user: dict[str, Any] = Depends(PermissionChecker(["tenant:write"])),
     session: AsyncSession = Depends(get_iam_db),
     cache: RedisCache = Depends(get_cache),
 ) -> Any:
@@ -63,14 +61,10 @@ async def list_feature_flags(
 async def toggle_feature_flag(
     flag_key: str,
     data: FeatureFlagUpdate,
-    current_user: dict[str, Any] = Depends(
-        PermissionChecker(["tenant:write"])
-    ),
+    current_user: dict[str, Any] = Depends(PermissionChecker(["tenant:write"])),
     session: AsyncSession = Depends(get_iam_db),
     cache: RedisCache = Depends(get_cache),
 ) -> Any:
     """Toggle a feature flag (admin only)."""
     service = TenantService(session, cache=cache)
-    return await service.toggle_feature(
-        current_user["tenant_id"], flag_key, data.enabled
-    )
+    return await service.toggle_feature(current_user["tenant_id"], flag_key, data.enabled)

@@ -62,9 +62,7 @@ class PermissionChecker:
 
         missing = [p for p in self.required_permissions if p not in user_permissions]
         if missing:
-            raise ForbiddenException(
-                f"Missing required permissions: {', '.join(missing)}"
-            )
+            raise ForbiddenException(f"Missing required permissions: {', '.join(missing)}")
 
         return user
 

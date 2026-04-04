@@ -26,9 +26,7 @@ class PaymentMethodRepository(BaseRepository[PaymentMethod]):
 
     model = PaymentMethod
 
-    async def get_by_user(
-        self, user_id: UUID | str, tenant_id: UUID | str
-    ) -> list[PaymentMethod]:
+    async def get_by_user(self, user_id: UUID | str, tenant_id: UUID | str) -> list[PaymentMethod]:
         """Return all saved payment methods for a user."""
         stmt = (
             select(PaymentMethod)
@@ -41,9 +39,7 @@ class PaymentMethodRepository(BaseRepository[PaymentMethod]):
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
 
-    async def get_default(
-        self, user_id: UUID | str, tenant_id: UUID | str
-    ) -> PaymentMethod | None:
+    async def get_default(self, user_id: UUID | str, tenant_id: UUID | str) -> PaymentMethod | None:
         """Return the user's default payment method, if any."""
         stmt = select(PaymentMethod).where(
             PaymentMethod.user_id == user_id,
@@ -61,21 +57,13 @@ class PaymentRepository(BaseRepository[Payment]):
 
     async def get_by_order(self, order_id: UUID | str) -> Payment | None:
         """Get the payment associated with an order."""
-        stmt = (
-            select(Payment)
-            .where(Payment.order_id == order_id)
-            .options(selectinload(Payment.transactions))
-        )
+        stmt = select(Payment).where(Payment.order_id == order_id).options(selectinload(Payment.transactions))
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
 
-    async def get_by_intent(
-        self, paymongo_intent_id: str
-    ) -> Payment | None:
+    async def get_by_intent(self, paymongo_intent_id: str) -> Payment | None:
         """Look up a payment by its PayMongo intent ID."""
-        stmt = select(Payment).where(
-            Payment.paymongo_intent_id == paymongo_intent_id
-        )
+        stmt = select(Payment).where(Payment.paymongo_intent_id == paymongo_intent_id)
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
 
@@ -98,9 +86,7 @@ class PaymentTransactionRepository(BaseRepository[PaymentTransaction]):
 
     model = PaymentTransaction
 
-    async def get_by_payment(
-        self, payment_id: UUID | str
-    ) -> list[PaymentTransaction]:
+    async def get_by_payment(self, payment_id: UUID | str) -> list[PaymentTransaction]:
         """Return all transactions for a payment, ordered chronologically."""
         stmt = (
             select(PaymentTransaction)
@@ -113,9 +99,7 @@ class PaymentTransactionRepository(BaseRepository[PaymentTransaction]):
     async def check_idempotency(self, paymongo_event_id: str) -> bool:
         """Return True if this PayMongo event has already been processed."""
         stmt = select(
-            select(PaymentTransaction)
-            .where(PaymentTransaction.paymongo_event_id == paymongo_event_id)
-            .exists()
+            select(PaymentTransaction).where(PaymentTransaction.paymongo_event_id == paymongo_event_id).exists()
         )
         result = await self.session.execute(stmt)
         return result.scalar_one()
@@ -128,11 +112,7 @@ class InvoiceRepository(BaseRepository[Invoice]):
 
     async def get_by_order(self, order_id: UUID | str) -> Invoice | None:
         """Get the invoice for a specific order."""
-        stmt = (
-            select(Invoice)
-            .where(Invoice.order_id == order_id)
-            .options(selectinload(Invoice.line_items))
-        )
+        stmt = select(Invoice).where(Invoice.order_id == order_id).options(selectinload(Invoice.line_items))
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
 
@@ -156,11 +136,7 @@ class InvoiceRepository(BaseRepository[Invoice]):
 
     async def count_by_tenant(self, tenant_id: UUID | str) -> int:
         """Count invoices for a tenant."""
-        stmt = (
-            select(func.count())
-            .select_from(Invoice)
-            .where(Invoice.tenant_id == tenant_id)
-        )
+        stmt = select(func.count()).select_from(Invoice).where(Invoice.tenant_id == tenant_id)
         result = await self.session.execute(stmt)
         return result.scalar_one()
 
@@ -169,11 +145,7 @@ class InvoiceRepository(BaseRepository[Invoice]):
 
         Format: ``INV-XXXXXX`` where X is a zero-padded sequential number.
         """
-        stmt = (
-            select(func.count())
-            .select_from(Invoice)
-            .where(Invoice.tenant_id == tenant_id)
-        )
+        stmt = select(func.count()).select_from(Invoice).where(Invoice.tenant_id == tenant_id)
         result = await self.session.execute(stmt)
         count = result.scalar_one()
         return f"INV-{count + 1:06d}"
@@ -184,9 +156,7 @@ class PromoCodeRepository(BaseRepository[PromoCode]):
 
     model = PromoCode
 
-    async def get_by_code(
-        self, code: str, tenant_id: UUID | str
-    ) -> PromoCode | None:
+    async def get_by_code(self, code: str, tenant_id: UUID | str) -> PromoCode | None:
         """Look up an active promo code by its code string."""
         stmt = select(PromoCode).where(
             PromoCode.code == code,
@@ -196,9 +166,7 @@ class PromoCodeRepository(BaseRepository[PromoCode]):
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
 
-    async def validate_usage(
-        self, code_id: UUID | str, user_id: UUID | str
-    ) -> bool:
+    async def validate_usage(self, code_id: UUID | str, user_id: UUID | str) -> bool:
         """Check whether the user can still use this promo code.
 
         Returns True if usage is within limits, False otherwise.
@@ -209,11 +177,7 @@ class PromoCodeRepository(BaseRepository[PromoCode]):
 
         # Global usage limit
         if promo.usage_limit is not None:
-            total_stmt = (
-                select(func.count())
-                .select_from(PromoCodeUsage)
-                .where(PromoCodeUsage.promo_code_id == code_id)
-            )
+            total_stmt = select(func.count()).select_from(PromoCodeUsage).where(PromoCodeUsage.promo_code_id == code_id)
             total = (await self.session.execute(total_stmt)).scalar_one()
             if total >= promo.usage_limit:
                 return False

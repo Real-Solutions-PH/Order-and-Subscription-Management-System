@@ -45,9 +45,7 @@ class IntegrationService:
     # Webhooks
     # ------------------------------------------------------------------
 
-    async def register_webhook(
-        self, tenant_id: UUID | str, data: WebhookCreate
-    ) -> Webhook:
+    async def register_webhook(self, tenant_id: UUID | str, data: WebhookCreate) -> Webhook:
         """Register a new webhook endpoint."""
         webhook_data = data.model_dump()
         webhook_data["tenant_id"] = tenant_id
@@ -62,17 +60,13 @@ class IntegrationService:
         """List all active webhooks for a tenant."""
         return await self.webhook_repo.get_active(tenant_id)
 
-    async def delete_webhook(
-        self, webhook_id: UUID | str, tenant_id: UUID | str
-    ) -> None:
+    async def delete_webhook(self, webhook_id: UUID | str, tenant_id: UUID | str) -> None:
         """Deactivate a webhook."""
         deleted = await self.webhook_repo.delete(webhook_id, tenant_id=tenant_id)
         if not deleted:
             raise NotFoundException("Webhook", str(webhook_id))
 
-    async def get_webhook_events(
-        self, webhook_id: UUID | str, tenant_id: UUID | str
-    ) -> list[WebhookEvent]:
+    async def get_webhook_events(self, webhook_id: UUID | str, tenant_id: UUID | str) -> list[WebhookEvent]:
         """List delivery events for a webhook."""
         # Verify webhook belongs to tenant
         webhook = await self.webhook_repo.get_by_id(webhook_id, tenant_id=tenant_id)
@@ -124,17 +118,13 @@ class IntegrationService:
     # Integration Configs
     # ------------------------------------------------------------------
 
-    async def configure_integration(
-        self, tenant_id: UUID | str, data: IntegrationConfigCreate
-    ) -> IntegrationConfig:
+    async def configure_integration(self, tenant_id: UUID | str, data: IntegrationConfigCreate) -> IntegrationConfig:
         """Create or update an integration configuration."""
         config_data = data.model_dump()
         config_data["tenant_id"] = tenant_id
         return await self.config_repo.create(config_data)
 
-    async def list_integrations(
-        self, tenant_id: UUID | str
-    ) -> list[IntegrationConfig]:
+    async def list_integrations(self, tenant_id: UUID | str) -> list[IntegrationConfig]:
         """List all active integrations for a tenant."""
         return await self.config_repo.get_active(tenant_id)
 
@@ -181,9 +171,7 @@ class AuditService:
         limit: int = 50,
     ) -> PaginatedResponse[AuditLogResponse]:
         """Query audit logs with pagination."""
-        items, total = await self.repo.query(
-            tenant_id, filters=filters, skip=skip, limit=limit
-        )
+        items, total = await self.repo.query(tenant_id, filters=filters, skip=skip, limit=limit)
         return PaginatedResponse.build(
             items=[AuditLogResponse.model_validate(i) for i in items],
             total=total,

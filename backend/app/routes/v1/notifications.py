@@ -35,9 +35,7 @@ router = APIRouter(prefix="", tags=["notifications"])
 )
 async def create_template(
     data: TemplateCreate,
-    current_user: dict[str, Any] = Depends(
-        PermissionChecker(["notifications:write"])
-    ),
+    current_user: dict[str, Any] = Depends(PermissionChecker(["notifications:write"])),
     session: AsyncSession = Depends(get_app_db),
 ) -> Any:
     """Create a new notification template (admin)."""
@@ -47,9 +45,7 @@ async def create_template(
 
 @router.get("/notification-templates", response_model=list[TemplateResponse])
 async def list_templates(
-    current_user: dict[str, Any] = Depends(
-        PermissionChecker(["notifications:read"])
-    ),
+    current_user: dict[str, Any] = Depends(PermissionChecker(["notifications:read"])),
     session: AsyncSession = Depends(get_app_db),
 ) -> Any:
     """List all notification templates (admin)."""
@@ -64,16 +60,12 @@ async def list_templates(
 async def update_template(
     template_id: UUID,
     data: TemplateUpdate,
-    current_user: dict[str, Any] = Depends(
-        PermissionChecker(["notifications:write"])
-    ),
+    current_user: dict[str, Any] = Depends(PermissionChecker(["notifications:write"])),
     session: AsyncSession = Depends(get_app_db),
 ) -> Any:
     """Update a notification template (admin)."""
     service = NotificationService(session)
-    return await service.update_template(
-        template_id, current_user["tenant_id"], data
-    )
+    return await service.update_template(template_id, current_user["tenant_id"], data)
 
 
 # ---------------------------------------------------------------------------
@@ -88,9 +80,7 @@ async def update_template(
 )
 async def send_notification(
     data: NotificationSend,
-    current_user: dict[str, Any] = Depends(
-        PermissionChecker(["notifications:write"])
-    ),
+    current_user: dict[str, Any] = Depends(PermissionChecker(["notifications:write"])),
     session: AsyncSession = Depends(get_app_db),
 ) -> Any:
     """Send an ad-hoc notification (admin)."""

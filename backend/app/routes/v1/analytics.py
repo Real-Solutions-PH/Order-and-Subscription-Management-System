@@ -27,9 +27,7 @@ router = APIRouter(prefix="/analytics", tags=["analytics"])
 @router.get("/dashboard", response_model=DashboardResponse)
 async def get_dashboard(
     period: str = Query("monthly", description="Period type: daily, weekly, monthly"),
-    current_user: dict[str, Any] = Depends(
-        PermissionChecker(["analytics:read"])
-    ),
+    current_user: dict[str, Any] = Depends(PermissionChecker(["analytics:read"])),
     session: AsyncSession = Depends(get_app_db),
 ) -> Any:
     """Get dashboard summary metrics (admin)."""
@@ -39,9 +37,7 @@ async def get_dashboard(
 
 @router.get("/mrr", response_model=MRRBreakdown)
 async def get_mrr(
-    current_user: dict[str, Any] = Depends(
-        PermissionChecker(["analytics:read"])
-    ),
+    current_user: dict[str, Any] = Depends(PermissionChecker(["analytics:read"])),
     session: AsyncSession = Depends(get_app_db),
 ) -> Any:
     """Get MRR breakdown by plan (admin)."""
@@ -53,38 +49,28 @@ async def get_mrr(
 async def get_churn(
     period_start: date = Query(..., description="Start of analysis period"),
     period_end: date = Query(..., description="End of analysis period"),
-    current_user: dict[str, Any] = Depends(
-        PermissionChecker(["analytics:read"])
-    ),
+    current_user: dict[str, Any] = Depends(PermissionChecker(["analytics:read"])),
     session: AsyncSession = Depends(get_app_db),
 ) -> Any:
     """Get churn data for a period (admin)."""
     service = AnalyticsService(session)
-    return await service.get_churn(
-        current_user["tenant_id"], period_start, period_end
-    )
+    return await service.get_churn(current_user["tenant_id"], period_start, period_end)
 
 
 @router.get("/popular-items", response_model=list[PopularItem])
 async def get_popular_items(
     limit: int = Query(10, ge=1, le=100),
-    current_user: dict[str, Any] = Depends(
-        PermissionChecker(["analytics:read"])
-    ),
+    current_user: dict[str, Any] = Depends(PermissionChecker(["analytics:read"])),
     session: AsyncSession = Depends(get_app_db),
 ) -> Any:
     """Get popular items ranked by order count (admin)."""
     service = AnalyticsService(session)
-    return await service.get_popular_items(
-        current_user["tenant_id"], limit=limit
-    )
+    return await service.get_popular_items(current_user["tenant_id"], limit=limit)
 
 
 @router.get("/cohorts", response_model=list[CohortResponse])
 async def get_cohorts(
-    current_user: dict[str, Any] = Depends(
-        PermissionChecker(["analytics:read"])
-    ),
+    current_user: dict[str, Any] = Depends(PermissionChecker(["analytics:read"])),
     session: AsyncSession = Depends(get_app_db),
 ) -> Any:
     """Get cohort retention data (admin)."""
@@ -98,9 +84,7 @@ async def export_report(
     period_start: date = Query(..., description="Start of report period"),
     period_end: date = Query(..., description="End of report period"),
     format: str = Query("csv", description="Export format: csv, xlsx"),
-    current_user: dict[str, Any] = Depends(
-        PermissionChecker(["analytics:read"])
-    ),
+    current_user: dict[str, Any] = Depends(PermissionChecker(["analytics:read"])),
     session: AsyncSession = Depends(get_app_db),
 ) -> Any:
     """Export a report (admin).

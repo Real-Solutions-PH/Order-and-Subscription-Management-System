@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuthContext } from '@/context/AuthContext';
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuthContext } from "@/context/AuthContext";
 
 interface RequireAuthProps {
   children: React.ReactNode;
@@ -23,8 +23,8 @@ export default function RequireAuth({ children, fallback }: RequireAuthProps) {
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      router.replace('/');
-      openAuthModal('login');
+      router.replace("/");
+      openAuthModal("login");
     }
   }, [isLoading, isAuthenticated, router, openAuthModal]);
 

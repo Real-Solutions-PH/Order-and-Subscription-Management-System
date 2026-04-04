@@ -59,9 +59,7 @@ async def update_user(
 ) -> Any:
     """Update a user's profile (admin only)."""
     service = UserService(session)
-    return await service.update_user(
-        user_id, current_user["tenant_id"], data
-    )
+    return await service.update_user(user_id, current_user["tenant_id"], data)
 
 
 @router.delete(
