@@ -101,11 +101,11 @@ export default function SettingsPage() {
   // Delivery – derive initial value from API
   const initialZonesData = useMemo(() => {
     if (zonesQuery.data && Array.isArray(zonesQuery.data)) {
-      return zonesQuery.data.map((z: Record<string, unknown>, i: number) => ({
+      return zonesQuery.data.map((z, i) => ({
         id: i,
-        name: (z.name as string) ?? '',
+        name: z.name ?? '',
         fee: Number(z.delivery_fee) ?? 0,
-        estimatedTime: (z.description as string) ?? '',
+        estimatedTime: z.description ?? '',
       }));
     }
     return initialZones.map((z, i) => ({ ...z, id: i }));
@@ -137,12 +137,12 @@ export default function SettingsPage() {
   // Notifications – derive initial value from API
   const initialTemplates = useMemo(() => {
     if (templatesQuery.data && Array.isArray(templatesQuery.data)) {
-      return templatesQuery.data.map((t: Record<string, unknown>) => ({
-        id: (t.id as string) ?? '',
-        name: (t.event_type as string) ?? '',
-        snippet: ((t.body_template as string) ?? '').substring(0, 60) + '...',
-        subject: (t.subject as string) ?? '',
-        body: (t.body_template as string) ?? '',
+      return templatesQuery.data.map((t) => ({
+        id: t.id ?? '',
+        name: t.event_type ?? '',
+        snippet: (t.body_template ?? '').substring(0, 60) + '...',
+        subject: t.subject ?? '',
+        body: t.body_template ?? '',
       }));
     }
     return defaultTemplates;
@@ -166,17 +166,17 @@ export default function SettingsPage() {
 
   // Zone editing handlers
   function handleZoneFeeChange(idx: number, fee: number) {
-    setZones((prev) => prev.map((z, i) => (i === idx ? { ...z, fee } : z)));
+    setZones((prev) => (prev ?? []).map((z, i) => (i === idx ? { ...z, fee } : z)));
   }
 
   function handleRemoveZone(idx: number) {
-    setZones((prev) => prev.filter((_, i) => i !== idx));
+    setZones((prev) => (prev ?? []).filter((_, i) => i !== idx));
     showToast('Zone removed');
   }
 
   function handleAddZone() {
     if (!newZone.name.trim()) return;
-    setZones((prev) => [...prev, { ...newZone, id: Date.now() }]);
+    setZones((prev) => [...(prev ?? []), { ...newZone, id: Date.now() }]);
     setNewZone({ name: '', fee: 0, estimatedTime: '' });
     setShowAddZone(false);
     showToast('Zone added');
@@ -192,7 +192,7 @@ export default function SettingsPage() {
   async function handleSaveTemplate() {
     if (!editingTemplate) return;
     setTemplates((prev) =>
-      prev.map((t) =>
+      (prev ?? []).map((t) =>
         t.id === editingTemplate.id
           ? { ...t, subject: templateForm.subject, body: templateForm.body, snippet: templateForm.body.substring(0, 60) + '...' }
           : t
@@ -315,7 +315,7 @@ export default function SettingsPage() {
                   <input
                     type="text"
                     value={general.businessName}
-                    onChange={(e) => setGeneral((g) => ({ ...g, businessName: e.target.value }))}
+                    onChange={(e) => setGeneral((g) => ({ ...g!, businessName: e.target.value }))}
                     className="w-full rounded-lg px-3 py-2 text-sm"
                     style={{ border: '1px solid #E5E7EB', color: '#1A1A2E' }}
                   />
@@ -338,7 +338,7 @@ export default function SettingsPage() {
                     <input
                       type="email"
                       value={general.email}
-                      onChange={(e) => setGeneral((g) => ({ ...g, email: e.target.value }))}
+                      onChange={(e) => setGeneral((g) => ({ ...g!, email: e.target.value }))}
                       className="w-full rounded-lg px-3 py-2 text-sm"
                       style={{ border: '1px solid #E5E7EB', color: '#1A1A2E' }}
                     />
@@ -348,7 +348,7 @@ export default function SettingsPage() {
                     <input
                       type="text"
                       value={general.phone}
-                      onChange={(e) => setGeneral((g) => ({ ...g, phone: e.target.value }))}
+                      onChange={(e) => setGeneral((g) => ({ ...g!, phone: e.target.value }))}
                       className="w-full rounded-lg px-3 py-2 text-sm"
                       style={{ border: '1px solid #E5E7EB', color: '#1A1A2E' }}
                     />
@@ -358,7 +358,7 @@ export default function SettingsPage() {
                   <label className="mb-1 block text-sm font-medium" style={{ color: '#1A1A2E' }}>Business Address</label>
                   <textarea
                     value={general.address}
-                    onChange={(e) => setGeneral((g) => ({ ...g, address: e.target.value }))}
+                    onChange={(e) => setGeneral((g) => ({ ...g!, address: e.target.value }))}
                     rows={3}
                     className="w-full rounded-lg px-3 py-2 text-sm"
                     style={{ border: '1px solid #E5E7EB', color: '#1A1A2E' }}

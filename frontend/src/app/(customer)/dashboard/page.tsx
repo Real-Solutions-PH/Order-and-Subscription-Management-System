@@ -39,6 +39,7 @@ import {
 } from "@/lib/mock-data";
 import { useToast } from "@/context/ToastContext";
 import { useAuth, useOrders } from "@/hooks";
+import RequireAuth from "@/components/RequireAuth";
 import { SkeletonCard } from "@/components/ui/skeleton";
 import {
   Select,
@@ -128,6 +129,7 @@ export default function DashboardPage() {
   };
 
   return (
+    <RequireAuth>
     <div
       className="h-screen overflow-hidden"
       style={{ backgroundColor: "#FEFAE0" }}
@@ -988,6 +990,7 @@ export default function DashboardPage() {
         </Modal>
       </div>
     </div>
+    </RequireAuth>
   );
 }
 

@@ -19,6 +19,7 @@ import { orders, formatPeso } from '@/lib/mock-data';
 import { useToast } from '@/context/ToastContext';
 import { useOrders } from '@/hooks';
 import { Skeleton } from '@/components/ui/skeleton';
+import RequireAuth from '@/components/RequireAuth';
 
 const timelineSteps = [
   { label: 'Placed', icon: Package, status: 'completed' as const },
@@ -72,6 +73,7 @@ export default function OrderConfirmationPage() {
   };
 
   return (
+    <RequireAuth>
     <div className="min-h-screen" style={{ backgroundColor: '#FEFAE0' }}>
       <div className="max-w-3xl mx-auto px-4 py-12">
         {isLoadingOrder ? (
@@ -319,5 +321,6 @@ export default function OrderConfirmationPage() {
         )}
       </div>
     </div>
+    </RequireAuth>
   );
 }

@@ -24,7 +24,12 @@ export function useAuth() {
   });
 
   const registerMutation = useMutation({
-    mutationFn: (data: RegisterRequest) => api.auth.register(data),
+    mutationFn: async (data: RegisterRequest) => {
+      // Backend register returns UserResponse, not tokens.
+      // Chain a login call to get tokens after successful registration.
+      await api.auth.register(data);
+      return api.auth.login({ email: data.email, password: data.password });
+    },
     onSuccess: (res) => {
       setAccessToken(res.access_token);
       setRefreshToken(res.refresh_token);

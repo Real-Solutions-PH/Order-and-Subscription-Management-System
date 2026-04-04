@@ -45,8 +45,13 @@ export function setRefreshToken(token: string | null) {
   }
 }
 
+export function clearTokens() {
+  setAccessToken(null);
+  setRefreshToken(null);
+}
+
 // ---------------------------------------------------------------------------
-// Core fetch wrapper
+// Core fetch wrapper with automatic token refresh
 // ---------------------------------------------------------------------------
 export class ApiError extends Error {
   constructor(public status: number, public detail: string) {
@@ -55,10 +60,15 @@ export class ApiError extends Error {
   }
 }
 
-async function request<T>(
-  path: string,
-  options: RequestInit = {},
-): Promise<T> {
+let isRefreshing = false;
+let refreshSubscribers: Array<(token: string) => void> = [];
+
+function onTokenRefreshed(newToken: string) {
+  refreshSubscribers.forEach((cb) => cb(newToken));
+  refreshSubscribers = [];
+}
+
+function buildHeaders(options: RequestInit = {}): Record<string, string> {
   const token = getAccessToken();
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -68,19 +78,90 @@ async function request<T>(
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
   }
+  return headers;
+}
+
+async function handleResponse<T>(res: Response): Promise<T> {
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({ detail: res.statusText }));
+    throw new ApiError(res.status, body.detail ?? res.statusText);
+  }
+  if (res.status === 204) return undefined as T;
+  return res.json();
+}
+
+async function retryWithToken<T>(
+  path: string,
+  options: RequestInit,
+  newToken: string,
+): Promise<T> {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    'X-Tenant-ID': TENANT_ID,
+    ...(options.headers as Record<string, string> ?? {}),
+    Authorization: `Bearer ${newToken}`,
+  };
+  const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
+  return handleResponse<T>(res);
+}
+
+async function request<T>(
+  path: string,
+  options: RequestInit = {},
+): Promise<T> {
+  const headers = buildHeaders(options);
 
   const res = await fetch(`${API_BASE}${path}`, {
     ...options,
     headers,
   });
 
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({ detail: res.statusText }));
-    throw new ApiError(res.status, body.detail ?? res.statusText);
+  // Attempt token refresh on 401 (skip for auth endpoints to avoid loops)
+  if (res.status === 401 && !path.startsWith('/auth/')) {
+    const refreshToken = getRefreshToken();
+    if (!refreshToken) {
+      clearTokens();
+      throw new ApiError(401, 'Session expired');
+    }
+
+    if (!isRefreshing) {
+      isRefreshing = true;
+      try {
+        const tokenRes = await fetch(`${API_BASE}/auth/refresh`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-Tenant-ID': TENANT_ID },
+          body: JSON.stringify({ refresh_token: refreshToken }),
+        });
+        if (!tokenRes.ok) {
+          throw new Error('Refresh failed');
+        }
+        const tokens = await tokenRes.json();
+        setAccessToken(tokens.access_token);
+        setRefreshToken(tokens.refresh_token);
+        isRefreshing = false;
+        onTokenRefreshed(tokens.access_token);
+        return retryWithToken<T>(path, options, tokens.access_token);
+      } catch {
+        isRefreshing = false;
+        refreshSubscribers = [];
+        clearTokens();
+        throw new ApiError(401, 'Session expired');
+      }
+    } else {
+      // Another request is already refreshing; queue this one
+      return new Promise<T>((resolve, reject) => {
+        refreshSubscribers.push(async (newToken) => {
+          try {
+            resolve(await retryWithToken<T>(path, options, newToken));
+          } catch (err) {
+            reject(err);
+          }
+        });
+      });
+    }
   }
 
-  if (res.status === 204) return undefined as T;
-  return res.json();
+  return handleResponse<T>(res);
 }
 
 function get<T>(path: string, params?: Record<string, string | number | undefined>) {

@@ -18,6 +18,7 @@ import { planTiers, formatPeso } from '@/lib/mock-data';
 import { useSubscriptionPlans, useSubscriptionMutations } from '@/hooks';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/context/ToastContext';
+import RequireAuth from '@/components/RequireAuth';
 
 export default function SubscriptionPage() {
   const { showToast } = useToast();
@@ -106,6 +107,7 @@ export default function SubscriptionPage() {
     : planTiers;
 
   return (
+    <RequireAuth>
     <div className="min-h-screen" style={{ backgroundColor: '#FEFAE0' }}>
       <div className="max-w-3xl mx-auto px-4 py-8">
         {/* Header */}
@@ -754,5 +756,6 @@ export default function SubscriptionPage() {
         </div>
       </div>
     </div>
+    </RequireAuth>
   );
 }
