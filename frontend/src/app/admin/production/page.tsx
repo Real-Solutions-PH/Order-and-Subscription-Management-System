@@ -10,8 +10,8 @@ import {
   Package,
   AlertTriangle,
 } from 'lucide-react';
-import { orders, meals, formatPeso } from '@/lib/mock-data';
-import { useProductionReport, useOrders } from '@/hooks';
+import { orders, meals } from '@/lib/mock-data';
+import { useProductionReport } from '@/hooks';
 import { Skeleton, SkeletonRow } from '@/components/ui/skeleton';
 
 const ingredientData = [
@@ -77,7 +77,6 @@ export default function ProductionPage() {
   const [expandedMeals, setExpandedMeals] = useState<Set<number>>(new Set());
 
   const productionQuery = useProductionReport(selectedDate);
-  const ordersQuery = useOrders({ status: 'confirmed' });
   const isLoadingProduction = productionQuery.isLoading;
 
   // If API data is available, use it; otherwise fall back to mock-derived data

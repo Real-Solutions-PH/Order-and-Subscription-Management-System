@@ -13,15 +13,14 @@ import {
   MessageSquare,
   ChevronUp,
   ChevronDown,
-  Plus,
 } from 'lucide-react';
 import { customers, orders, formatPeso } from '@/lib/mock-data';
 import type { Customer } from '@/lib/mock-data';
 import StatusBadge from '@/components/StatusBadge';
 import Modal from '@/components/Modal';
 import { useToast } from '@/context/ToastContext';
-import { useUsers, useOrders, useNotificationMutations } from '@/hooks';
-import { Skeleton, SkeletonRow } from '@/components/ui/skeleton';
+import { useUsers, useNotificationMutations } from '@/hooks';
+import { SkeletonRow } from '@/components/ui/skeleton';
 
 type Segment = 'all' | 'active' | 'paused' | 'at_risk' | 'churned' | 'vip';
 type SortKey = 'name' | 'email' | 'phone' | 'planType' | 'status' | 'ltv' | 'lastOrder' | 'joinDate';
@@ -55,12 +54,11 @@ export default function CustomersPage() {
 
   // TanStack Query hooks
   const usersQuery = useUsers();
-  const ordersQuery = useOrders();
   const isLoadingCustomers = usersQuery.isLoading;
-  const { sendNotification, isSending } = useNotificationMutations();
+  const { sendNotification } = useNotificationMutations();
 
   // Map API users to Customer format, falling back to mock data
-  const displayCustomers: Customer[] = usersQuery.data?.items?.map((u: any) => ({
+  const displayCustomers: Customer[] = usersQuery.data?.items?.map((u: Record<string, unknown>) => ({
     id: 0,
     name: `${u.first_name} ${u.last_name}`,
     email: u.email,

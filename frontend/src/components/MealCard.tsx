@@ -20,6 +20,7 @@ export default function MealCard({ meal, onAdd, compact = false }: MealCardProps
     >
       {/* Image */}
       <div className="relative" style={{ aspectRatio: '16/9' }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={meal.image}
           alt={meal.name}

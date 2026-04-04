@@ -37,8 +37,8 @@ export default function CheckoutPage() {
 
   // API hooks
   const { data: apiZones, isLoading: isLoadingZones } = useDeliveryZones();
-  const { validatePromo, isValidatingPromo } = usePaymentMutations();
-  const { checkout, isCheckingOut } = useOrderMutations();
+  const { validatePromo } = usePaymentMutations();
+  const { checkout } = useOrderMutations();
 
   // Map API zones to the existing format, fall back to mock data on error/loading
   const deliveryZones = useMemo(() => {
@@ -323,6 +323,7 @@ export default function CheckoutPage() {
                   key={item.meal.id}
                   className="flex items-center gap-4 rounded-xl p-3 transition-colors hover:bg-gray-50"
                 >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={item.meal.image}
                     alt={item.meal.name}

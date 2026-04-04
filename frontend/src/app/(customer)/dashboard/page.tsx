@@ -9,7 +9,6 @@ import {
   ArrowRightLeft,
   UtensilsCrossed,
   ChevronRight,
-  ChevronDown,
   RefreshCw,
   MapPin,
   CreditCard,
@@ -40,7 +39,7 @@ import {
 } from "@/lib/mock-data";
 import { useToast } from "@/context/ToastContext";
 import { useAuth, useOrders } from "@/hooks";
-import { Skeleton, SkeletonCard } from "@/components/ui/skeleton";
+import { SkeletonCard } from "@/components/ui/skeleton";
 import {
   Select,
   SelectContent,
@@ -1698,6 +1697,7 @@ function EditMealsModalContent({
                   backgroundColor: isSelected ? "#F0FDF4" : "#FFFFFF",
                 }}
               >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={meal.image}
                   alt={meal.name}

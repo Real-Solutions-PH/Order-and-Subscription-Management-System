@@ -11,7 +11,6 @@ import {
   Plus,
   Star,
   Zap,
-  Calendar,
   Clock,
   ShoppingBag,
 } from 'lucide-react';
@@ -450,6 +449,7 @@ export default function MealPlanPage() {
                         )}
 
                         <div className="relative" style={{ aspectRatio: '16/10' }}>
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
                             src={meal.image}
                             alt={meal.name}
@@ -564,6 +564,7 @@ export default function MealPlanPage() {
                             className="flex w-full items-center justify-between p-4 text-left"
                           >
                             <div className="flex items-center gap-3">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
                               <img
                                 src={sm.meal.image}
                                 alt={sm.meal.name}

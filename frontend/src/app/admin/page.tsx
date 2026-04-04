@@ -134,13 +134,32 @@ const renderCustomLabel = ({ cx, cy }: { cx: number; cy: number }) => {
 
 type Tab = "overview" | "subscriptions" | "operations";
 
+type SortKey =
+  | "name"
+  | "sold"
+  | "costPerUnit"
+  | "marginPct"
+  | "revenue"
+  | "pricePerUnit"
+  | "cookMins"
+  | "packMins";
+
+function SortIcon({ column, sortConfig }: { column: SortKey; sortConfig: { key: SortKey; direction: "asc" | "desc" } }) {
+  if (sortConfig.key !== column) return <div className="w-4" />;
+  return sortConfig.direction === "asc" ? (
+    <ChevronUp size={14} />
+  ) : (
+    <ChevronDown size={14} />
+  );
+}
+
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<Tab>("overview");
 
   // ─── TanStack Query hooks ───
   const dashboardQuery = useDashboardMetrics();
   const mrrQuery = useMRRBreakdown();
-  const popularQuery = usePopularItems(10);
+  usePopularItems(10);
   const cohortsQuery = useCohorts();
   const ordersQuery = useOrders();
 
@@ -303,15 +322,6 @@ export default function AdminDashboard() {
   ];
 
   // Sorting state for Menu Contribution table
-  type SortKey =
-    | "name"
-    | "sold"
-    | "costPerUnit"
-    | "marginPct"
-    | "revenue"
-    | "pricePerUnit"
-    | "cookMins"
-    | "packMins";
   const [sortConfig, setSortConfig] = useState<{
     key: SortKey;
     direction: "asc" | "desc";
@@ -322,7 +332,7 @@ export default function AdminDashboard() {
 
   const sortedContribution = useMemo(() => {
     const sortableData = [...displayAnalytics.menuContribution];
-    sortableData.sort((a: any, b: any) => {
+    sortableData.sort((a: Record<string, number | string>, b: Record<string, number | string>) => {
       if (a[sortConfig.key] < b[sortConfig.key]) {
         return sortConfig.direction === "asc" ? -1 : 1;
       }
@@ -339,15 +349,6 @@ export default function AdminDashboard() {
       key,
       direction: prev.key === key && prev.direction === "desc" ? "asc" : "desc",
     }));
-  };
-
-  const SortIcon = ({ column }: { column: SortKey }) => {
-    if (sortConfig.key !== column) return <div className="w-4" />;
-    return sortConfig.direction === "asc" ? (
-      <ChevronUp size={14} />
-    ) : (
-      <ChevronDown size={14} />
-    );
   };
 
   // Count orders by status
@@ -491,7 +492,7 @@ export default function AdminDashboard() {
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
-              {orderStatuses.map((s, idx) => {
+              {orderStatuses.map((s) => {
                 const colors = statusColors[s.key];
                 const Icon = s.icon;
                 const count = statusCounts[s.key] || 0;
@@ -823,28 +824,28 @@ export default function AdminDashboard() {
                   <tr style={{ borderBottom: "2px solid #E5E7EB" }}>
                     <th className="px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: "#6B7280" }}>#</th>
                     <th className="cursor-pointer px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-wider transition-colors hover:bg-gray-50" onClick={() => handleSort("name")} style={{ color: "#6B7280" }}>
-                      <div className="flex items-center gap-1">Meal <SortIcon column="name" /></div>
+                      <div className="flex items-center gap-1">Meal <SortIcon column="name" sortConfig={sortConfig} /></div>
                     </th>
                     <th className="cursor-pointer px-3 py-2.5 text-right text-xs font-semibold uppercase tracking-wider transition-colors hover:bg-gray-50" onClick={() => handleSort("sold")} style={{ color: "#6B7280" }}>
-                      <div className="flex items-center justify-end gap-1">Sold <SortIcon column="sold" /></div>
+                      <div className="flex items-center justify-end gap-1">Sold <SortIcon column="sold" sortConfig={sortConfig} /></div>
                     </th>
                     <th className="cursor-pointer px-3 py-2.5 text-right text-xs font-semibold uppercase tracking-wider transition-colors hover:bg-gray-50" onClick={() => handleSort("pricePerUnit")} style={{ color: "#6B7280" }}>
-                      <div className="flex items-center justify-end gap-1">AOV <SortIcon column="pricePerUnit" /></div>
+                      <div className="flex items-center justify-end gap-1">AOV <SortIcon column="pricePerUnit" sortConfig={sortConfig} /></div>
                     </th>
                     <th className="cursor-pointer px-3 py-2.5 text-right text-xs font-semibold uppercase tracking-wider transition-colors hover:bg-gray-50" onClick={() => handleSort("costPerUnit")} style={{ color: "#6B7280" }}>
-                      <div className="flex items-center justify-end gap-1">COGS <SortIcon column="costPerUnit" /></div>
+                      <div className="flex items-center justify-end gap-1">COGS <SortIcon column="costPerUnit" sortConfig={sortConfig} /></div>
                     </th>
                     <th className="cursor-pointer px-3 py-2.5 text-right text-xs font-semibold uppercase tracking-wider transition-colors hover:bg-gray-50" onClick={() => handleSort("marginPct")} style={{ color: "#6B7280" }}>
-                      <div className="flex items-center justify-end gap-1">Gross Margin <SortIcon column="marginPct" /></div>
+                      <div className="flex items-center justify-end gap-1">Gross Margin <SortIcon column="marginPct" sortConfig={sortConfig} /></div>
                     </th>
                     <th className="cursor-pointer px-3 py-2.5 text-right text-xs font-semibold uppercase tracking-wider transition-colors hover:bg-gray-50" onClick={() => handleSort("revenue")} style={{ color: "#6B7280" }}>
-                      <div className="flex items-center justify-end gap-1">Revenue <SortIcon column="revenue" /></div>
+                      <div className="flex items-center justify-end gap-1">Revenue <SortIcon column="revenue" sortConfig={sortConfig} /></div>
                     </th>
                     <th className="cursor-pointer px-3 py-2.5 text-right text-xs font-semibold uppercase tracking-wider transition-colors hover:bg-gray-50" onClick={() => handleSort("cookMins")} style={{ color: "#6B7280" }}>
-                      <div className="flex items-center justify-end gap-1">Cook <SortIcon column="cookMins" /></div>
+                      <div className="flex items-center justify-end gap-1">Cook <SortIcon column="cookMins" sortConfig={sortConfig} /></div>
                     </th>
                     <th className="cursor-pointer px-3 py-2.5 text-right text-xs font-semibold uppercase tracking-wider transition-colors hover:bg-gray-50" onClick={() => handleSort("packMins")} style={{ color: "#6B7280" }}>
-                      <div className="flex items-center justify-end gap-1">Pack <SortIcon column="packMins" /></div>
+                      <div className="flex items-center justify-end gap-1">Pack <SortIcon column="packMins" sortConfig={sortConfig} /></div>
                     </th>
                   </tr>
                 </thead>
@@ -1254,7 +1255,7 @@ export default function AdminDashboard() {
                         borderRadius: 8,
                         fontSize: 12,
                       }}
-                      formatter={(value: any) => [
+                      formatter={(value: number | string) => [
                         formatPeso(Number(value)),
                         "LTV",
                       ]}

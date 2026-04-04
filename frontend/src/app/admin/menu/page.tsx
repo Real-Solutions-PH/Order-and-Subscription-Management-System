@@ -18,7 +18,7 @@ import type { Meal } from '@/lib/mock-data';
 import Modal from '@/components/Modal';
 import { useToast } from '@/context/ToastContext';
 import { useProducts, useProductMutations } from '@/hooks';
-import { Skeleton, SkeletonMealCard } from '@/components/ui/skeleton';
+import { SkeletonMealCard } from '@/components/ui/skeleton';
 import type { ProductResponse } from '@/lib/api-client';
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -128,7 +128,7 @@ export default function MenuManagementPage() {
     );
   }, [searchQuery, mealsData]);
 
-  const getMealById = (id: number) => mealsData.find((m) => m.id === id);
+  const getMealById = useCallback((id: number) => mealsData.find((m) => m.id === id), [mealsData]);
 
   // --- Drag and Drop ---
   const handleDragStart = useCallback((e: DragEvent, mealId: number, sourceDay?: string) => {
@@ -183,7 +183,7 @@ export default function MenuManagementPage() {
     } catch {
       // ignore invalid drag data
     }
-  }, [showToast]);
+  }, [showToast, getMealById]);
 
   // Remove meal from day
   function handleRemoveFromDay(day: string, mealId: number) {
@@ -355,6 +355,7 @@ export default function MenuManagementPage() {
                               onClick={() => openMealEditor(meal)}
                               className="w-full text-left"
                             >
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
                               <img
                                 src={meal.image}
                                 alt={meal.name}
@@ -434,6 +435,7 @@ export default function MenuManagementPage() {
                   <div className="flex flex-shrink-0 items-center self-center">
                     <GripVertical size={14} style={{ color: '#D1D5DB' }} />
                   </div>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={meal.image}
                     alt={meal.name}
@@ -587,6 +589,7 @@ export default function MenuManagementPage() {
             <div className="flex items-start gap-4">
               {editForm.image && (
                 <div className="relative h-24 w-32 flex-shrink-0 overflow-hidden rounded-lg shadow-sm" style={{ border: '1px solid #E5E7EB' }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={editForm.image} alt="Meal preview" className="h-full w-full object-cover" />
                 </div>
               )}

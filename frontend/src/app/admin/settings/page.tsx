@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import {
   Settings,
@@ -13,7 +13,6 @@ import {
   Plus,
   Trash2,
   Eye,
-  X,
 } from 'lucide-react';
 import { deliveryZones as initialZones, paymentMethods as initialPaymentMethods } from '@/lib/mock-data';
 import Modal from '@/components/Modal';
@@ -77,44 +76,43 @@ export default function SettingsPage() {
   const isLoadingSettings = tenantQuery.isLoading;
   const tenantConfig = tenantQuery.data;
 
-  // General
-  const [general, setGeneral] = useState({
-    businessName: 'PrepFlow Kitchen',
-    email: 'hello@prepflow.ph',
-    phone: '+63 917 000 1234',
-    address: '15th Floor, Tower One, Ayala Triangle, Makati City 1226',
-  });
-
-  // Sync general settings from API when available
-  useEffect(() => {
+  // General – derive initial value from API, keep editable via setState
+  const initialGeneral = useMemo(() => {
     if (tenantConfig) {
       const meta = (tenantConfig.operating_hours ?? {}) as Record<string, string>;
-      setGeneral({
+      return {
         businessName: tenantConfig.business_name ?? 'PrepFlow Kitchen',
         email: meta.contact_email ?? 'hello@prepflow.ph',
         phone: meta.contact_phone ?? '+63 917 000 1234',
         address: meta.business_address ?? '15th Floor, Tower One, Ayala Triangle, Makati City 1226',
-      });
+      };
     }
+    return {
+      businessName: 'PrepFlow Kitchen',
+      email: 'hello@prepflow.ph',
+      phone: '+63 917 000 1234',
+      address: '15th Floor, Tower One, Ayala Triangle, Makati City 1226',
+    };
   }, [tenantConfig]);
+  const [generalOverride, setGeneralOverride] = useState<typeof initialGeneral | null>(null);
+  const general = generalOverride ?? initialGeneral;
+  const setGeneral = setGeneralOverride;
 
-  // Delivery
-  const [zones, setZones] = useState(initialZones.map((z, i) => ({ ...z, id: i })));
-
-  // Sync delivery zones from API when available
-  useEffect(() => {
+  // Delivery – derive initial value from API
+  const initialZonesData = useMemo(() => {
     if (zonesQuery.data && Array.isArray(zonesQuery.data)) {
-      setZones(
-        zonesQuery.data.map((z, i) => ({
-          id: i,
-          name: z.name ?? '',
-          fee: Number(z.delivery_fee) ?? 0,
-          estimatedTime: z.description ?? '',
-        }))
-      );
+      return zonesQuery.data.map((z: Record<string, unknown>, i: number) => ({
+        id: i,
+        name: (z.name as string) ?? '',
+        fee: Number(z.delivery_fee) ?? 0,
+        estimatedTime: (z.description as string) ?? '',
+      }));
     }
+    return initialZones.map((z, i) => ({ ...z, id: i }));
   }, [zonesQuery.data]);
-  const [editingZone, setEditingZone] = useState<number | null>(null);
+  const [zonesOverride, setZonesOverride] = useState<typeof initialZonesData | null>(null);
+  const zones = zonesOverride ?? initialZonesData;
+  const setZones = setZonesOverride;
   const [newZone, setNewZone] = useState({ name: '', fee: 0, estimatedTime: '' });
   const [showAddZone, setShowAddZone] = useState(false);
   const [cutoffs, setCutoffs] = useState<Record<string, { day: string; time: string }>>(cutoffDefaults);
@@ -136,23 +134,22 @@ export default function SettingsPage() {
     setPaymentMethodsConfig(prev => prev.map(m => m.id === id ? { ...m, [field]: value } : m));
   };
 
-  // Notifications
-  const [templates, setTemplates] = useState(defaultTemplates);
-
-  // Sync notification templates from API when available
-  useEffect(() => {
+  // Notifications – derive initial value from API
+  const initialTemplates = useMemo(() => {
     if (templatesQuery.data && Array.isArray(templatesQuery.data)) {
-      setTemplates(
-        templatesQuery.data.map((t) => ({
-          id: t.id ?? '',
-          name: t.event_type ?? '',
-          snippet: (t.body_template ?? '').substring(0, 60) + '...',
-          subject: t.subject ?? '',
-          body: t.body_template ?? '',
-        }))
-      );
+      return templatesQuery.data.map((t: Record<string, unknown>) => ({
+        id: (t.id as string) ?? '',
+        name: (t.event_type as string) ?? '',
+        snippet: ((t.body_template as string) ?? '').substring(0, 60) + '...',
+        subject: (t.subject as string) ?? '',
+        body: (t.body_template as string) ?? '',
+      }));
     }
+    return defaultTemplates;
   }, [templatesQuery.data]);
+  const [templatesOverride, setTemplatesOverride] = useState<typeof initialTemplates | null>(null);
+  const templates = templatesOverride ?? initialTemplates;
+  const setTemplates = setTemplatesOverride;
   const [editingTemplate, setEditingTemplate] = useState<typeof defaultTemplates[0] | null>(null);
   const [templateForm, setTemplateForm] = useState({ subject: '', body: '' });
   const [previewTemplate, setPreviewTemplate] = useState(false);

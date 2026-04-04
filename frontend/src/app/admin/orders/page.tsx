@@ -24,7 +24,7 @@ import { orders, customers, formatPeso } from '@/lib/mock-data';
 import type { Order } from '@/lib/mock-data';
 import StatusBadge from '@/components/StatusBadge';
 import { useOrders, useOrderMutations } from '@/hooks';
-import { Skeleton, SkeletonRow } from '@/components/ui/skeleton';
+import { SkeletonRow } from '@/components/ui/skeleton';
 
 type StatusTab =
   | 'all'
@@ -57,6 +57,15 @@ const timelineSteps = [
   { key: 'delivered', label: 'Delivered' },
 ];
 
+function SortIcon({ field, sortField, sortDirection }: { field: SortField; sortField: SortField; sortDirection: SortDirection }) {
+  if (sortField !== field) return null;
+  return sortDirection === 'asc' ? (
+    <ChevronUp size={14} />
+  ) : (
+    <ChevronDown size={14} />
+  );
+}
+
 function getTimelineIndex(status: string): number {
   const map: Record<string, number> = {
     new: 1,
@@ -85,18 +94,18 @@ export default function OrdersPage() {
   const { updateStatus, isUpdatingStatus } = useOrderMutations();
   const isLoadingOrders = ordersQuery.isLoading;
 
-  const displayOrders = ordersQuery.data?.items?.map((o: any) => ({
+  const displayOrders = ordersQuery.data?.items?.map((o: Record<string, unknown> & { order_number: string; items: Array<Record<string, unknown>>; total: string | number; status: string; delivered_at?: string; placed_at?: string; created_at: string; notes?: string }) => ({
     id: o.order_number,
     customerId: 0,
-    customerName: o.items[0]?.product_name ?? 'Customer',
-    items: o.items.map((i: any) => ({
+    customerName: (o.items[0]?.product_name as string) ?? 'Customer',
+    items: o.items.map((i: Record<string, unknown>) => ({
       mealId: 0,
-      mealName: i.product_name,
-      quantity: i.quantity,
+      mealName: i.product_name as string,
+      quantity: i.quantity as number,
       price: Number(i.unit_price),
     })),
     total: Number(o.total),
-    status: o.status as any,
+    status: o.status as Order['status'],
     deliveryDate: o.delivered_at ?? o.placed_at ?? o.created_at,
     deliverySlot: '',
     paymentMethod: '',
@@ -108,7 +117,7 @@ export default function OrdersPage() {
 
   const tabCounts = useMemo(() => {
     const counts: Record<string, number> = { all: displayOrders.length };
-    displayOrders.forEach((o: any) => {
+    displayOrders.forEach((o: { status: string }) => {
       counts[o.status] = (counts[o.status] || 0) + 1;
     });
     return counts;
@@ -207,19 +216,6 @@ export default function OrdersPage() {
     }));
     setInternalNote('');
   }
-
-  const SortIcon = ({
-    field,
-  }: {
-    field: SortField;
-  }) => {
-    if (sortField !== field) return null;
-    return sortDirection === 'asc' ? (
-      <ChevronUp size={14} />
-    ) : (
-      <ChevronDown size={14} />
-    );
-  };
 
   const selectedCustomer = selectedOrder
     ? customers.find((c) => c.id === selectedOrder.customerId)
@@ -484,7 +480,7 @@ export default function OrdersPage() {
                     onClick={() => toggleSort('total')}
                   >
                     <span className="inline-flex items-center gap-1">
-                      Total <SortIcon field="total" />
+                      Total <SortIcon field="total" sortField={sortField} sortDirection={sortDirection} />
                     </span>
                   </th>
                   <th
@@ -499,7 +495,7 @@ export default function OrdersPage() {
                     onClick={() => toggleSort('deliveryDate')}
                   >
                     <span className="inline-flex items-center gap-1">
-                      Delivery Date <SortIcon field="deliveryDate" />
+                      Delivery Date <SortIcon field="deliveryDate" sortField={sortField} sortDirection={sortDirection} />
                     </span>
                   </th>
                   <th
@@ -548,7 +544,7 @@ export default function OrdersPage() {
                         {order.customerName}
                       </td>
                       <td className="px-4 py-3" style={{ color: '#6B7280' }}>
-                        {order.items.reduce((s: number, i: any) => s + i.quantity, 0)} items
+                        {order.items.reduce((s: number, i: { quantity: number }) => s + i.quantity, 0)} items
                       </td>
                       <td
                         className="px-4 py-3 font-medium"
