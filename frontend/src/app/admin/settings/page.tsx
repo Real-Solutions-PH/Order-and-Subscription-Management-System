@@ -18,6 +18,7 @@ import {
 import { deliveryZones as initialZones, paymentMethods as initialPaymentMethods } from '@/lib/mock-data';
 import Modal from '@/components/Modal';
 import { useToast } from '@/context/ToastContext';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 type TabKey = 'general' | 'delivery' | 'payments' | 'notifications' | 'tax' | 'team';
 
@@ -81,14 +82,21 @@ export default function SettingsPage() {
   const [cutoffs, setCutoffs] = useState<Record<string, { day: string; time: string }>>(cutoffDefaults);
 
   // Payments
-  const [paymentEnabled, setPaymentEnabled] = useState<Record<string, boolean>>({
-    gcash: true,
-    maya: true,
-    grabpay: true,
-    card: true,
-    cod: false,
-  });
+  const [paymentMethodsConfig, setPaymentMethodsConfig] = useState(
+    initialPaymentMethods.map(m => ({
+      ...m,
+      enabled: ['gcash', 'maya', 'grabpay', 'card'].includes(m.id),
+      qrCode: '',
+      accountNumber: '',
+      displayName: m.name,
+      email: ''
+    }))
+  );
   const [minOrder, setMinOrder] = useState(500);
+
+  const updatePaymentMethod = (id: string, field: string, value: string | boolean) => {
+    setPaymentMethodsConfig(prev => prev.map(m => m.id === id ? { ...m, [field]: value } : m));
+  };
 
   // Notifications
   const [templates, setTemplates] = useState(defaultTemplates);
@@ -422,16 +430,19 @@ export default function SettingsPage() {
                       <div key={day} className="flex flex-wrap items-center gap-3 rounded-lg p-3" style={{ border: '1px solid #E5E7EB' }}>
                         <span className="w-24 text-sm font-medium" style={{ color: '#1A1A2E' }}>{day} deliveries:</span>
                         <span className="text-sm" style={{ color: '#6B7280' }}>cutoff</span>
-                        <select
+                        <Select
                           value={cutoffs[day]?.day || ''}
-                          onChange={(e) => setCutoffs((c) => ({ ...c, [day]: { ...c[day], day: e.target.value } }))}
-                          className="rounded-lg px-3 py-1.5 text-sm"
-                          style={{ border: '1px solid #E5E7EB', color: '#1A1A2E' }}
+                          onValueChange={(value) => setCutoffs((c) => ({ ...c, [day]: { ...c[day], day: value } }))}
                         >
-                          {dayOptions.map((d) => (
-                            <option key={d} value={d}>{d}</option>
-                          ))}
-                        </select>
+                          <SelectTrigger className="w-[140px] bg-white text-sm">
+                            <SelectValue placeholder="Select day" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {dayOptions.map((d) => (
+                              <SelectItem key={d} value={d}>{d}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                         <input
                           type="time"
                           value={cutoffs[day]?.time || '18:00'}
@@ -458,22 +469,76 @@ export default function SettingsPage() {
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
                 <h2 className="text-lg font-semibold" style={{ color: '#1A1A2E' }}>Payment Methods</h2>
                 <div className="space-y-3">
-                  {initialPaymentMethods.map((method) => (
-                    <div key={method.id} className="flex items-center justify-between rounded-lg p-4" style={{ border: '1px solid #E5E7EB' }}>
-                      <div className="flex items-center gap-3">
-                        <span className="text-2xl">{method.icon}</span>
-                        <span className="text-sm font-medium" style={{ color: '#1A1A2E' }}>{method.name}</span>
+                  {paymentMethodsConfig.map((method) => (
+                    <div key={method.id} className="rounded-lg p-4 transition-all" style={{ border: '1px solid #E5E7EB', backgroundColor: method.enabled ? '#FFFFFF' : '#F9FAFB' }}>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <span className="text-2xl">{method.icon}</span>
+                          <span className="text-sm font-medium" style={{ color: '#1A1A2E' }}>{method.name}</span>
+                        </div>
+                        <button
+                          onClick={() => updatePaymentMethod(method.id, 'enabled', !method.enabled)}
+                          className="relative flex h-6 w-11 shrink-0 items-center rounded-full transition-colors"
+                          style={{ backgroundColor: method.enabled ? '#40916C' : '#D1D5DB' }}
+                        >
+                          <span
+                            className={`absolute left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${method.enabled ? 'translate-x-5' : 'translate-x-0'}`}
+                          />
+                        </button>
                       </div>
-                      <button
-                        onClick={() => setPaymentEnabled((p) => ({ ...p, [method.id]: !p[method.id] }))}
-                        className="relative h-6 w-11 rounded-full transition-colors"
-                        style={{ backgroundColor: paymentEnabled[method.id] ? '#40916C' : '#D1D5DB' }}
-                      >
-                        <span
-                          className="absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform"
-                          style={{ transform: paymentEnabled[method.id] ? 'translateX(22px)' : 'translateX(2px)' }}
-                        />
-                      </button>
+
+                      {method.enabled && method.id !== 'cod' && (
+                        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 pt-4" style={{ borderTop: '1px solid #E5E7EB' }}>
+                          <div>
+                            <label className="mb-1 block text-xs font-medium" style={{ color: '#1A1A2E' }}>Display Name</label>
+                            <input
+                              type="text"
+                              value={method.displayName}
+                              onChange={(e) => updatePaymentMethod(method.id, 'displayName', e.target.value)}
+                              className="w-full rounded-lg px-3 py-2 text-sm"
+                              style={{ border: '1px solid #E5E7EB', color: '#1A1A2E' }}
+                              placeholder={method.name}
+                            />
+                          </div>
+                          <div>
+                            <label className="mb-1 block text-xs font-medium" style={{ color: '#1A1A2E' }}>Account Number</label>
+                            <input
+                              type="text"
+                              value={method.accountNumber}
+                              onChange={(e) => updatePaymentMethod(method.id, 'accountNumber', e.target.value)}
+                              className="w-full rounded-lg px-3 py-2 text-sm"
+                              style={{ border: '1px solid #E5E7EB', color: '#1A1A2E' }}
+                              placeholder="e.g., 0917 123 4567"
+                            />
+                          </div>
+                          <div>
+                            <label className="mb-1 block text-xs font-medium" style={{ color: '#1A1A2E' }}>Email (Optional)</label>
+                            <input
+                              type="email"
+                              value={method.email}
+                              onChange={(e) => updatePaymentMethod(method.id, 'email', e.target.value)}
+                              className="w-full rounded-lg px-3 py-2 text-sm"
+                              style={{ border: '1px solid #E5E7EB', color: '#1A1A2E' }}
+                              placeholder="e.g., payments@domain.com"
+                            />
+                          </div>
+                          <div>
+                            <label className="mb-1 block text-xs font-medium" style={{ color: '#1A1A2E' }}>QR Code Image</label>
+                            <div
+                                className="flex items-center justify-center rounded-lg py-1.5 cursor-pointer transition-colors hover:bg-gray-50"
+                                style={{ border: '1px dashed #E5E7EB', backgroundColor: '#F9FAFB' }}
+                                onClick={() => showToast('QR Code upload clicked')}
+                              >
+                                <div className="text-center flex gap-2 items-center">
+                                  <Upload size={16} style={{ color: '#6B7280' }} />
+                                  <span className="text-xs" style={{ color: '#6B7280' }}>
+                                    {method.qrCode ? 'Change QR Code' : 'Upload QR Code'}
+                                  </span>
+                                </div>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -619,17 +684,20 @@ export default function SettingsPage() {
                           <td className="px-4 py-3 font-medium" style={{ color: '#1A1A2E' }}>{member.name}</td>
                           <td className="px-4 py-3" style={{ color: '#6B7280' }}>{member.email}</td>
                           <td className="px-4 py-3">
-                            <select
+                            <Select
                               value={member.role}
-                              onChange={(e) => handleTeamRoleChange(member.id, e.target.value)}
+                              onValueChange={(value) => handleTeamRoleChange(member.id, value)}
                               disabled={member.role === 'Owner'}
-                              className="rounded px-2 py-1 text-sm disabled:opacity-50"
-                              style={{ border: '1px solid #E5E7EB', color: '#1A1A2E' }}
                             >
-                              {roleOptions.map((r) => (
-                                <option key={r} value={r}>{r}</option>
-                              ))}
-                            </select>
+                              <SelectTrigger className="w-[150px] bg-white text-sm disabled:opacity-50">
+                                <SelectValue placeholder="Select role" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {roleOptions.map((r) => (
+                                  <SelectItem key={r} value={r}>{r}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                           </td>
                           <td className="px-4 py-3">
                             <span
@@ -747,16 +815,19 @@ export default function SettingsPage() {
           </div>
           <div>
             <label className="mb-1 block text-sm font-medium" style={{ color: '#1A1A2E' }}>Role</label>
-            <select
+            <Select
               value={inviteForm.role}
-              onChange={(e) => setInviteForm((f) => ({ ...f, role: e.target.value }))}
-              className="w-full rounded-lg px-3 py-2 text-sm"
-              style={{ border: '1px solid #E5E7EB', color: '#1A1A2E' }}
+              onValueChange={(value) => setInviteForm((f) => ({ ...f, role: value }))}
             >
-              {roleOptions.filter((r) => r !== 'Owner').map((r) => (
-                <option key={r} value={r}>{r}</option>
-              ))}
-            </select>
+              <SelectTrigger className="w-full bg-white text-sm">
+                <SelectValue placeholder="Select role" />
+              </SelectTrigger>
+              <SelectContent>
+                {roleOptions.filter((r) => r !== 'Owner').map((r) => (
+                  <SelectItem key={r} value={r}>{r}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div className="flex justify-end gap-3">
             <button

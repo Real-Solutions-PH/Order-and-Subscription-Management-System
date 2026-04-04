@@ -26,6 +26,7 @@ import {
 import { useCart } from '@/context/CartContext';
 import { useToast } from '@/context/ToastContext';
 import Link from 'next/link';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -400,19 +401,21 @@ export default function CheckoutPage() {
                 <label className="mb-1 block text-sm font-medium" style={{ color: '#1A1A2E' }}>
                   Delivery Zone
                 </label>
-                <select
+                <Select
                   value={selectedZone}
-                  onChange={e => setSelectedZone(e.target.value)}
-                  className="w-full rounded-lg px-4 py-2.5 text-sm outline-none transition-colors focus:ring-2"
-                  style={{ border: '1px solid #E5E7EB', color: selectedZone ? '#1A1A2E' : '#9ca3af' }}
+                  onValueChange={(value) => setSelectedZone(value)}
                 >
-                  <option value="">Select your zone</option>
-                  {deliveryZones.map(z => (
-                    <option key={z.name} value={z.name}>
-                      {z.name} — {formatPeso(z.fee)} ({z.estimatedTime})
-                    </option>
-                  ))}
-                </select>
+                  <SelectTrigger className="w-full bg-white text-sm">
+                    <SelectValue placeholder="Select your zone" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {deliveryZones.map(z => (
+                      <SelectItem key={z.name} value={z.name}>
+                        {z.name} — {formatPeso(z.fee)} ({z.estimatedTime})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             {zone && (
@@ -446,19 +449,21 @@ export default function CheckoutPage() {
               <label className="mb-2 block text-sm font-medium" style={{ color: '#1A1A2E' }}>
                 Delivery Date
               </label>
-              <select
+              <Select
                 value={deliveryDate}
-                onChange={e => setDeliveryDate(e.target.value)}
-                className="w-full rounded-lg px-4 py-2.5 text-sm outline-none sm:w-64"
-                style={{ border: '1px solid #E5E7EB', color: deliveryDate ? '#1A1A2E' : '#9ca3af' }}
+                onValueChange={(value) => setDeliveryDate(value)}
               >
-                <option value="">Choose a date</option>
-                {nextDays.map(d => (
-                  <option key={d.value} value={d.value}>
-                    {d.label}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger className="w-full sm:w-64 bg-white text-sm">
+                  <SelectValue placeholder="Choose a date" />
+                </SelectTrigger>
+                <SelectContent>
+                  {nextDays.map(d => (
+                    <SelectItem key={d.value} value={d.value}>
+                      {d.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Time slot grid */}

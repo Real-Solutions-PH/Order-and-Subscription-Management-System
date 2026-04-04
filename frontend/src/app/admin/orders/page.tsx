@@ -205,267 +205,339 @@ export default function OrdersPage() {
         </Link>
       </div>
 
-      {/* Search and Filters */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <div className="relative flex-1">
-          <Search
-            size={16}
-            className="absolute left-3 top-1/2 -translate-y-1/2"
-            style={{ color: '#6B7280' }}
-          />
-          <input
-            type="text"
-            placeholder="Search by order ID or customer name..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-lg py-2.5 pl-10 pr-4 text-sm outline-none transition-colors"
+      {/* Main Content Areas */}
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
+        {/* Left Sidebar: Operational Flow / Roadmap */}
+        <div className="w-full shrink-0 lg:w-64">
+          <div
+            className="sticky top-6 rounded-xl p-5"
             style={{
-              border: '1px solid #E5E7EB',
               backgroundColor: '#FFFFFF',
-              color: '#1A1A2E',
-            }}
-          />
-        </div>
-        <div className="flex items-center gap-2">
-          <input
-            type="date"
-            value={dateFrom}
-            onChange={(e) => setDateFrom(e.target.value)}
-            className="rounded-lg px-3 py-2.5 text-sm outline-none"
-            style={{ border: '1px solid #E5E7EB', color: '#1A1A2E' }}
-          />
-          <span className="text-sm" style={{ color: '#6B7280' }}>
-            to
-          </span>
-          <input
-            type="date"
-            value={dateTo}
-            onChange={(e) => setDateTo(e.target.value)}
-            className="rounded-lg px-3 py-2.5 text-sm outline-none"
-            style={{ border: '1px solid #E5E7EB', color: '#1A1A2E' }}
-          />
-        </div>
-      </div>
-
-      {/* Status Tabs */}
-      <div
-        className="flex gap-1 overflow-x-auto rounded-xl p-1"
-        style={{ backgroundColor: '#F3F4F6' }}
-      >
-        {tabs.map((tab) => (
-          <button
-            key={tab.value}
-            onClick={() => setSelectedTab(tab.value)}
-            className="flex items-center gap-1.5 whitespace-nowrap rounded-lg px-4 py-2 text-sm font-medium transition-colors"
-            style={{
-              backgroundColor:
-                selectedTab === tab.value ? '#FFFFFF' : 'transparent',
-              color: selectedTab === tab.value ? '#1B4332' : '#6B7280',
-              boxShadow:
-                selectedTab === tab.value
-                  ? '0 1px 2px rgba(0,0,0,0.06)'
-                  : 'none',
+              border: '1px solid #E5E7EB',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
             }}
           >
-            {tab.label}
-            <span
-              className="rounded-full px-1.5 py-0.5 text-xs"
-              style={{
-                backgroundColor:
-                  selectedTab === tab.value ? '#D1FAE5' : '#E5E7EB',
-                color: selectedTab === tab.value ? '#065F46' : '#6B7280',
-              }}
+            <h2
+              className="mb-6 text-xs font-bold uppercase tracking-wider"
+              style={{ color: '#6B7280' }}
             >
-              {tabCounts[tab.value] || 0}
-            </span>
-          </button>
-        ))}
-      </div>
+              Operational Flow
+            </h2>
+            <div className="relative ml-2 space-y-0">
+              {tabs.map((tab, i) => {
+                const isSelected = selectedTab === tab.value;
+                const count = tabCounts[tab.value] || 0;
 
-      {/* Bulk Actions Bar */}
-      <AnimatePresence>
-        {selectedIds.size > 0 && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="flex items-center gap-3 rounded-xl p-3"
-            style={{
-              backgroundColor: '#EFF6FF',
-              border: '1px solid #BFDBFE',
-            }}
-          >
-            <span className="text-sm font-medium" style={{ color: '#1E40AF' }}>
-              {selectedIds.size} selected
-            </span>
-            <button
-              className="rounded-md px-3 py-1.5 text-xs font-medium text-white"
-              style={{ backgroundColor: '#D97706' }}
-            >
-              Mark as Preparing
-            </button>
-            <button
-              className="rounded-md px-3 py-1.5 text-xs font-medium text-white"
-              style={{ backgroundColor: '#059669' }}
-            >
-              Mark as Ready
-            </button>
-            <button
-              className="flex items-center gap-1 rounded-md px-3 py-1.5 text-xs font-medium text-white"
-              style={{ backgroundColor: '#1B4332' }}
-            >
-              <Printer size={12} />
-              Print Labels
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
+                // Determine icon / color based on tab and selection
+                let dotColor = '#E5E7EB';
+                if (isSelected) {
+                  if (tab.value === 'cancelled') dotColor = '#DC2626';
+                  else dotColor = '#1B4332';
+                }
 
-      {/* Orders Table */}
-      <div
-        className="overflow-x-auto rounded-xl"
-        style={{
-          backgroundColor: '#FFFFFF',
-          boxShadow: 'var(--shadow-card)',
-          border: '1px solid #E5E7EB',
-        }}
-      >
-        <table className="w-full text-sm">
-          <thead>
-            <tr style={{ borderBottom: '1px solid #E5E7EB' }}>
-              <th className="px-4 py-3 text-left">
-                <button onClick={toggleSelectAll}>
-                  {selectedIds.size === filteredOrders.length &&
-                  filteredOrders.length > 0 ? (
-                    <CheckSquare size={16} style={{ color: '#1B4332' }} />
-                  ) : (
-                    <Square size={16} style={{ color: '#6B7280' }} />
-                  )}
-                </button>
-              </th>
-              <th
-                className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider"
-                style={{ color: '#6B7280' }}
-              >
-                Order ID
-              </th>
-              <th
-                className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider"
-                style={{ color: '#6B7280' }}
-              >
-                Customer
-              </th>
-              <th
-                className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider"
-                style={{ color: '#6B7280' }}
-              >
-                Items
-              </th>
-              <th
-                className="cursor-pointer px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider"
-                style={{ color: '#6B7280' }}
-                onClick={() => toggleSort('total')}
-              >
-                <span className="inline-flex items-center gap-1">
-                  Total <SortIcon field="total" />
-                </span>
-              </th>
-              <th
-                className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider"
-                style={{ color: '#6B7280' }}
-              >
-                Status
-              </th>
-              <th
-                className="cursor-pointer px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider"
-                style={{ color: '#6B7280' }}
-                onClick={() => toggleSort('deliveryDate')}
-              >
-                <span className="inline-flex items-center gap-1">
-                  Delivery Date <SortIcon field="deliveryDate" />
-                </span>
-              </th>
-              <th
-                className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider"
-                style={{ color: '#6B7280' }}
-              >
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredOrders.map((order) => (
-              <tr
-                key={order.id}
-                className="cursor-pointer transition-colors hover:bg-gray-50"
-                style={{ borderBottom: '1px solid #F3F4F6' }}
-                onClick={() => setSelectedOrder(order)}
-              >
-                <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
-                  <button onClick={() => toggleSelect(order.id)}>
-                    {selectedIds.has(order.id) ? (
-                      <CheckSquare size={16} style={{ color: '#1B4332' }} />
-                    ) : (
-                      <Square size={16} style={{ color: '#6B7280' }} />
+                return (
+                  <div
+                    key={tab.value}
+                    className="group relative flex cursor-pointer gap-4 pb-6"
+                    onClick={() => setSelectedTab(tab.value)}
+                  >
+                    {/* Vertical line connecting nodes */}
+                    {i < tabs.length - 1 && (
+                      <div
+                        className="absolute bottom-[-6px] left-[11px] top-[24px] w-[2px]"
+                        style={{ backgroundColor: '#F3F4F6' }}
+                      />
                     )}
-                  </button>
-                </td>
-                <td className="px-4 py-3">
-                  <span
-                    className="text-xs font-medium"
-                    style={{
-                      fontFamily: "'JetBrains Mono', monospace",
-                      color: '#1B4332',
-                    }}
-                  >
-                    {order.id}
-                  </span>
-                </td>
-                <td
-                  className="px-4 py-3 font-medium"
-                  style={{ color: '#1A1A2E' }}
-                >
-                  {order.customerName}
-                </td>
-                <td className="px-4 py-3" style={{ color: '#6B7280' }}>
-                  {order.items.reduce((s, i) => s + i.quantity, 0)} items
-                </td>
-                <td
-                  className="px-4 py-3 font-medium"
-                  style={{ color: '#1A1A2E' }}
-                >
-                  {formatPeso(order.total)}
-                </td>
-                <td className="px-4 py-3">
-                  <StatusBadge status={order.status} size="sm" />
-                </td>
-                <td className="px-4 py-3" style={{ color: '#6B7280' }}>
-                  {order.deliveryDate}
-                </td>
-                <td className="px-4 py-3">
-                  <button
-                    className="rounded-md px-2.5 py-1 text-xs font-medium transition-colors hover:opacity-80"
-                    style={{
-                      backgroundColor: '#F3F4F6',
-                      color: '#1A1A2E',
-                    }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedOrder(order);
-                    }}
-                  >
-                    View
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {filteredOrders.length === 0 && (
-          <div className="py-12 text-center text-sm" style={{ color: '#6B7280' }}>
-            No orders found.
+
+                    <div className="relative z-10 flex flex-col items-center">
+                      <div
+                        className="flex h-6 w-6 items-center justify-center rounded-full transition-all duration-200"
+                        style={{
+                          backgroundColor: isSelected ? dotColor : '#F9FAFB',
+                          border: isSelected
+                            ? 'none'
+                            : `2px solid ${count > 0 ? '#1B4332' : '#E5E7EB'}`,
+                          boxShadow: isSelected
+                            ? `0 0 0 4px ${dotColor}20`
+                            : 'none',
+                        }}
+                      >
+                        {isSelected && (
+                          <div
+                            className="h-2 w-2 rounded-full"
+                            style={{ backgroundColor: '#FFFFFF' }}
+                          />
+                        )}
+                        {!isSelected && count > 0 && (
+                          <div
+                            className="h-2 w-2 rounded-full"
+                            style={{ backgroundColor: '#1B4332' }}
+                          />
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="-mt-1 flex-1">
+                      <div className="flex items-center justify-between">
+                        <p
+                          className="text-sm transition-colors"
+                          style={{
+                            color: isSelected ? '#1A1A2E' : '#6B7280',
+                            fontWeight: isSelected ? 600 : 500,
+                          }}
+                        >
+                          {tab.label}
+                        </p>
+                        <span
+                          className="rounded-full px-2 py-0.5 text-xs font-semibold"
+                          style={{
+                            backgroundColor: isSelected
+                              ? `${dotColor}15`
+                              : '#F3F4F6',
+                            color: isSelected ? dotColor : '#6B7280',
+                          }}
+                        >
+                          {count}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        )}
+        </div>
+
+        {/* Right Content Area */}
+        <div className="min-w-0 flex-1 space-y-6">
+          {/* Search and Filters */}
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="relative flex-1">
+              <Search
+                size={16}
+                className="absolute left-3 top-1/2 -translate-y-1/2"
+                style={{ color: '#6B7280' }}
+              />
+              <input
+                type="text"
+                placeholder="Search by order ID or customer name..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full rounded-lg py-2.5 pl-10 pr-4 text-sm outline-none transition-colors"
+                style={{
+                  border: '1px solid #E5E7EB',
+                  backgroundColor: '#FFFFFF',
+                  color: '#1A1A2E',
+                }}
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="date"
+                value={dateFrom}
+                onChange={(e) => setDateFrom(e.target.value)}
+                className="rounded-lg px-3 py-2.5 text-sm outline-none"
+                style={{ border: '1px solid #E5E7EB', color: '#1A1A2E' }}
+              />
+              <span className="text-sm" style={{ color: '#6B7280' }}>
+                to
+              </span>
+              <input
+                type="date"
+                value={dateTo}
+                onChange={(e) => setDateTo(e.target.value)}
+                className="rounded-lg px-3 py-2.5 text-sm outline-none"
+                style={{ border: '1px solid #E5E7EB', color: '#1A1A2E' }}
+              />
+            </div>
+          </div>
+
+          {/* Bulk Actions Bar */}
+          <AnimatePresence>
+            {selectedIds.size > 0 && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="flex items-center gap-3 rounded-xl p-3"
+                style={{
+                  backgroundColor: '#EFF6FF',
+                  border: '1px solid #BFDBFE',
+                }}
+              >
+                <span className="text-sm font-medium" style={{ color: '#1E40AF' }}>
+                  {selectedIds.size} selected
+                </span>
+                <button
+                  className="rounded-md px-3 py-1.5 text-xs font-medium text-white"
+                  style={{ backgroundColor: '#D97706' }}
+                >
+                  Mark as Preparing
+                </button>
+                <button
+                  className="rounded-md px-3 py-1.5 text-xs font-medium text-white"
+                  style={{ backgroundColor: '#059669' }}
+                >
+                  Mark as Ready
+                </button>
+                <button
+                  className="flex items-center gap-1 rounded-md px-3 py-1.5 text-xs font-medium text-white"
+                  style={{ backgroundColor: '#1B4332' }}
+                >
+                  <Printer size={12} />
+                  Print Labels
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Orders Table */}
+          <div
+            className="overflow-x-auto rounded-xl"
+            style={{
+              backgroundColor: '#FFFFFF',
+              boxShadow: 'var(--shadow-card)',
+              border: '1px solid #E5E7EB',
+            }}
+          >
+            <table className="w-full text-sm">
+              <thead>
+                <tr style={{ borderBottom: '1px solid #E5E7EB' }}>
+                  <th className="px-4 py-3 text-left">
+                    <button onClick={toggleSelectAll}>
+                      {selectedIds.size === filteredOrders.length &&
+                      filteredOrders.length > 0 ? (
+                        <CheckSquare size={16} style={{ color: '#1B4332' }} />
+                      ) : (
+                        <Square size={16} style={{ color: '#6B7280' }} />
+                      )}
+                    </button>
+                  </th>
+                  <th
+                    className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider"
+                    style={{ color: '#6B7280' }}
+                  >
+                    Order ID
+                  </th>
+                  <th
+                    className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider"
+                    style={{ color: '#6B7280' }}
+                  >
+                    Customer
+                  </th>
+                  <th
+                    className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider"
+                    style={{ color: '#6B7280' }}
+                  >
+                    Items
+                  </th>
+                  <th
+                    className="cursor-pointer px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider"
+                    style={{ color: '#6B7280' }}
+                    onClick={() => toggleSort('total')}
+                  >
+                    <span className="inline-flex items-center gap-1">
+                      Total <SortIcon field="total" />
+                    </span>
+                  </th>
+                  <th
+                    className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider"
+                    style={{ color: '#6B7280' }}
+                  >
+                    Status
+                  </th>
+                  <th
+                    className="cursor-pointer px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider"
+                    style={{ color: '#6B7280' }}
+                    onClick={() => toggleSort('deliveryDate')}
+                  >
+                    <span className="inline-flex items-center gap-1">
+                      Delivery Date <SortIcon field="deliveryDate" />
+                    </span>
+                  </th>
+                  <th
+                    className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider"
+                    style={{ color: '#6B7280' }}
+                  >
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredOrders.map((order) => (
+                  <tr
+                    key={order.id}
+                    className="cursor-pointer transition-colors hover:bg-gray-50"
+                    style={{ borderBottom: '1px solid #F3F4F6' }}
+                    onClick={() => setSelectedOrder(order)}
+                  >
+                    <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                      <button onClick={() => toggleSelect(order.id)}>
+                        {selectedIds.has(order.id) ? (
+                          <CheckSquare size={16} style={{ color: '#1B4332' }} />
+                        ) : (
+                          <Square size={16} style={{ color: '#6B7280' }} />
+                        )}
+                      </button>
+                    </td>
+                    <td className="px-4 py-3">
+                      <span
+                        className="text-xs font-medium"
+                        style={{
+                          fontFamily: "'JetBrains Mono', monospace",
+                          color: '#1B4332',
+                        }}
+                      >
+                        {order.id}
+                      </span>
+                    </td>
+                    <td
+                      className="px-4 py-3 font-medium"
+                      style={{ color: '#1A1A2E' }}
+                    >
+                      {order.customerName}
+                    </td>
+                    <td className="px-4 py-3" style={{ color: '#6B7280' }}>
+                      {order.items.reduce((s, i) => s + i.quantity, 0)} items
+                    </td>
+                    <td
+                      className="px-4 py-3 font-medium"
+                      style={{ color: '#1A1A2E' }}
+                    >
+                      {formatPeso(order.total)}
+                    </td>
+                    <td className="px-4 py-3">
+                      <StatusBadge status={order.status} size="sm" />
+                    </td>
+                    <td className="px-4 py-3" style={{ color: '#6B7280' }}>
+                      {order.deliveryDate}
+                    </td>
+                    <td className="px-4 py-3">
+                      <button
+                        className="rounded-md px-2.5 py-1 text-xs font-medium transition-colors hover:opacity-80"
+                        style={{
+                          backgroundColor: '#F3F4F6',
+                          color: '#1A1A2E',
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedOrder(order);
+                        }}
+                      >
+                        View
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {filteredOrders.length === 0 && (
+              <div className="py-12 text-center text-sm" style={{ color: '#6B7280' }}>
+                No orders found.
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Order Detail Slide-out Panel */}

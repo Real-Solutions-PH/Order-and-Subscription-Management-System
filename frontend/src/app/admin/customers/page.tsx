@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search,
@@ -304,25 +305,26 @@ export default function CustomersPage() {
       </div>
 
       {/* Customer Detail Slide-out Panel */}
-      <AnimatePresence>
-        {selectedCustomer && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-40 bg-black/30"
-              onClick={() => setSelectedCustomer(null)}
-            />
-            {/* Panel */}
-            <motion.div
-              initial={{ x: '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-              className="fixed inset-y-0 right-0 z-50 w-full max-w-lg overflow-y-auto bg-white shadow-2xl"
-            >
+      {createPortal(
+        <AnimatePresence>
+          {selectedCustomer && (
+            <>
+              {/* Backdrop */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-40 bg-black/30"
+                onClick={() => setSelectedCustomer(null)}
+              />
+              {/* Panel */}
+              <motion.div
+                initial={{ x: '100%' }}
+                animate={{ x: 0 }}
+                exit={{ x: '100%' }}
+                transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+                className="fixed inset-y-0 right-0 z-50 w-full max-w-lg overflow-y-auto bg-white shadow-2xl"
+              >
               <div className="p-6">
                 {/* Close */}
                 <div className="mb-4 flex items-center justify-between">
@@ -486,7 +488,9 @@ export default function CustomersPage() {
             </motion.div>
           </>
         )}
-      </AnimatePresence>
+        </AnimatePresence>,
+        document.body
+      )}
 
       {/* Email Compose Modal */}
       <Modal isOpen={emailModalOpen} onClose={() => setEmailModalOpen(false)} title="Send Email" size="md">

@@ -52,7 +52,7 @@ export const meals: Meal[] = [
     id: 1, name: 'Garlic Butter Chicken with Jasmine Rice', price: 285,
     calories: 520, protein: 42, carbs: 45, fat: 18,
     tags: ['High Protein', 'Gluten-Free'],
-    image: 'https://picsum.photos/seed/garlic-chicken/400/300',
+    image: '/images/meals/garlic-chicken.png',
     description: 'Juicy chicken breast in garlic butter sauce served with fluffy jasmine rice.',
     allergens: ['Dairy'], ingredients: ['Chicken Breast', 'Butter', 'Garlic', 'Jasmine Rice', 'Herbs']
   },
@@ -60,7 +60,7 @@ export const meals: Meal[] = [
     id: 2, name: 'Beef Tapa with Garlic Fried Rice & Egg', price: 310,
     calories: 610, protein: 38, carbs: 52, fat: 24,
     tags: ['Filipino Classic'],
-    image: 'https://picsum.photos/seed/beef-tapa/400/300',
+    image: '/images/meals/beef-tapa.png',
     description: 'Classic Filipino beef tapa with sinangag and itlog.',
     allergens: ['Eggs', 'Soy'], ingredients: ['Beef Sirloin', 'Garlic Rice', 'Egg', 'Vinegar', 'Soy Sauce']
   },
@@ -68,7 +68,7 @@ export const meals: Meal[] = [
     id: 3, name: 'Salmon Teriyaki Bowl', price: 395,
     calories: 480, protein: 35, carbs: 48, fat: 16,
     tags: ['Keto-Friendly'],
-    image: 'https://picsum.photos/seed/salmon-bowl/400/300',
+    image: '/images/meals/salmon-bowl.png',
     description: 'Fresh Atlantic salmon glazed with house teriyaki on a bed of mixed grains.',
     allergens: ['Fish', 'Soy', 'Gluten'], ingredients: ['Salmon Fillet', 'Teriyaki Sauce', 'Brown Rice', 'Edamame', 'Sesame']
   },
@@ -76,7 +76,7 @@ export const meals: Meal[] = [
     id: 4, name: 'Vegan Buddha Bowl', price: 245,
     calories: 380, protein: 18, carbs: 55, fat: 12,
     tags: ['Vegan', 'Dairy-Free'],
-    image: 'https://picsum.photos/seed/buddha-bowl/400/300',
+    image: '/images/meals/buddha-bowl.png',
     description: 'Colorful bowl of roasted vegetables, quinoa, and tahini dressing.',
     allergens: ['Sesame'], ingredients: ['Quinoa', 'Sweet Potato', 'Chickpeas', 'Kale', 'Tahini']
   },
@@ -84,7 +84,7 @@ export const meals: Meal[] = [
     id: 5, name: 'Chicken Adobo Meal Prep', price: 265,
     calories: 490, protein: 40, carbs: 42, fat: 15,
     tags: ['Filipino Classic', 'High Protein'],
-    image: 'https://picsum.photos/seed/chicken-adobo/400/300',
+    image: '/images/meals/chicken-adobo.png',
     description: 'Traditional chicken adobo braised in soy-vinegar sauce with steamed rice.',
     allergens: ['Soy'], ingredients: ['Chicken Thigh', 'Soy Sauce', 'Vinegar', 'Bay Leaves', 'Rice']
   },
@@ -92,7 +92,7 @@ export const meals: Meal[] = [
     id: 6, name: 'Mediterranean Quinoa Salad', price: 275,
     calories: 420, protein: 22, carbs: 48, fat: 14,
     tags: ['Vegetarian', 'Gluten-Free'],
-    image: 'https://picsum.photos/seed/med-quinoa/400/300',
+    image: '/images/meals/med-quinoa.png',
     description: 'Fresh Mediterranean salad with quinoa, feta, olives, and lemon vinaigrette.',
     allergens: ['Dairy'], ingredients: ['Quinoa', 'Feta Cheese', 'Olives', 'Cucumber', 'Tomatoes']
   },
@@ -100,7 +100,7 @@ export const meals: Meal[] = [
     id: 7, name: 'Korean BBQ Beef with Kimchi Rice', price: 335,
     calories: 560, protein: 36, carbs: 50, fat: 22,
     tags: ['Spicy'],
-    image: 'https://picsum.photos/seed/korean-bbq/400/300',
+    image: '/images/meals/korean-bbq.png',
     description: 'Marinated Korean BBQ beef with kimchi fried rice and pickled vegetables.',
     allergens: ['Soy', 'Gluten', 'Sesame'], ingredients: ['Beef Ribeye', 'Kimchi', 'Gochujang', 'Rice', 'Sesame Oil']
   },
@@ -108,7 +108,7 @@ export const meals: Meal[] = [
     id: 8, name: 'Grilled Fish Sinigang Soup Set', price: 290,
     calories: 350, protein: 32, carbs: 28, fat: 10,
     tags: ['Filipino Classic', 'Low Carb', 'Diabetic-Friendly'],
-    image: 'https://picsum.photos/seed/fish-sinigang/400/300',
+    image: '/images/meals/fish-sinigang.png',
     description: 'Grilled bangus with sinigang soup, vegetables, and a cup of rice.',
     allergens: ['Fish'], ingredients: ['Bangus', 'Tamarind', 'Tomatoes', 'Kangkong', 'Radish']
   },
@@ -116,7 +116,7 @@ export const meals: Meal[] = [
     id: 9, name: 'Tofu Sisig with Brown Rice', price: 225,
     calories: 410, protein: 20, carbs: 52, fat: 14,
     tags: ['Vegan', 'Filipino Fusion'],
-    image: 'https://picsum.photos/seed/tofu-sisig/400/300',
+    image: '/images/meals/tofu-sisig.png',
     description: 'Crispy tofu sisig on a sizzling plate with brown rice.',
     allergens: ['Soy'], ingredients: ['Tofu', 'Onions', 'Chili', 'Calamansi', 'Brown Rice']
   },
@@ -124,7 +124,7 @@ export const meals: Meal[] = [
     id: 10, name: 'Herb-Crusted Pork Tenderloin', price: 305,
     calories: 470, protein: 38, carbs: 35, fat: 18,
     tags: ['Keto-Friendly'],
-    image: 'https://picsum.photos/seed/pork-herb/400/300',
+    image: '/images/meals/pork-herb.png',
     description: 'Tender pork loin with herb crust, roasted vegetables, and mashed potatoes.',
     allergens: ['Dairy', 'Gluten'], ingredients: ['Pork Tenderloin', 'Herbs', 'Butter', 'Potatoes', 'Green Beans']
   },
@@ -132,7 +132,7 @@ export const meals: Meal[] = [
     id: 11, name: 'Shrimp Pad Thai', price: 320,
     calories: 500, protein: 28, carbs: 58, fat: 16,
     tags: ['Gluten-Free'],
-    image: 'https://picsum.photos/seed/pad-thai/400/300',
+    image: '/images/meals/pad-thai.png',
     description: 'Classic pad Thai with jumbo shrimp, rice noodles, and crushed peanuts.',
     allergens: ['Shellfish', 'Peanuts', 'Eggs'], ingredients: ['Shrimp', 'Rice Noodles', 'Peanuts', 'Bean Sprouts', 'Lime']
   },
@@ -140,7 +140,7 @@ export const meals: Meal[] = [
     id: 12, name: 'Chicken Kare-Kare with Bagoong', price: 295,
     calories: 540, protein: 35, carbs: 46, fat: 20,
     tags: ['Filipino Classic'],
-    image: 'https://picsum.photos/seed/kare-kare/400/300',
+    image: '/images/meals/kare-kare.png',
     description: 'Rich peanut-based stew with chicken, eggplant, and shrimp paste on the side.',
     allergens: ['Peanuts', 'Shellfish'], ingredients: ['Chicken', 'Peanut Butter', 'Eggplant', 'Banana Blossom', 'Bagoong']
   }
@@ -314,17 +314,35 @@ export const deliveryZones = [
 
 export const analyticsData = {
   mrr: 487500,
+  mrrLastMonth: 451200,
   activeSubscribers: 127,
+  activeSubscribersLastMonth: 121,
   churnRate: 4.2,
+  churnRateLastMonth: 4.5,
   avgOrderValue: 1285,
   todayRevenue: 28450,
+  todayGrossSales: 32580,
+  todayGrossSalesLastMonth: 29100,
+  todayNetSales: 28450,
+  todayNetSalesLastMonth: 25800,
+  todayTotalMeals: 142,
+  todayTotalMealsLastMonth: 128,
   mostPopularMeal: 'Garlic Butter Chicken',
   mostPopularCount: 89,
-  revenueData: Array.from({ length: 30 }, (_, i) => ({
-    date: `Mar ${i + 1}`,
-    subscription: 12000 + Math.floor(Math.random() * 6000),
-    alaCarte: 3000 + Math.floor(Math.random() * 4000),
-  })),
+  revenueData: Array.from({ length: 30 }, (_, i) => {
+    const totalMeals = 40 + Math.floor(Math.random() * 60);
+    const laborCost = 800 + Math.floor(Math.random() * 400);
+    const workers = 3 + Math.floor(Math.random() * 3);
+    return {
+      date: `Mar ${i + 1}`,
+      subscription: 12000 + Math.floor(Math.random() * 6000),
+      alaCarte: 3000 + Math.floor(Math.random() * 4000),
+      laborEfficiency: Number.parseFloat((totalMeals / (laborCost * workers)).toFixed(3)),
+      totalMeals,
+      laborCost,
+      workers,
+    };
+  }),
   weeklyMealPopularity: [
     { name: 'Garlic Butter Chicken', count: 89 },
     { name: 'Chicken Adobo', count: 72 },
@@ -332,6 +350,21 @@ export const analyticsData = {
     { name: 'Korean BBQ Beef', count: 58 },
     { name: 'Vegan Buddha Bowl', count: 45 },
   ],
+  // Menu Contribution & Velocity – sorted by revenue desc
+  menuContribution: [
+    { name: 'Garlic Butter Chicken',      sold: 89,  costPerUnit: 142, pricePerUnit: 285, revenue: 25365, marginPct: 50.2, cookMins: 12, packMins: 3 },
+    { name: 'Salmon Teriyaki Bowl',        sold: 65,  costPerUnit: 178, pricePerUnit: 395, revenue: 25675, marginPct: 54.9, cookMins: 15, packMins: 4 },
+    { name: 'Korean BBQ Beef',             sold: 58,  costPerUnit: 167, pricePerUnit: 335, revenue: 19430, marginPct: 50.1, cookMins: 18, packMins: 4 },
+    { name: 'Chicken Adobo',              sold: 72,  costPerUnit: 106, pricePerUnit: 265, revenue: 19080, marginPct: 60.0, cookMins: 20, packMins: 3 },
+    { name: 'Herb-Crusted Pork',          sold: 47,  costPerUnit: 158, pricePerUnit: 305, revenue: 14335, marginPct: 48.2, cookMins: 22, packMins: 4 },
+    { name: 'Shrimp Pad Thai',            sold: 42,  costPerUnit: 150, pricePerUnit: 320, revenue: 13440, marginPct: 53.1, cookMins: 10, packMins: 3 },
+    { name: 'Beef Tapa',                  sold: 40,  costPerUnit: 140, pricePerUnit: 310, revenue: 12400, marginPct: 54.8, cookMins: 14, packMins: 3 },
+    { name: 'Chicken Kare-Kare',          sold: 38,  costPerUnit: 148, pricePerUnit: 295, revenue: 11210, marginPct: 49.8, cookMins: 25, packMins: 5 },
+    { name: 'Med Quinoa Salad',           sold: 36,  costPerUnit: 118, pricePerUnit: 275, revenue:  9900, marginPct: 57.1, cookMins:  8, packMins: 3 },
+    { name: 'Vegan Buddha Bowl',          sold: 45,  costPerUnit: 102, pricePerUnit: 245, revenue: 11025, marginPct: 58.4, cookMins:  8, packMins: 3 },
+    { name: 'Fish Sinigang Set',          sold: 30,  costPerUnit: 136, pricePerUnit: 290, revenue:  8700, marginPct: 53.1, cookMins: 20, packMins: 4 },
+    { name: 'Tofu Sisig',                 sold: 28,  costPerUnit:  90, pricePerUnit: 225, revenue:  6300, marginPct: 60.0, cookMins: 12, packMins: 3 },
+  ].sort((a, b) => b.revenue - a.revenue),
   subscriberTrend: Array.from({ length: 12 }, (_, i) => ({
     week: `W${i + 1}`,
     new: Math.floor(8 + Math.random() * 12),
@@ -352,6 +385,43 @@ export const analyticsData = {
     { month: 'Mar', m1: 100 },
   ],
   avgLTV: 15200,
+  cac: 2450,
+  cacLastMonth: 2680,
+  cacPaybackMonths: 1.6,
+  cacPaybackMonthsLastMonth: 1.8,
+  // Operations & Fulfillment
+  orderFulfillmentRate: 94.2,
+  orderFulfillmentRateLastMonth: 91.8,
+  avgPrepTimeMinutes: 18.4,
+  avgPrepTimeMinutesLastMonth: 21.2,
+  foodWastePercent: 6.1,
+  foodWastePercentLastMonth: 7.8,
+  deliverySuccessRate: 97.3,
+  deliverySuccessRateLastMonth: 95.6,
+  fulfillmentTrend: [
+    { week: 'W1', fulfillment: 91, prepTime: 22, waste: 8.2, delivery: 94 },
+    { week: 'W2', fulfillment: 92, prepTime: 21, waste: 7.5, delivery: 95 },
+    { week: 'W3', fulfillment: 90, prepTime: 20, waste: 7.8, delivery: 96 },
+    { week: 'W4', fulfillment: 93, prepTime: 19, waste: 7.0, delivery: 96 },
+    { week: 'W5', fulfillment: 94, prepTime: 19, waste: 6.5, delivery: 97 },
+    { week: 'W6', fulfillment: 93, prepTime: 18, waste: 6.8, delivery: 97 },
+    { week: 'W7', fulfillment: 95, prepTime: 18, waste: 6.2, delivery: 98 },
+    { week: 'W8', fulfillment: 94, prepTime: 18, waste: 6.1, delivery: 97 },
+  ],
+  dailyPrepBreakdown: [
+    { meal: 'Garlic Butter Chicken', prepTime: 12, orders: 89, wasteKg: 1.2 },
+    { meal: 'Salmon Teriyaki Bowl', prepTime: 15, orders: 65, wasteKg: 0.8 },
+    { meal: 'Korean BBQ Beef', prepTime: 18, orders: 58, wasteKg: 1.5 },
+    { meal: 'Chicken Adobo', prepTime: 20, orders: 72, wasteKg: 0.6 },
+    { meal: 'Herb-Crusted Pork', prepTime: 22, orders: 47, wasteKg: 1.8 },
+    { meal: 'Shrimp Pad Thai', prepTime: 10, orders: 42, wasteKg: 0.5 },
+  ],
+  deliveryBreakdown: {
+    onTime: 138,
+    late: 6,
+    failed: 4,
+    returned: 2,
+  },
 };
 
 export const dietaryFilters = [
@@ -378,6 +448,98 @@ export const paymentMethods = [
   { id: 'card', name: 'Credit/Debit Card', icon: '💳' },
   { id: 'cod', name: 'Cash on Delivery', icon: '💵' },
 ];
+
+// Customer Behavior metrics
+export const customerBehaviorData = {
+  upgradeRate: 12.5,
+  upgradeRateLastMonth: 10.8,
+  downgradeRate: 3.2,
+  downgradeRateLastMonth: 4.1,
+  pauseRate: 8.3,
+  pauseRateLastMonth: 9.1,
+  cancelRate: 4.2,
+  cancelRateLastMonth: 4.5,
+  reactivationRate: 18.7,
+  reactivationRateLastMonth: 15.2,
+  npsScore: 72,
+  npsLastMonth: 68,
+  npsPromoters: 58,
+  npsPassives: 28,
+  npsDetractors: 14,
+  planMovement: [
+    { month: 'Nov', upgrades: 8, downgrades: 3, net: 5 },
+    { month: 'Dec', upgrades: 12, downgrades: 5, net: 7 },
+    { month: 'Jan', upgrades: 10, downgrades: 4, net: 6 },
+    { month: 'Feb', upgrades: 14, downgrades: 3, net: 11 },
+    { month: 'Mar', upgrades: 16, downgrades: 4, net: 12 },
+    { month: 'Apr', upgrades: 11, downgrades: 2, net: 9 },
+  ],
+  subscriberFlow: {
+    pausedRecoverable: 11,
+    cancelledChurned: 5,
+    reactivated: 3,
+  },
+  mealPopularityBySubscribers: [
+    { name: 'Garlic Butter Chicken', orders: 89, rating: 4.8 },
+    { name: 'Chicken Adobo', orders: 72, rating: 4.7 },
+    { name: 'Salmon Teriyaki Bowl', orders: 65, rating: 4.6 },
+    { name: 'Korean BBQ Beef', orders: 58, rating: 4.5 },
+    { name: 'Vegan Buddha Bowl', orders: 45, rating: 4.3 },
+    { name: 'Herb-Crusted Pork', orders: 47, rating: 4.4 },
+    { name: 'Med Quinoa Salad', orders: 36, rating: 4.2 },
+    { name: 'Beef Tapa', orders: 40, rating: 4.5 },
+    { name: 'Shrimp Pad Thai', orders: 42, rating: 4.4 },
+    { name: 'Fish Sinigang Set', orders: 30, rating: 4.1 },
+    { name: 'Tofu Sisig', orders: 28, rating: 3.9 },
+    { name: 'Chicken Kare-Kare', orders: 38, rating: 4.3 },
+  ],
+};
+
+// Demand Planning metrics
+export const demandPlanningData = {
+  mealsByPlanType: [
+    { plan: '5 meals', garlic: 12, adobo: 10, salmon: 8, korean: 6, others: 14 },
+    { plan: '10 meals', garlic: 28, adobo: 22, salmon: 18, korean: 16, others: 36 },
+    { plan: '15 meals', garlic: 30, adobo: 25, salmon: 22, korean: 20, others: 43 },
+    { plan: '20 meals', garlic: 19, adobo: 15, salmon: 17, korean: 16, others: 29 },
+  ],
+  demandForecast: [
+    { week: 'W1', forecast: 580, actual: 562 },
+    { week: 'W2', forecast: 610, actual: 624 },
+    { week: 'W3', forecast: 640, actual: 618 },
+    { week: 'W4', forecast: 660, actual: 671 },
+    { week: 'W5', forecast: 680, actual: 692 },
+    { week: 'W6', forecast: 700, actual: null },
+    { week: 'W7', forecast: 720, actual: null },
+    { week: 'W8', forecast: 735, actual: null },
+  ],
+  peakOrderDays: [
+    { day: 'Mon', orders: 145 },
+    { day: 'Tue', orders: 132 },
+    { day: 'Wed', orders: 168 },
+    { day: 'Thu', orders: 155 },
+    { day: 'Fri', orders: 189 },
+    { day: 'Sat', orders: 112 },
+    { day: 'Sun', orders: 98 },
+  ],
+  peakOrderHours: [
+    { hour: '8AM', orders: 28 },
+    { hour: '9AM', orders: 42 },
+    { hour: '10AM', orders: 65 },
+    { hour: '11AM', orders: 88 },
+    { hour: '12PM', orders: 105 },
+    { hour: '1PM', orders: 92 },
+    { hour: '2PM', orders: 55 },
+    { hour: '3PM', orders: 38 },
+    { hour: '4PM', orders: 48 },
+    { hour: '5PM', orders: 78 },
+    { hour: '6PM', orders: 95 },
+    { hour: '7PM', orders: 72 },
+    { hour: '8PM', orders: 45 },
+  ],
+  forecastAccuracy: 96.2,
+  wasteReduction: 12.5,
+};
 
 export function formatPeso(amount: number): string {
   return `₱${amount.toLocaleString()}`;

@@ -22,7 +22,7 @@ export default function SubscriptionPage() {
   const { showToast } = useToast();
 
   // Pause state
-  const [pauseDuration, setPauseDuration] = useState<'1week' | '2weeks' | '1month'>('1week');
+  const [pauseDays, setPauseDays] = useState(7);
   const [pauseConfirmed, setPauseConfirmed] = useState(false);
 
   // Plan change state
@@ -35,10 +35,27 @@ export default function SubscriptionPage() {
   const [cancelStep, setCancelStep] = useState(0); // 0=hidden, 1=reason, 2=winback, 3=confirm
   const [cancelReasons, setCancelReasons] = useState<string[]>([]);
 
-  const resumeMap: Record<string, string> = {
-    '1week': 'April 14, 2026',
-    '2weeks': 'April 21, 2026',
-    '1month': 'May 7, 2026',
+  const pausePresets = [
+    { days: 7, label: '1 Week' },
+    { days: 14, label: '2 Weeks' },
+    { days: 30, label: '1 Month' },
+  ];
+
+  const pauseResumeDate = new Date();
+  pauseResumeDate.setDate(pauseResumeDate.getDate() + pauseDays);
+  const pauseResumeLabel = pauseResumeDate.toLocaleDateString('en-US', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  });
+
+  const handlePauseDaysChange = (value: string) => {
+    const num = parseInt(value, 10);
+    if (!isNaN(num)) {
+      setPauseDays(Math.max(1, Math.min(90, num)));
+    } else if (value === '') {
+      setPauseDays(1);
+    }
   };
 
   const upcomingWeeks = [
@@ -164,44 +181,77 @@ export default function SubscriptionPage() {
 
           {!pauseConfirmed ? (
             <>
-              <div className="space-y-2 mb-4">
-                {[
-                  { key: '1week' as const, label: '1 Week' },
-                  { key: '2weeks' as const, label: '2 Weeks' },
-                  { key: '1month' as const, label: '1 Month' },
-                ].map((opt) => (
-                  <label
-                    key={opt.key}
-                    className="flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all"
+              {/* Preset buttons */}
+              <div className="flex gap-2 mb-4">
+                {pausePresets.map((preset) => (
+                  <button
+                    key={preset.days}
+                    onClick={() => setPauseDays(preset.days)}
+                    className="flex-1 px-3 py-2.5 rounded-xl text-sm font-medium transition-all"
                     style={{
-                      border: `2px solid ${pauseDuration === opt.key ? '#D97706' : '#E5E7EB'}`,
-                      backgroundColor: pauseDuration === opt.key ? '#FFF7ED' : '#FFFFFF',
+                      border: `2px solid ${pauseDays === preset.days ? '#D97706' : '#E5E7EB'}`,
+                      backgroundColor: pauseDays === preset.days ? '#FFF7ED' : '#FFFFFF',
+                      color: pauseDays === preset.days ? '#D97706' : '#6B7280',
                     }}
                   >
-                    <input
-                      type="radio"
-                      name="pause-duration"
-                      checked={pauseDuration === opt.key}
-                      onChange={() => setPauseDuration(opt.key)}
-                      className="sr-only"
-                    />
-                    <div
-                      className="w-4 h-4 rounded-full border-2 flex items-center justify-center"
-                      style={{ borderColor: pauseDuration === opt.key ? '#D97706' : '#D1D5DB' }}
-                    >
-                      {pauseDuration === opt.key && (
-                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: '#D97706' }} />
-                      )}
-                    </div>
-                    <span className="font-medium" style={{ color: '#1A1A2E' }}>
-                      {opt.label}
-                    </span>
-                    <span className="ml-auto text-sm" style={{ color: '#6B7280' }}>
-                      Resume: {resumeMap[opt.key]}
-                    </span>
-                  </label>
+                    {preset.label}
+                  </button>
                 ))}
               </div>
+
+              {/* Custom days input */}
+              <div
+                className="rounded-xl p-4 mb-4"
+                style={{ backgroundColor: '#F9FAFB', border: '1px solid #E5E7EB' }}
+              >
+                <label className="block text-sm font-medium mb-2" style={{ color: '#1A1A2E' }}>
+                  Or enter a custom number of days
+                </label>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setPauseDays(Math.max(1, pauseDays - 1))}
+                    className="w-9 h-9 rounded-lg flex items-center justify-center font-bold text-lg transition-all hover:opacity-80"
+                    style={{ backgroundColor: '#E5E7EB', color: '#374151' }}
+                  >
+                    −
+                  </button>
+                  <input
+                    type="number"
+                    min={1}
+                    max={90}
+                    value={pauseDays}
+                    onChange={(e) => handlePauseDaysChange(e.target.value)}
+                    className="w-20 text-center text-lg font-semibold rounded-lg py-1.5 outline-none transition-colors"
+                    style={{
+                      border: '2px solid #D97706',
+                      color: '#D97706',
+                      backgroundColor: '#FFFFFF',
+                    }}
+                  />
+                  <button
+                    onClick={() => setPauseDays(Math.min(90, pauseDays + 1))}
+                    className="w-9 h-9 rounded-lg flex items-center justify-center font-bold text-lg transition-all hover:opacity-80"
+                    style={{ backgroundColor: '#D97706', color: '#FFFFFF' }}
+                  >
+                    +
+                  </button>
+                  <span className="text-sm font-medium" style={{ color: '#6B7280' }}>
+                    day{pauseDays !== 1 ? 's' : ''}
+                  </span>
+                </div>
+                <p className="text-xs mt-2" style={{ color: '#9CA3AF' }}>Min 1 day · Max 90 days</p>
+              </div>
+
+              {/* Resume info */}
+              <div
+                className="rounded-xl p-3 mb-4"
+                style={{ backgroundColor: '#FFF7ED', border: '1px solid #FED7AA' }}
+              >
+                <p className="text-sm" style={{ color: '#92400E' }}>
+                  Your subscription will resume on <strong>{pauseResumeLabel}</strong>. You won&apos;t be charged during the pause.
+                </p>
+              </div>
+
               <button
                 onClick={() => setPauseConfirmed(true)}
                 className="w-full px-4 py-3 rounded-xl font-semibold text-white transition-colors hover:opacity-90"
@@ -220,8 +270,8 @@ export default function SubscriptionPage() {
                   Confirm Pause
                 </p>
                 <p className="text-sm" style={{ color: '#92400E' }}>
-                  Your subscription will be paused until{' '}
-                  <strong>{resumeMap[pauseDuration]}</strong>. You won&apos;t be charged during this
+                  Your subscription will be paused for <strong>{pauseDays} day{pauseDays !== 1 ? 's' : ''}</strong> until{' '}
+                  <strong>{pauseResumeLabel}</strong>. You won&apos;t be charged during this
                   period and deliveries will be suspended.
                 </p>
               </div>
@@ -236,7 +286,7 @@ export default function SubscriptionPage() {
                 <button
                   onClick={() => {
                     setPauseConfirmed(false);
-                    showToast(`Subscription paused until ${resumeMap[pauseDuration]}`, 'success');
+                    showToast(`Subscription paused for ${pauseDays} day${pauseDays !== 1 ? 's' : ''} — resumes ${pauseResumeLabel}`, 'success');
                   }}
                   className="flex-1 px-4 py-2.5 rounded-xl font-semibold text-white transition-colors hover:opacity-90"
                   style={{ backgroundColor: '#D97706' }}

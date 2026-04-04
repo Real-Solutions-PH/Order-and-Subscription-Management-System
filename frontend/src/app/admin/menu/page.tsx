@@ -85,6 +85,7 @@ export default function MenuManagementPage() {
     tags: [] as string[],
     allergens: [] as string[],
     available: true,
+    image: '',
   });
 
   const filteredMeals = useMemo(() => {
@@ -176,6 +177,7 @@ export default function MenuManagementPage() {
       tags: [...meal.tags],
       allergens: [...meal.allergens],
       available: true,
+      image: meal.image,
     });
   }
 
@@ -485,7 +487,7 @@ export default function MenuManagementPage() {
 
       {/* Meal Editor Modal */}
       <Modal isOpen={editingMeal !== null} onClose={() => setEditingMeal(null)} title="Edit Meal" size="lg">
-        <div className="max-h-[70vh] space-y-4 overflow-y-auto pr-1">
+        <div className="max-h-[70vh] space-y-4 overflow-y-auto overflow-x-hidden pr-1">
           <div>
             <label className="mb-1 block text-sm font-medium" style={{ color: '#1A1A2E' }}>Name</label>
             <input
@@ -521,14 +523,21 @@ export default function MenuManagementPage() {
 
           <div>
             <label className="mb-1 block text-sm font-medium" style={{ color: '#1A1A2E' }}>Photo</label>
-            <div
-              className="flex items-center justify-center rounded-lg py-8"
-              style={{ border: '2px dashed #E5E7EB', backgroundColor: '#F9FAFB' }}
-            >
-              <div className="text-center">
-                <Upload size={24} className="mx-auto mb-2" style={{ color: '#6B7280' }} />
-                <p className="text-sm" style={{ color: '#6B7280' }}>Drop image here or click to upload</p>
-                <p className="text-xs" style={{ color: '#9CA3AF' }}>PNG, JPG up to 5MB</p>
+            <div className="flex items-start gap-4">
+              {editForm.image && (
+                <div className="relative h-24 w-32 flex-shrink-0 overflow-hidden rounded-lg shadow-sm" style={{ border: '1px solid #E5E7EB' }}>
+                  <img src={editForm.image} alt="Meal preview" className="h-full w-full object-cover" />
+                </div>
+              )}
+              <div
+                className="flex flex-1 cursor-pointer items-center justify-center rounded-lg py-6 transition-colors hover:bg-gray-50"
+                style={{ border: '2px dashed #E5E7EB', backgroundColor: '#F9FAFB' }}
+              >
+                <div className="text-center">
+                  <Upload size={20} className="mx-auto mb-2" style={{ color: '#6B7280' }} />
+                  <p className="text-sm" style={{ color: '#6B7280' }}>Drop image here or click to upload</p>
+                  <p className="text-xs" style={{ color: '#9CA3AF' }}>PNG, JPG up to 5MB</p>
+                </div>
               </div>
             </div>
           </div>
@@ -599,12 +608,11 @@ export default function MenuManagementPage() {
             <label className="text-sm font-medium" style={{ color: '#1A1A2E' }}>Available</label>
             <button
               onClick={() => setEditForm((f) => ({ ...f, available: !f.available }))}
-              className="relative h-6 w-11 rounded-full transition-colors"
+              className="relative flex h-6 w-11 shrink-0 items-center rounded-full transition-colors"
               style={{ backgroundColor: editForm.available ? '#40916C' : '#D1D5DB' }}
             >
               <span
-                className="absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform"
-                style={{ transform: editForm.available ? 'translateX(22px)' : 'translateX(2px)' }}
+                className={`absolute left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${editForm.available ? 'translate-x-5' : 'translate-x-0'}`}
               />
             </button>
           </div>
