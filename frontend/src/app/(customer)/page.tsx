@@ -147,7 +147,7 @@ export default function LandingPage() {
         style={{ backgroundColor: '#FFFFFF', borderBottom: '1px solid #E5E7EB' }}
       >
         <div className="mx-auto max-w-7xl px-4 py-3 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
+          <div className="flex flex-wrap items-center gap-2 pb-1">
             <span className="mr-1 shrink-0 text-sm font-medium" style={{ color: '#6B7280' }}>
               Filter:
             </span>
