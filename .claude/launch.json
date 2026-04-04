@@ -4,9 +4,10 @@
     {
       "name": "prepflow",
       "runtimeExecutable": "npx",
-      "runtimeArgs": ["next", "dev", "--port", "3000"],
+      "runtimeArgs": ["next", "dev"],
       "port": 3000,
-      "cwd": "ux_prototype"
+      "autoPort": false,
+      "cwd": "frontend"
     }
   ]
 }
