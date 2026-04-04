@@ -82,6 +82,7 @@ class Settings(BaseSettings):
     RATE_LIMIT_PER_MINUTE: int = 60
 
     # Tenant Defaults
+    DEFAULT_TENANT_ID: str = "00000000-0000-0000-0000-000000000001"
     DEFAULT_TIMEZONE: str = "Asia/Manila"
     DEFAULT_CURRENCY: str = "PHP"
     DEFAULT_TAX_RATE: float = 0.12
