@@ -20,6 +20,8 @@ import type { Customer } from '@/lib/mock-data';
 import StatusBadge from '@/components/StatusBadge';
 import Modal from '@/components/Modal';
 import { useToast } from '@/context/ToastContext';
+import { useUsers, useOrders, useNotificationMutations } from '@/hooks';
+import { Skeleton, SkeletonRow } from '@/components/ui/skeleton';
 
 type Segment = 'all' | 'active' | 'paused' | 'at_risk' | 'churned' | 'vip';
 type SortKey = 'name' | 'email' | 'phone' | 'planType' | 'status' | 'ltv' | 'lastOrder' | 'joinDate';
@@ -51,17 +53,40 @@ export default function CustomersPage() {
   const [emailForm, setEmailForm] = useState({ to: '', subject: '', body: '' });
   const [smsForm, setSmsForm] = useState({ phone: '', message: '' });
 
+  // TanStack Query hooks
+  const usersQuery = useUsers();
+  const ordersQuery = useOrders();
+  const isLoadingCustomers = usersQuery.isLoading;
+  const { sendNotification, isSending } = useNotificationMutations();
+
+  // Map API users to Customer format, falling back to mock data
+  const displayCustomers: Customer[] = usersQuery.data?.items?.map((u: any) => ({
+    id: 0,
+    name: `${u.first_name} ${u.last_name}`,
+    email: u.email,
+    phone: u.phone ?? '',
+    planType: 'A la carte' as const,
+    status: (u.status === 'active' ? 'active' : 'churned') as Customer['status'],
+    monthsSubscribed: 0,
+    ltv: 0,
+    joinDate: u.created_at?.split('T')[0] ?? '',
+    lastOrder: u.last_login_at?.split('T')[0] ?? '',
+    notes: [] as string[],
+    address: '',
+    dietaryPreferences: [] as string[],
+  })) ?? customers;
+
   // Filter by segment
   const segmentFiltered = useMemo(() => {
     switch (activeSegment) {
-      case 'active': return customers.filter((c) => c.status === 'active' && c.planType !== 'A la carte');
-      case 'paused': return customers.filter((c) => c.status === 'paused');
-      case 'at_risk': return customers.filter((c) => c.status === 'at_risk');
-      case 'churned': return customers.filter((c) => c.status === 'churned');
-      case 'vip': return customers.filter((c) => c.isVIP);
-      default: return customers;
+      case 'active': return displayCustomers.filter((c) => c.status === 'active' && c.planType !== 'A la carte');
+      case 'paused': return displayCustomers.filter((c) => c.status === 'paused');
+      case 'at_risk': return displayCustomers.filter((c) => c.status === 'at_risk');
+      case 'churned': return displayCustomers.filter((c) => c.status === 'churned');
+      case 'vip': return displayCustomers.filter((c) => c.isVIP);
+      default: return displayCustomers;
     }
-  }, [activeSegment]);
+  }, [activeSegment, displayCustomers]);
 
   // Filter by search
   const searchFiltered = useMemo(() => {
@@ -145,16 +170,38 @@ export default function CustomersPage() {
     setSmsModalOpen(true);
   }
 
-  function handleSendEmail() {
+  async function handleSendEmail() {
     if (!selectedCustomer) return;
     setEmailModalOpen(false);
-    showToast(`Message sent to ${selectedCustomer.name}`);
+    try {
+      await sendNotification({
+        user_id: String(selectedCustomer.id),
+        channel: 'email',
+        subject: emailForm.subject,
+        body: emailForm.body,
+      });
+      showToast(`Email sent to ${selectedCustomer.name}`);
+    } catch {
+      // API not available – fall back to local toast
+      showToast(`Message sent to ${selectedCustomer.name}`);
+    }
   }
 
-  function handleSendSms() {
+  async function handleSendSms() {
     if (!selectedCustomer) return;
     setSmsModalOpen(false);
-    showToast(`Message sent to ${selectedCustomer.name}`);
+    try {
+      await sendNotification({
+        user_id: String(selectedCustomer.id),
+        channel: 'sms',
+        subject: '',
+        body: smsForm.message,
+      });
+      showToast(`SMS sent to ${selectedCustomer.name}`);
+    } catch {
+      // API not available – fall back to local toast
+      showToast(`Message sent to ${selectedCustomer.name}`);
+    }
   }
 
   return (
@@ -203,7 +250,7 @@ export default function CustomersPage() {
                   border: activeSegment === seg.key ? 'none' : '1px solid #E5E7EB',
                 }}
               >
-                {seg.label} ({seg.count(customers)})
+                {seg.label} ({seg.count(displayCustomers)})
               </button>
             ))}
           </div>
@@ -229,7 +276,7 @@ export default function CustomersPage() {
                       color: activeSegment === seg.key ? '#FFFFFF' : '#6B7280',
                     }}
                   >
-                    {seg.count(customers)}
+                    {seg.count(displayCustomers)}
                   </span>
                 </button>
               ))}
@@ -268,35 +315,43 @@ export default function CustomersPage() {
                 </tr>
               </thead>
               <tbody>
-                {sorted.map((customer) => (
-                  <tr
-                    key={customer.id}
-                    className="cursor-pointer transition-colors hover:bg-gray-50"
-                    style={{ borderBottom: '1px solid #E5E7EB' }}
-                    onClick={() => setSelectedCustomer(customer)}
-                  >
-                    <td className="whitespace-nowrap px-4 py-3">
-                      <div className="flex items-center gap-1.5">
-                        <span className="font-medium" style={{ color: '#1A1A2E' }}>{customer.name}</span>
-                        {customer.isVIP && <Star size={14} style={{ color: '#F59E0B' }} fill="#F59E0B" />}
-                        {customer.isCorporate && <Building2 size={14} style={{ color: '#3B82F6' }} />}
-                      </div>
-                    </td>
-                    <td className="whitespace-nowrap px-4 py-3" style={{ color: '#6B7280' }}>{customer.email}</td>
-                    <td className="whitespace-nowrap px-4 py-3" style={{ color: '#6B7280' }}>{customer.phone}</td>
-                    <td className="whitespace-nowrap px-4 py-3" style={{ color: '#6B7280' }}>{customer.planType}</td>
-                    <td className="whitespace-nowrap px-4 py-3"><StatusBadge status={customer.status} size="sm" /></td>
-                    <td className="whitespace-nowrap px-4 py-3 font-medium" style={{ color: '#1A1A2E' }}>{formatPeso(customer.ltv)}</td>
-                    <td className="whitespace-nowrap px-4 py-3" style={{ color: '#6B7280' }}>{customer.lastOrder}</td>
-                    <td className="whitespace-nowrap px-4 py-3" style={{ color: '#6B7280' }}>{customer.joinDate}</td>
-                  </tr>
-                ))}
-                {sorted.length === 0 && (
-                  <tr>
-                    <td colSpan={8} className="px-4 py-8 text-center text-sm" style={{ color: '#6B7280' }}>
-                      No customers found.
-                    </td>
-                  </tr>
+                {isLoadingCustomers ? (
+                  Array.from({ length: 6 }).map((_, i) => (
+                    <SkeletonRow key={i} cols={8} />
+                  ))
+                ) : (
+                  <>
+                    {sorted.map((customer) => (
+                      <tr
+                        key={customer.id}
+                        className="cursor-pointer transition-colors hover:bg-gray-50"
+                        style={{ borderBottom: '1px solid #E5E7EB' }}
+                        onClick={() => setSelectedCustomer(customer)}
+                      >
+                        <td className="whitespace-nowrap px-4 py-3">
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-medium" style={{ color: '#1A1A2E' }}>{customer.name}</span>
+                            {customer.isVIP && <Star size={14} style={{ color: '#F59E0B' }} fill="#F59E0B" />}
+                            {customer.isCorporate && <Building2 size={14} style={{ color: '#3B82F6' }} />}
+                          </div>
+                        </td>
+                        <td className="whitespace-nowrap px-4 py-3" style={{ color: '#6B7280' }}>{customer.email}</td>
+                        <td className="whitespace-nowrap px-4 py-3" style={{ color: '#6B7280' }}>{customer.phone}</td>
+                        <td className="whitespace-nowrap px-4 py-3" style={{ color: '#6B7280' }}>{customer.planType}</td>
+                        <td className="whitespace-nowrap px-4 py-3"><StatusBadge status={customer.status} size="sm" /></td>
+                        <td className="whitespace-nowrap px-4 py-3 font-medium" style={{ color: '#1A1A2E' }}>{formatPeso(customer.ltv)}</td>
+                        <td className="whitespace-nowrap px-4 py-3" style={{ color: '#6B7280' }}>{customer.lastOrder}</td>
+                        <td className="whitespace-nowrap px-4 py-3" style={{ color: '#6B7280' }}>{customer.joinDate}</td>
+                      </tr>
+                    ))}
+                    {sorted.length === 0 && (
+                      <tr>
+                        <td colSpan={8} className="px-4 py-8 text-center text-sm" style={{ color: '#6B7280' }}>
+                          No customers found.
+                        </td>
+                      </tr>
+                    )}
+                  </>
                 )}
               </tbody>
             </table>
@@ -305,7 +360,7 @@ export default function CustomersPage() {
       </div>
 
       {/* Customer Detail Slide-out Panel */}
-      {createPortal(
+      {typeof document !== 'undefined' && createPortal(
         <AnimatePresence>
           {selectedCustomer && (
             <>

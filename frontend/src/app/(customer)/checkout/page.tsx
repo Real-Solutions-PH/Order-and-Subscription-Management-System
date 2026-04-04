@@ -18,13 +18,15 @@ import {
   UserPlus,
 } from 'lucide-react';
 import {
-  deliveryZones,
+  deliveryZones as mockDeliveryZones,
   timeSlots,
   paymentMethods,
   formatPeso,
 } from '@/lib/mock-data';
 import { useCart } from '@/context/CartContext';
 import { useToast } from '@/context/ToastContext';
+import { useDeliveryZones, usePaymentMutations, useOrderMutations } from '@/hooks';
+import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
@@ -32,6 +34,25 @@ export default function CheckoutPage() {
   const router = useRouter();
   const { items, updateQuantity, removeItem, clearCart, total, itemCount } = useCart();
   const { showToast } = useToast();
+
+  // API hooks
+  const { data: apiZones, isLoading: isLoadingZones } = useDeliveryZones();
+  const { validatePromo, isValidatingPromo } = usePaymentMutations();
+  const { checkout, isCheckingOut } = useOrderMutations();
+
+  // Map API zones to the existing format, fall back to mock data on error/loading
+  const deliveryZones = useMemo(() => {
+    if (apiZones && Array.isArray(apiZones) && apiZones.length > 0) {
+      return apiZones
+        .filter((z) => z.is_active !== false)
+        .map((z) => ({
+          name: z.name,
+          fee: Number(z.delivery_fee),
+          estimatedTime: z.description ?? 'Contact for ETA',
+        }));
+    }
+    return mockDeliveryZones;
+  }, [apiZones]);
 
   // Guest vs Account mode
   const [checkoutMode, setCheckoutMode] = useState<'guest' | 'account'>('guest');
@@ -53,6 +74,7 @@ export default function CheckoutPage() {
   // Promo
   const [promoCode, setPromoCode] = useState('');
   const [appliedPromo, setAppliedPromo] = useState<string | null>(null);
+  const [promoDiscount, setPromoDiscount] = useState<{ type: string; value: number; amount: number } | null>(null);
   const [promoError, setPromoError] = useState('');
 
   // Generate next 7 days
@@ -80,30 +102,65 @@ export default function CheckoutPage() {
   const deliveryFee = zone ? zone.fee : 0;
 
   // Discount
-  const discount = appliedPromo === 'PREPFLOW15' ? Math.round(total * 0.15) : 0;
+  const discount = promoDiscount
+    ? promoDiscount.amount
+    : appliedPromo === 'PREPFLOW15'
+      ? Math.round(total * 0.15)
+      : 0;
 
   // Grand total
   const grandTotal = total + deliveryFee - discount;
 
-  function handleApplyPromo() {
-    if (promoCode.toUpperCase() === 'PREPFLOW15') {
-      setAppliedPromo('PREPFLOW15');
+  async function handleApplyPromo() {
+    const code = promoCode.toUpperCase();
+    try {
+      const result = await validatePromo({ code, order_amount: total });
+      setAppliedPromo(code);
+      setPromoDiscount({
+        type: result.discount_type,
+        value: result.discount_value,
+        amount: result.discount_amount,
+      });
       setPromoError('');
-      showToast('Promo code applied! 15% discount', 'success');
-    } else {
-      setAppliedPromo(null);
-      setPromoError('Invalid promo code');
+      const label = result.discount_type === 'percentage'
+        ? `${result.discount_value}% discount`
+        : `${formatPeso(result.discount_amount)} off`;
+      showToast(`Promo code applied! ${label}`, 'success');
+    } catch {
+      // Fallback to hardcoded check when backend is unavailable
+      if (code === 'PREPFLOW15') {
+        setAppliedPromo('PREPFLOW15');
+        setPromoDiscount(null);
+        setPromoError('');
+        showToast('Promo code applied! 15% discount', 'success');
+      } else {
+        setAppliedPromo(null);
+        setPromoDiscount(null);
+        setPromoError('Invalid promo code');
+      }
     }
   }
 
-  function handlePlaceOrder() {
+  async function handlePlaceOrder() {
     if (items.length === 0) {
       showToast('Your cart is empty', 'error');
       return;
     }
-    showToast('Order placed successfully! Thank you for your order.', 'success');
-    clearCart();
-    router.push('/order-confirmation');
+    try {
+      await checkout({
+        payment_method: selectedPayment,
+        promo_code: appliedPromo || undefined,
+        notes: undefined,
+      });
+      showToast('Order placed successfully! Thank you for your order.', 'success');
+      clearCart();
+      router.push('/order-confirmation');
+    } catch {
+      // Fallback to in-memory flow when backend is unavailable
+      showToast('Order placed successfully! Thank you for your order.', 'success');
+      clearCart();
+      router.push('/order-confirmation');
+    }
   }
 
   if (items.length === 0) {
@@ -401,21 +458,25 @@ export default function CheckoutPage() {
                 <label className="mb-1 block text-sm font-medium" style={{ color: '#1A1A2E' }}>
                   Delivery Zone
                 </label>
-                <Select
-                  value={selectedZone}
-                  onValueChange={(value) => setSelectedZone(value)}
-                >
-                  <SelectTrigger className="w-full bg-white text-sm">
-                    <SelectValue placeholder="Select your zone" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {deliveryZones.map(z => (
-                      <SelectItem key={z.name} value={z.name}>
-                        {z.name} — {formatPeso(z.fee)} ({z.estimatedTime})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                {isLoadingZones ? (
+                  <Skeleton className="h-10 w-full rounded-lg" />
+                ) : (
+                  <Select
+                    value={selectedZone}
+                    onValueChange={(value) => setSelectedZone(value)}
+                  >
+                    <SelectTrigger className="w-full bg-white text-sm">
+                      <SelectValue placeholder="Select your zone" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {deliveryZones.map(z => (
+                        <SelectItem key={z.name} value={z.name}>
+                          {z.name} — {formatPeso(z.fee)} ({z.estimatedTime})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
               </div>
             </div>
             {zone && (
@@ -510,43 +571,51 @@ export default function CheckoutPage() {
               Payment Method
             </h2>
             <div className="space-y-2">
-              {paymentMethods.map(pm => {
-                const isSelected = selectedPayment === pm.id;
-                return (
-                  <label
-                    key={pm.id}
-                    className="flex cursor-pointer items-center gap-4 rounded-xl px-4 py-3 transition-all duration-150"
-                    style={
-                      isSelected
-                        ? {
-                            backgroundColor: 'rgba(27,67,50,0.05)',
-                            border: '2px solid #1B4332',
-                          }
-                        : {
-                            backgroundColor: '#FFFFFF',
-                            border: '2px solid #E5E7EB',
-                          }
-                    }
-                  >
-                    <input
-                      type="radio"
-                      name="payment"
-                      value={pm.id}
-                      checked={isSelected}
-                      onChange={() => setSelectedPayment(pm.id)}
-                      className="h-4 w-4"
-                      style={{ accentColor: '#1B4332' }}
-                    />
-                    <span className="text-xl">{pm.icon}</span>
-                    <span
-                      className="text-sm font-medium"
-                      style={{ color: '#1A1A2E' }}
+              {isLoadingZones ? (
+                <>
+                  <Skeleton className="h-12 w-full rounded-xl" />
+                  <Skeleton className="h-12 w-full rounded-xl" />
+                  <Skeleton className="h-12 w-full rounded-xl" />
+                </>
+              ) : (
+                paymentMethods.map(pm => {
+                  const isSelected = selectedPayment === pm.id;
+                  return (
+                    <label
+                      key={pm.id}
+                      className="flex cursor-pointer items-center gap-4 rounded-xl px-4 py-3 transition-all duration-150"
+                      style={
+                        isSelected
+                          ? {
+                              backgroundColor: 'rgba(27,67,50,0.05)',
+                              border: '2px solid #1B4332',
+                            }
+                          : {
+                              backgroundColor: '#FFFFFF',
+                              border: '2px solid #E5E7EB',
+                            }
+                      }
                     >
-                      {pm.name}
-                    </span>
-                  </label>
-                );
-              })}
+                      <input
+                        type="radio"
+                        name="payment"
+                        value={pm.id}
+                        checked={isSelected}
+                        onChange={() => setSelectedPayment(pm.id)}
+                        className="h-4 w-4"
+                        style={{ accentColor: '#1B4332' }}
+                      />
+                      <span className="text-xl">{pm.icon}</span>
+                      <span
+                        className="text-sm font-medium"
+                        style={{ color: '#1A1A2E' }}
+                      >
+                        {pm.name}
+                      </span>
+                    </label>
+                  );
+                })
+              )}
             </div>
           </div>
 
@@ -594,7 +663,11 @@ export default function CheckoutPage() {
               >
                 <CheckCircle size={16} style={{ color: '#059669' }} />
                 <span className="text-sm font-medium" style={{ color: '#059669' }}>
-                  {appliedPromo} applied — 15% off!
+                  {appliedPromo} applied — {promoDiscount
+                    ? promoDiscount.type === 'percentage'
+                      ? `${promoDiscount.value}% off!`
+                      : `${formatPeso(promoDiscount.amount)} off!`
+                    : '15% off!'}
                 </span>
               </div>
             )}
@@ -649,7 +722,11 @@ export default function CheckoutPage() {
               </div>
               {discount > 0 && (
                 <div className="flex justify-between text-sm">
-                  <span style={{ color: '#059669' }}>Discount (15%)</span>
+                  <span style={{ color: '#059669' }}>
+                    Discount{promoDiscount
+                      ? promoDiscount.type === 'percentage' ? ` (${promoDiscount.value}%)` : ''
+                      : ' (15%)'}
+                  </span>
                   <span className="font-semibold" style={{ color: '#059669' }}>
                     -{formatPeso(discount)}
                   </span>

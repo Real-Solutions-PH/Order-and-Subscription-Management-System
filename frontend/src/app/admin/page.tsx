@@ -59,6 +59,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useDashboardMetrics, useMRRBreakdown, usePopularItems, useCohorts, useOrders } from '@/hooks';
+import { SkeletonKPI, SkeletonChart } from '@/components/ui/skeleton';
 
 const statusColors: Record<string, { bg: string; text: string }> = {
   new: { bg: "#DBEAFE", text: "#1E40AF" },
@@ -75,145 +77,7 @@ const calculateTrend = (current: number, previous: number) => {
   return diff > 0 ? `+${diff.toFixed(1)}%` : `${diff.toFixed(1)}%`;
 };
 
-const overviewKpis = [
-  {
-    label: "Today's Gross Sales",
-    value: formatPeso(analyticsData.todayGrossSales),
-    lastMonthValue: formatPeso(analyticsData.todayGrossSalesLastMonth),
-    trend: calculateTrend(
-      analyticsData.todayGrossSales,
-      analyticsData.todayGrossSalesLastMonth,
-    ),
-    trendUp:
-      analyticsData.todayGrossSales > analyticsData.todayGrossSalesLastMonth,
-    icon: DollarSign,
-    iconBg: "#F0FDF4",
-    iconColor: "#16A34A",
-  },
-  {
-    label: "Net Sales",
-    value: formatPeso(analyticsData.todayNetSales),
-    lastMonthValue: formatPeso(analyticsData.todayNetSalesLastMonth),
-    trend: calculateTrend(
-      analyticsData.todayNetSales,
-      analyticsData.todayNetSalesLastMonth,
-    ),
-    trendUp: analyticsData.todayNetSales > analyticsData.todayNetSalesLastMonth,
-    icon: Activity,
-    iconBg: "#ECFDF5",
-    iconColor: "#059669",
-  },
-  {
-    label: "Total Meals",
-    value: analyticsData.todayTotalMeals.toString(),
-    lastMonthValue: analyticsData.todayTotalMealsLastMonth.toString(),
-    trend: calculateTrend(
-      analyticsData.todayTotalMeals,
-      analyticsData.todayTotalMealsLastMonth,
-    ),
-    trendUp:
-      analyticsData.todayTotalMeals > analyticsData.todayTotalMealsLastMonth,
-    icon: Package,
-    iconBg: "#FFFBEB",
-    iconColor: "#D97706",
-  },
-  {
-    label: "MRR",
-    value: formatPeso(analyticsData.mrr),
-    lastMonthValue: formatPeso(analyticsData.mrrLastMonth),
-    trend: calculateTrend(analyticsData.mrr, analyticsData.mrrLastMonth),
-    trendUp: analyticsData.mrr > analyticsData.mrrLastMonth,
-    icon: Repeat,
-    iconBg: "#F5F3FF",
-    iconColor: "#7C3AED",
-  },
-  {
-    label: "Churn Rate",
-    value: `${analyticsData.churnRate}%`,
-    lastMonthValue: `${analyticsData.churnRateLastMonth}%`,
-    trend: `${(analyticsData.churnRate - analyticsData.churnRateLastMonth).toFixed(1)}%`,
-    trendUp: analyticsData.churnRate < analyticsData.churnRateLastMonth,
-    icon: BarChart3,
-    iconBg: "#FEF2F2",
-    iconColor: "#DC2626",
-  },
-  {
-    label: "Active Subscribers",
-    value: analyticsData.activeSubscribers.toString(),
-    lastMonthValue: analyticsData.activeSubscribersLastMonth.toString(),
-    trend: `+${analyticsData.activeSubscribers - analyticsData.activeSubscribersLastMonth}`,
-    trendUp:
-      analyticsData.activeSubscribers >
-      analyticsData.activeSubscribersLastMonth,
-    icon: Users,
-    iconBg: "#EFF6FF",
-    iconColor: "#2563EB",
-  },
-  {
-    label: "CAC",
-    value: formatPeso(analyticsData.cac),
-    lastMonthValue: formatPeso(analyticsData.cacLastMonth),
-    trend: calculateTrend(analyticsData.cac, analyticsData.cacLastMonth),
-    trendUp: analyticsData.cac < analyticsData.cacLastMonth,
-    icon: Target,
-    iconBg: "#FFF7ED",
-    iconColor: "#EA580C",
-  },
-  {
-    label: "CAC Payback",
-    value: `${analyticsData.cacPaybackMonths} mo`,
-    lastMonthValue: `${analyticsData.cacPaybackMonthsLastMonth} mo`,
-    trend: `${(analyticsData.cacPaybackMonths - analyticsData.cacPaybackMonthsLastMonth).toFixed(1)} mo`,
-    trendUp: analyticsData.cacPaybackMonths < analyticsData.cacPaybackMonthsLastMonth,
-    icon: Timer,
-    iconBg: "#FDF4FF",
-    iconColor: "#A855F7",
-  },
-];
-
-const subscriptionKpis = [
-  {
-    label: "Active Subscriptions",
-    value: analyticsData.activeSubscribers.toString(),
-    lastMonthValue: analyticsData.activeSubscribersLastMonth.toString(),
-    trend: `+${analyticsData.activeSubscribers - analyticsData.activeSubscribersLastMonth}`,
-    trendUp:
-      analyticsData.activeSubscribers >
-      analyticsData.activeSubscribersLastMonth,
-    icon: Users,
-    iconBg: "#D1FAE5",
-    iconColor: "#059669",
-  },
-  {
-    label: "MRR",
-    value: formatPeso(analyticsData.mrr),
-    lastMonthValue: formatPeso(analyticsData.mrrLastMonth),
-    trend: calculateTrend(analyticsData.mrr, analyticsData.mrrLastMonth),
-    trendUp: analyticsData.mrr > analyticsData.mrrLastMonth,
-    icon: Repeat,
-    iconBg: "#EDE9FE",
-    iconColor: "#7C3AED",
-  },
-  {
-    label: "Churn Rate",
-    value: `${analyticsData.churnRate}%`,
-    lastMonthValue: `${analyticsData.churnRateLastMonth}%`,
-    trend: `${(analyticsData.churnRate - analyticsData.churnRateLastMonth).toFixed(1)}%`,
-    trendUp: analyticsData.churnRate < analyticsData.churnRateLastMonth,
-    icon: BarChart3,
-    iconBg: "#FEF3C7",
-    iconColor: "#D97706",
-  },
-  {
-    label: "Avg LTV",
-    value: formatPeso(analyticsData.avgLTV),
-    trend: "+5%",
-    trendUp: true,
-    icon: Heart,
-    iconBg: "#FCE7F3",
-    iconColor: "#DB2777",
-  },
-];
+// overviewKpis and subscriptionKpis are now defined inside the component to use displayAnalytics
 
 const ltvTrendData = [
   { month: "Oct", ltv: 12800 },
@@ -273,6 +137,171 @@ type Tab = "overview" | "subscriptions" | "operations";
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<Tab>("overview");
 
+  // ─── TanStack Query hooks ───
+  const dashboardQuery = useDashboardMetrics();
+  const mrrQuery = useMRRBreakdown();
+  const popularQuery = usePopularItems(10);
+  const cohortsQuery = useCohorts();
+  const ordersQuery = useOrders();
+
+  // Merge API data with mock fallback
+  const dashMetrics = dashboardQuery.data;
+  const displayAnalytics = {
+    ...analyticsData,
+    // Override with API data when available
+    ...(dashMetrics ? {
+      mrr: Number(dashMetrics.mrr),
+      activeSubscribers: dashMetrics.active_subscribers,
+      churnRate: dashMetrics.churn_rate,
+      avgOrderValue: Number(dashMetrics.aov),
+      todayRevenue: Number(dashMetrics.total_revenue),
+    } : {}),
+  };
+
+  // Use API orders when available, fall back to mock
+  const displayOrders = ordersQuery.data?.items ?? orders;
+
+  // ─── KPI card definitions (use displayAnalytics) ───
+  const overviewKpis = [
+    {
+      label: "Today's Gross Sales",
+      value: formatPeso(displayAnalytics.todayGrossSales),
+      lastMonthValue: formatPeso(displayAnalytics.todayGrossSalesLastMonth),
+      trend: calculateTrend(
+        displayAnalytics.todayGrossSales,
+        displayAnalytics.todayGrossSalesLastMonth,
+      ),
+      trendUp:
+        displayAnalytics.todayGrossSales > displayAnalytics.todayGrossSalesLastMonth,
+      icon: DollarSign,
+      iconBg: "#F0FDF4",
+      iconColor: "#16A34A",
+    },
+    {
+      label: "Net Sales",
+      value: formatPeso(displayAnalytics.todayNetSales),
+      lastMonthValue: formatPeso(displayAnalytics.todayNetSalesLastMonth),
+      trend: calculateTrend(
+        displayAnalytics.todayNetSales,
+        displayAnalytics.todayNetSalesLastMonth,
+      ),
+      trendUp: displayAnalytics.todayNetSales > displayAnalytics.todayNetSalesLastMonth,
+      icon: Activity,
+      iconBg: "#ECFDF5",
+      iconColor: "#059669",
+    },
+    {
+      label: "Total Meals",
+      value: displayAnalytics.todayTotalMeals.toString(),
+      lastMonthValue: displayAnalytics.todayTotalMealsLastMonth.toString(),
+      trend: calculateTrend(
+        displayAnalytics.todayTotalMeals,
+        displayAnalytics.todayTotalMealsLastMonth,
+      ),
+      trendUp:
+        displayAnalytics.todayTotalMeals > displayAnalytics.todayTotalMealsLastMonth,
+      icon: Package,
+      iconBg: "#FFFBEB",
+      iconColor: "#D97706",
+    },
+    {
+      label: "MRR",
+      value: formatPeso(displayAnalytics.mrr),
+      lastMonthValue: formatPeso(displayAnalytics.mrrLastMonth),
+      trend: calculateTrend(displayAnalytics.mrr, displayAnalytics.mrrLastMonth),
+      trendUp: displayAnalytics.mrr > displayAnalytics.mrrLastMonth,
+      icon: Repeat,
+      iconBg: "#F5F3FF",
+      iconColor: "#7C3AED",
+    },
+    {
+      label: "Churn Rate",
+      value: `${displayAnalytics.churnRate}%`,
+      lastMonthValue: `${displayAnalytics.churnRateLastMonth}%`,
+      trend: `${(displayAnalytics.churnRate - displayAnalytics.churnRateLastMonth).toFixed(1)}%`,
+      trendUp: displayAnalytics.churnRate < displayAnalytics.churnRateLastMonth,
+      icon: BarChart3,
+      iconBg: "#FEF2F2",
+      iconColor: "#DC2626",
+    },
+    {
+      label: "Active Subscribers",
+      value: displayAnalytics.activeSubscribers.toString(),
+      lastMonthValue: displayAnalytics.activeSubscribersLastMonth.toString(),
+      trend: `+${displayAnalytics.activeSubscribers - displayAnalytics.activeSubscribersLastMonth}`,
+      trendUp:
+        displayAnalytics.activeSubscribers >
+        displayAnalytics.activeSubscribersLastMonth,
+      icon: Users,
+      iconBg: "#EFF6FF",
+      iconColor: "#2563EB",
+    },
+    {
+      label: "CAC",
+      value: formatPeso(displayAnalytics.cac),
+      lastMonthValue: formatPeso(displayAnalytics.cacLastMonth),
+      trend: calculateTrend(displayAnalytics.cac, displayAnalytics.cacLastMonth),
+      trendUp: displayAnalytics.cac < displayAnalytics.cacLastMonth,
+      icon: Target,
+      iconBg: "#FFF7ED",
+      iconColor: "#EA580C",
+    },
+    {
+      label: "CAC Payback",
+      value: `${displayAnalytics.cacPaybackMonths} mo`,
+      lastMonthValue: `${displayAnalytics.cacPaybackMonthsLastMonth} mo`,
+      trend: `${(displayAnalytics.cacPaybackMonths - displayAnalytics.cacPaybackMonthsLastMonth).toFixed(1)} mo`,
+      trendUp: displayAnalytics.cacPaybackMonths < displayAnalytics.cacPaybackMonthsLastMonth,
+      icon: Timer,
+      iconBg: "#FDF4FF",
+      iconColor: "#A855F7",
+    },
+  ];
+
+  const subscriptionKpis = [
+    {
+      label: "Active Subscriptions",
+      value: displayAnalytics.activeSubscribers.toString(),
+      lastMonthValue: displayAnalytics.activeSubscribersLastMonth.toString(),
+      trend: `+${displayAnalytics.activeSubscribers - displayAnalytics.activeSubscribersLastMonth}`,
+      trendUp:
+        displayAnalytics.activeSubscribers >
+        displayAnalytics.activeSubscribersLastMonth,
+      icon: Users,
+      iconBg: "#D1FAE5",
+      iconColor: "#059669",
+    },
+    {
+      label: "MRR",
+      value: formatPeso(displayAnalytics.mrr),
+      lastMonthValue: formatPeso(displayAnalytics.mrrLastMonth),
+      trend: calculateTrend(displayAnalytics.mrr, displayAnalytics.mrrLastMonth),
+      trendUp: displayAnalytics.mrr > displayAnalytics.mrrLastMonth,
+      icon: Repeat,
+      iconBg: "#EDE9FE",
+      iconColor: "#7C3AED",
+    },
+    {
+      label: "Churn Rate",
+      value: `${displayAnalytics.churnRate}%`,
+      lastMonthValue: `${displayAnalytics.churnRateLastMonth}%`,
+      trend: `${(displayAnalytics.churnRate - displayAnalytics.churnRateLastMonth).toFixed(1)}%`,
+      trendUp: displayAnalytics.churnRate < displayAnalytics.churnRateLastMonth,
+      icon: BarChart3,
+      iconBg: "#FEF3C7",
+      iconColor: "#D97706",
+    },
+    {
+      label: "Avg LTV",
+      value: formatPeso(displayAnalytics.avgLTV),
+      trend: "+5%",
+      trendUp: true,
+      icon: Heart,
+      iconBg: "#FCE7F3",
+      iconColor: "#DB2777",
+    },
+  ];
+
   // Sorting state for Menu Contribution table
   type SortKey =
     | "name"
@@ -292,7 +321,7 @@ export default function AdminDashboard() {
   });
 
   const sortedContribution = useMemo(() => {
-    const sortableData = [...analyticsData.menuContribution];
+    const sortableData = [...displayAnalytics.menuContribution];
     sortableData.sort((a: any, b: any) => {
       if (a[sortConfig.key] < b[sortConfig.key]) {
         return sortConfig.direction === "asc" ? -1 : 1;
@@ -303,7 +332,7 @@ export default function AdminDashboard() {
       return 0;
     });
     return sortableData;
-  }, [sortConfig]);
+  }, [sortConfig, displayAnalytics.menuContribution]);
 
   const handleSort = (key: SortKey) => {
     setSortConfig((prev) => ({
@@ -322,8 +351,8 @@ export default function AdminDashboard() {
   };
 
   // Count orders by status
-  const statusCounts = orders.reduce(
-    (acc, o) => {
+  const statusCounts = (displayOrders as Array<{ status: string }>).reduce(
+    (acc: Record<string, number>, o) => {
       acc[o.status] = (acc[o.status] || 0) + 1;
       return acc;
     },
@@ -549,80 +578,91 @@ export default function AdminDashboard() {
             </div>
           </motion.div>
           {/* KPI Cards */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4">
-            {overviewKpis.map((kpi, i) => {
-              const Icon = kpi.icon;
-              return (
-                <Tooltip key={kpi.label}>
-                  <TooltipTrigger asChild>
-                    <motion.div
-                      initial={{ opacity: 0, y: 16 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: i * 0.05, duration: 0.3 }}
-                      className="rounded-xl p-4 cursor-help"
-                      style={{
-                        backgroundColor: "#FFFFFF",
-                        boxShadow: "var(--shadow-card)",
-                        border: "1px solid #E5E7EB",
-                      }}
-                    >
-                      <div className="flex items-start justify-between">
-                        <div
-                          className="flex h-9 w-9 items-center justify-center rounded-lg"
-                          style={{ backgroundColor: kpi.iconBg }}
-                        >
-                          <Icon size={18} style={{ color: kpi.iconColor }} />
+          {dashboardQuery.isLoading ? (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4">
+              {Array.from({length: 8}).map((_, i) => <SkeletonKPI key={i} />)}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4">
+              {overviewKpis.map((kpi, i) => {
+                const Icon = kpi.icon;
+                return (
+                  <Tooltip key={kpi.label}>
+                    <TooltipTrigger asChild>
+                      <motion.div
+                        initial={{ opacity: 0, y: 16 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.05, duration: 0.3 }}
+                        className="rounded-xl p-4 cursor-help"
+                        style={{
+                          backgroundColor: "#FFFFFF",
+                          boxShadow: "var(--shadow-card)",
+                          border: "1px solid #E5E7EB",
+                        }}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div
+                            className="flex h-9 w-9 items-center justify-center rounded-lg"
+                            style={{ backgroundColor: kpi.iconBg }}
+                          >
+                            <Icon size={18} style={{ color: kpi.iconColor }} />
+                          </div>
+                          <span
+                            className="inline-flex items-center gap-0.5 text-[10px] font-bold uppercase tracking-wider"
+                            style={{ color: kpi.trendUp ? "#059669" : "#DC2626" }}
+                          >
+                            {kpi.trendUp ? (
+                              <TrendingUp size={12} />
+                            ) : (
+                              <TrendingDown size={12} />
+                            )}
+                            {kpi.trend}
+                          </span>
                         </div>
-                        <span
-                          className="inline-flex items-center gap-0.5 text-[10px] font-bold uppercase tracking-wider"
-                          style={{ color: kpi.trendUp ? "#059669" : "#DC2626" }}
+                        <p
+                          className="mt-3 text-xl font-bold tracking-tight"
+                          style={{ color: "#1A1A2E" }}
                         >
-                          {kpi.trendUp ? (
-                            <TrendingUp size={12} />
-                          ) : (
-                            <TrendingDown size={12} />
-                          )}
-                          {kpi.trend}
+                          {kpi.value}
+                        </p>
+                        <p
+                          className="mt-0.5 text-[11px] font-medium"
+                          style={{ color: "#6B7280" }}
+                        >
+                          {kpi.label}
+                        </p>
+                      </motion.div>
+                    </TooltipTrigger>
+                    <TooltipContent
+                      side="top"
+                      align="center"
+                      className="flex flex-col gap-1 p-2"
+                    >
+                      <div className="flex items-center justify-between gap-4">
+                        <span className="text-gray-500">Current</span>
+                        <span className="font-bold text-slate-900">
+                          {kpi.value}
                         </span>
                       </div>
-                      <p
-                        className="mt-3 text-xl font-bold tracking-tight"
-                        style={{ color: "#1A1A2E" }}
-                      >
-                        {kpi.value}
-                      </p>
-                      <p
-                        className="mt-0.5 text-[11px] font-medium"
-                        style={{ color: "#6B7280" }}
-                      >
-                        {kpi.label}
-                      </p>
-                    </motion.div>
-                  </TooltipTrigger>
-                  <TooltipContent
-                    side="top"
-                    align="center"
-                    className="flex flex-col gap-1 p-2"
-                  >
-                    <div className="flex items-center justify-between gap-4">
-                      <span className="text-gray-500">Current</span>
-                      <span className="font-bold text-slate-900">
-                        {kpi.value}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between gap-4 border-t border-gray-100 pt-1">
-                      <span className="text-gray-500">Last Month</span>
-                      <span className="font-semibold text-slate-700">
-                        {kpi.lastMonthValue}
-                      </span>
-                    </div>
-                  </TooltipContent>
-                </Tooltip>
-              );
-            })}
-          </div>
+                      <div className="flex items-center justify-between gap-4 border-t border-gray-100 pt-1">
+                        <span className="text-gray-500">Last Month</span>
+                        <span className="font-semibold text-slate-700">
+                          {kpi.lastMonthValue}
+                        </span>
+                      </div>
+                    </TooltipContent>
+                  </Tooltip>
+                );
+              })}
+            </div>
+          )}
 
           {/* Charts Row */}
+          {dashboardQuery.isLoading ? (
+            <div className="grid grid-cols-1 gap-6">
+              <SkeletonChart />
+            </div>
+          ) : (
           <div className="grid grid-cols-1 gap-6">
             {/* Revenue Chart */}
             <motion.div
@@ -644,7 +684,7 @@ export default function AdminDashboard() {
               </h2>
               <div style={{ height: 300 }}>
                 <ResponsiveContainer width="100%" height="100%">
-                  <ComposedChart data={analyticsData.revenueData}>
+                  <ComposedChart data={displayAnalytics.revenueData}>
                     <defs>
                       <linearGradient
                         id="gradSubscription"
@@ -713,8 +753,8 @@ export default function AdminDashboard() {
                         borderRadius: 8,
                         fontSize: 12,
                       }}
-                      formatter={(value: number, name: string) => {
-                        if (name === "Labor Efficiency") return [value.toFixed(3), name];
+                      formatter={(value, name) => {
+                        if (name === "Labor Efficiency") return [Number(value).toFixed(3), name];
                         return [formatPeso(Number(value)), name];
                       }}
                     />
@@ -750,6 +790,7 @@ export default function AdminDashboard() {
               </div>
             </motion.div>
           </div>
+          )}
 
           {/* Menu Profitability & Performance */}
           <motion.div
@@ -809,7 +850,7 @@ export default function AdminDashboard() {
                 </thead>
                 <tbody>
                   {sortedContribution.map((item, i) => {
-                    const topRevenue = Math.max(...analyticsData.menuContribution.map((m) => m.revenue));
+                    const topRevenue = Math.max(...displayAnalytics.menuContribution.map((m) => m.revenue));
                     const revenueBarPct = (item.revenue / topRevenue) * 100;
                     const isTop3 = i < 3;
                     return (
@@ -841,6 +882,11 @@ export default function AdminDashboard() {
       {activeTab === "subscriptions" && (
         <TooltipProvider>
           {/* Subscription KPI Cards */}
+          {dashboardQuery.isLoading ? (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              {Array.from({length: 4}).map((_, i) => <SkeletonKPI key={i} />)}
+            </div>
+          ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
             {subscriptionKpis.map((kpi, i) => {
               const Icon = kpi.icon;
@@ -879,7 +925,7 @@ export default function AdminDashboard() {
                                 fill="none"
                                 stroke="#D97706"
                                 strokeWidth="3"
-                                strokeDasharray={`${analyticsData.churnRate}, 100`}
+                                strokeDasharray={`${displayAnalytics.churnRate}, 100`}
                                 strokeLinecap="round"
                               />
                             </svg>
@@ -947,8 +993,15 @@ export default function AdminDashboard() {
               );
             })}
           </div>
+          )}
 
           {/* Charts Row 1 */}
+          {mrrQuery.isLoading ? (
+            <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+              <SkeletonChart />
+              <SkeletonChart />
+            </div>
+          ) : (
           <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
             {/* New vs Churned */}
             <motion.div
@@ -970,7 +1023,7 @@ export default function AdminDashboard() {
               </h2>
               <div style={{ height: 300 }}>
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={analyticsData.subscriberTrend}>
+                  <BarChart data={displayAnalytics.subscriberTrend}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
                     <XAxis
                       dataKey="week"
@@ -1032,7 +1085,7 @@ export default function AdminDashboard() {
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
-                        data={analyticsData.planDistribution}
+                        data={displayAnalytics.planDistribution}
                         cx="50%"
                         cy="50%"
                         innerRadius={55}
@@ -1042,7 +1095,7 @@ export default function AdminDashboard() {
                         label={renderCustomLabel}
                         labelLine={false}
                       >
-                        {analyticsData.planDistribution.map((entry, index) => (
+                        {displayAnalytics.planDistribution.map((entry, index) => (
                           <Cell key={index} fill={entry.color} />
                         ))}
                       </Pie>
@@ -1061,7 +1114,7 @@ export default function AdminDashboard() {
                   </ResponsiveContainer>
                 </div>
                 <div className="flex-1 space-y-3">
-                  {analyticsData.planDistribution.map((plan) => (
+                  {displayAnalytics.planDistribution.map((plan) => (
                     <div key={plan.name} className="flex items-center gap-3">
                       <div
                         className="h-3 w-3 rounded-full"
@@ -1104,6 +1157,7 @@ export default function AdminDashboard() {
               </div>
             </motion.div>
           </div>
+          )}
 
           {/* Row 2: Retention Metrics + LTV Trend */}
           <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
@@ -1220,6 +1274,9 @@ export default function AdminDashboard() {
           </div>
 
           {/* Cohort Retention Heatmap */}
+          {cohortsQuery.isLoading ? (
+            <SkeletonChart />
+          ) : (
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
@@ -1259,7 +1316,7 @@ export default function AdminDashboard() {
                   </tr>
                 </thead>
                 <tbody>
-                  {analyticsData.cohortRetention.map((row) => (
+                  {displayAnalytics.cohortRetention.map((row) => (
                     <tr
                       key={row.month}
                       style={{ borderBottom: "1px solid #F3F4F6" }}
@@ -1329,6 +1386,7 @@ export default function AdminDashboard() {
               </span>
             </div>
           </motion.div>
+          )}
 
           {/* ─── CUSTOMER BEHAVIOR ─── */}
           <div>
@@ -1671,14 +1729,19 @@ export default function AdminDashboard() {
       {activeTab === "operations" && (
         <TooltipProvider>
           {/* Operations KPI Cards */}
+          {dashboardQuery.isLoading ? (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              {Array.from({length: 4}).map((_, i) => <SkeletonKPI key={i} />)}
+            </div>
+          ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
             {[
               {
                 label: "Order Fulfillment Rate",
-                value: `${analyticsData.orderFulfillmentRate}%`,
-                lastMonthValue: `${analyticsData.orderFulfillmentRateLastMonth}%`,
-                trend: calculateTrend(analyticsData.orderFulfillmentRate, analyticsData.orderFulfillmentRateLastMonth),
-                trendUp: analyticsData.orderFulfillmentRate > analyticsData.orderFulfillmentRateLastMonth,
+                value: `${displayAnalytics.orderFulfillmentRate}%`,
+                lastMonthValue: `${displayAnalytics.orderFulfillmentRateLastMonth}%`,
+                trend: calculateTrend(displayAnalytics.orderFulfillmentRate, displayAnalytics.orderFulfillmentRateLastMonth),
+                trendUp: displayAnalytics.orderFulfillmentRate > displayAnalytics.orderFulfillmentRateLastMonth,
                 icon: CheckCircle2,
                 iconBg: "#D1FAE5",
                 iconColor: "#059669",
@@ -1686,10 +1749,10 @@ export default function AdminDashboard() {
               },
               {
                 label: "Avg Prep Time",
-                value: `${analyticsData.avgPrepTimeMinutes} min`,
-                lastMonthValue: `${analyticsData.avgPrepTimeMinutesLastMonth} min`,
-                trend: calculateTrend(analyticsData.avgPrepTimeMinutes, analyticsData.avgPrepTimeMinutesLastMonth),
-                trendUp: analyticsData.avgPrepTimeMinutes < analyticsData.avgPrepTimeMinutesLastMonth,
+                value: `${displayAnalytics.avgPrepTimeMinutes} min`,
+                lastMonthValue: `${displayAnalytics.avgPrepTimeMinutesLastMonth} min`,
+                trend: calculateTrend(displayAnalytics.avgPrepTimeMinutes, displayAnalytics.avgPrepTimeMinutesLastMonth),
+                trendUp: displayAnalytics.avgPrepTimeMinutes < displayAnalytics.avgPrepTimeMinutesLastMonth,
                 icon: Clock,
                 iconBg: "#FEF3C7",
                 iconColor: "#D97706",
@@ -1697,10 +1760,10 @@ export default function AdminDashboard() {
               },
               {
                 label: "Food Waste",
-                value: `${analyticsData.foodWastePercent}%`,
-                lastMonthValue: `${analyticsData.foodWastePercentLastMonth}%`,
-                trend: calculateTrend(analyticsData.foodWastePercent, analyticsData.foodWastePercentLastMonth),
-                trendUp: analyticsData.foodWastePercent < analyticsData.foodWastePercentLastMonth,
+                value: `${displayAnalytics.foodWastePercent}%`,
+                lastMonthValue: `${displayAnalytics.foodWastePercentLastMonth}%`,
+                trend: calculateTrend(displayAnalytics.foodWastePercent, displayAnalytics.foodWastePercentLastMonth),
+                trendUp: displayAnalytics.foodWastePercent < displayAnalytics.foodWastePercentLastMonth,
                 icon: Trash2,
                 iconBg: "#FEE2E2",
                 iconColor: "#DC2626",
@@ -1708,10 +1771,10 @@ export default function AdminDashboard() {
               },
               {
                 label: "Delivery Success Rate",
-                value: `${analyticsData.deliverySuccessRate}%`,
-                lastMonthValue: `${analyticsData.deliverySuccessRateLastMonth}%`,
-                trend: calculateTrend(analyticsData.deliverySuccessRate, analyticsData.deliverySuccessRateLastMonth),
-                trendUp: analyticsData.deliverySuccessRate > analyticsData.deliverySuccessRateLastMonth,
+                value: `${displayAnalytics.deliverySuccessRate}%`,
+                lastMonthValue: `${displayAnalytics.deliverySuccessRateLastMonth}%`,
+                trend: calculateTrend(displayAnalytics.deliverySuccessRate, displayAnalytics.deliverySuccessRateLastMonth),
+                trendUp: displayAnalytics.deliverySuccessRate > displayAnalytics.deliverySuccessRateLastMonth,
                 icon: Truck,
                 iconBg: "#DBEAFE",
                 iconColor: "#2563EB",
@@ -1767,8 +1830,12 @@ export default function AdminDashboard() {
               );
             })}
           </div>
+          )}
 
           {/* Fulfillment Trend Chart */}
+          {ordersQuery.isLoading ? (
+            <SkeletonChart />
+          ) : (
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
@@ -1787,7 +1854,7 @@ export default function AdminDashboard() {
               8-week rolling view of key operational metrics
             </p>
             <ResponsiveContainer width="100%" height={320}>
-              <LineChart data={analyticsData.fulfillmentTrend}>
+              <LineChart data={displayAnalytics.fulfillmentTrend}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
                 <XAxis dataKey="week" tick={{ fontSize: 12, fill: "#6B7280" }} />
                 <YAxis tick={{ fontSize: 12, fill: "#6B7280" }} domain={[0, 100]} />
@@ -1801,6 +1868,7 @@ export default function AdminDashboard() {
               </LineChart>
             </ResponsiveContainer>
           </motion.div>
+          )}
 
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             {/* Prep Time by Meal */}
@@ -1822,13 +1890,13 @@ export default function AdminDashboard() {
                 Average preparation time (minutes) per meal
               </p>
               <ResponsiveContainer width="100%" height={280}>
-                <BarChart data={analyticsData.dailyPrepBreakdown} layout="vertical">
+                <BarChart data={displayAnalytics.dailyPrepBreakdown} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
                   <XAxis type="number" tick={{ fontSize: 12, fill: "#6B7280" }} unit=" min" />
                   <YAxis dataKey="meal" type="category" tick={{ fontSize: 11, fill: "#6B7280" }} width={140} />
                   <RechartsTooltip
                     contentStyle={{ borderRadius: 12, border: "1px solid #E5E7EB", fontSize: 12 }}
-                    formatter={(value: number) => [`${value} min`, "Prep Time"]}
+                    formatter={(value) => [`${value} min`, "Prep Time"]}
                   />
                   <Bar dataKey="prepTime" fill="#D97706" radius={[0, 6, 6, 0]} barSize={20} />
                 </BarChart>
@@ -1857,10 +1925,10 @@ export default function AdminDashboard() {
                 <PieChart>
                   <Pie
                     data={[
-                      { name: "On Time", value: analyticsData.deliveryBreakdown.onTime, color: "#059669" },
-                      { name: "Late", value: analyticsData.deliveryBreakdown.late, color: "#D97706" },
-                      { name: "Failed", value: analyticsData.deliveryBreakdown.failed, color: "#DC2626" },
-                      { name: "Returned", value: analyticsData.deliveryBreakdown.returned, color: "#6B7280" },
+                      { name: "On Time", value: displayAnalytics.deliveryBreakdown.onTime, color: "#059669" },
+                      { name: "Late", value: displayAnalytics.deliveryBreakdown.late, color: "#D97706" },
+                      { name: "Failed", value: displayAnalytics.deliveryBreakdown.failed, color: "#DC2626" },
+                      { name: "Returned", value: displayAnalytics.deliveryBreakdown.returned, color: "#6B7280" },
                     ]}
                     cx="50%"
                     cy="50%"
@@ -1868,13 +1936,13 @@ export default function AdminDashboard() {
                     outerRadius={100}
                     paddingAngle={3}
                     dataKey="value"
-                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                    label={({ name, percent }: { name?: string; percent?: number }) => `${name ?? ''} ${((percent ?? 0) * 100).toFixed(0)}%`}
                   >
                     {[
-                      { name: "On Time", value: analyticsData.deliveryBreakdown.onTime, color: "#059669" },
-                      { name: "Late", value: analyticsData.deliveryBreakdown.late, color: "#D97706" },
-                      { name: "Failed", value: analyticsData.deliveryBreakdown.failed, color: "#DC2626" },
-                      { name: "Returned", value: analyticsData.deliveryBreakdown.returned, color: "#6B7280" },
+                      { name: "On Time", value: displayAnalytics.deliveryBreakdown.onTime, color: "#059669" },
+                      { name: "Late", value: displayAnalytics.deliveryBreakdown.late, color: "#D97706" },
+                      { name: "Failed", value: displayAnalytics.deliveryBreakdown.failed, color: "#DC2626" },
+                      { name: "Returned", value: displayAnalytics.deliveryBreakdown.returned, color: "#6B7280" },
                     ].map((entry) => (
                       <Cell key={entry.name} fill={entry.color} />
                     ))}
@@ -1917,7 +1985,7 @@ export default function AdminDashboard() {
                   </tr>
                 </thead>
                 <tbody>
-                  {analyticsData.dailyPrepBreakdown.map((item, idx) => (
+                  {displayAnalytics.dailyPrepBreakdown.map((item, idx) => (
                     <tr
                       key={item.meal}
                       style={{

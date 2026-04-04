@@ -2,7 +2,7 @@
 # PrepFlow — Order & Subscription Management System
 # ============================================================================
 
-.PHONY: help install dev backend frontend lint format test migrate docker-up docker-down clean
+.PHONY: help install dev backend frontend lint lint-backend lint-frontend lint-fix format format-backend format-frontend format-check test migrate docker-up docker-down clean
 
 help: ## Show this help message
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | \
@@ -36,16 +36,38 @@ frontend: run-frontend-dev ## Alias for run-frontend-dev
 
 # --- Code Quality ------------------------------------------------------------
 
-lint: ## Run linter on backend code
+lint: ## Run linters on backend and frontend
+	cd backend && uv run ruff check app/
+	cd frontend && npm run lint
+
+lint-backend: ## Run linter on backend code only
 	cd backend && uv run ruff check app/
 
-format: ## Auto-format backend code
+lint-frontend: ## Run ESLint on frontend code only
+	cd frontend && npm run lint
+
+lint-fix: ## Auto-fix lint issues (backend + frontend)
+	cd backend && uv run ruff check --fix app/
+	cd frontend && npm run lint:fix
+
+format: ## Auto-format backend and frontend code
 	cd backend && uv run ruff format app/
+	cd frontend && npm run format
+
+format-backend: ## Auto-format backend code only
+	cd backend && uv run ruff format app/
+
+format-frontend: ## Auto-format frontend code only
+	cd frontend && npm run format
+
+format-check: ## Check formatting without writing (backend + frontend)
+	cd backend && uv run ruff format --check app/
+	cd frontend && npm run format:check
 
 typecheck: ## Run mypy type checker on backend
 	cd backend && uv run mypy app/
 
-check: lint typecheck ## Run all code quality checks
+check: lint format-check typecheck ## Run all code quality checks
 
 # --- Testing -----------------------------------------------------------------
 

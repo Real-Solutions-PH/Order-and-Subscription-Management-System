@@ -18,11 +18,34 @@ import {
 import { meals, planTiers, timeSlots, formatPeso, Meal } from '@/lib/mock-data';
 import { useCart } from '@/context/CartContext';
 import { useToast } from '@/context/ToastContext';
+import { useProducts, useSubscriptionPlans } from '@/hooks';
+import { SkeletonMealCard, Skeleton } from '@/components/ui/skeleton';
+import type { ProductResponse } from '@/lib/api-client';
 
 interface SelectedMeal {
   meal: Meal;
   quantity: number;
   addOns: { name: string; price: number }[];
+}
+
+function mapProductToMeal(p: ProductResponse): Meal {
+  const meta = (p.metadata ?? {}) as Record<string, unknown>;
+  const defaultVariant = p.variants.find(v => v.is_default) ?? p.variants[0];
+  const primaryImage = p.images.find(img => img.is_primary) ?? p.images[0];
+  return {
+    id: typeof meta.legacy_id === 'number' ? meta.legacy_id : 0,
+    name: p.name,
+    price: defaultVariant ? Number(defaultVariant.price) : 0,
+    calories: (meta.calories as number) ?? 0,
+    protein: (meta.protein as number) ?? 0,
+    carbs: (meta.carbs as number) ?? 0,
+    fat: (meta.fat as number) ?? 0,
+    tags: (meta.tags as string[]) ?? [],
+    image: primaryImage?.url ?? '/images/meals/placeholder.png',
+    description: p.description ?? '',
+    allergens: (meta.allergens as string[]) ?? [],
+    ingredients: (meta.ingredients as string[]) ?? [],
+  };
 }
 
 const ADD_ON_OPTIONS = [
@@ -42,7 +65,27 @@ export default function MealPlanPage() {
   const { addItem } = useCart();
   const { showToast } = useToast();
 
-  const selectedPlan = planTiers.find(p => p.id === selectedPlanId);
+  const productsQuery = useProducts({ status: 'active' });
+  const plansQuery = useSubscriptionPlans();
+
+  const apiMeals = productsQuery.data?.items.map(mapProductToMeal);
+  const mealsData = apiMeals && apiMeals.length > 0 ? apiMeals : meals;
+  const isLoadingMeals = productsQuery.isLoading;
+
+  const displayPlans = plansQuery.data?.length
+    ? plansQuery.data.flatMap(plan =>
+        plan.tiers.map(tier => ({
+          id: tier.items_per_cycle,
+          meals: tier.items_per_cycle,
+          price: Number(tier.price),
+          perMeal: Math.round(Number(tier.price) / tier.items_per_cycle),
+          savings: 0,
+          label: tier.name,
+        }))
+      )
+    : planTiers;
+
+  const selectedPlan = displayPlans.find(p => p.id === selectedPlanId);
   const totalMealsSelected = selectedMeals.reduce((sum, m) => sum + m.quantity, 0);
 
   const addOnsTotal = useMemo(
@@ -221,7 +264,14 @@ export default function MealPlanPage() {
                   Choose Your Plan
                 </h2>
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  {planTiers.map(plan => {
+                  {plansQuery.isLoading
+                    ? Array.from({ length: 4 }).map((_, i) => (
+                        <Skeleton
+                          key={i}
+                          className="h-52 w-full rounded-2xl"
+                        />
+                      ))
+                    : displayPlans.map(plan => {
                     const isSelected = selectedPlanId === plan.id;
                     const badge =
                       plan.meals === 10
@@ -370,7 +420,11 @@ export default function MealPlanPage() {
                 </div>
 
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {meals.map(meal => {
+                  {isLoadingMeals
+                    ? Array.from({ length: 6 }).map((_, i) => (
+                        <SkeletonMealCard key={i} />
+                      ))
+                    : mealsData.map(meal => {
                     const qty = getMealQuantity(meal.id);
                     const isSelected = qty > 0;
                     return (

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { QueryProvider } from "@/context/QueryProvider";
 import { CartProvider } from "@/context/CartContext";
 import { ToastProvider } from "@/context/ToastContext";
 
@@ -21,11 +22,13 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=DM+Serif+Display&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
       </head>
       <body className="min-h-full flex flex-col" style={{ fontFamily: "'DM Sans', sans-serif" }}>
-        <CartProvider>
-          <ToastProvider>
-            {children}
-          </ToastProvider>
-        </CartProvider>
+        <QueryProvider>
+          <CartProvider>
+            <ToastProvider>
+              {children}
+            </ToastProvider>
+          </CartProvider>
+        </QueryProvider>
       </body>
     </html>
   );

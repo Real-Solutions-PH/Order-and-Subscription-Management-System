@@ -39,6 +39,8 @@ import {
   Meal,
 } from "@/lib/mock-data";
 import { useToast } from "@/context/ToastContext";
+import { useAuth, useOrders } from "@/hooks";
+import { Skeleton, SkeletonCard } from "@/components/ui/skeleton";
 import {
   Select,
   SelectContent,
@@ -49,16 +51,39 @@ import {
 import StatusBadge from "@/components/StatusBadge";
 import Modal from "@/components/Modal";
 
-const customer = customers[0]; // Maria Santos
-
-// Orders for this customer
-const customerOrders = orders.filter((o) => o.customerId === customer.id);
-
 // Next delivery meals (first 5 from meals array)
 const nextDeliveryMeals = meals.slice(0, 5);
 
 export default function DashboardPage() {
   const { showToast } = useToast();
+
+  // --- API hooks with mock-data fallback ---
+  const { user, isLoading: isLoadingUser } = useAuth();
+  const ordersQuery = useOrders();
+
+  const customer = customers[0]; // fallback source
+
+  // Map API user to display format, fall back to customers[0]
+  const displayUser = user
+    ? {
+        name: `${user.first_name} ${user.last_name}`,
+        email: user.email,
+        phone: user.phone ?? "",
+      }
+    : { name: customer.name, email: customer.email, phone: customer.phone };
+
+  // Map API orders to display format, fall back to mock orders
+  const displayOrders =
+    ordersQuery.data?.items?.map((o) => ({
+      id: o.id,
+      orderId: o.order_number,
+      status: o.status,
+      items: o.items,
+      total: o.total,
+      deliveryDate: o.delivered_at ?? o.placed_at ?? o.created_at,
+    })) ?? orders;
+  const isLoadingOrders = ordersQuery.isLoading;
+
   const [skipModalOpen, setSkipModalOpen] = useState(false);
   const [subscriptionModalOpen, setSubscriptionModalOpen] = useState(false);
   const [subscriptionModalMode, setSubscriptionModalMode] = useState<
@@ -66,9 +91,9 @@ export default function DashboardPage() {
   >("pause");
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const [editMealsModalOpen, setEditMealsModalOpen] = useState(false);
-  const [userName, setUserName] = useState(customer.name);
-  const [userEmail, setUserEmail] = useState(customer.email);
-  const [userPhone, setUserPhone] = useState(customer.phone);
+  const [userName, setUserName] = useState(displayUser.name);
+  const [userEmail, setUserEmail] = useState(displayUser.email);
+  const [userPhone, setUserPhone] = useState(displayUser.phone);
   const [userDietary, setUserDietary] = useState<string[]>(
     customer.dietaryPreferences,
   );
@@ -113,6 +138,9 @@ export default function DashboardPage() {
         <div className="flex-1 flex flex-col lg:grid lg:grid-cols-12 gap-4 min-h-0 overflow-y-auto lg:overflow-hidden">
           {/* LEFT COLUMN - Profile & Preferences (4/12 on desktop) */}
           <div className="lg:col-span-4 flex flex-col gap-4 min-h-0 order-2 lg:order-1">
+            {isLoadingUser ? (
+              <SkeletonCard className="lg:flex-1" />
+            ) : (
             <div
               className="rounded-2xl p-5 lg:flex-1 lg:min-h-0 lg:overflow-y-auto"
               style={{
@@ -461,11 +489,15 @@ export default function DashboardPage() {
                 </table>
               </div>
             </div>
+            )}
           </div>
 
           {/* RIGHT COLUMN - Subscription, Actions, Meals, Orders (8/12 on desktop) */}
           <div className="lg:col-span-8 flex flex-col gap-4 min-h-0 order-1 lg:order-2">
             {/* A) Subscription Status Card */}
+            {isLoadingUser ? (
+              <SkeletonCard className="min-h-[140px]" />
+            ) : (
             <motion.div
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
@@ -626,6 +658,7 @@ export default function DashboardPage() {
                 </svg>
               </div>
             </motion.div>
+            )}
 
             {/* B) Quick Actions */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -750,6 +783,9 @@ export default function DashboardPage() {
             </div>
 
             {/* D) Order History Table */}
+            {isLoadingOrders ? (
+              <SkeletonCard className="flex-1 min-h-[200px]" />
+            ) : (
             <div
               className="rounded-2xl p-4 flex-1 min-h-0 flex flex-col"
               style={{
@@ -787,7 +823,7 @@ export default function DashboardPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {orders.slice(0, 6).map((order) => (
+                    {displayOrders.slice(0, 6).map((order: { id: string; deliveryDate: string; items: unknown[]; total: number; status: string }) => (
                       <tr
                         key={order.id}
                         style={{ borderBottom: "1px solid #F3F4F6" }}
@@ -845,6 +881,7 @@ export default function DashboardPage() {
                 </table>
               </div>
             </div>
+            )}
           </div>
         </div>
 

@@ -17,6 +17,8 @@ import {
 } from 'lucide-react';
 import { orders, formatPeso } from '@/lib/mock-data';
 import { useToast } from '@/context/ToastContext';
+import { useOrders } from '@/hooks';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const timelineSteps = [
   { label: 'Placed', icon: Package, status: 'completed' as const },
@@ -30,7 +32,27 @@ const timelineSteps = [
 export default function OrderConfirmationPage() {
   const { showToast } = useToast();
   const [showContent, setShowContent] = useState(false);
-  const order = orders[0];
+
+  const ordersQuery = useOrders({ limit: 1 });
+  const isLoadingOrder = ordersQuery.isLoading;
+
+  const apiOrder = ordersQuery.data?.items?.[0];
+  const displayOrder = apiOrder ? {
+    id: apiOrder.order_number,
+    items: apiOrder.items.map(i => ({
+      mealName: i.product_name,
+      quantity: i.quantity,
+      price: Number(i.unit_price),
+    })),
+    total: Number(apiOrder.total),
+    status: apiOrder.status,
+    deliveryDate: apiOrder.delivered_at ?? apiOrder.placed_at ?? '',
+    deliverySlot: '',
+    paymentMethod: '',
+    address: '',
+  } : orders[0];
+
+  const order = displayOrder;
 
   useEffect(() => {
     const timer = setTimeout(() => setShowContent(true), 600);
@@ -52,6 +74,14 @@ export default function OrderConfirmationPage() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#FEFAE0' }}>
       <div className="max-w-3xl mx-auto px-4 py-12">
+        {isLoadingOrder ? (
+          <div className="space-y-4">
+            <Skeleton className="h-8 w-48" />
+            <Skeleton className="h-64 w-full rounded-2xl" />
+            <Skeleton className="h-32 w-full rounded-2xl" />
+          </div>
+        ) : (
+        <>
         {/* Success Animation */}
         <motion.div
           initial={{ scale: 0 }}
@@ -284,6 +314,8 @@ export default function OrderConfirmationPage() {
               />
             </motion.div>
           </motion.div>
+        )}
+        </>
         )}
       </div>
     </div>

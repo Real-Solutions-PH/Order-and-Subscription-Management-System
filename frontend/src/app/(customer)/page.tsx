@@ -4,10 +4,33 @@ import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShoppingCart, ChevronDown, Sparkles, Clock } from 'lucide-react';
-import { meals, dietaryFilters, formatPeso } from '@/lib/mock-data';
+import { meals, dietaryFilters, formatPeso, type Meal } from '@/lib/mock-data';
 import { useCart } from '@/context/CartContext';
 import { useToast } from '@/context/ToastContext';
 import MealCard from '@/components/MealCard';
+import { useProducts } from '@/hooks';
+import { SkeletonMealCard } from '@/components/ui/skeleton';
+import type { ProductResponse } from '@/lib/api-client';
+
+function mapProductToMeal(p: ProductResponse): Meal {
+  const meta = (p.metadata ?? {}) as Record<string, unknown>;
+  const defaultVariant = p.variants.find(v => v.is_default) ?? p.variants[0];
+  const primaryImage = p.images.find(img => img.is_primary) ?? p.images[0];
+  return {
+    id: typeof meta.legacy_id === 'number' ? meta.legacy_id : 0,
+    name: p.name,
+    price: defaultVariant ? Number(defaultVariant.price) : 0,
+    calories: (meta.calories as number) ?? 0,
+    protein: (meta.protein as number) ?? 0,
+    carbs: (meta.carbs as number) ?? 0,
+    fat: (meta.fat as number) ?? 0,
+    tags: (meta.tags as string[]) ?? [],
+    image: primaryImage?.url ?? '/images/meals/placeholder.png',
+    description: p.description ?? '',
+    allergens: (meta.allergens as string[]) ?? [],
+    ingredients: (meta.ingredients as string[]) ?? [],
+  };
+}
 
 export default function LandingPage() {
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
@@ -16,6 +39,12 @@ export default function LandingPage() {
   const menuGridRef = useRef<HTMLDivElement>(null);
   const { addItem, itemCount, total } = useCart();
   const { showToast } = useToast();
+
+  // Fetch products from API, fall back to mock data
+  const productsQuery = useProducts({ status: 'active' });
+  const apiMeals = productsQuery.data?.items.map(mapProductToMeal);
+  const mealsData = apiMeals && apiMeals.length > 0 ? apiMeals : meals;
+  const isLoadingMeals = productsQuery.isLoading;
 
   // Sticky filter bar detection
   useEffect(() => {
@@ -40,8 +69,8 @@ export default function LandingPage() {
   };
 
   const filteredMeals = activeFilters.length === 0
-    ? meals
-    : meals.filter(meal =>
+    ? mealsData
+    : mealsData.filter(meal =>
         activeFilters.some(filter => meal.tags.includes(filter))
       );
 
@@ -202,18 +231,22 @@ export default function LandingPage() {
           className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
         >
           <AnimatePresence mode="popLayout">
-            {filteredMeals.map(meal => (
-              <motion.div
-                key={meal.id}
-                layout
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.25 }}
-              >
-                <MealCard meal={meal} onAdd={handleAddToCart} />
-              </motion.div>
-            ))}
+            {isLoadingMeals
+              ? Array.from({ length: 8 }).map((_, i) => (
+                  <SkeletonMealCard key={i} />
+                ))
+              : filteredMeals.map(meal => (
+                  <motion.div
+                    key={meal.id}
+                    layout
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    transition={{ duration: 0.25 }}
+                  >
+                    <MealCard meal={meal} onAdd={handleAddToCart} />
+                  </motion.div>
+                ))}
           </AnimatePresence>
         </motion.div>
 

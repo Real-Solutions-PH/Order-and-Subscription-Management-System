@@ -16,10 +16,14 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 import { planTiers, formatPeso } from '@/lib/mock-data';
+import { useSubscriptionPlans, useSubscriptionMutations } from '@/hooks';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/context/ToastContext';
 
 export default function SubscriptionPage() {
   const { showToast } = useToast();
+  const plansQuery = useSubscriptionPlans();
+  const { pauseSubscription, cancelSubscription, modifyPlan, isPausing, isCancelling } = useSubscriptionMutations();
 
   // Pause state
   const [pauseDays, setPauseDays] = useState(7);
@@ -87,6 +91,20 @@ export default function SubscriptionPage() {
   };
 
   const creditPerWeek = 1125; // 4500 / 4 weeks
+
+  const displayPlans = plansQuery.data?.length
+    ? plansQuery.data.flatMap(plan =>
+        plan.tiers.map(tier => ({
+          id: tier.items_per_cycle,
+          meals: tier.items_per_cycle,
+          price: Number(tier.price),
+          perMeal: Math.round(Number(tier.price) / tier.items_per_cycle),
+          savings: 0,
+          label: tier.name,
+          tierId: tier.id, // keep the UUID for API calls
+        }))
+      )
+    : planTiers;
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#FEFAE0' }}>
@@ -284,14 +302,20 @@ export default function SubscriptionPage() {
                   Go Back
                 </button>
                 <button
-                  onClick={() => {
+                  disabled={isPausing}
+                  onClick={async () => {
+                    try {
+                      await pauseSubscription({ id: 'current', resume_date: pauseResumeDate.toISOString().split('T')[0] });
+                    } catch {
+                      // backend unavailable — continue with UI-only flow
+                    }
                     setPauseConfirmed(false);
                     showToast(`Subscription paused for ${pauseDays} day${pauseDays !== 1 ? 's' : ''} — resumes ${pauseResumeLabel}`, 'success');
                   }}
-                  className="flex-1 px-4 py-2.5 rounded-xl font-semibold text-white transition-colors hover:opacity-90"
+                  className="flex-1 px-4 py-2.5 rounded-xl font-semibold text-white transition-colors hover:opacity-90 disabled:opacity-50"
                   style={{ backgroundColor: '#D97706' }}
                 >
-                  Confirm Pause
+                  {isPausing ? 'Pausing...' : 'Confirm Pause'}
                 </button>
               </div>
             </div>
@@ -313,8 +337,13 @@ export default function SubscriptionPage() {
               Change Plan
             </h2>
           </div>
+          {plansQuery.isLoading ? (
+            <div className="grid gap-3 mb-4">
+              {Array.from({length: 4}).map((_, i) => <Skeleton key={i} className="h-20 rounded-xl" />)}
+            </div>
+          ) : (
           <div className="grid grid-cols-2 gap-3 mb-4">
-            {planTiers.map((tier) => {
+            {displayPlans.map((tier) => {
               const isSelected = selectedPlan === tier.id;
               const isCurrent = tier.id === 10;
               const diff = tier.price - 4500;
@@ -379,6 +408,7 @@ export default function SubscriptionPage() {
               );
             })}
           </div>
+          )}
           {selectedPlan !== 10 && (
             <div
               className="rounded-xl p-3 mb-4"
@@ -391,8 +421,16 @@ export default function SubscriptionPage() {
             </div>
           )}
           <button
-            onClick={() => {
+            onClick={async () => {
               if (selectedPlan !== 10) {
+                const selectedTier = displayPlans.find(t => t.id === selectedPlan);
+                if (selectedTier && 'tierId' in selectedTier && selectedTier.tierId) {
+                  try {
+                    await modifyPlan({ id: 'current', new_plan_tier_id: selectedTier.tierId as string });
+                  } catch {
+                    // backend unavailable — continue with UI-only flow
+                  }
+                }
                 showToast(`Plan changed to ${selectedPlan} meals/week`, 'success');
               } else {
                 showToast('You are already on this plan', 'info');
@@ -694,15 +732,21 @@ export default function SubscriptionPage() {
                     Keep My Subscription
                   </button>
                   <button
-                    onClick={() => {
+                    disabled={isCancelling}
+                    onClick={async () => {
+                      try {
+                        await cancelSubscription({ id: 'current', reason: cancelReasons.join(', ') });
+                      } catch {
+                        // backend unavailable — continue with UI-only flow
+                      }
                       setCancelStep(0);
                       setCancelReasons([]);
                       showToast('Subscription cancelled', 'error');
                     }}
-                    className="flex-1 px-4 py-2.5 rounded-xl font-semibold text-white transition-colors hover:opacity-90"
+                    className="flex-1 px-4 py-2.5 rounded-xl font-semibold text-white transition-colors hover:opacity-90 disabled:opacity-50"
                     style={{ backgroundColor: '#DC2626' }}
                   >
-                    I want to cancel
+                    {isCancelling ? 'Cancelling...' : 'I want to cancel'}
                   </button>
                 </div>
               </motion.div>

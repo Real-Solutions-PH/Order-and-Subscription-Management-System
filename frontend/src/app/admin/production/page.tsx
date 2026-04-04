@@ -11,6 +11,8 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 import { orders, meals, formatPeso } from '@/lib/mock-data';
+import { useProductionReport, useOrders } from '@/hooks';
+import { Skeleton, SkeletonRow } from '@/components/ui/skeleton';
 
 const ingredientData = [
   { ingredient: 'Chicken Breast', totalQty: '12.5 kg', mealsCount: 47 },
@@ -74,12 +76,23 @@ export default function ProductionPage() {
   const [selectedDate, setSelectedDate] = useState('2026-04-01');
   const [expandedMeals, setExpandedMeals] = useState<Set<number>>(new Set());
 
+  const productionQuery = useProductionReport(selectedDate);
+  const ordersQuery = useOrders({ status: 'confirmed' });
+  const isLoadingProduction = productionQuery.isLoading;
+
+  // If API data is available, use it; otherwise fall back to mock-derived data
+  const apiProductionItems = productionQuery.data?.items;
+
   const mealBreakdown = getMealBreakdown(selectedDate);
   const packingSlips = getPackingSlips(selectedDate);
 
-  const totalMeals = mealBreakdown.reduce((s, m) => s + m.quantity, 0);
-  const totalOrders = packingSlips.length;
-  const uniqueMeals = mealBreakdown.length;
+  const totalMeals = apiProductionItems
+    ? apiProductionItems.reduce((s, m) => s + m.quantity, 0)
+    : mealBreakdown.reduce((s, m) => s + m.quantity, 0);
+  const totalOrders = productionQuery.data?.total_orders ?? packingSlips.length;
+  const uniqueMeals = apiProductionItems
+    ? apiProductionItems.length
+    : mealBreakdown.length;
 
   function toggleMeal(mealId: number) {
     setExpandedMeals((prev) => {
@@ -132,34 +145,52 @@ export default function ProductionPage() {
 
       {/* Summary Stats */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        {[
-          { label: 'Total Meals Today', value: totalMeals },
-          { label: 'Total Orders', value: totalOrders },
-          { label: 'Unique Meals', value: uniqueMeals },
-        ].map((stat, i) => (
-          <motion.div
-            key={stat.label}
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.05, duration: 0.3 }}
-            className="rounded-xl p-5 text-center"
-            style={{
-              backgroundColor: '#FFFFFF',
-              boxShadow: 'var(--shadow-card)',
-              border: '1px solid #E5E7EB',
-            }}
-          >
-            <p
-              className="text-3xl font-bold"
-              style={{ color: '#1B4332' }}
+        {isLoadingProduction ? (
+          <>
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div
+                key={i}
+                className="rounded-xl p-5 text-center space-y-2"
+                style={{
+                  backgroundColor: '#FFFFFF',
+                  boxShadow: 'var(--shadow-card)',
+                  border: '1px solid #E5E7EB',
+                }}
+              >
+                <Skeleton className="mx-auto h-9 w-16" />
+                <Skeleton className="mx-auto h-4 w-28" />
+              </div>
+            ))}
+          </>
+        ) : (
+          [{label: 'Total Meals Today', value: totalMeals},
+           {label: 'Total Orders', value: totalOrders},
+           {label: 'Unique Meals', value: uniqueMeals},
+          ].map((stat, i) => (
+            <motion.div
+              key={stat.label}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.05, duration: 0.3 }}
+              className="rounded-xl p-5 text-center"
+              style={{
+                backgroundColor: '#FFFFFF',
+                boxShadow: 'var(--shadow-card)',
+                border: '1px solid #E5E7EB',
+              }}
             >
-              {stat.value}
-            </p>
-            <p className="mt-1 text-sm" style={{ color: '#6B7280' }}>
-              {stat.label}
-            </p>
-          </motion.div>
-        ))}
+              <p
+                className="text-3xl font-bold"
+                style={{ color: '#1B4332' }}
+              >
+                {stat.value}
+              </p>
+              <p className="mt-1 text-sm" style={{ color: '#6B7280' }}>
+                {stat.label}
+              </p>
+            </motion.div>
+          ))
+        )}
       </div>
 
       {/* Aggregated Ingredient List */}
@@ -205,31 +236,37 @@ export default function ProductionPage() {
               </tr>
             </thead>
             <tbody>
-              {ingredientData.map((row, i) => (
-                <tr
-                  key={row.ingredient}
-                  style={{
-                    borderBottom: '1px solid #F3F4F6',
-                    backgroundColor: i % 2 === 0 ? '#FFFFFF' : '#F9FAFB',
-                  }}
-                >
-                  <td
-                    className="px-4 py-3 font-medium"
-                    style={{ color: '#1A1A2E' }}
+              {isLoadingProduction ? (
+                Array.from({ length: 6 }).map((_, i) => (
+                  <SkeletonRow key={i} cols={3} />
+                ))
+              ) : (
+                ingredientData.map((row, i) => (
+                  <tr
+                    key={row.ingredient}
+                    style={{
+                      borderBottom: '1px solid #F3F4F6',
+                      backgroundColor: i % 2 === 0 ? '#FFFFFF' : '#F9FAFB',
+                    }}
                   >
-                    {row.ingredient}
-                  </td>
-                  <td
-                    className="px-4 py-3 font-medium"
-                    style={{ color: '#1B4332' }}
-                  >
-                    {row.totalQty}
-                  </td>
-                  <td className="px-4 py-3" style={{ color: '#6B7280' }}>
-                    {row.mealsCount} meals
-                  </td>
-                </tr>
-              ))}
+                    <td
+                      className="px-4 py-3 font-medium"
+                      style={{ color: '#1A1A2E' }}
+                    >
+                      {row.ingredient}
+                    </td>
+                    <td
+                      className="px-4 py-3 font-medium"
+                      style={{ color: '#1B4332' }}
+                    >
+                      {row.totalQty}
+                    </td>
+                    <td className="px-4 py-3" style={{ color: '#6B7280' }}>
+                      {row.mealsCount} meals
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
@@ -253,7 +290,22 @@ export default function ProductionPage() {
         >
           Meal-by-Meal Breakdown
         </h2>
-        {mealBreakdown.length === 0 ? (
+        {isLoadingProduction ? (
+          <div className="space-y-3">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div
+                key={i}
+                className="rounded-lg p-4"
+                style={{ border: '1px solid #E5E7EB' }}
+              >
+                <div className="flex items-center gap-3">
+                  <Skeleton className="h-8 w-8 rounded-lg" />
+                  <Skeleton className="h-4 w-48" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : mealBreakdown.length === 0 ? (
           <p className="py-8 text-center text-sm" style={{ color: '#6B7280' }}>
             No meals scheduled for this date.
           </p>

@@ -23,6 +23,8 @@ import Link from 'next/link';
 import { orders, customers, formatPeso } from '@/lib/mock-data';
 import type { Order } from '@/lib/mock-data';
 import StatusBadge from '@/components/StatusBadge';
+import { useOrders, useOrderMutations } from '@/hooks';
+import { Skeleton, SkeletonRow } from '@/components/ui/skeleton';
 
 type StatusTab =
   | 'all'
@@ -79,16 +81,41 @@ export default function OrdersPage() {
   const [internalNote, setInternalNote] = useState('');
   const [orderNotes, setOrderNotes] = useState<Record<string, string[]>>({});
 
+  const ordersQuery = useOrders();
+  const { updateStatus, isUpdatingStatus } = useOrderMutations();
+  const isLoadingOrders = ordersQuery.isLoading;
+
+  const displayOrders = ordersQuery.data?.items?.map((o: any) => ({
+    id: o.order_number,
+    customerId: 0,
+    customerName: o.items[0]?.product_name ?? 'Customer',
+    items: o.items.map((i: any) => ({
+      mealId: 0,
+      mealName: i.product_name,
+      quantity: i.quantity,
+      price: Number(i.unit_price),
+    })),
+    total: Number(o.total),
+    status: o.status as any,
+    deliveryDate: o.delivered_at ?? o.placed_at ?? o.created_at,
+    deliverySlot: '',
+    paymentMethod: '',
+    paymentStatus: 'paid' as const,
+    address: o.notes ?? '',
+    notes: o.notes ?? '',
+    createdAt: o.created_at,
+  })) ?? orders;
+
   const tabCounts = useMemo(() => {
-    const counts: Record<string, number> = { all: orders.length };
-    orders.forEach((o) => {
+    const counts: Record<string, number> = { all: displayOrders.length };
+    displayOrders.forEach((o: any) => {
       counts[o.status] = (counts[o.status] || 0) + 1;
     });
     return counts;
-  }, []);
+  }, [displayOrders]);
 
   const filteredOrders = useMemo(() => {
-    let result = [...orders];
+    let result = [...displayOrders];
 
     // Tab filter
     if (selectedTab !== 'all') {
@@ -125,7 +152,7 @@ export default function OrdersPage() {
     });
 
     return result;
-  }, [selectedTab, searchQuery, dateFrom, dateTo, sortField, sortDirection]);
+  }, [displayOrders, selectedTab, searchQuery, dateFrom, dateTo, sortField, sortDirection]);
 
   function toggleSort(field: SortField) {
     if (sortField === field) {
@@ -151,6 +178,22 @@ export default function OrdersPage() {
     } else {
       setSelectedIds(new Set(filteredOrders.map((o) => o.id)));
     }
+  }
+
+  async function handleUpdateStatus(orderId: string, status: string) {
+    try {
+      await updateStatus({ id: orderId, status });
+    } catch (err) {
+      console.error('Failed to update order status via API, falling back to local state', err);
+    }
+  }
+
+  async function handleBulkUpdateStatus(status: string) {
+    const ids = Array.from(selectedIds);
+    for (const id of ids) {
+      await handleUpdateStatus(id, status);
+    }
+    setSelectedIds(new Set());
   }
 
   function addNote() {
@@ -369,16 +412,20 @@ export default function OrdersPage() {
                   {selectedIds.size} selected
                 </span>
                 <button
-                  className="rounded-md px-3 py-1.5 text-xs font-medium text-white"
+                  className="rounded-md px-3 py-1.5 text-xs font-medium text-white disabled:opacity-50"
                   style={{ backgroundColor: '#D97706' }}
+                  disabled={isUpdatingStatus}
+                  onClick={() => handleBulkUpdateStatus('preparing')}
                 >
-                  Mark as Preparing
+                  {isUpdatingStatus ? 'Updating...' : 'Mark as Preparing'}
                 </button>
                 <button
-                  className="rounded-md px-3 py-1.5 text-xs font-medium text-white"
+                  className="rounded-md px-3 py-1.5 text-xs font-medium text-white disabled:opacity-50"
                   style={{ backgroundColor: '#059669' }}
+                  disabled={isUpdatingStatus}
+                  onClick={() => handleBulkUpdateStatus('ready')}
                 >
-                  Mark as Ready
+                  {isUpdatingStatus ? 'Updating...' : 'Mark as Ready'}
                 </button>
                 <button
                   className="flex items-center gap-1 rounded-md px-3 py-1.5 text-xs font-medium text-white"
@@ -464,71 +511,75 @@ export default function OrdersPage() {
                 </tr>
               </thead>
               <tbody>
-                {filteredOrders.map((order) => (
-                  <tr
-                    key={order.id}
-                    className="cursor-pointer transition-colors hover:bg-gray-50"
-                    style={{ borderBottom: '1px solid #F3F4F6' }}
-                    onClick={() => setSelectedOrder(order)}
-                  >
-                    <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
-                      <button onClick={() => toggleSelect(order.id)}>
-                        {selectedIds.has(order.id) ? (
-                          <CheckSquare size={16} style={{ color: '#1B4332' }} />
-                        ) : (
-                          <Square size={16} style={{ color: '#6B7280' }} />
-                        )}
-                      </button>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span
-                        className="text-xs font-medium"
-                        style={{
-                          fontFamily: "'JetBrains Mono', monospace",
-                          color: '#1B4332',
-                        }}
-                      >
-                        {order.id}
-                      </span>
-                    </td>
-                    <td
-                      className="px-4 py-3 font-medium"
-                      style={{ color: '#1A1A2E' }}
+                {isLoadingOrders ? (
+                  Array.from({ length: 5 }).map((_, i) => <SkeletonRow key={i} cols={8} />)
+                ) : (
+                  filteredOrders.map((order) => (
+                    <tr
+                      key={order.id}
+                      className="cursor-pointer transition-colors hover:bg-gray-50"
+                      style={{ borderBottom: '1px solid #F3F4F6' }}
+                      onClick={() => setSelectedOrder(order)}
                     >
-                      {order.customerName}
-                    </td>
-                    <td className="px-4 py-3" style={{ color: '#6B7280' }}>
-                      {order.items.reduce((s, i) => s + i.quantity, 0)} items
-                    </td>
-                    <td
-                      className="px-4 py-3 font-medium"
-                      style={{ color: '#1A1A2E' }}
-                    >
-                      {formatPeso(order.total)}
-                    </td>
-                    <td className="px-4 py-3">
-                      <StatusBadge status={order.status} size="sm" />
-                    </td>
-                    <td className="px-4 py-3" style={{ color: '#6B7280' }}>
-                      {order.deliveryDate}
-                    </td>
-                    <td className="px-4 py-3">
-                      <button
-                        className="rounded-md px-2.5 py-1 text-xs font-medium transition-colors hover:opacity-80"
-                        style={{
-                          backgroundColor: '#F3F4F6',
-                          color: '#1A1A2E',
-                        }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedOrder(order);
-                        }}
+                      <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                        <button onClick={() => toggleSelect(order.id)}>
+                          {selectedIds.has(order.id) ? (
+                            <CheckSquare size={16} style={{ color: '#1B4332' }} />
+                          ) : (
+                            <Square size={16} style={{ color: '#6B7280' }} />
+                          )}
+                        </button>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span
+                          className="text-xs font-medium"
+                          style={{
+                            fontFamily: "'JetBrains Mono', monospace",
+                            color: '#1B4332',
+                          }}
+                        >
+                          {order.id}
+                        </span>
+                      </td>
+                      <td
+                        className="px-4 py-3 font-medium"
+                        style={{ color: '#1A1A2E' }}
                       >
-                        View
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                        {order.customerName}
+                      </td>
+                      <td className="px-4 py-3" style={{ color: '#6B7280' }}>
+                        {order.items.reduce((s: number, i: any) => s + i.quantity, 0)} items
+                      </td>
+                      <td
+                        className="px-4 py-3 font-medium"
+                        style={{ color: '#1A1A2E' }}
+                      >
+                        {formatPeso(order.total)}
+                      </td>
+                      <td className="px-4 py-3">
+                        <StatusBadge status={order.status} size="sm" />
+                      </td>
+                      <td className="px-4 py-3" style={{ color: '#6B7280' }}>
+                        {order.deliveryDate}
+                      </td>
+                      <td className="px-4 py-3">
+                        <button
+                          className="rounded-md px-2.5 py-1 text-xs font-medium transition-colors hover:opacity-80"
+                          style={{
+                            backgroundColor: '#F3F4F6',
+                            color: '#1A1A2E',
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedOrder(order);
+                          }}
+                        >
+                          View
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
             {filteredOrders.length === 0 && (

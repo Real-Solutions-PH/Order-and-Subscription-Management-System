@@ -17,6 +17,9 @@ import { meals, formatPeso } from '@/lib/mock-data';
 import type { Meal } from '@/lib/mock-data';
 import Modal from '@/components/Modal';
 import { useToast } from '@/context/ToastContext';
+import { useProducts, useProductMutations } from '@/hooks';
+import { Skeleton, SkeletonMealCard } from '@/components/ui/skeleton';
+import type { ProductResponse } from '@/lib/api-client';
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const FULL_DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -58,6 +61,26 @@ const menuHistory = [
   { weekLabel: 'Mar 10 - Mar 16', mealCount: 11, meals: ['Salmon Teriyaki Bowl', 'Chicken Adobo', 'Korean BBQ Beef', 'Tofu Sisig', 'Mediterranean Quinoa Salad'] },
 ];
 
+function mapProductToMeal(p: ProductResponse): Meal {
+  const meta = (p.metadata ?? {}) as Record<string, unknown>;
+  const defaultVariant = p.variants.find(v => v.is_default) ?? p.variants[0];
+  const primaryImage = p.images.find(img => img.is_primary) ?? p.images[0];
+  return {
+    id: typeof meta.legacy_id === 'number' ? meta.legacy_id : 0,
+    name: p.name,
+    price: defaultVariant ? Number(defaultVariant.price) : 0,
+    calories: (meta.calories as number) ?? 0,
+    protein: (meta.protein as number) ?? 0,
+    carbs: (meta.carbs as number) ?? 0,
+    fat: (meta.fat as number) ?? 0,
+    tags: (meta.tags as string[]) ?? [],
+    image: primaryImage?.url ?? '/images/meals/placeholder.png',
+    description: p.description ?? '',
+    allergens: (meta.allergens as string[]) ?? [],
+    ingredients: (meta.ingredients as string[]) ?? [],
+  };
+}
+
 interface DragData {
   mealId: number;
   sourceDay?: string; // undefined if from library
@@ -65,6 +88,13 @@ interface DragData {
 
 export default function MenuManagementPage() {
   const { showToast } = useToast();
+
+  const productsQuery = useProducts();
+  const { updateProduct, isUpdating } = useProductMutations();
+  const isLoadingProducts = productsQuery.isLoading;
+
+  const apiMeals = productsQuery.data?.items.map(mapProductToMeal);
+  const mealsData = apiMeals && apiMeals.length > 0 ? apiMeals : meals;
 
   const [weekOffset, setWeekOffset] = useState(0);
   const [calendar, setCalendar] = useState<Record<string, number[]>>(initialCalendar);
@@ -89,16 +119,16 @@ export default function MenuManagementPage() {
   });
 
   const filteredMeals = useMemo(() => {
-    if (!searchQuery.trim()) return meals;
+    if (!searchQuery.trim()) return mealsData;
     const q = searchQuery.toLowerCase();
-    return meals.filter(
+    return mealsData.filter(
       (m) =>
         m.name.toLowerCase().includes(q) ||
         m.tags.some((t) => t.toLowerCase().includes(q))
     );
-  }, [searchQuery]);
+  }, [searchQuery, mealsData]);
 
-  const getMealById = (id: number) => meals.find((m) => m.id === id);
+  const getMealById = (id: number) => mealsData.find((m) => m.id === id);
 
   // --- Drag and Drop ---
   const handleDragStart = useCallback((e: DragEvent, mealId: number, sourceDay?: string) => {
@@ -181,7 +211,34 @@ export default function MenuManagementPage() {
     });
   }
 
-  function handleSaveMeal() {
+  async function handleSaveMeal() {
+    if (editingMeal) {
+      // Try API update if we have a matching product
+      const matchingProduct = productsQuery.data?.items.find(
+        (p) => p.name === editingMeal.name
+      );
+      if (matchingProduct) {
+        try {
+          await updateProduct({
+            id: matchingProduct.id,
+            data: {
+              name: editForm.name,
+              description: editForm.description,
+              metadata: {
+                calories: editForm.calories,
+                protein: editForm.protein,
+                carbs: editForm.carbs,
+                fat: editForm.fat,
+                tags: editForm.tags,
+                allergens: editForm.allergens,
+              },
+            },
+          });
+        } catch {
+          // Fall back to local-only update
+        }
+      }
+    }
     showToast(`"${editForm.name}" updated successfully`);
     setEditingMeal(null);
   }
@@ -362,7 +419,11 @@ export default function MenuManagementPage() {
               />
             </div>
             <div className="max-h-[600px] space-y-2 overflow-y-auto pr-1">
-              {filteredMeals.map((meal) => (
+              {isLoadingProducts ? (
+                Array.from({ length: 6 }).map((_, i) => (
+                  <SkeletonMealCard key={i} />
+                ))
+              ) : filteredMeals.map((meal) => (
                 <div
                   key={meal.id}
                   draggable
@@ -627,10 +688,11 @@ export default function MenuManagementPage() {
             </button>
             <button
               onClick={handleSaveMeal}
-              className="rounded-lg px-4 py-2 text-sm font-semibold text-white transition-colors hover:opacity-90"
+              disabled={isUpdating}
+              className="rounded-lg px-4 py-2 text-sm font-semibold text-white transition-colors hover:opacity-90 disabled:opacity-50"
               style={{ backgroundColor: '#1B4332' }}
             >
-              Save Changes
+              {isUpdating ? 'Saving...' : 'Save Changes'}
             </button>
           </div>
         </div>

@@ -3,7 +3,10 @@
     "allow": [
       "mcp__Claude_Preview__preview_start",
       "Bash(npx kill-port:*)",
-      "Bash(taskkill //F //IM \"node.exe\")"
+      "Bash(taskkill //F //IM \"node.exe\")",
+      "Bash(npm install:*)",
+      "Bash(npm run:*)",
+      "Bash(npx tsc:*)"
     ]
   }
 }

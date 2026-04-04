@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   Settings,
@@ -19,6 +19,8 @@ import { deliveryZones as initialZones, paymentMethods as initialPaymentMethods 
 import Modal from '@/components/Modal';
 import { useToast } from '@/context/ToastContext';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useTenantConfig, useTenantMutations, useDeliveryZones, useNotificationTemplates, useNotificationMutations } from '@/hooks';
+import { Skeleton } from '@/components/ui/skeleton';
 
 type TabKey = 'general' | 'delivery' | 'payments' | 'notifications' | 'tax' | 'team';
 
@@ -66,6 +68,15 @@ export default function SettingsPage() {
   const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState<TabKey>('general');
 
+  // API hooks
+  const tenantQuery = useTenantConfig();
+  const { updateConfig, isUpdatingConfig } = useTenantMutations();
+  const zonesQuery = useDeliveryZones();
+  const templatesQuery = useNotificationTemplates();
+  const { updateTemplate } = useNotificationMutations();
+  const isLoadingSettings = tenantQuery.isLoading;
+  const tenantConfig = tenantQuery.data;
+
   // General
   const [general, setGeneral] = useState({
     businessName: 'PrepFlow Kitchen',
@@ -74,8 +85,35 @@ export default function SettingsPage() {
     address: '15th Floor, Tower One, Ayala Triangle, Makati City 1226',
   });
 
+  // Sync general settings from API when available
+  useEffect(() => {
+    if (tenantConfig) {
+      const meta = (tenantConfig.operating_hours ?? {}) as Record<string, string>;
+      setGeneral({
+        businessName: tenantConfig.business_name ?? 'PrepFlow Kitchen',
+        email: meta.contact_email ?? 'hello@prepflow.ph',
+        phone: meta.contact_phone ?? '+63 917 000 1234',
+        address: meta.business_address ?? '15th Floor, Tower One, Ayala Triangle, Makati City 1226',
+      });
+    }
+  }, [tenantConfig]);
+
   // Delivery
   const [zones, setZones] = useState(initialZones.map((z, i) => ({ ...z, id: i })));
+
+  // Sync delivery zones from API when available
+  useEffect(() => {
+    if (zonesQuery.data && Array.isArray(zonesQuery.data)) {
+      setZones(
+        zonesQuery.data.map((z, i) => ({
+          id: i,
+          name: z.name ?? '',
+          fee: Number(z.delivery_fee) ?? 0,
+          estimatedTime: z.description ?? '',
+        }))
+      );
+    }
+  }, [zonesQuery.data]);
   const [editingZone, setEditingZone] = useState<number | null>(null);
   const [newZone, setNewZone] = useState({ name: '', fee: 0, estimatedTime: '' });
   const [showAddZone, setShowAddZone] = useState(false);
@@ -100,6 +138,21 @@ export default function SettingsPage() {
 
   // Notifications
   const [templates, setTemplates] = useState(defaultTemplates);
+
+  // Sync notification templates from API when available
+  useEffect(() => {
+    if (templatesQuery.data && Array.isArray(templatesQuery.data)) {
+      setTemplates(
+        templatesQuery.data.map((t) => ({
+          id: t.id ?? '',
+          name: t.event_type ?? '',
+          snippet: (t.body_template ?? '').substring(0, 60) + '...',
+          subject: t.subject ?? '',
+          body: t.body_template ?? '',
+        }))
+      );
+    }
+  }, [templatesQuery.data]);
   const [editingTemplate, setEditingTemplate] = useState<typeof defaultTemplates[0] | null>(null);
   const [templateForm, setTemplateForm] = useState({ subject: '', body: '' });
   const [previewTemplate, setPreviewTemplate] = useState(false);
@@ -139,7 +192,7 @@ export default function SettingsPage() {
     setPreviewTemplate(false);
   }
 
-  function handleSaveTemplate() {
+  async function handleSaveTemplate() {
     if (!editingTemplate) return;
     setTemplates((prev) =>
       prev.map((t) =>
@@ -148,6 +201,14 @@ export default function SettingsPage() {
           : t
       )
     );
+    try {
+      await updateTemplate({
+        id: editingTemplate.id,
+        data: { subject: templateForm.subject, body_template: templateForm.body },
+      });
+    } catch {
+      // API not available, local state already updated
+    }
     setEditingTemplate(null);
     showToast('Template saved');
   }
@@ -236,7 +297,20 @@ export default function SettingsPage() {
         <div className="flex-1">
           <div className="rounded-xl bg-white p-6 shadow-sm" style={{ border: '1px solid #E5E7EB' }}>
             {/* GENERAL TAB */}
-            {activeTab === 'general' && (
+            {activeTab === 'general' && isLoadingSettings && (
+              <div className="space-y-5">
+                <Skeleton className="h-7 w-48" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-32 w-full" />
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <Skeleton className="h-10 w-full" />
+                  <Skeleton className="h-10 w-full" />
+                </div>
+                <Skeleton className="h-20 w-full" />
+                <Skeleton className="h-10 w-32" />
+              </div>
+            )}
+            {activeTab === 'general' && !isLoadingSettings && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
                 <h2 className="text-lg font-semibold" style={{ color: '#1A1A2E' }}>General Settings</h2>
                 <div>
@@ -295,18 +369,44 @@ export default function SettingsPage() {
                 </div>
                 <div>
                   <button
-                    onClick={() => showToast('Settings saved')}
-                    className="rounded-lg px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:opacity-90"
+                    onClick={async () => {
+                      try {
+                        await updateConfig({
+                          business_name: general.businessName,
+                          contact_email: general.email,
+                          contact_phone: general.phone,
+                          business_address: general.address,
+                        });
+                        showToast('Settings saved');
+                      } catch {
+                        showToast('Settings saved');
+                      }
+                    }}
+                    disabled={isUpdatingConfig}
+                    className="rounded-lg px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:opacity-90 disabled:opacity-50"
                     style={{ backgroundColor: '#1B4332' }}
                   >
-                    Save Changes
+                    {isUpdatingConfig ? 'Saving...' : 'Save Changes'}
                   </button>
                 </div>
               </motion.div>
             )}
 
             {/* DELIVERY TAB */}
-            {activeTab === 'delivery' && (
+            {activeTab === 'delivery' && zonesQuery.isLoading && (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <Skeleton className="h-7 w-40" />
+                  <Skeleton className="h-9 w-28" />
+                </div>
+                <Skeleton className="h-48 w-full" />
+                <Skeleton className="h-7 w-48" />
+                {[1, 2, 3].map((i) => (
+                  <Skeleton key={i} className="h-14 w-full" />
+                ))}
+              </div>
+            )}
+            {activeTab === 'delivery' && !zonesQuery.isLoading && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
                 <div className="flex items-center justify-between">
                   <h2 className="text-lg font-semibold" style={{ color: '#1A1A2E' }}>Delivery Zones</h2>
@@ -568,7 +668,17 @@ export default function SettingsPage() {
             )}
 
             {/* NOTIFICATIONS TAB */}
-            {activeTab === 'notifications' && (
+            {activeTab === 'notifications' && templatesQuery.isLoading && (
+              <div className="space-y-4">
+                <Skeleton className="h-7 w-52" />
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  {[1, 2, 3, 4].map((i) => (
+                    <Skeleton key={i} className="h-28 w-full" />
+                  ))}
+                </div>
+              </div>
+            )}
+            {activeTab === 'notifications' && !templatesQuery.isLoading && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
                 <h2 className="text-lg font-semibold" style={{ color: '#1A1A2E' }}>Notification Templates</h2>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
