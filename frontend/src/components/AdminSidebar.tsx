@@ -33,15 +33,12 @@ export default function AdminSidebar() {
   }
 
   const sidebarContent = (
-    <div className="flex h-full flex-col" style={{ backgroundColor: '#1A1A2E' }}>
+    <div className="flex h-full flex-col bg-surface-dark">
       {/* Logo */}
       <div className="flex h-16 items-center px-6" style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-        <span
-          className="text-xl font-bold tracking-tight text-white"
-          style={{ fontFamily: "'DM Serif Display', serif" }}
-        >
+        <span className="font-display text-xl font-bold tracking-tight text-white">
           PrepFlow{' '}
-          <span className="text-sm font-normal" style={{ color: '#40916C' }}>
+          <span className="text-sm font-normal text-primary-lighter">
             Admin
           </span>
         </span>
@@ -57,23 +54,11 @@ export default function AdminSidebar() {
               key={item.href}
               href={item.href}
               onClick={() => setMobileOpen(false)}
-              className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors duration-150"
-              style={{
-                color: active ? '#FFFFFF' : 'rgba(255,255,255,0.6)',
-                backgroundColor: active ? '#40916C' : 'transparent',
-              }}
-              onMouseEnter={(e) => {
-                if (!active) {
-                  e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.08)';
-                  e.currentTarget.style.color = '#FFFFFF';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!active) {
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                  e.currentTarget.style.color = 'rgba(255,255,255,0.6)';
-                }
-              }}
+              className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors duration-150 ${
+                active
+                  ? 'text-white bg-primary-lighter'
+                  : 'text-white/60 bg-transparent hover:bg-white/8 hover:text-white'
+              }`}
             >
               <Icon size={20} />
               {item.label}
@@ -88,8 +73,7 @@ export default function AdminSidebar() {
     <>
       {/* Mobile toggle button */}
       <button
-        className="fixed left-4 top-4 z-50 rounded-lg p-2 shadow-md lg:hidden"
-        style={{ backgroundColor: '#1A1A2E' }}
+        className="fixed left-4 top-4 z-50 rounded-lg p-2 shadow-md lg:hidden bg-surface-dark"
         onClick={() => setMobileOpen(!mobileOpen)}
         aria-label={mobileOpen ? 'Close sidebar' : 'Open sidebar'}
       >

@@ -53,18 +53,11 @@ export default function Modal({ isOpen, onClose, title, children, size = 'md' }:
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.15 }}
-            className={`relative w-full ${sizeClasses[size]} rounded-2xl bg-white shadow-xl`}
-            style={{ boxShadow: '0 20px 60px rgba(0,0,0,0.15)' }}
+            className={`relative w-full ${sizeClasses[size]} rounded-2xl bg-white shadow-modal`}
           >
             {/* Header */}
-            <div
-              className="flex items-center justify-between px-6 py-4"
-              style={{ borderBottom: '1px solid #E5E7EB' }}
-            >
-              <h2
-                className="text-lg font-semibold"
-                style={{ color: '#1A1A2E' }}
-              >
+            <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+              <h2 className="text-lg font-semibold text-text-primary">
                 {title}
               </h2>
               <button
@@ -72,7 +65,7 @@ export default function Modal({ isOpen, onClose, title, children, size = 'md' }:
                 className="rounded-lg p-1.5 transition-colors hover:bg-gray-100"
                 aria-label="Close"
               >
-                <X size={20} style={{ color: '#6B7280' }} />
+                <X size={20} className="text-text-secondary" />
               </button>
             </div>
 

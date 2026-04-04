@@ -37,7 +37,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`h-full antialiased ${dmSans.variable} ${dmSerifDisplay.variable} ${jetbrainsMono.variable}`}>
-      <body className="min-h-full flex flex-col" style={{ fontFamily: "var(--font-dm-sans), sans-serif" }}>
+      <body className="min-h-full flex flex-col font-body">
         <QueryProvider>
           <CartProvider>
             <ToastProvider>

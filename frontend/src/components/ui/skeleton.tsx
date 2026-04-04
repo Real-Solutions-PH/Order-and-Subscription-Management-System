@@ -43,7 +43,7 @@ export function SkeletonRow({ cols = 5 }: { cols?: number }) {
 /** Meal card skeleton matching MealCard dimensions. */
 export function SkeletonMealCard() {
   return (
-    <div className="rounded-2xl bg-white overflow-hidden" style={{ border: '1px solid #E5E7EB' }}>
+    <div className="rounded-2xl bg-white overflow-hidden border border-border">
       <Skeleton className="h-48 w-full rounded-none" />
       <div className="p-4 space-y-3">
         <Skeleton className="h-4 w-3/4" />
@@ -64,7 +64,7 @@ export function SkeletonMealCard() {
 /** KPI card skeleton for admin dashboard. */
 export function SkeletonKPI() {
   return (
-    <div className="rounded-2xl bg-white p-5 space-y-3" style={{ border: '1px solid #F3F4F6' }}>
+    <div className="rounded-2xl bg-white p-5 space-y-3 border border-muted">
       <div className="flex items-center justify-between">
         <Skeleton className="h-3 w-24" />
         <Skeleton className="h-8 w-8 rounded-lg" />
@@ -78,7 +78,7 @@ export function SkeletonKPI() {
 /** Chart area skeleton. */
 export function SkeletonChart({ className }: { className?: string }) {
   return (
-    <div className={cn('rounded-2xl bg-white p-6', className)} style={{ border: '1px solid #F3F4F6' }}>
+    <div className={cn('rounded-2xl bg-white p-6 border border-muted', className)}>
       <Skeleton className="h-4 w-32 mb-4" />
       <Skeleton className="h-64 w-full rounded-xl" />
     </div>

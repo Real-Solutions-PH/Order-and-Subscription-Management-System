@@ -6,7 +6,10 @@
       "Bash(taskkill //F //IM \"node.exe\")",
       "Bash(npm install:*)",
       "Bash(npm run:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(grep -io \"'#[0-9A-Fa-f]\\\\{3,6\\\\}\\\\|\\\\\"#[0-9A-Fa-f]\\\\{3,6\\\\}\")",
+      "Read(//c/Users/kairu/Documents/Github/Order-and-Subscription-Management-System/Color declarations: $\\(wc -l < /tmp/**)",
+      "Read(//c/Users/kairu/Documents/Github/Order-and-Subscription-Management-System/Total unique inline style lines: $\\(wc -l < /tmp/**)"
     ]
   }
 }

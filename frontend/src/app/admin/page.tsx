@@ -62,13 +62,13 @@ import {
 import { useDashboardMetrics, useMRRBreakdown, usePopularItems, useCohorts, useOrders } from '@/hooks';
 import { SkeletonKPI, SkeletonChart } from '@/components/ui/skeleton';
 
-const statusColors: Record<string, { bg: string; text: string }> = {
-  new: { bg: "#DBEAFE", text: "#1E40AF" },
-  preparing: { bg: "#FEF3C7", text: "#92400E" },
-  ready: { bg: "#D1FAE5", text: "#065F46" },
-  delivering: { bg: "#DBEAFE", text: "#1E40AF" },
-  delivered: { bg: "#D1FAE5", text: "#065F46" },
-  cancelled: { bg: "#FEE2E2", text: "#991B1B" },
+const statusColors: Record<string, { bg: string; text: string; dotBg: string }> = {
+  new: { bg: "bg-info-light", text: "text-blue-800", dotBg: "bg-blue-800" },
+  preparing: { bg: "bg-warning-light", text: "text-warning-dark", dotBg: "bg-warning-dark" },
+  ready: { bg: "bg-success-light", text: "text-emerald-800", dotBg: "bg-emerald-800" },
+  delivering: { bg: "bg-info-light", text: "text-blue-800", dotBg: "bg-blue-800" },
+  delivered: { bg: "bg-success-light", text: "text-emerald-800", dotBg: "bg-emerald-800" },
+  cancelled: { bg: "bg-error-light", text: "text-red-800", dotBg: "bg-red-800" },
 };
 
 const calculateTrend = (current: number, previous: number) => {
@@ -99,21 +99,21 @@ const totalSubscribers = analyticsData.planDistribution.reduce(
   0,
 );
 
-function getCohortColor(value: number | undefined): string {
-  if (value === undefined) return "transparent";
-  if (value >= 90) return "#059669";
-  if (value >= 80) return "#10B981";
-  if (value >= 70) return "#34D399";
-  if (value >= 60) return "#F4A261";
-  if (value >= 50) return "#E76F51";
-  return "#DC2626";
+function getCohortBgClass(value: number | undefined): string {
+  if (value === undefined) return "bg-transparent";
+  if (value >= 90) return "bg-success";
+  if (value >= 80) return "bg-emerald-500";
+  if (value >= 70) return "bg-emerald-400";
+  if (value >= 60) return "bg-accent-light";
+  if (value >= 50) return "bg-accent";
+  return "bg-error";
 }
 
-function getCohortTextColor(value: number | undefined): string {
-  if (value === undefined) return "transparent";
-  if (value >= 80) return "#FFFFFF";
-  if (value >= 60) return "#1A1A2E";
-  return "#FFFFFF";
+function getCohortTextClass(value: number | undefined): string {
+  if (value === undefined) return "text-transparent";
+  if (value >= 80) return "text-surface-white";
+  if (value >= 60) return "text-text-primary";
+  return "text-surface-white";
 }
 
 const cohortColumns = ["m1", "m2", "m3", "m4", "m5", "m6"] as const;
@@ -125,7 +125,8 @@ const renderCustomLabel = ({ cx, cy }: { cx: number; cy: number }) => {
       y={cy}
       textAnchor="middle"
       dominantBaseline="central"
-      style={{ fontSize: 20, fontWeight: 700, fill: "#1A1A2E" }}
+      className="fill-text-primary"
+      style={{ fontSize: 20, fontWeight: 700 }}
     >
       {totalSubscribers}
     </text>
@@ -193,8 +194,8 @@ export default function AdminDashboard() {
       trendUp:
         displayAnalytics.todayGrossSales > displayAnalytics.todayGrossSalesLastMonth,
       icon: DollarSign,
-      iconBg: "#F0FDF4",
-      iconColor: "#16A34A",
+      iconBg: "bg-green-50",
+      iconColor: "text-green-600",
     },
     {
       label: "Net Sales",
@@ -206,8 +207,8 @@ export default function AdminDashboard() {
       ),
       trendUp: displayAnalytics.todayNetSales > displayAnalytics.todayNetSalesLastMonth,
       icon: Activity,
-      iconBg: "#ECFDF5",
-      iconColor: "#059669",
+      iconBg: "bg-emerald-50",
+      iconColor: "text-success",
     },
     {
       label: "Total Meals",
@@ -220,8 +221,8 @@ export default function AdminDashboard() {
       trendUp:
         displayAnalytics.todayTotalMeals > displayAnalytics.todayTotalMealsLastMonth,
       icon: Package,
-      iconBg: "#FFFBEB",
-      iconColor: "#D97706",
+      iconBg: "bg-amber-50",
+      iconColor: "text-warning",
     },
     {
       label: "MRR",
@@ -230,8 +231,8 @@ export default function AdminDashboard() {
       trend: calculateTrend(displayAnalytics.mrr, displayAnalytics.mrrLastMonth),
       trendUp: displayAnalytics.mrr > displayAnalytics.mrrLastMonth,
       icon: Repeat,
-      iconBg: "#F5F3FF",
-      iconColor: "#7C3AED",
+      iconBg: "bg-violet-50",
+      iconColor: "text-violet-600",
     },
     {
       label: "Churn Rate",
@@ -240,8 +241,8 @@ export default function AdminDashboard() {
       trend: `${(displayAnalytics.churnRate - displayAnalytics.churnRateLastMonth).toFixed(1)}%`,
       trendUp: displayAnalytics.churnRate < displayAnalytics.churnRateLastMonth,
       icon: BarChart3,
-      iconBg: "#FEF2F2",
-      iconColor: "#DC2626",
+      iconBg: "bg-red-50",
+      iconColor: "text-error",
     },
     {
       label: "Active Subscribers",
@@ -252,8 +253,8 @@ export default function AdminDashboard() {
         displayAnalytics.activeSubscribers >
         displayAnalytics.activeSubscribersLastMonth,
       icon: Users,
-      iconBg: "#EFF6FF",
-      iconColor: "#2563EB",
+      iconBg: "bg-blue-50",
+      iconColor: "text-info",
     },
     {
       label: "CAC",
@@ -262,8 +263,8 @@ export default function AdminDashboard() {
       trend: calculateTrend(displayAnalytics.cac, displayAnalytics.cacLastMonth),
       trendUp: displayAnalytics.cac < displayAnalytics.cacLastMonth,
       icon: Target,
-      iconBg: "#FFF7ED",
-      iconColor: "#EA580C",
+      iconBg: "bg-orange-50",
+      iconColor: "text-orange-600",
     },
     {
       label: "CAC Payback",
@@ -272,8 +273,8 @@ export default function AdminDashboard() {
       trend: `${(displayAnalytics.cacPaybackMonths - displayAnalytics.cacPaybackMonthsLastMonth).toFixed(1)} mo`,
       trendUp: displayAnalytics.cacPaybackMonths < displayAnalytics.cacPaybackMonthsLastMonth,
       icon: Timer,
-      iconBg: "#FDF4FF",
-      iconColor: "#A855F7",
+      iconBg: "bg-fuchsia-50",
+      iconColor: "text-purple-500",
     },
   ];
 
@@ -287,8 +288,8 @@ export default function AdminDashboard() {
         displayAnalytics.activeSubscribers >
         displayAnalytics.activeSubscribersLastMonth,
       icon: Users,
-      iconBg: "#D1FAE5",
-      iconColor: "#059669",
+      iconBg: "bg-success-light",
+      iconColor: "text-success",
     },
     {
       label: "MRR",
@@ -297,8 +298,8 @@ export default function AdminDashboard() {
       trend: calculateTrend(displayAnalytics.mrr, displayAnalytics.mrrLastMonth),
       trendUp: displayAnalytics.mrr > displayAnalytics.mrrLastMonth,
       icon: Repeat,
-      iconBg: "#EDE9FE",
-      iconColor: "#7C3AED",
+      iconBg: "bg-violet-100",
+      iconColor: "text-violet-600",
     },
     {
       label: "Churn Rate",
@@ -307,8 +308,8 @@ export default function AdminDashboard() {
       trend: `${(displayAnalytics.churnRate - displayAnalytics.churnRateLastMonth).toFixed(1)}%`,
       trendUp: displayAnalytics.churnRate < displayAnalytics.churnRateLastMonth,
       icon: BarChart3,
-      iconBg: "#FEF3C7",
-      iconColor: "#D97706",
+      iconBg: "bg-warning-light",
+      iconColor: "text-warning",
     },
     {
       label: "Avg LTV",
@@ -316,8 +317,8 @@ export default function AdminDashboard() {
       trend: "+5%",
       trendUp: true,
       icon: Heart,
-      iconBg: "#FCE7F3",
-      iconColor: "#DB2777",
+      iconBg: "bg-pink-100",
+      iconColor: "text-pink-600",
     },
   ];
 
@@ -403,34 +404,25 @@ export default function AdminDashboard() {
     <div className="space-y-6">
       {/* Page Header */}
       <div>
-        <h1
-          className="text-2xl font-bold"
-          style={{ color: "#1A1A2E", fontFamily: "'DM Serif Display', serif" }}
-        >
+        <h1 className="text-2xl font-bold text-text-primary font-display">
           Dashboard
         </h1>
-        <p className="mt-1 text-sm" style={{ color: "#6B7280" }}>
+        <p className="mt-1 text-sm text-text-secondary">
           Welcome back. Here&apos;s your business overview for today.
         </p>
       </div>
 
       {/* Tabs */}
-      <div
-        className="flex gap-1 rounded-lg p-1"
-        style={{ backgroundColor: "#F3F4F6" }}
-      >
+      <div className="flex gap-1 rounded-lg bg-muted p-1">
         {tabs.map((tab) => (
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
-            className="rounded-md px-4 py-2 text-sm font-medium transition-colors duration-150"
-            style={{
-              backgroundColor:
-                activeTab === tab.key ? "#FFFFFF" : "transparent",
-              color: activeTab === tab.key ? "#1A1A2E" : "#6B7280",
-              boxShadow:
-                activeTab === tab.key ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
-            }}
+            className={`rounded-md px-4 py-2 text-sm font-medium transition-colors duration-150 ${
+              activeTab === tab.key
+                ? "bg-surface-white text-text-primary shadow-sm"
+                : "bg-transparent text-text-secondary"
+            }`}
           >
             {tab.label}
           </button>
@@ -444,39 +436,24 @@ export default function AdminDashboard() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.3 }}
-            className="rounded-2xl p-6"
-            style={{
-              backgroundColor: "#FFFFFF",
-              boxShadow:
-                "0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05)",
-              border: "1px solid #F3F4F6",
-            }}
+            className="rounded-2xl border border-border-light bg-surface-white p-6 shadow-elevated"
           >
             <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div
-                  className="flex h-10 w-10 items-center justify-center rounded-xl"
-                  style={{ backgroundColor: "#1B4332" }}
-                >
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary">
                   <Activity size={20} className="text-white" />
                 </div>
                 <div>
-                  <h2
-                    className="text-lg font-bold"
-                    style={{ color: "#1A1A2E" }}
-                  >
+                  <h2 className="text-lg font-bold text-text-primary">
                     Live Operational Flow
                   </h2>
-                  <p className="text-sm" style={{ color: "#6B7280" }}>
+                  <p className="text-sm text-text-secondary">
                     Real-time order progression for today
                   </p>
                 </div>
               </div>
 
-              <div
-                className="flex items-center gap-2 rounded-full border px-3 py-1.5"
-                style={{ borderColor: "#E5E7EB", backgroundColor: "#F9FAFB" }}
-              >
+              <div className="flex items-center gap-2 rounded-full border border-border bg-gray-50">
                 <span className="relative flex h-2 w-2">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75"></span>
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-red-500"></span>
@@ -504,40 +481,31 @@ export default function AdminDashboard() {
                   <motion.div
                     key={s.key}
                     whileHover={{ y: -4 }}
-                    className="relative flex flex-col items-start overflow-hidden rounded-xl border p-4 transition-all"
-                    style={{
-                      backgroundColor: "#FFFFFF",
-                      borderColor: "#F3F4F6",
-                    }}
+                    className="relative flex flex-col items-start overflow-hidden rounded-xl border border-border-light bg-surface-white p-4 transition-all"
                   >
                     {/* Background Accent */}
                     <div
-                      className="absolute right-[-10px] top-[-10px] h-20 w-20 opacity-[0.03]"
-                      style={{ color: colors.text }}
+                      className={`absolute right-[-10px] top-[-10px] h-20 w-20 opacity-[0.03] ${colors.text}`}
                     >
                       <Icon size={80} />
                     </div>
 
                     <div className="mb-3 flex w-full items-center justify-between">
                       <div
-                        className="flex h-9 w-9 items-center justify-center rounded-lg"
-                        style={{ backgroundColor: `${colors.bg}` }}
+                        className={`flex h-9 w-9 items-center justify-center rounded-lg ${colors.bg}`}
                       >
-                        <Icon size={18} style={{ color: colors.text }} />
+                        <Icon size={18} className={colors.text} />
                       </div>
                       {isActive && (
                         <div className="flex gap-1">
                           <div
-                            className="h-1 w-1 animate-pulse rounded-full"
-                            style={{ backgroundColor: colors.text }}
+                            className={`h-1 w-1 animate-pulse rounded-full ${colors.dotBg}`}
                           ></div>
                           <div
-                            className="h-1 w-1 animate-pulse rounded-full delay-75"
-                            style={{ backgroundColor: colors.text }}
+                            className={`h-1 w-1 animate-pulse rounded-full delay-75 ${colors.dotBg}`}
                           ></div>
                           <div
-                            className="h-1 w-1 animate-pulse rounded-full delay-150"
-                            style={{ backgroundColor: colors.text }}
+                            className={`h-1 w-1 animate-pulse rounded-full delay-150 ${colors.dotBg}`}
                           ></div>
                         </div>
                       )}
@@ -548,14 +516,12 @@ export default function AdminDashboard() {
                         key={count}
                         initial={{ scale: 0.8, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
-                        className="text-3xl font-black"
-                        style={{ color: "#1A1A2E" }}
+                        className="text-3xl font-black text-text-primary"
                       >
                         {count}
                       </motion.span>
                       <span
-                        className="text-xs font-bold uppercase tracking-wide"
-                        style={{ color: colors.text }}
+                        className={`text-xs font-bold uppercase tracking-wide ${colors.text}`}
                       >
                         {s.label}
                       </span>
@@ -569,8 +535,7 @@ export default function AdminDashboard() {
                       <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: count > 0 ? "100%" : "0%" }}
-                        className="h-full rounded-full"
-                        style={{ backgroundColor: colors.text, opacity: 0.2 }}
+                        className={`h-full rounded-full opacity-20 ${colors.dotBg}`}
                       />
                     </div>
                   </motion.div>
@@ -594,23 +559,16 @@ export default function AdminDashboard() {
                         initial={{ opacity: 0, y: 16 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.05, duration: 0.3 }}
-                        className="rounded-xl p-4 cursor-help"
-                        style={{
-                          backgroundColor: "#FFFFFF",
-                          boxShadow: "var(--shadow-card)",
-                          border: "1px solid #E5E7EB",
-                        }}
+                        className="rounded-xl border border-border bg-surface-white p-4 shadow-card cursor-help"
                       >
                         <div className="flex items-start justify-between">
                           <div
-                            className="flex h-9 w-9 items-center justify-center rounded-lg"
-                            style={{ backgroundColor: kpi.iconBg }}
+                            className={`flex h-9 w-9 items-center justify-center rounded-lg ${kpi.iconBg}`}
                           >
-                            <Icon size={18} style={{ color: kpi.iconColor }} />
+                            <Icon size={18} className={kpi.iconColor} />
                           </div>
                           <span
-                            className="inline-flex items-center gap-0.5 text-[10px] font-bold uppercase tracking-wider"
-                            style={{ color: kpi.trendUp ? "#059669" : "#DC2626" }}
+                            className={`inline-flex items-center gap-0.5 text-[10px] font-bold uppercase tracking-wider ${kpi.trendUp ? "text-success" : "text-error"}`}
                           >
                             {kpi.trendUp ? (
                               <TrendingUp size={12} />
@@ -620,16 +578,10 @@ export default function AdminDashboard() {
                             {kpi.trend}
                           </span>
                         </div>
-                        <p
-                          className="mt-3 text-xl font-bold tracking-tight"
-                          style={{ color: "#1A1A2E" }}
-                        >
+                        <p className="mt-3 text-xl font-bold tracking-tight text-text-primary">
                           {kpi.value}
                         </p>
-                        <p
-                          className="mt-0.5 text-[11px] font-medium"
-                          style={{ color: "#6B7280" }}
-                        >
+                        <p className="mt-0.5 text-[11px] font-medium text-text-secondary">
                           {kpi.label}
                         </p>
                       </motion.div>
@@ -670,17 +622,9 @@ export default function AdminDashboard() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.25, duration: 0.3 }}
-              className="rounded-xl p-5"
-              style={{
-                backgroundColor: "#FFFFFF",
-                boxShadow: "var(--shadow-card)",
-                border: "1px solid #E5E7EB",
-              }}
+              className="rounded-xl border border-border bg-surface-white p-5 shadow-card"
             >
-              <h2
-                className="mb-4 text-base font-semibold"
-                style={{ color: "#1A1A2E" }}
-              >
+              <h2 className="mb-4 text-base font-semibold text-text-primary">
                 Revenue (Last 30 Days)
               </h2>
               <div style={{ height: 300 }}>
@@ -798,22 +742,14 @@ export default function AdminDashboard() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.3 }}
-            className="rounded-xl p-5"
-            style={{
-              backgroundColor: "#FFFFFF",
-              boxShadow: "var(--shadow-card)",
-              border: "1px solid #E5E7EB",
-            }}
+            className="rounded-xl border border-border bg-surface-white p-5 shadow-card"
           >
             <div className="mb-4 flex items-center justify-between">
               <div>
-                <h2
-                  className="text-base font-semibold"
-                  style={{ color: "#1A1A2E" }}
-                >
+                <h2 className="text-base font-semibold text-text-primary">
                   Menu Profitability & Performance
                 </h2>
-                <p className="mt-0.5 text-xs" style={{ color: "#6B7280" }}>
+                <p className="mt-0.5 text-xs text-text-secondary">
                   Ranked by {sortConfig.key === 'name' ? 'name' : sortConfig.key === 'revenue' ? 'revenue' : 'selected metric'} — this week
                 </p>
               </div>
@@ -821,30 +757,30 @@ export default function AdminDashboard() {
             <div className="overflow-x-auto" style={{ maxHeight: 480 }}>
               <table className="w-full text-sm" style={{ minWidth: 700 }}>
                 <thead>
-                  <tr style={{ borderBottom: "2px solid #E5E7EB" }}>
-                    <th className="px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: "#6B7280" }}>#</th>
-                    <th className="cursor-pointer px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-wider transition-colors hover:bg-gray-50" onClick={() => handleSort("name")} style={{ color: "#6B7280" }}>
+                  <tr className="border-b-2 border-border">
+                    <th className="px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-wider text-text-secondary">#</th>
+                    <th className="cursor-pointer px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-wider text-text-secondary transition-colors hover:bg-gray-50" onClick={() => handleSort("name")}>
                       <div className="flex items-center gap-1">Meal <SortIcon column="name" sortConfig={sortConfig} /></div>
                     </th>
-                    <th className="cursor-pointer px-3 py-2.5 text-right text-xs font-semibold uppercase tracking-wider transition-colors hover:bg-gray-50" onClick={() => handleSort("sold")} style={{ color: "#6B7280" }}>
+                    <th className="cursor-pointer px-3 py-2.5 text-right text-xs font-semibold uppercase tracking-wider text-text-secondary transition-colors hover:bg-gray-50" onClick={() => handleSort("sold")}>
                       <div className="flex items-center justify-end gap-1">Sold <SortIcon column="sold" sortConfig={sortConfig} /></div>
                     </th>
-                    <th className="cursor-pointer px-3 py-2.5 text-right text-xs font-semibold uppercase tracking-wider transition-colors hover:bg-gray-50" onClick={() => handleSort("pricePerUnit")} style={{ color: "#6B7280" }}>
+                    <th className="cursor-pointer px-3 py-2.5 text-right text-xs font-semibold uppercase tracking-wider text-text-secondary transition-colors hover:bg-gray-50" onClick={() => handleSort("pricePerUnit")}>
                       <div className="flex items-center justify-end gap-1">AOV <SortIcon column="pricePerUnit" sortConfig={sortConfig} /></div>
                     </th>
-                    <th className="cursor-pointer px-3 py-2.5 text-right text-xs font-semibold uppercase tracking-wider transition-colors hover:bg-gray-50" onClick={() => handleSort("costPerUnit")} style={{ color: "#6B7280" }}>
+                    <th className="cursor-pointer px-3 py-2.5 text-right text-xs font-semibold uppercase tracking-wider text-text-secondary transition-colors hover:bg-gray-50" onClick={() => handleSort("costPerUnit")}>
                       <div className="flex items-center justify-end gap-1">COGS <SortIcon column="costPerUnit" sortConfig={sortConfig} /></div>
                     </th>
-                    <th className="cursor-pointer px-3 py-2.5 text-right text-xs font-semibold uppercase tracking-wider transition-colors hover:bg-gray-50" onClick={() => handleSort("marginPct")} style={{ color: "#6B7280" }}>
+                    <th className="cursor-pointer px-3 py-2.5 text-right text-xs font-semibold uppercase tracking-wider text-text-secondary transition-colors hover:bg-gray-50" onClick={() => handleSort("marginPct")}>
                       <div className="flex items-center justify-end gap-1">Gross Margin <SortIcon column="marginPct" sortConfig={sortConfig} /></div>
                     </th>
-                    <th className="cursor-pointer px-3 py-2.5 text-right text-xs font-semibold uppercase tracking-wider transition-colors hover:bg-gray-50" onClick={() => handleSort("revenue")} style={{ color: "#6B7280" }}>
+                    <th className="cursor-pointer px-3 py-2.5 text-right text-xs font-semibold uppercase tracking-wider text-text-secondary transition-colors hover:bg-gray-50" onClick={() => handleSort("revenue")}>
                       <div className="flex items-center justify-end gap-1">Revenue <SortIcon column="revenue" sortConfig={sortConfig} /></div>
                     </th>
-                    <th className="cursor-pointer px-3 py-2.5 text-right text-xs font-semibold uppercase tracking-wider transition-colors hover:bg-gray-50" onClick={() => handleSort("cookMins")} style={{ color: "#6B7280" }}>
+                    <th className="cursor-pointer px-3 py-2.5 text-right text-xs font-semibold uppercase tracking-wider text-text-secondary transition-colors hover:bg-gray-50" onClick={() => handleSort("cookMins")}>
                       <div className="flex items-center justify-end gap-1">Cook <SortIcon column="cookMins" sortConfig={sortConfig} /></div>
                     </th>
-                    <th className="cursor-pointer px-3 py-2.5 text-right text-xs font-semibold uppercase tracking-wider transition-colors hover:bg-gray-50" onClick={() => handleSort("packMins")} style={{ color: "#6B7280" }}>
+                    <th className="cursor-pointer px-3 py-2.5 text-right text-xs font-semibold uppercase tracking-wider text-text-secondary transition-colors hover:bg-gray-50" onClick={() => handleSort("packMins")}>
                       <div className="flex items-center justify-end gap-1">Pack <SortIcon column="packMins" sortConfig={sortConfig} /></div>
                     </th>
                   </tr>
@@ -855,17 +791,17 @@ export default function AdminDashboard() {
                     const revenueBarPct = (item.revenue / topRevenue) * 100;
                     const isTop3 = i < 3;
                     return (
-                      <tr key={item.name} style={{ borderBottom: "1px solid #F3F4F6", backgroundColor: isTop3 ? "#F0FDF4" : "transparent" }}>
-                        <td className="px-3 py-2.5 text-left text-xs font-bold" style={{ color: isTop3 ? "#1B4332" : "#6B7280" }}>{i + 1}</td>
-                        <td className="px-3 py-2.5 font-medium" style={{ color: "#1A1A2E" }}>{item.name}</td>
+                      <tr key={item.name} className={`border-b border-border-light ${isTop3 ? "bg-green-50" : "bg-transparent"}`}>
+                        <td className={`px-3 py-2.5 text-left text-xs font-bold ${isTop3 ? "text-primary" : "text-text-secondary"}`}>{i + 1}</td>
+                        <td className="px-3 py-2.5 font-medium text-text-primary">{item.name}</td>
                         <td className="px-3 py-2.5 text-right font-semibold">{item.sold}</td>
-                        <td className="px-3 py-2.5 text-right text-xs font-semibold" style={{ color: "#1A1A2E" }}>{formatPeso(item.pricePerUnit)}</td>
-                        <td className="px-3 py-2.5 text-right text-xs font-semibold" style={{ color: "#6B7280" }}>{formatPeso(item.costPerUnit)}</td>
-                        <td className="px-3 py-2.5 text-right text-xs font-semibold" style={{ color: item.marginPct >= 55 ? "#065F46" : "#991B1B" }}>{item.marginPct.toFixed(1)}%</td>
+                        <td className="px-3 py-2.5 text-right text-xs font-semibold text-text-primary">{formatPeso(item.pricePerUnit)}</td>
+                        <td className="px-3 py-2.5 text-right text-xs font-semibold text-text-secondary">{formatPeso(item.costPerUnit)}</td>
+                        <td className={`px-3 py-2.5 text-right text-xs font-semibold ${item.marginPct >= 55 ? "text-emerald-800" : "text-red-800"}`}>{item.marginPct.toFixed(1)}%</td>
                         <td className="px-3 py-2.5 text-right">
                           <div className="flex items-center justify-end gap-2">
-                            <div className="h-2 rounded-full" style={{ width: `${Math.max(revenueBarPct, 8)}%`, maxWidth: 80, backgroundColor: "#2D6A4F", opacity: 0.35 }} />
-                            <span className="font-semibold" style={{ color: "#1A1A2E", minWidth: 64, textAlign: "right" }}>{formatPeso(item.revenue)}</span>
+                            <div className="h-2 rounded-full bg-primary-light opacity-35" style={{ width: `${Math.max(revenueBarPct, 8)}%`, maxWidth: 80 }} />
+                            <span className="font-semibold text-text-primary" style={{ minWidth: 64, textAlign: "right" }}>{formatPeso(item.revenue)}</span>
                           </div>
                         </td>
                         <td className="px-3 py-2.5 text-right text-xs text-gray-500">{item.cookMins}m</td>
@@ -898,19 +834,13 @@ export default function AdminDashboard() {
                       initial={{ opacity: 0, y: 16 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: i * 0.05, duration: 0.3 }}
-                      className="rounded-xl p-5 cursor-help"
-                      style={{
-                        backgroundColor: "#FFFFFF",
-                        boxShadow: "var(--shadow-card)",
-                        border: "1px solid #E5E7EB",
-                      }}
+                      className="rounded-xl border border-border bg-surface-white p-5 shadow-card cursor-help"
                     >
                       <div className="flex items-start justify-between">
                         <div
-                          className="flex h-10 w-10 items-center justify-center rounded-lg"
-                          style={{ backgroundColor: kpi.iconBg }}
+                          className={`flex h-10 w-10 items-center justify-center rounded-lg ${kpi.iconBg}`}
                         >
-                          <Icon size={20} style={{ color: kpi.iconColor }} />
+                          <Icon size={20} className={kpi.iconColor} />
                         </div>
                         {kpi.label === "Churn Rate" ? (
                           <div className="relative h-10 w-10">
@@ -933,10 +863,7 @@ export default function AdminDashboard() {
                           </div>
                         ) : (
                           <span
-                            className="inline-flex items-center gap-1 text-xs font-medium"
-                            style={{
-                              color: kpi.trendUp ? "#059669" : "#DC2626",
-                            }}
+                            className={`inline-flex items-center gap-1 text-xs font-medium ${kpi.trendUp ? "text-success" : "text-error"}`}
                           >
                             {kpi.trendUp ? (
                               <TrendingUp size={14} />
@@ -947,22 +874,19 @@ export default function AdminDashboard() {
                           </span>
                         )}
                       </div>
-                      <p
-                        className="mt-3 text-2xl font-bold"
-                        style={{ color: "#1A1A2E" }}
-                      >
+                      <p className="mt-3 text-2xl font-bold text-text-primary">
                         {kpi.value}
                       </p>
-                      <p className="mt-1 text-xs" style={{ color: "#6B7280" }}>
+                      <p className="mt-1 text-xs text-text-secondary">
                         {kpi.label}
                         {kpi.label === "Churn Rate" && kpi.trendUp && (
-                          <span style={{ color: "#059669" }}>
+                          <span className="text-success">
                             {" "}
                             ({kpi.trend})
                           </span>
                         )}
                         {kpi.label === "Churn Rate" && !kpi.trendUp && (
-                          <span style={{ color: "#DC2626" }}>
+                          <span className="text-error">
                             {" "}
                             ({kpi.trend})
                           </span>
@@ -1009,17 +933,9 @@ export default function AdminDashboard() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.3 }}
-              className="rounded-xl p-5"
-              style={{
-                backgroundColor: "#FFFFFF",
-                boxShadow: "var(--shadow-card)",
-                border: "1px solid #E5E7EB",
-              }}
+              className="rounded-xl border border-border bg-surface-white p-5 shadow-card"
             >
-              <h2
-                className="mb-4 text-base font-semibold"
-                style={{ color: "#1A1A2E" }}
-              >
+              <h2 className="mb-4 text-base font-semibold text-text-primary">
                 New vs Churned Subscribers
               </h2>
               <div style={{ height: 300 }}>
@@ -1068,17 +984,9 @@ export default function AdminDashboard() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.25, duration: 0.3 }}
-              className="rounded-xl p-5"
-              style={{
-                backgroundColor: "#FFFFFF",
-                boxShadow: "var(--shadow-card)",
-                border: "1px solid #E5E7EB",
-              }}
+              className="rounded-xl border border-border bg-surface-white p-5 shadow-card"
             >
-              <h2
-                className="mb-4 text-base font-semibold"
-                style={{ color: "#1A1A2E" }}
-              >
+              <h2 className="mb-4 text-base font-semibold text-text-primary">
                 Plan Distribution
               </h2>
               <div className="flex items-center gap-4">
@@ -1123,23 +1031,14 @@ export default function AdminDashboard() {
                       />
                       <div className="flex-1">
                         <div className="flex items-center justify-between">
-                          <span
-                            className="text-sm font-medium"
-                            style={{ color: "#1A1A2E" }}
-                          >
+                          <span className="text-sm font-medium text-text-primary">
                             {plan.name}
                           </span>
-                          <span
-                            className="text-sm"
-                            style={{ color: "#6B7280" }}
-                          >
+                          <span className="text-sm text-text-secondary">
                             {plan.value}
                           </span>
                         </div>
-                        <div
-                          className="mt-1 h-1.5 w-full rounded-full"
-                          style={{ backgroundColor: "#F3F4F6" }}
-                        >
+                        <div className="mt-1 h-1.5 w-full rounded-full bg-muted">
                           <div
                             className="h-1.5 rounded-full"
                             style={{
@@ -1149,7 +1048,7 @@ export default function AdminDashboard() {
                           />
                         </div>
                       </div>
-                      <span className="text-xs" style={{ color: "#6B7280" }}>
+                      <span className="text-xs text-text-secondary">
                         {((plan.value / totalSubscribers) * 100).toFixed(1)}%
                       </span>
                     </div>
@@ -1167,46 +1066,30 @@ export default function AdminDashboard() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.3 }}
-              className="rounded-xl p-5"
-              style={{
-                backgroundColor: "#FFFFFF",
-                boxShadow: "var(--shadow-card)",
-                border: "1px solid #E5E7EB",
-              }}
+              className="rounded-xl border border-border bg-surface-white p-5 shadow-card"
             >
-              <h2
-                className="mb-4 text-base font-semibold"
-                style={{ color: "#1A1A2E" }}
-              >
+              <h2 className="mb-4 text-base font-semibold text-text-primary">
                 Retention Metrics
               </h2>
               <div className="space-y-5">
                 {retentionMetrics.map((metric) => (
                   <div key={metric.label}>
                     <div className="mb-1 flex items-center justify-between">
-                      <span className="text-sm" style={{ color: "#6B7280" }}>
+                      <span className="text-sm text-text-secondary">
                         {metric.label}
                       </span>
-                      <span
-                        className="text-lg font-bold"
-                        style={{ color: "#1A1A2E" }}
-                      >
+                      <span className="text-lg font-bold text-text-primary">
                         {metric.value}
                       </span>
                     </div>
-                    <div
-                      className="h-2 w-full rounded-full"
-                      style={{ backgroundColor: "#F3F4F6" }}
-                    >
+                    <div className="h-2 w-full rounded-full bg-muted">
                       <div
-                        className="h-2 rounded-full transition-all"
-                        style={{
-                          backgroundColor:
-                            metric.label === "Win-back Rate"
-                              ? "#059669"
-                              : "#2D6A4F",
-                          width: `${metric.bar}%`,
-                        }}
+                        className={`h-2 rounded-full transition-all ${
+                          metric.label === "Win-back Rate"
+                            ? "bg-success"
+                            : "bg-primary-light"
+                        }`}
+                        style={{ width: `${metric.bar}%` }}
                       />
                     </div>
                   </div>
@@ -1219,17 +1102,9 @@ export default function AdminDashboard() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.35, duration: 0.3 }}
-              className="rounded-xl p-5"
-              style={{
-                backgroundColor: "#FFFFFF",
-                boxShadow: "var(--shadow-card)",
-                border: "1px solid #E5E7EB",
-              }}
+              className="rounded-xl border border-border bg-surface-white p-5 shadow-card"
             >
-              <h2
-                className="mb-4 text-base font-semibold"
-                style={{ color: "#1A1A2E" }}
-              >
+              <h2 className="mb-4 text-base font-semibold text-text-primary">
                 LTV Trend (Last 6 Months)
               </h2>
               <div style={{ height: 200 }}>
@@ -1282,34 +1157,22 @@ export default function AdminDashboard() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.3 }}
-            className="rounded-xl p-5"
-            style={{
-              backgroundColor: "#FFFFFF",
-              boxShadow: "var(--shadow-card)",
-              border: "1px solid #E5E7EB",
-            }}
+            className="rounded-xl border border-border bg-surface-white p-5 shadow-card"
           >
-            <h2
-              className="mb-4 text-base font-semibold"
-              style={{ color: "#1A1A2E" }}
-            >
+            <h2 className="mb-4 text-base font-semibold text-text-primary">
               Cohort Retention Heatmap
             </h2>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr>
-                    <th
-                      className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider"
-                      style={{ color: "#6B7280" }}
-                    >
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-text-secondary">
                       Signup Month
                     </th>
                     {cohortColumns.map((col, i) => (
                       <th
                         key={col}
-                        className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider"
-                        style={{ color: "#6B7280" }}
+                        className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-text-secondary"
                       >
                         Month {i + 1}
                       </th>
@@ -1320,12 +1183,9 @@ export default function AdminDashboard() {
                   {displayAnalytics.cohortRetention.map((row) => (
                     <tr
                       key={row.month}
-                      style={{ borderBottom: "1px solid #F3F4F6" }}
+                      className="border-b border-border-light"
                     >
-                      <td
-                        className="px-4 py-3 font-medium"
-                        style={{ color: "#1A1A2E" }}
-                      >
+                      <td className="px-4 py-3 font-medium text-text-primary">
                         {row.month}
                       </td>
                       {cohortColumns.map((col) => {
@@ -1334,22 +1194,12 @@ export default function AdminDashboard() {
                           <td key={col} className="px-2 py-2 text-center">
                             {value !== undefined ? (
                               <span
-                                className="inline-flex h-10 w-16 items-center justify-center rounded-md text-xs font-bold"
-                                style={{
-                                  backgroundColor: getCohortColor(value),
-                                  color: getCohortTextColor(value),
-                                }}
+                                className={`inline-flex h-10 w-16 items-center justify-center rounded-md text-xs font-bold ${getCohortBgClass(value)} ${getCohortTextClass(value)}`}
                               >
                                 {value}%
                               </span>
                             ) : (
-                              <span
-                                className="inline-flex h-10 w-16 items-center justify-center rounded-md text-xs"
-                                style={{
-                                  backgroundColor: "#F9FAFB",
-                                  color: "#D1D5DB",
-                                }}
-                              >
+                              <span className="inline-flex h-10 w-16 items-center justify-center rounded-md bg-gray-50 text-xs text-gray-300">
                                 --
                               </span>
                             )}
@@ -1363,26 +1213,25 @@ export default function AdminDashboard() {
             </div>
             {/* Color scale legend */}
             <div className="mt-4 flex items-center justify-end gap-2">
-              <span className="text-xs" style={{ color: "#6B7280" }}>
+              <span className="text-xs text-text-secondary">
                 Low
               </span>
               <div className="flex gap-0.5">
                 {[
-                  "#DC2626",
-                  "#E76F51",
-                  "#F4A261",
-                  "#34D399",
-                  "#10B981",
-                  "#059669",
-                ].map((color) => (
+                  "bg-error",
+                  "bg-accent",
+                  "bg-accent-light",
+                  "bg-emerald-400",
+                  "bg-emerald-500",
+                  "bg-success",
+                ].map((bgClass) => (
                   <div
-                    key={color}
-                    className="h-3 w-6 first:rounded-l last:rounded-r"
-                    style={{ backgroundColor: color }}
+                    key={bgClass}
+                    className={`h-3 w-6 first:rounded-l last:rounded-r ${bgClass}`}
                   />
                 ))}
               </div>
-              <span className="text-xs" style={{ color: "#6B7280" }}>
+              <span className="text-xs text-text-secondary">
                 High
               </span>
             </div>
@@ -1391,18 +1240,18 @@ export default function AdminDashboard() {
 
           {/* ─── CUSTOMER BEHAVIOR ─── */}
           <div>
-            <h2 className="mb-4 text-lg font-bold" style={{ color: "#1A1A2E", fontFamily: "'DM Serif Display', serif" }}>
+            <h2 className="mb-4 text-lg font-bold text-text-primary font-display">
               Customer Behavior
             </h2>
 
             {/* Behavior KPI row */}
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-5">
               {[
-                { label: "Upgrade Rate", value: `${customerBehaviorData.upgradeRate}%`, prev: `${customerBehaviorData.upgradeRateLastMonth}%`, up: customerBehaviorData.upgradeRate > customerBehaviorData.upgradeRateLastMonth, icon: TrendingUp, iconBg: "#D1FAE5", iconColor: "#059669" },
-                { label: "Downgrade Rate", value: `${customerBehaviorData.downgradeRate}%`, prev: `${customerBehaviorData.downgradeRateLastMonth}%`, up: customerBehaviorData.downgradeRate < customerBehaviorData.downgradeRateLastMonth, icon: TrendingDown, iconBg: "#FEE2E2", iconColor: "#DC2626" },
-                { label: "Pause Rate", value: `${customerBehaviorData.pauseRate}%`, prev: `${customerBehaviorData.pauseRateLastMonth}%`, up: customerBehaviorData.pauseRate < customerBehaviorData.pauseRateLastMonth, icon: Pause, iconBg: "#FEF3C7", iconColor: "#D97706" },
-                { label: "Reactivation Rate", value: `${customerBehaviorData.reactivationRate}%`, prev: `${customerBehaviorData.reactivationRateLastMonth}%`, up: customerBehaviorData.reactivationRate > customerBehaviorData.reactivationRateLastMonth, icon: RefreshCw, iconBg: "#DBEAFE", iconColor: "#2563EB" },
-                { label: "NPS Score", value: customerBehaviorData.npsScore.toString(), prev: customerBehaviorData.npsLastMonth.toString(), up: customerBehaviorData.npsScore > customerBehaviorData.npsLastMonth, icon: Star, iconBg: "#FDF4FF", iconColor: "#A855F7" },
+                { label: "Upgrade Rate", value: `${customerBehaviorData.upgradeRate}%`, prev: `${customerBehaviorData.upgradeRateLastMonth}%`, up: customerBehaviorData.upgradeRate > customerBehaviorData.upgradeRateLastMonth, icon: TrendingUp, iconBg: "bg-success-light", iconColor: "text-success" },
+                { label: "Downgrade Rate", value: `${customerBehaviorData.downgradeRate}%`, prev: `${customerBehaviorData.downgradeRateLastMonth}%`, up: customerBehaviorData.downgradeRate < customerBehaviorData.downgradeRateLastMonth, icon: TrendingDown, iconBg: "bg-error-light", iconColor: "text-error" },
+                { label: "Pause Rate", value: `${customerBehaviorData.pauseRate}%`, prev: `${customerBehaviorData.pauseRateLastMonth}%`, up: customerBehaviorData.pauseRate < customerBehaviorData.pauseRateLastMonth, icon: Pause, iconBg: "bg-warning-light", iconColor: "text-warning" },
+                { label: "Reactivation Rate", value: `${customerBehaviorData.reactivationRate}%`, prev: `${customerBehaviorData.reactivationRateLastMonth}%`, up: customerBehaviorData.reactivationRate > customerBehaviorData.reactivationRateLastMonth, icon: RefreshCw, iconBg: "bg-info-light", iconColor: "text-info" },
+                { label: "NPS Score", value: customerBehaviorData.npsScore.toString(), prev: customerBehaviorData.npsLastMonth.toString(), up: customerBehaviorData.npsScore > customerBehaviorData.npsLastMonth, icon: Star, iconBg: "bg-fuchsia-50", iconColor: "text-purple-500" },
               ].map((kpi, i) => {
                 const Icon = kpi.icon;
                 return (
@@ -1412,19 +1261,18 @@ export default function AdminDashboard() {
                         initial={{ opacity: 0, y: 16 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.05, duration: 0.3 }}
-                        className="cursor-help rounded-xl p-4"
-                        style={{ backgroundColor: "#FFFFFF", boxShadow: "var(--shadow-card)", border: "1px solid #E5E7EB" }}
+                        className="cursor-help rounded-xl border border-border bg-surface-white p-4 shadow-card"
                       >
                         <div className="flex items-start justify-between">
-                          <div className="flex h-9 w-9 items-center justify-center rounded-lg" style={{ backgroundColor: kpi.iconBg }}>
-                            <Icon size={18} style={{ color: kpi.iconColor }} />
+                          <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${kpi.iconBg}`}>
+                            <Icon size={18} className={kpi.iconColor} />
                           </div>
-                          <span className="inline-flex items-center gap-0.5 text-[10px] font-bold uppercase tracking-wider" style={{ color: kpi.up ? "#059669" : "#DC2626" }}>
+                          <span className={`inline-flex items-center gap-0.5 text-[10px] font-bold uppercase tracking-wider ${kpi.up ? "text-success" : "text-error"}`}>
                             {kpi.up ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
                           </span>
                         </div>
-                        <p className="mt-3 text-xl font-bold tracking-tight" style={{ color: "#1A1A2E" }}>{kpi.value}</p>
-                        <p className="mt-0.5 text-[11px] font-medium" style={{ color: "#6B7280" }}>{kpi.label}</p>
+                        <p className="mt-3 text-xl font-bold tracking-tight text-text-primary">{kpi.value}</p>
+                        <p className="mt-0.5 text-[11px] font-medium text-text-secondary">{kpi.label}</p>
                       </motion.div>
                     </TooltipTrigger>
                     <TooltipContent side="top" align="center" className="flex flex-col gap-1 p-2">
@@ -1449,10 +1297,9 @@ export default function AdminDashboard() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.45, duration: 0.3 }}
-              className="rounded-xl p-5"
-              style={{ backgroundColor: "#FFFFFF", boxShadow: "var(--shadow-card)", border: "1px solid #E5E7EB" }}
+              className="rounded-xl border border-border bg-surface-white p-5 shadow-card"
             >
-              <h2 className="mb-4 text-base font-semibold" style={{ color: "#1A1A2E" }}>
+              <h2 className="mb-4 text-base font-semibold text-text-primary">
                 Plan Upgrade / Downgrade Trend
               </h2>
               <div style={{ height: 280 }}>
@@ -1475,13 +1322,12 @@ export default function AdminDashboard() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5, duration: 0.3 }}
-              className="rounded-xl p-5"
-              style={{ backgroundColor: "#FFFFFF", boxShadow: "var(--shadow-card)", border: "1px solid #E5E7EB" }}
+              className="rounded-xl border border-border bg-surface-white p-5 shadow-card"
             >
-              <h2 className="mb-2 text-base font-semibold" style={{ color: "#1A1A2E" }}>
+              <h2 className="mb-2 text-base font-semibold text-text-primary">
                 NPS / Satisfaction Score
               </h2>
-              <p className="mb-4 text-xs" style={{ color: "#6B7280" }}>Net Promoter Score breakdown</p>
+              <p className="mb-4 text-xs text-text-secondary">Net Promoter Score breakdown</p>
               <div className="flex items-center gap-6">
                 <div className="flex flex-col items-center justify-center">
                   <div className="relative flex h-28 w-28 items-center justify-center">
@@ -1489,23 +1335,23 @@ export default function AdminDashboard() {
                       <path d="M18 2.0845a 15.9155 15.9155 0 0 1 0 31.831a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#E5E7EB" strokeWidth="3" />
                       <path d="M18 2.0845a 15.9155 15.9155 0 0 1 0 31.831a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#059669" strokeWidth="3" strokeDasharray={`${customerBehaviorData.npsScore}, 100`} strokeLinecap="round" />
                     </svg>
-                    <span className="absolute text-2xl font-black" style={{ color: "#1A1A2E" }}>{customerBehaviorData.npsScore}</span>
+                    <span className="absolute text-2xl font-black text-text-primary">{customerBehaviorData.npsScore}</span>
                   </div>
-                  <span className="mt-1 text-xs font-medium" style={{ color: "#059669" }}>Great</span>
+                  <span className="mt-1 text-xs font-medium text-success">Great</span>
                 </div>
                 <div className="flex-1 space-y-4">
                   {[
-                    { label: "Promoters (9-10)", value: customerBehaviorData.npsPromoters, color: "#059669" },
-                    { label: "Passives (7-8)", value: customerBehaviorData.npsPassives, color: "#D97706" },
-                    { label: "Detractors (0-6)", value: customerBehaviorData.npsDetractors, color: "#DC2626" },
+                    { label: "Promoters (9-10)", value: customerBehaviorData.npsPromoters, bgClass: "bg-success" },
+                    { label: "Passives (7-8)", value: customerBehaviorData.npsPassives, bgClass: "bg-warning" },
+                    { label: "Detractors (0-6)", value: customerBehaviorData.npsDetractors, bgClass: "bg-error" },
                   ].map((seg) => (
                     <div key={seg.label}>
                       <div className="mb-1 flex items-center justify-between">
-                        <span className="text-xs" style={{ color: "#6B7280" }}>{seg.label}</span>
-                        <span className="text-sm font-bold" style={{ color: "#1A1A2E" }}>{seg.value}%</span>
+                        <span className="text-xs text-text-secondary">{seg.label}</span>
+                        <span className="text-sm font-bold text-text-primary">{seg.value}%</span>
                       </div>
-                      <div className="h-2 w-full rounded-full" style={{ backgroundColor: "#F3F4F6" }}>
-                        <div className="h-2 rounded-full" style={{ backgroundColor: seg.color, width: `${seg.value}%` }} />
+                      <div className="h-2 w-full rounded-full bg-muted">
+                        <div className={`h-2 rounded-full ${seg.bgClass}`} style={{ width: `${seg.value}%` }} />
                       </div>
                     </div>
                   ))}
@@ -1521,33 +1367,32 @@ export default function AdminDashboard() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.55, duration: 0.3 }}
-              className="rounded-xl p-5"
-              style={{ backgroundColor: "#FFFFFF", boxShadow: "var(--shadow-card)", border: "1px solid #E5E7EB" }}
+              className="rounded-xl border border-border bg-surface-white p-5 shadow-card"
             >
-              <h2 className="mb-2 text-base font-semibold" style={{ color: "#1A1A2E" }}>
+              <h2 className="mb-2 text-base font-semibold text-text-primary">
                 Subscriber Flow — Pause vs Cancel
               </h2>
-              <p className="mb-4 text-xs" style={{ color: "#6B7280" }}>Recoverable churn vs permanent churn this month</p>
+              <p className="mb-4 text-xs text-text-secondary">Recoverable churn vs permanent churn this month</p>
               <div className="space-y-4">
                 {[
-                  { label: "Paused (Recoverable)", value: customerBehaviorData.subscriberFlow.pausedRecoverable, total: customerBehaviorData.subscriberFlow.pausedRecoverable + customerBehaviorData.subscriberFlow.cancelledChurned, color: "#D97706", icon: Pause },
-                  { label: "Cancelled (Churned)", value: customerBehaviorData.subscriberFlow.cancelledChurned, total: customerBehaviorData.subscriberFlow.pausedRecoverable + customerBehaviorData.subscriberFlow.cancelledChurned, color: "#DC2626", icon: TrendingDown },
-                  { label: "Reactivated (Win-back)", value: customerBehaviorData.subscriberFlow.reactivated, total: customerBehaviorData.subscriberFlow.pausedRecoverable + customerBehaviorData.subscriberFlow.cancelledChurned, color: "#059669", icon: RefreshCw },
+                  { label: "Paused (Recoverable)", value: customerBehaviorData.subscriberFlow.pausedRecoverable, total: customerBehaviorData.subscriberFlow.pausedRecoverable + customerBehaviorData.subscriberFlow.cancelledChurned, iconBg: "bg-warning/15", iconColor: "text-warning", barBg: "bg-warning", icon: Pause },
+                  { label: "Cancelled (Churned)", value: customerBehaviorData.subscriberFlow.cancelledChurned, total: customerBehaviorData.subscriberFlow.pausedRecoverable + customerBehaviorData.subscriberFlow.cancelledChurned, iconBg: "bg-error/15", iconColor: "text-error", barBg: "bg-error", icon: TrendingDown },
+                  { label: "Reactivated (Win-back)", value: customerBehaviorData.subscriberFlow.reactivated, total: customerBehaviorData.subscriberFlow.pausedRecoverable + customerBehaviorData.subscriberFlow.cancelledChurned, iconBg: "bg-success/15", iconColor: "text-success", barBg: "bg-success", icon: RefreshCw },
                 ].map((item) => {
                   const Icon = item.icon;
                   const pct = ((item.value / item.total) * 100).toFixed(1);
                   return (
                     <div key={item.label} className="flex items-center gap-3">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-lg" style={{ backgroundColor: `${item.color}15` }}>
-                        <Icon size={16} style={{ color: item.color }} />
+                      <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${item.iconBg}`}>
+                        <Icon size={16} className={item.iconColor} />
                       </div>
                       <div className="flex-1">
                         <div className="mb-1 flex items-center justify-between">
-                          <span className="text-sm font-medium" style={{ color: "#1A1A2E" }}>{item.label}</span>
-                          <span className="text-sm font-bold" style={{ color: "#1A1A2E" }}>{item.value} <span className="text-xs font-normal text-gray-400">({pct}%)</span></span>
+                          <span className="text-sm font-medium text-text-primary">{item.label}</span>
+                          <span className="text-sm font-bold text-text-primary">{item.value} <span className="text-xs font-normal text-gray-400">({pct}%)</span></span>
                         </div>
-                        <div className="h-2 w-full rounded-full" style={{ backgroundColor: "#F3F4F6" }}>
-                          <div className="h-2 rounded-full" style={{ backgroundColor: item.color, width: `${pct}%` }} />
+                        <div className="h-2 w-full rounded-full bg-muted">
+                          <div className={`h-2 rounded-full ${item.barBg}`} style={{ width: `${pct}%` }} />
                         </div>
                       </div>
                     </div>
@@ -1561,13 +1406,12 @@ export default function AdminDashboard() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6, duration: 0.3 }}
-              className="rounded-xl p-5"
-              style={{ backgroundColor: "#FFFFFF", boxShadow: "var(--shadow-card)", border: "1px solid #E5E7EB" }}
+              className="rounded-xl border border-border bg-surface-white p-5 shadow-card"
             >
-              <h2 className="mb-2 text-base font-semibold" style={{ color: "#1A1A2E" }}>
+              <h2 className="mb-2 text-base font-semibold text-text-primary">
                 Most & Least Popular Meals
               </h2>
-              <p className="mb-3 text-xs" style={{ color: "#6B7280" }}>Subscriber meal preferences — informs menu planning</p>
+              <p className="mb-3 text-xs text-text-secondary">Subscriber meal preferences — informs menu planning</p>
               <div className="space-y-2" style={{ maxHeight: 320, overflowY: "auto" }}>
                 {[...customerBehaviorData.mealPopularityBySubscribers]
                   .sort((a, b) => b.orders - a.orders)
@@ -1576,20 +1420,20 @@ export default function AdminDashboard() {
                     const isTop3 = i < 3;
                     const isBottom3 = i >= arr.length - 3;
                     return (
-                      <div key={meal.name} className="flex items-center gap-3 rounded-lg px-3 py-2" style={{ backgroundColor: isTop3 ? "#F0FDF4" : isBottom3 ? "#FEF2F2" : "transparent" }}>
-                        <span className="w-5 text-xs font-bold" style={{ color: isTop3 ? "#059669" : isBottom3 ? "#DC2626" : "#6B7280" }}>
-                          {isTop3 ? <Flame size={14} style={{ color: "#059669" }} /> : isBottom3 ? <Snowflake size={14} style={{ color: "#DC2626" }} /> : `${i + 1}`}
+                      <div key={meal.name} className={`flex items-center gap-3 rounded-lg px-3 py-2 ${isTop3 ? "bg-green-50" : isBottom3 ? "bg-red-50" : "bg-transparent"}`}>
+                        <span className={`w-5 text-xs font-bold ${isTop3 ? "text-success" : isBottom3 ? "text-error" : "text-text-secondary"}`}>
+                          {isTop3 ? <Flame size={14} className="text-success" /> : isBottom3 ? <Snowflake size={14} className="text-error" /> : `${i + 1}`}
                         </span>
                         <div className="flex-1">
                           <div className="flex items-center justify-between">
-                            <span className="text-sm font-medium" style={{ color: "#1A1A2E" }}>{meal.name}</span>
-                            <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>{meal.orders} orders</span>
+                            <span className="text-sm font-medium text-text-primary">{meal.name}</span>
+                            <span className="text-xs font-semibold text-text-secondary">{meal.orders} orders</span>
                           </div>
-                          <div className="mt-1 h-1.5 w-full rounded-full" style={{ backgroundColor: "#F3F4F6" }}>
-                            <div className="h-1.5 rounded-full" style={{ backgroundColor: isTop3 ? "#059669" : isBottom3 ? "#DC2626" : "#2D6A4F", width: `${(meal.orders / maxOrders) * 100}%` }} />
+                          <div className="mt-1 h-1.5 w-full rounded-full bg-muted">
+                            <div className={`h-1.5 rounded-full ${isTop3 ? "bg-success" : isBottom3 ? "bg-error" : "bg-primary-light"}`} style={{ width: `${(meal.orders / maxOrders) * 100}%` }} />
                           </div>
                         </div>
-                        <span className="text-xs" style={{ color: "#D97706" }}>{meal.rating}</span>
+                        <span className="text-xs text-warning">{meal.rating}</span>
                       </div>
                     );
                   })}
@@ -1599,7 +1443,7 @@ export default function AdminDashboard() {
 
           {/* ─── DEMAND PLANNING ─── */}
           <div>
-            <h2 className="mb-4 text-lg font-bold" style={{ color: "#1A1A2E", fontFamily: "'DM Serif Display', serif" }}>
+            <h2 className="mb-4 text-lg font-bold text-text-primary font-display">
               Demand Planning
             </h2>
           </div>
@@ -1609,13 +1453,12 @@ export default function AdminDashboard() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.65, duration: 0.3 }}
-            className="rounded-xl p-5"
-            style={{ backgroundColor: "#FFFFFF", boxShadow: "var(--shadow-card)", border: "1px solid #E5E7EB" }}
+            className="rounded-xl border border-border bg-surface-white p-5 shadow-card"
           >
-            <h2 className="mb-2 text-base font-semibold" style={{ color: "#1A1A2E" }}>
+            <h2 className="mb-2 text-base font-semibold text-text-primary">
               Meals by Plan Type
             </h2>
-            <p className="mb-4 text-xs" style={{ color: "#6B7280" }}>Breakdown of meal orders per subscription tier — capacity planning</p>
+            <p className="mb-4 text-xs text-text-secondary">Breakdown of meal orders per subscription tier — capacity planning</p>
             <div style={{ height: 300 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={demandPlanningData.mealsByPlanType}>
@@ -1640,17 +1483,16 @@ export default function AdminDashboard() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.7, duration: 0.3 }}
-              className="rounded-xl p-5"
-              style={{ backgroundColor: "#FFFFFF", boxShadow: "var(--shadow-card)", border: "1px solid #E5E7EB" }}
+              className="rounded-xl border border-border bg-surface-white p-5 shadow-card"
             >
               <div className="mb-4 flex items-center justify-between">
                 <div>
-                  <h2 className="text-base font-semibold" style={{ color: "#1A1A2E" }}>Demand Forecast vs Actual</h2>
-                  <p className="mt-0.5 text-xs" style={{ color: "#6B7280" }}>Helps reduce waste and stockouts</p>
+                  <h2 className="text-base font-semibold text-text-primary">Demand Forecast vs Actual</h2>
+                  <p className="mt-0.5 text-xs text-text-secondary">Helps reduce waste and stockouts</p>
                 </div>
-                <div className="flex items-center gap-2 rounded-full px-3 py-1" style={{ backgroundColor: "#F0FDF4" }}>
-                  <Target size={12} style={{ color: "#059669" }} />
-                  <span className="text-xs font-bold" style={{ color: "#059669" }}>{demandPlanningData.forecastAccuracy}% accuracy</span>
+                <div className="flex items-center gap-2 rounded-full bg-green-50 px-3 py-1">
+                  <Target size={12} className="text-success" />
+                  <span className="text-xs font-bold text-success">{demandPlanningData.forecastAccuracy}% accuracy</span>
                 </div>
               </div>
               <div style={{ height: 280 }}>
@@ -1672,11 +1514,10 @@ export default function AdminDashboard() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.75, duration: 0.3 }}
-              className="rounded-xl p-5"
-              style={{ backgroundColor: "#FFFFFF", boxShadow: "var(--shadow-card)", border: "1px solid #E5E7EB" }}
+              className="rounded-xl border border-border bg-surface-white p-5 shadow-card"
             >
-              <h2 className="mb-2 text-base font-semibold" style={{ color: "#1A1A2E" }}>Peak Order Days</h2>
-              <p className="mb-4 text-xs" style={{ color: "#6B7280" }}>Staffing and delivery route optimization</p>
+              <h2 className="mb-2 text-base font-semibold text-text-primary">Peak Order Days</h2>
+              <p className="mb-4 text-xs text-text-secondary">Staffing and delivery route optimization</p>
               <div style={{ height: 280 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={demandPlanningData.peakOrderDays}>
@@ -1701,11 +1542,10 @@ export default function AdminDashboard() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8, duration: 0.3 }}
-            className="rounded-xl p-5"
-            style={{ backgroundColor: "#FFFFFF", boxShadow: "var(--shadow-card)", border: "1px solid #E5E7EB" }}
+            className="rounded-xl border border-border bg-surface-white p-5 shadow-card"
           >
-            <h2 className="mb-2 text-base font-semibold" style={{ color: "#1A1A2E" }}>Peak Order Hours</h2>
-            <p className="mb-4 text-xs" style={{ color: "#6B7280" }}>Hourly order distribution — delivery and kitchen scheduling</p>
+            <h2 className="mb-2 text-base font-semibold text-text-primary">Peak Order Hours</h2>
+            <p className="mb-4 text-xs text-text-secondary">Hourly order distribution — delivery and kitchen scheduling</p>
             <div style={{ height: 250 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={demandPlanningData.peakOrderHours}>
@@ -1744,8 +1584,8 @@ export default function AdminDashboard() {
                 trend: calculateTrend(displayAnalytics.orderFulfillmentRate, displayAnalytics.orderFulfillmentRateLastMonth),
                 trendUp: displayAnalytics.orderFulfillmentRate > displayAnalytics.orderFulfillmentRateLastMonth,
                 icon: CheckCircle2,
-                iconBg: "#D1FAE5",
-                iconColor: "#059669",
+                iconBg: "bg-success-light",
+                iconColor: "text-success",
                 description: "% of orders delivered on time",
               },
               {
@@ -1755,8 +1595,8 @@ export default function AdminDashboard() {
                 trend: calculateTrend(displayAnalytics.avgPrepTimeMinutes, displayAnalytics.avgPrepTimeMinutesLastMonth),
                 trendUp: displayAnalytics.avgPrepTimeMinutes < displayAnalytics.avgPrepTimeMinutesLastMonth,
                 icon: Clock,
-                iconBg: "#FEF3C7",
-                iconColor: "#D97706",
+                iconBg: "bg-warning-light",
+                iconColor: "text-warning",
                 description: "Kitchen efficiency per order",
               },
               {
@@ -1766,8 +1606,8 @@ export default function AdminDashboard() {
                 trend: calculateTrend(displayAnalytics.foodWastePercent, displayAnalytics.foodWastePercentLastMonth),
                 trendUp: displayAnalytics.foodWastePercent < displayAnalytics.foodWastePercentLastMonth,
                 icon: Trash2,
-                iconBg: "#FEE2E2",
-                iconColor: "#DC2626",
+                iconBg: "bg-error-light",
+                iconColor: "text-error",
                 description: "Over-prepped ingredients vs. orders",
               },
               {
@@ -1777,8 +1617,8 @@ export default function AdminDashboard() {
                 trend: calculateTrend(displayAnalytics.deliverySuccessRate, displayAnalytics.deliverySuccessRateLastMonth),
                 trendUp: displayAnalytics.deliverySuccessRate > displayAnalytics.deliverySuccessRateLastMonth,
                 icon: Truck,
-                iconBg: "#DBEAFE",
-                iconColor: "#2563EB",
+                iconBg: "bg-info-light",
+                iconColor: "text-info",
                 description: "Successful deliveries as % of total",
               },
             ].map((kpi, i) => {
@@ -1790,32 +1630,25 @@ export default function AdminDashboard() {
                       initial={{ opacity: 0, y: 16 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: i * 0.05, duration: 0.3 }}
-                      className="rounded-xl p-5 cursor-help"
-                      style={{
-                        backgroundColor: "#FFFFFF",
-                        boxShadow: "var(--shadow-card)",
-                        border: "1px solid #E5E7EB",
-                      }}
+                      className="rounded-xl border border-border bg-surface-white p-5 shadow-card cursor-help"
                     >
                       <div className="flex items-start justify-between">
                         <div
-                          className="flex h-10 w-10 items-center justify-center rounded-lg"
-                          style={{ backgroundColor: kpi.iconBg }}
+                          className={`flex h-10 w-10 items-center justify-center rounded-lg ${kpi.iconBg}`}
                         >
-                          <Icon size={20} style={{ color: kpi.iconColor }} />
+                          <Icon size={20} className={kpi.iconColor} />
                         </div>
                         <span
-                          className="inline-flex items-center gap-0.5 text-[10px] font-bold uppercase tracking-wider"
-                          style={{ color: kpi.trendUp ? "#059669" : "#DC2626" }}
+                          className={`inline-flex items-center gap-0.5 text-[10px] font-bold uppercase tracking-wider ${kpi.trendUp ? "text-success" : "text-error"}`}
                         >
                           {kpi.trendUp ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
                           {kpi.trend}
                         </span>
                       </div>
-                      <p className="mt-3 text-2xl font-bold tracking-tight" style={{ color: "#1A1A2E" }}>
+                      <p className="mt-3 text-2xl font-bold tracking-tight text-text-primary">
                         {kpi.value}
                       </p>
-                      <p className="mt-0.5 text-[11px] font-medium" style={{ color: "#6B7280" }}>
+                      <p className="mt-0.5 text-[11px] font-medium text-text-secondary">
                         {kpi.label}
                       </p>
                     </motion.div>
@@ -1841,17 +1674,12 @@ export default function AdminDashboard() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1, duration: 0.3 }}
-            className="rounded-2xl p-6"
-            style={{
-              backgroundColor: "#FFFFFF",
-              boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05)",
-              border: "1px solid #F3F4F6",
-            }}
+            className="rounded-2xl border border-border-light bg-surface-white p-6 shadow-elevated"
           >
-            <h2 className="mb-1 text-lg font-bold" style={{ color: "#1A1A2E" }}>
+            <h2 className="mb-1 text-lg font-bold text-text-primary">
               Weekly Fulfillment Trends
             </h2>
-            <p className="mb-4 text-sm" style={{ color: "#6B7280" }}>
+            <p className="mb-4 text-sm text-text-secondary">
               8-week rolling view of key operational metrics
             </p>
             <ResponsiveContainer width="100%" height={320}>
@@ -1877,17 +1705,12 @@ export default function AdminDashboard() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.15, duration: 0.3 }}
-              className="rounded-2xl p-6"
-              style={{
-                backgroundColor: "#FFFFFF",
-                boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05)",
-                border: "1px solid #F3F4F6",
-              }}
+              className="rounded-2xl border border-border-light bg-surface-white p-6 shadow-elevated"
             >
-              <h2 className="mb-1 text-lg font-bold" style={{ color: "#1A1A2E" }}>
+              <h2 className="mb-1 text-lg font-bold text-text-primary">
                 Prep Time by Meal
               </h2>
-              <p className="mb-4 text-sm" style={{ color: "#6B7280" }}>
+              <p className="mb-4 text-sm text-text-secondary">
                 Average preparation time (minutes) per meal
               </p>
               <ResponsiveContainer width="100%" height={280}>
@@ -1909,17 +1732,12 @@ export default function AdminDashboard() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.3 }}
-              className="rounded-2xl p-6"
-              style={{
-                backgroundColor: "#FFFFFF",
-                boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05)",
-                border: "1px solid #F3F4F6",
-              }}
+              className="rounded-2xl border border-border-light bg-surface-white p-6 shadow-elevated"
             >
-              <h2 className="mb-1 text-lg font-bold" style={{ color: "#1A1A2E" }}>
+              <h2 className="mb-1 text-lg font-bold text-text-primary">
                 Delivery Breakdown
               </h2>
-              <p className="mb-4 text-sm" style={{ color: "#6B7280" }}>
+              <p className="mb-4 text-sm text-text-secondary">
                 Today&apos;s delivery outcome distribution
               </p>
               <ResponsiveContainer width="100%" height={280}>
@@ -1961,46 +1779,38 @@ export default function AdminDashboard() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.25, duration: 0.3 }}
-            className="rounded-2xl p-6"
-            style={{
-              backgroundColor: "#FFFFFF",
-              boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05)",
-              border: "1px solid #F3F4F6",
-            }}
+            className="rounded-2xl border border-border-light bg-surface-white p-6 shadow-elevated"
           >
-            <h2 className="mb-1 text-lg font-bold" style={{ color: "#1A1A2E" }}>
+            <h2 className="mb-1 text-lg font-bold text-text-primary">
               Food Waste by Meal
             </h2>
-            <p className="mb-4 text-sm" style={{ color: "#6B7280" }}>
+            <p className="mb-4 text-sm text-text-secondary">
               Ingredient waste breakdown to identify over-prepping patterns
             </p>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr style={{ borderBottom: "2px solid #E5E7EB" }}>
-                    <th className="px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: "#6B7280" }}>Meal</th>
-                    <th className="px-3 py-2.5 text-right text-xs font-semibold uppercase tracking-wider" style={{ color: "#6B7280" }}>Orders</th>
-                    <th className="px-3 py-2.5 text-right text-xs font-semibold uppercase tracking-wider" style={{ color: "#6B7280" }}>Prep Time</th>
-                    <th className="px-3 py-2.5 text-right text-xs font-semibold uppercase tracking-wider" style={{ color: "#6B7280" }}>Waste (kg)</th>
-                    <th className="px-3 py-2.5 text-right text-xs font-semibold uppercase tracking-wider" style={{ color: "#6B7280" }}>Waste/Order</th>
+                  <tr className="border-b-2 border-border">
+                    <th className="px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-wider text-text-secondary">Meal</th>
+                    <th className="px-3 py-2.5 text-right text-xs font-semibold uppercase tracking-wider text-text-secondary">Orders</th>
+                    <th className="px-3 py-2.5 text-right text-xs font-semibold uppercase tracking-wider text-text-secondary">Prep Time</th>
+                    <th className="px-3 py-2.5 text-right text-xs font-semibold uppercase tracking-wider text-text-secondary">Waste (kg)</th>
+                    <th className="px-3 py-2.5 text-right text-xs font-semibold uppercase tracking-wider text-text-secondary">Waste/Order</th>
                   </tr>
                 </thead>
                 <tbody>
                   {displayAnalytics.dailyPrepBreakdown.map((item, idx) => (
                     <tr
                       key={item.meal}
-                      style={{
-                        borderBottom: "1px solid #F3F4F6",
-                        backgroundColor: idx % 2 === 0 ? "#FFFFFF" : "#F9FAFB",
-                      }}
+                      className={`border-b border-border-light ${idx % 2 === 0 ? "bg-surface-white" : "bg-gray-50"}`}
                     >
-                      <td className="px-3 py-2.5 font-medium" style={{ color: "#1A1A2E" }}>{item.meal}</td>
-                      <td className="px-3 py-2.5 text-right" style={{ color: "#6B7280" }}>{item.orders}</td>
-                      <td className="px-3 py-2.5 text-right" style={{ color: "#6B7280" }}>{item.prepTime} min</td>
-                      <td className="px-3 py-2.5 text-right font-medium" style={{ color: item.wasteKg >= 1.5 ? "#DC2626" : "#059669" }}>
+                      <td className="px-3 py-2.5 font-medium text-text-primary">{item.meal}</td>
+                      <td className="px-3 py-2.5 text-right text-text-secondary">{item.orders}</td>
+                      <td className="px-3 py-2.5 text-right text-text-secondary">{item.prepTime} min</td>
+                      <td className={`px-3 py-2.5 text-right font-medium ${item.wasteKg >= 1.5 ? "text-error" : "text-success"}`}>
                         {item.wasteKg} kg
                       </td>
-                      <td className="px-3 py-2.5 text-right" style={{ color: "#6B7280" }}>
+                      <td className="px-3 py-2.5 text-right text-text-secondary">
                         {(item.wasteKg / item.orders * 1000).toFixed(0)}g
                       </td>
                     </tr>

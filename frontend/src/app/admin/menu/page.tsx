@@ -271,29 +271,28 @@ export default function MenuManagementPage() {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold" style={{ fontFamily: "'DM Serif Display', serif", color: '#1A1A2E' }}>
+          <h1 className="text-2xl font-bold font-display text-text-primary">
             Menu Management
           </h1>
-          <p className="mt-1 text-sm" style={{ color: '#6B7280' }}>
+          <p className="mt-1 text-sm text-text-secondary">
             Drag meals from the library or between days to organize your weekly menu.
           </p>
         </div>
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 rounded-lg bg-white px-3 py-2 shadow-sm" style={{ border: '1px solid #E5E7EB' }}>
+          <div className="flex items-center gap-2 rounded-lg bg-white px-3 py-2 shadow-sm border border-border">
             <button onClick={() => setWeekOffset((w) => w - 1)} className="rounded p-1 transition-colors hover:bg-gray-100">
-              <ChevronLeft size={18} style={{ color: '#6B7280' }} />
+              <ChevronLeft size={18} className="text-text-secondary" />
             </button>
-            <span className="min-w-[180px] text-center text-sm font-medium" style={{ color: '#1A1A2E' }}>
+            <span className="min-w-[180px] text-center text-sm font-medium text-text-primary">
               {getWeekLabel(weekOffset)}
             </span>
             <button onClick={() => setWeekOffset((w) => w + 1)} className="rounded p-1 transition-colors hover:bg-gray-100">
-              <ChevronRight size={18} style={{ color: '#6B7280' }} />
+              <ChevronRight size={18} className="text-text-secondary" />
             </button>
           </div>
           <button
             onClick={() => setPublishModalOpen(true)}
-            className="rounded-lg px-4 py-2 text-sm font-semibold text-white transition-colors hover:opacity-90"
-            style={{ backgroundColor: '#E76F51' }}
+            className="rounded-lg px-4 py-2 text-sm font-semibold text-white transition-colors hover:opacity-90 bg-accent"
           >
             Publish Menu
           </button>
@@ -304,8 +303,8 @@ export default function MenuManagementPage() {
       <div className="flex flex-col gap-6 xl:flex-row">
         {/* Weekly Calendar */}
         <div className="flex-1">
-          <div className="rounded-xl bg-white p-4 shadow-sm" style={{ border: '1px solid #E5E7EB' }}>
-            <h2 className="mb-4 text-lg font-semibold" style={{ color: '#1A1A2E' }}>
+          <div className="rounded-xl bg-white p-4 shadow-sm border border-border">
+            <h2 className="mb-4 text-lg font-semibold text-text-primary">
               Weekly Calendar
             </h2>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7">
@@ -317,18 +316,14 @@ export default function MenuManagementPage() {
                     onDragOver={(e) => handleDragOver(e, day)}
                     onDragLeave={handleDragLeave}
                     onDrop={(e) => handleDrop(e, day)}
-                    className="rounded-lg p-3 transition-all duration-200"
-                    style={{
-                      border: isOver ? '2px solid #40916C' : '1px solid #E5E7EB',
-                      backgroundColor: isOver ? '#ECFDF5' : '#FAFAFA',
-                      minHeight: 200,
-                    }}
+                    className={`rounded-lg p-3 transition-all duration-200 ${isOver ? 'border-2 border-primary-lighter bg-emerald-50' : 'border border-border bg-[#FAFAFA]'}`}
+                    style={{ minHeight: 200 }}
                   >
                     <div className="mb-2 text-center">
-                      <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: '#6B7280' }}>
+                      <span className="text-xs font-semibold uppercase tracking-wide text-text-secondary">
                         {FULL_DAYS[idx]}
                       </span>
-                      <div className="mt-0.5 text-[10px]" style={{ color: '#9CA3AF' }}>
+                      <div className="mt-0.5 text-[10px] text-text-tertiary">
                         {(calendar[day] || []).length} meals
                       </div>
                     </div>
@@ -345,11 +340,10 @@ export default function MenuManagementPage() {
                             animate={{ opacity: 1, scale: 1 }}
                             draggable
                             onDragStart={(e) => handleDragStart(e as unknown as DragEvent, mealId, day)}
-                            className="group relative cursor-grab rounded-md bg-white p-2 shadow-sm active:cursor-grabbing"
-                            style={{ border: '1px solid #E5E7EB' }}
+                            className="group relative cursor-grab rounded-md bg-white p-2 shadow-sm active:cursor-grabbing border border-border"
                           >
                             <div className="absolute left-1 top-1/2 -translate-y-1/2 opacity-0 transition-opacity group-hover:opacity-50">
-                              <GripVertical size={12} style={{ color: '#9CA3AF' }} />
+                              <GripVertical size={12} className="text-text-tertiary" />
                             </div>
                             <button
                               onClick={() => openMealEditor(meal)}
@@ -362,7 +356,7 @@ export default function MenuManagementPage() {
                                 className="mb-1 h-12 w-full rounded object-cover pointer-events-none"
                                 draggable={false}
                               />
-                              <p className="text-xs font-medium leading-tight" style={{ color: '#1A1A2E' }}>
+                              <p className="text-xs font-medium leading-tight text-text-primary">
                                 {meal.name.length > 28 ? meal.name.substring(0, 28) + '...' : meal.name}
                               </p>
                             </button>
@@ -384,11 +378,10 @@ export default function MenuManagementPage() {
                         <motion.div
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
-                          className="flex items-center justify-center rounded-md border-2 border-dashed py-3"
-                          style={{ borderColor: '#40916C', backgroundColor: '#D1FAE5' }}
+                          className="flex items-center justify-center rounded-md border-2 border-dashed py-3 border-primary-lighter bg-success-light"
                         >
-                          <Plus size={16} style={{ color: '#059669' }} />
-                          <span className="ml-1 text-xs font-medium" style={{ color: '#059669' }}>Drop here</span>
+                          <Plus size={16} className="text-success" />
+                          <span className="ml-1 text-xs font-medium text-success">Drop here</span>
                         </motion.div>
                       )}
                     </div>
@@ -401,22 +394,21 @@ export default function MenuManagementPage() {
 
         {/* Meal Library Sidebar */}
         <div className="w-full xl:w-80">
-          <div className="rounded-xl bg-white p-4 shadow-sm" style={{ border: '1px solid #E5E7EB' }}>
-            <h2 className="mb-1 text-lg font-semibold" style={{ color: '#1A1A2E' }}>
+          <div className="rounded-xl bg-white p-4 shadow-sm border border-border">
+            <h2 className="mb-1 text-lg font-semibold text-text-primary">
               Meal Library
             </h2>
-            <p className="mb-3 text-xs" style={{ color: '#9CA3AF' }}>
+            <p className="mb-3 text-xs text-text-tertiary">
               Drag meals onto calendar days
             </p>
             <div className="relative mb-3">
-              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: '#6B7280' }} />
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" />
               <input
                 type="text"
                 placeholder="Search meals..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-lg py-2 pl-9 pr-3 text-sm transition-all duration-200 focus:outline-none focus:ring-2"
-                style={{ border: '1px solid #E5E7EB', color: '#1A1A2E', '--tw-ring-color': '#1B4332' } as React.CSSProperties}
+                className="w-full rounded-lg py-2 pl-9 pr-3 text-sm transition-all duration-200 focus:outline-none focus:ring-2 border border-border text-text-primary ring-primary"
               />
             </div>
             <div className="max-h-[600px] space-y-2 overflow-y-auto pr-1">
@@ -429,11 +421,10 @@ export default function MenuManagementPage() {
                   key={meal.id}
                   draggable
                   onDragStart={(e) => handleDragStart(e, meal.id)}
-                  className="flex cursor-grab items-start gap-3 rounded-lg p-2 transition-all duration-150 hover:bg-gray-50 hover:shadow-sm active:cursor-grabbing active:shadow-md"
-                  style={{ border: '1px solid #E5E7EB' }}
+                  className="flex cursor-grab items-start gap-3 rounded-lg p-2 transition-all duration-150 hover:bg-gray-50 hover:shadow-sm active:cursor-grabbing active:shadow-md border border-border"
                 >
                   <div className="flex flex-shrink-0 items-center self-center">
-                    <GripVertical size={14} style={{ color: '#D1D5DB' }} />
+                    <GripVertical size={14} className="text-gray-300" />
                   </div>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
@@ -445,18 +436,17 @@ export default function MenuManagementPage() {
                   />
                   <div className="min-w-0 flex-1">
                     <p
-                      className="cursor-pointer truncate text-sm font-medium hover:underline"
-                      style={{ color: '#1A1A2E' }}
+                      className="cursor-pointer truncate text-sm font-medium hover:underline text-text-primary"
                       onClick={() => openMealEditor(meal)}
                     >
                       {meal.name}
                     </p>
-                    <p className="text-xs" style={{ color: '#6B7280' }}>
+                    <p className="text-xs text-text-secondary">
                       {formatPeso(meal.price)}
                     </p>
                     <div className="mt-1 flex flex-wrap gap-1">
                       {meal.tags.slice(0, 2).map((tag) => (
-                        <span key={tag} className="rounded-full px-1.5 py-0.5 text-[10px] font-medium" style={{ backgroundColor: '#D1FAE5', color: '#065F46' }}>
+                        <span key={tag} className="rounded-full px-1.5 py-0.5 text-[10px] font-medium bg-success-light text-emerald-800">
                           {tag}
                         </span>
                       ))}
@@ -470,30 +460,30 @@ export default function MenuManagementPage() {
       </div>
 
       {/* Menu History */}
-      <div className="rounded-xl bg-white p-4 shadow-sm" style={{ border: '1px solid #E5E7EB' }}>
-        <h2 className="mb-3 text-lg font-semibold" style={{ color: '#1A1A2E' }}>
+      <div className="rounded-xl bg-white p-4 shadow-sm border border-border">
+        <h2 className="mb-3 text-lg font-semibold text-text-primary">
           Menu History
         </h2>
         <div className="space-y-2">
           {menuHistory.map((week, idx) => (
-            <div key={idx} className="rounded-lg" style={{ border: '1px solid #E5E7EB' }}>
+            <div key={idx} className="rounded-lg border border-border">
               <button
                 onClick={() => setExpandedHistory(expandedHistory === idx ? null : idx)}
                 className="flex w-full items-center justify-between p-3 text-left transition-colors hover:bg-gray-50"
               >
                 <div className="flex items-center gap-3">
-                  <span className="text-sm font-medium" style={{ color: '#1A1A2E' }}>
+                  <span className="text-sm font-medium text-text-primary">
                     Week of {week.weekLabel}
                   </span>
-                  <span className="rounded-full px-2 py-0.5 text-xs font-medium" style={{ backgroundColor: '#F3F4F6', color: '#6B7280' }}>
+                  <span className="rounded-full px-2 py-0.5 text-xs font-medium bg-muted text-text-secondary">
                     {week.mealCount} meals
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
                   {expandedHistory !== idx && (
-                    <span className="text-xs" style={{ color: '#6B7280' }}>View</span>
+                    <span className="text-xs text-text-secondary">View</span>
                   )}
-                  {expandedHistory === idx ? <ChevronUp size={16} style={{ color: '#6B7280' }} /> : <ChevronDown size={16} style={{ color: '#6B7280' }} />}
+                  {expandedHistory === idx ? <ChevronUp size={16} className="text-text-secondary" /> : <ChevronDown size={16} className="text-text-secondary" />}
                 </div>
               </button>
               <AnimatePresence>
@@ -505,10 +495,10 @@ export default function MenuManagementPage() {
                     transition={{ duration: 0.2 }}
                     className="overflow-hidden"
                   >
-                    <div className="border-t px-3 pb-3 pt-2" style={{ borderColor: '#E5E7EB' }}>
+                    <div className="border-t border-border px-3 pb-3 pt-2">
                       <div className="flex flex-wrap gap-2">
                         {week.meals.map((name) => (
-                          <span key={name} className="rounded-md px-2 py-1 text-xs font-medium" style={{ backgroundColor: '#F3F4F6', color: '#1A1A2E' }}>
+                          <span key={name} className="rounded-md px-2 py-1 text-xs font-medium bg-muted text-text-primary">
                             {name}
                           </span>
                         ))}
@@ -525,22 +515,20 @@ export default function MenuManagementPage() {
       {/* Publish Confirmation Modal */}
       <Modal isOpen={publishModalOpen} onClose={() => setPublishModalOpen(false)} title="Publish Menu" size="sm">
         <div className="space-y-4">
-          <p className="text-sm" style={{ color: '#6B7280' }}>
+          <p className="text-sm text-text-secondary">
             This will notify <strong>127 subscribers</strong> about the new menu for{' '}
             <strong>{getWeekLabel(weekOffset)}</strong>. Publish?
           </p>
           <div className="flex justify-end gap-3">
             <button
               onClick={() => setPublishModalOpen(false)}
-              className="rounded-lg px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-100"
-              style={{ color: '#6B7280', border: '1px solid #E5E7EB' }}
+              className="rounded-lg px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-100 text-text-secondary border border-border"
             >
               Cancel
             </button>
             <button
               onClick={handlePublish}
-              className="rounded-lg px-4 py-2 text-sm font-semibold text-white transition-colors hover:opacity-90"
-              style={{ backgroundColor: '#E76F51' }}
+              className="rounded-lg px-4 py-2 text-sm font-semibold text-white transition-colors hover:opacity-90 bg-accent"
             >
               Publish Menu
             </button>
@@ -552,74 +540,69 @@ export default function MenuManagementPage() {
       <Modal isOpen={editingMeal !== null} onClose={() => setEditingMeal(null)} title="Edit Meal" size="lg">
         <div className="max-h-[70vh] space-y-4 overflow-y-auto overflow-x-hidden pr-1">
           <div>
-            <label className="mb-1 block text-sm font-medium" style={{ color: '#1A1A2E' }}>Name</label>
+            <label className="mb-1 block text-sm font-medium text-text-primary">Name</label>
             <input
               type="text"
               value={editForm.name}
               onChange={(e) => setEditForm((f) => ({ ...f, name: e.target.value }))}
-              className="w-full rounded-lg px-3 py-2 text-sm transition-all duration-200 focus:outline-none focus:ring-2"
-              style={{ border: '1px solid #E5E7EB', color: '#1A1A2E', '--tw-ring-color': '#1B4332' } as React.CSSProperties}
+              className="w-full rounded-lg px-3 py-2 text-sm transition-all duration-200 focus:outline-none focus:ring-2 border border-border text-text-primary ring-primary"
             />
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium" style={{ color: '#1A1A2E' }}>Description</label>
+            <label className="mb-1 block text-sm font-medium text-text-primary">Description</label>
             <textarea
               value={editForm.description}
               onChange={(e) => setEditForm((f) => ({ ...f, description: e.target.value }))}
               rows={3}
-              className="w-full rounded-lg px-3 py-2 text-sm transition-all duration-200 focus:outline-none focus:ring-2"
-              style={{ border: '1px solid #E5E7EB', color: '#1A1A2E', '--tw-ring-color': '#1B4332' } as React.CSSProperties}
+              className="w-full rounded-lg px-3 py-2 text-sm transition-all duration-200 focus:outline-none focus:ring-2 border border-border text-text-primary ring-primary"
             />
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium" style={{ color: '#1A1A2E' }}>Price</label>
+            <label className="mb-1 block text-sm font-medium text-text-primary">Price</label>
             <input
               type="number"
               value={editForm.price}
               onChange={(e) => setEditForm((f) => ({ ...f, price: Number(e.target.value) }))}
-              className="w-full rounded-lg px-3 py-2 text-sm transition-all duration-200 focus:outline-none focus:ring-2"
-              style={{ border: '1px solid #E5E7EB', color: '#1A1A2E', '--tw-ring-color': '#1B4332' } as React.CSSProperties}
+              className="w-full rounded-lg px-3 py-2 text-sm transition-all duration-200 focus:outline-none focus:ring-2 border border-border text-text-primary ring-primary"
             />
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium" style={{ color: '#1A1A2E' }}>Photo</label>
+            <label className="mb-1 block text-sm font-medium text-text-primary">Photo</label>
             <div className="flex items-start gap-4">
               {editForm.image && (
-                <div className="relative h-24 w-32 flex-shrink-0 overflow-hidden rounded-lg shadow-sm" style={{ border: '1px solid #E5E7EB' }}>
+                <div className="relative h-24 w-32 flex-shrink-0 overflow-hidden rounded-lg shadow-sm border border-border">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={editForm.image} alt="Meal preview" className="h-full w-full object-cover" />
                 </div>
               )}
               <div
-                className="flex flex-1 cursor-pointer items-center justify-center rounded-lg py-6 transition-colors hover:bg-gray-50"
-                style={{ border: '2px dashed #E5E7EB', backgroundColor: '#F9FAFB' }}
+                className="flex flex-1 cursor-pointer items-center justify-center rounded-lg py-6 transition-colors hover:bg-gray-50 border-2 border-dashed border-border bg-gray-50"
               >
                 <div className="text-center">
-                  <Upload size={20} className="mx-auto mb-2" style={{ color: '#6B7280' }} />
-                  <p className="text-sm" style={{ color: '#6B7280' }}>Drop image here or click to upload</p>
-                  <p className="text-xs" style={{ color: '#9CA3AF' }}>PNG, JPG up to 5MB</p>
+                  <Upload size={20} className="mx-auto mb-2 text-text-secondary" />
+                  <p className="text-sm text-text-secondary">Drop image here or click to upload</p>
+                  <p className="text-xs text-text-tertiary">PNG, JPG up to 5MB</p>
                 </div>
               </div>
             </div>
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium" style={{ color: '#1A1A2E' }}>Nutritional Info</label>
+            <label className="mb-2 block text-sm font-medium text-text-primary">Nutritional Info</label>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               {(['calories', 'protein', 'carbs', 'fat'] as const).map((field) => (
                 <div key={field}>
-                  <label className="mb-1 block text-xs capitalize" style={{ color: '#6B7280' }}>
+                  <label className="mb-1 block text-xs capitalize text-text-secondary">
                     {field} {field === 'calories' ? '(kcal)' : '(g)'}
                   </label>
                   <input
                     type="number"
                     value={editForm[field]}
                     onChange={(e) => setEditForm((f) => ({ ...f, [field]: Number(e.target.value) }))}
-                    className="w-full rounded-lg px-3 py-2 text-sm transition-all duration-200 focus:outline-none focus:ring-2"
-                    style={{ border: '1px solid #E5E7EB', color: '#1A1A2E', '--tw-ring-color': '#1B4332' } as React.CSSProperties}
+                    className="w-full rounded-lg px-3 py-2 text-sm transition-all duration-200 focus:outline-none focus:ring-2 border border-border text-text-primary ring-primary"
                   />
                 </div>
               ))}
@@ -627,14 +610,10 @@ export default function MenuManagementPage() {
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium" style={{ color: '#1A1A2E' }}>Dietary Tags</label>
+            <label className="mb-2 block text-sm font-medium text-text-primary">Dietary Tags</label>
             <div className="flex flex-wrap gap-2">
               {ALL_TAGS.map((tag) => (
-                <label key={tag} className="flex cursor-pointer items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors" style={{
-                  backgroundColor: editForm.tags.includes(tag) ? '#D1FAE5' : '#F3F4F6',
-                  color: editForm.tags.includes(tag) ? '#065F46' : '#6B7280',
-                  border: editForm.tags.includes(tag) ? '1px solid #6EE7B7' : '1px solid #E5E7EB',
-                }}>
+                <label key={tag} className={`flex cursor-pointer items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors border ${editForm.tags.includes(tag) ? 'bg-success-light text-emerald-800 border-emerald-300' : 'bg-muted text-text-secondary border-border'}`}>
                   <input
                     type="checkbox"
                     checked={editForm.tags.includes(tag)}
@@ -648,14 +627,10 @@ export default function MenuManagementPage() {
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium" style={{ color: '#1A1A2E' }}>Allergens</label>
+            <label className="mb-2 block text-sm font-medium text-text-primary">Allergens</label>
             <div className="flex flex-wrap gap-2">
               {ALL_ALLERGENS.map((a) => (
-                <label key={a} className="flex cursor-pointer items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors" style={{
-                  backgroundColor: editForm.allergens.includes(a) ? '#FEE2E2' : '#F3F4F6',
-                  color: editForm.allergens.includes(a) ? '#991B1B' : '#6B7280',
-                  border: editForm.allergens.includes(a) ? '1px solid #FCA5A5' : '1px solid #E5E7EB',
-                }}>
+                <label key={a} className={`flex cursor-pointer items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors border ${editForm.allergens.includes(a) ? 'bg-error-light text-red-800 border-red-300' : 'bg-muted text-text-secondary border-border'}`}>
                   <input
                     type="checkbox"
                     checked={editForm.allergens.includes(a)}
@@ -669,11 +644,10 @@ export default function MenuManagementPage() {
           </div>
 
           <div className="flex items-center justify-between">
-            <label className="text-sm font-medium" style={{ color: '#1A1A2E' }}>Available</label>
+            <label className="text-sm font-medium text-text-primary">Available</label>
             <button
               onClick={() => setEditForm((f) => ({ ...f, available: !f.available }))}
-              className="relative flex h-6 w-11 shrink-0 items-center rounded-full transition-colors"
-              style={{ backgroundColor: editForm.available ? '#40916C' : '#D1D5DB' }}
+              className={`relative flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${editForm.available ? 'bg-primary-lighter' : 'bg-gray-300'}`}
             >
               <span
                 className={`absolute left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${editForm.available ? 'translate-x-5' : 'translate-x-0'}`}
@@ -681,19 +655,17 @@ export default function MenuManagementPage() {
             </button>
           </div>
 
-          <div className="flex justify-end gap-3 pt-2" style={{ borderTop: '1px solid #E5E7EB' }}>
+          <div className="flex justify-end gap-3 pt-2 border-t border-border">
             <button
               onClick={() => setEditingMeal(null)}
-              className="rounded-lg px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-100"
-              style={{ color: '#6B7280', border: '1px solid #E5E7EB' }}
+              className="rounded-lg px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-100 text-text-secondary border border-border"
             >
               Cancel
             </button>
             <button
               onClick={handleSaveMeal}
               disabled={isUpdating}
-              className="rounded-lg px-4 py-2 text-sm font-semibold text-white transition-colors hover:opacity-90 disabled:opacity-50"
-              style={{ backgroundColor: '#1B4332' }}
+              className="rounded-lg px-4 py-2 text-sm font-semibold text-white transition-colors hover:opacity-90 disabled:opacity-50 bg-primary"
             >
               {isUpdating ? 'Saving...' : 'Save Changes'}
             </button>

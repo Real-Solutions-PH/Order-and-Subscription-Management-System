@@ -5,35 +5,34 @@ interface StatusBadgeProps {
   size?: 'sm' | 'md';
 }
 
-const statusColorMap: Record<string, { bg: string; text: string }> = {
-  active:     { bg: '#D1FAE5', text: '#065F46' },
-  delivered:  { bg: '#D1FAE5', text: '#065F46' },
-  paid:       { bg: '#D1FAE5', text: '#065F46' },
+const statusClassMap: Record<string, string> = {
+  active:     'bg-success-light text-emerald-800',
+  delivered:  'bg-success-light text-emerald-800',
+  paid:       'bg-success-light text-emerald-800',
 
-  paused:     { bg: '#FEF3C7', text: '#92400E' },
-  pending:    { bg: '#FEF3C7', text: '#92400E' },
-  preparing:  { bg: '#FEF3C7', text: '#92400E' },
+  paused:     'bg-warning-light text-warning-dark',
+  pending:    'bg-warning-light text-warning-dark',
+  preparing:  'bg-warning-light text-warning-dark',
 
-  cancelled:  { bg: '#FEE2E2', text: '#991B1B' },
-  failed:     { bg: '#FEE2E2', text: '#991B1B' },
-  churned:    { bg: '#FEE2E2', text: '#991B1B' },
+  cancelled:  'bg-error-light text-error-900',
+  failed:     'bg-error-light text-error-900',
+  churned:    'bg-error-light text-error-900',
 
-  new:        { bg: '#DBEAFE', text: '#1E40AF' },
-  info:       { bg: '#DBEAFE', text: '#1E40AF' },
-  ready:      { bg: '#DBEAFE', text: '#1E40AF' },
-  delivering: { bg: '#DBEAFE', text: '#1E40AF' },
+  new:        'bg-info-light text-info-800',
+  info:       'bg-info-light text-info-800',
+  ready:      'bg-info-light text-info-800',
+  delivering: 'bg-info-light text-info-800',
 };
 
-const defaultColors = { bg: '#F3F4F6', text: '#374151' };
+const defaultClasses = 'bg-muted text-gray-700';
 
-export default function StatusBadge({ status, size = 'md' }: StatusBadgeProps) {
-  const colors = statusColorMap[status.toLowerCase()] ?? defaultColors;
+export default function StatusBadge({ status, size = 'md' }: Readonly<StatusBadgeProps>) {
+  const colorClasses = statusClassMap[status.toLowerCase()] ?? defaultClasses;
   const sizeClasses = size === 'sm' ? 'px-2 py-0.5 text-xs' : 'px-2.5 py-1 text-xs';
 
   return (
     <span
-      className={`inline-flex items-center rounded-full font-medium capitalize ${sizeClasses}`}
-      style={{ backgroundColor: colors.bg, color: colors.text }}
+      className={`inline-flex items-center rounded-full font-medium capitalize ${sizeClasses} ${colorClasses}`}
     >
       {status}
     </span>

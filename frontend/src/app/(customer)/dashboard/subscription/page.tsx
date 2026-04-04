@@ -106,21 +106,17 @@ export default function SubscriptionPage() {
     : planTiers;
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#FEFAE0' }}>
+    <div className="min-h-screen bg-surface">
       <div className="max-w-3xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
           <Link
             href="/dashboard"
-            className="inline-flex items-center gap-2 text-sm font-medium mb-4 transition-colors hover:opacity-80"
-            style={{ color: '#1B4332' }}
+            className="inline-flex items-center gap-2 text-sm font-medium mb-4 transition-colors hover:opacity-80 text-primary"
           >
             <ArrowLeft size={16} /> Back to Dashboard
           </Link>
-          <h1
-            className="text-3xl"
-            style={{ fontFamily: "'DM Serif Display', serif", color: '#1A1A2E' }}
-          >
+          <h1 className="text-3xl font-display text-text-primary">
             Manage Subscription
           </h1>
         </div>
@@ -129,48 +125,41 @@ export default function SubscriptionPage() {
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          className="rounded-2xl p-6 mb-6"
-          style={{
-            background: 'linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%)',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-          }}
+          className="rounded-2xl p-6 mb-6 shadow-elevated bg-linear-to-br from-primary to-primary-light"
         >
           <div className="flex items-center gap-2 mb-3">
-            <Crown size={20} color="#F4A261" />
-            <p className="text-sm font-semibold" style={{ color: '#F4A261' }}>
+            <Crown size={20} className="text-accent-light" />
+            <p className="text-sm font-semibold text-accent-light">
               CURRENT PLAN
             </p>
           </div>
-          <h2
-            className="text-2xl font-bold text-white mb-1"
-            style={{ fontFamily: "'DM Serif Display', serif" }}
-          >
+          <h2 className="text-2xl font-bold text-white mb-1 font-display">
             10 Meals / Week
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4">
             <div>
-              <p className="text-xs" style={{ color: '#A7F3D0' }}>
+              <p className="text-xs text-success-pale">
                 Monthly Cost
               </p>
               <p className="text-white font-semibold">{formatPeso(4500)}</p>
             </div>
             <div>
-              <p className="text-xs" style={{ color: '#A7F3D0' }}>
+              <p className="text-xs text-success-pale">
                 Next Billing
               </p>
               <p className="text-white font-semibold">Apr 5, 2026</p>
             </div>
             <div>
-              <p className="text-xs" style={{ color: '#A7F3D0' }}>
+              <p className="text-xs text-success-pale">
                 Member Since
               </p>
               <p className="text-white font-semibold">Jan 5, 2026</p>
             </div>
             <div>
-              <p className="text-xs" style={{ color: '#A7F3D0' }}>
+              <p className="text-xs text-success-pale">
                 Total Savings
               </p>
-              <p className="font-semibold" style={{ color: '#34D399' }}>
+              <p className="font-semibold text-success-bright">
                 {formatPeso(2040)}
               </p>
             </div>
@@ -178,21 +167,14 @@ export default function SubscriptionPage() {
         </motion.div>
 
         {/* B) Pause Subscription */}
-        <div
-          className="rounded-2xl p-6 mb-6"
-          style={{
-            backgroundColor: '#FFFFFF',
-            border: '1px solid #E5E7EB',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
-          }}
-        >
+        <div className="rounded-2xl p-6 mb-6 bg-surface-white border border-border shadow-card">
           <div className="flex items-center gap-2 mb-4">
-            <Pause size={20} color="#D97706" />
-            <h2 className="text-lg font-semibold" style={{ color: '#1A1A2E' }}>
+            <Pause size={20} className="text-warning" />
+            <h2 className="text-lg font-semibold text-text-primary">
               Pause Subscription
             </h2>
           </div>
-          <p className="text-sm mb-4" style={{ color: '#6B7280' }}>
+          <p className="text-sm mb-4 text-text-secondary">
             Need a break? Pause your subscription and we&apos;ll hold your spot.
           </p>
 
@@ -204,12 +186,11 @@ export default function SubscriptionPage() {
                   <button
                     key={preset.days}
                     onClick={() => setPauseDays(preset.days)}
-                    className="flex-1 px-3 py-2.5 rounded-xl text-sm font-medium transition-all"
-                    style={{
-                      border: `2px solid ${pauseDays === preset.days ? '#D97706' : '#E5E7EB'}`,
-                      backgroundColor: pauseDays === preset.days ? '#FFF7ED' : '#FFFFFF',
-                      color: pauseDays === preset.days ? '#D97706' : '#6B7280',
-                    }}
+                    className={`flex-1 px-3 py-2.5 rounded-xl text-sm font-medium transition-all border-2 ${
+                      pauseDays === preset.days
+                        ? 'border-warning bg-warning-50 text-warning'
+                        : 'border-border bg-surface-white text-text-secondary'
+                    }`}
                   >
                     {preset.label}
                   </button>
@@ -217,18 +198,14 @@ export default function SubscriptionPage() {
               </div>
 
               {/* Custom days input */}
-              <div
-                className="rounded-xl p-4 mb-4"
-                style={{ backgroundColor: '#F9FAFB', border: '1px solid #E5E7EB' }}
-              >
-                <label className="block text-sm font-medium mb-2" style={{ color: '#1A1A2E' }}>
+              <div className="rounded-xl p-4 mb-4 bg-gray-50 border border-border">
+                <label className="block text-sm font-medium mb-2 text-text-primary">
                   Or enter a custom number of days
                 </label>
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() => setPauseDays(Math.max(1, pauseDays - 1))}
-                    className="w-9 h-9 rounded-lg flex items-center justify-center font-bold text-lg transition-all hover:opacity-80"
-                    style={{ backgroundColor: '#E5E7EB', color: '#374151' }}
+                    className="w-9 h-9 rounded-lg flex items-center justify-center font-bold text-lg transition-all hover:opacity-80 bg-border text-gray-700"
                   >
                     −
                   </button>
@@ -238,55 +215,42 @@ export default function SubscriptionPage() {
                     max={90}
                     value={pauseDays}
                     onChange={(e) => handlePauseDaysChange(e.target.value)}
-                    className="w-20 text-center text-lg font-semibold rounded-lg py-1.5 outline-none transition-colors"
-                    style={{
-                      border: '2px solid #D97706',
-                      color: '#D97706',
-                      backgroundColor: '#FFFFFF',
-                    }}
+                    className="w-20 text-center text-lg font-semibold rounded-lg py-1.5 outline-none transition-colors border-2 border-warning text-warning bg-surface-white"
                   />
                   <button
                     onClick={() => setPauseDays(Math.min(90, pauseDays + 1))}
-                    className="w-9 h-9 rounded-lg flex items-center justify-center font-bold text-lg transition-all hover:opacity-80"
-                    style={{ backgroundColor: '#D97706', color: '#FFFFFF' }}
+                    className="w-9 h-9 rounded-lg flex items-center justify-center font-bold text-lg transition-all hover:opacity-80 bg-warning text-surface-white"
                   >
                     +
                   </button>
-                  <span className="text-sm font-medium" style={{ color: '#6B7280' }}>
+                  <span className="text-sm font-medium text-text-secondary">
                     day{pauseDays !== 1 ? 's' : ''}
                   </span>
                 </div>
-                <p className="text-xs mt-2" style={{ color: '#9CA3AF' }}>Min 1 day · Max 90 days</p>
+                <p className="text-xs mt-2 text-text-tertiary">Min 1 day · Max 90 days</p>
               </div>
 
               {/* Resume info */}
-              <div
-                className="rounded-xl p-3 mb-4"
-                style={{ backgroundColor: '#FFF7ED', border: '1px solid #FED7AA' }}
-              >
-                <p className="text-sm" style={{ color: '#92400E' }}>
+              <div className="rounded-xl p-3 mb-4 bg-warning-50 border border-warning-200">
+                <p className="text-sm text-warning-dark">
                   Your subscription will resume on <strong>{pauseResumeLabel}</strong>. You won&apos;t be charged during the pause.
                 </p>
               </div>
 
               <button
                 onClick={() => setPauseConfirmed(true)}
-                className="w-full px-4 py-3 rounded-xl font-semibold text-white transition-colors hover:opacity-90"
-                style={{ backgroundColor: '#D97706' }}
+                className="w-full px-4 py-3 rounded-xl font-semibold text-white transition-colors hover:opacity-90 bg-warning"
               >
                 Pause Subscription
               </button>
             </>
           ) : (
             <div className="space-y-4">
-              <div
-                className="rounded-xl p-4"
-                style={{ backgroundColor: '#FFF7ED', border: '1px solid #FED7AA' }}
-              >
-                <p className="font-semibold mb-1" style={{ color: '#92400E' }}>
+              <div className="rounded-xl p-4 bg-warning-50 border border-warning-200">
+                <p className="font-semibold mb-1 text-warning-dark">
                   Confirm Pause
                 </p>
-                <p className="text-sm" style={{ color: '#92400E' }}>
+                <p className="text-sm text-warning-dark">
                   Your subscription will be paused for <strong>{pauseDays} day{pauseDays !== 1 ? 's' : ''}</strong> until{' '}
                   <strong>{pauseResumeLabel}</strong>. You won&apos;t be charged during this
                   period and deliveries will be suspended.
@@ -295,8 +259,7 @@ export default function SubscriptionPage() {
               <div className="flex gap-3">
                 <button
                   onClick={() => setPauseConfirmed(false)}
-                  className="flex-1 px-4 py-2.5 rounded-xl font-medium transition-colors hover:bg-gray-100"
-                  style={{ border: '1px solid #E5E7EB', color: '#1A1A2E' }}
+                  className="flex-1 px-4 py-2.5 rounded-xl font-medium transition-colors hover:bg-gray-100 border border-border text-text-primary"
                 >
                   Go Back
                 </button>
@@ -311,8 +274,7 @@ export default function SubscriptionPage() {
                     setPauseConfirmed(false);
                     showToast(`Subscription paused for ${pauseDays} day${pauseDays !== 1 ? 's' : ''} — resumes ${pauseResumeLabel}`, 'success');
                   }}
-                  className="flex-1 px-4 py-2.5 rounded-xl font-semibold text-white transition-colors hover:opacity-90 disabled:opacity-50"
-                  style={{ backgroundColor: '#D97706' }}
+                  className="flex-1 px-4 py-2.5 rounded-xl font-semibold text-white transition-colors hover:opacity-90 disabled:opacity-50 bg-warning"
                 >
                   {isPausing ? 'Pausing...' : 'Confirm Pause'}
                 </button>
@@ -322,17 +284,10 @@ export default function SubscriptionPage() {
         </div>
 
         {/* C) Modify Plan */}
-        <div
-          className="rounded-2xl p-6 mb-6"
-          style={{
-            backgroundColor: '#FFFFFF',
-            border: '1px solid #E5E7EB',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
-          }}
-        >
+        <div className="rounded-2xl p-6 mb-6 bg-surface-white border border-border shadow-card">
           <div className="flex items-center gap-2 mb-4">
-            <ArrowRightLeft size={20} color="#2D6A4F" />
-            <h2 className="text-lg font-semibold" style={{ color: '#1A1A2E' }}>
+            <ArrowRightLeft size={20} className="text-primary-light" />
+            <h2 className="text-lg font-semibold text-text-primary">
               Change Plan
             </h2>
           </div>
@@ -350,56 +305,48 @@ export default function SubscriptionPage() {
                 <button
                   key={tier.id}
                   onClick={() => setSelectedPlan(tier.id)}
-                  className="relative rounded-xl p-4 text-left transition-all"
-                  style={{
-                    border: `2px solid ${isSelected ? '#1B4332' : isCurrent ? '#40916C' : '#E5E7EB'}`,
-                    backgroundColor: isSelected ? '#F0FDF4' : '#FFFFFF',
-                  }}
+                  className={`relative rounded-xl p-4 text-left transition-all border-2 ${
+                    isSelected
+                      ? 'border-primary bg-success-50'
+                      : isCurrent
+                        ? 'border-primary-lighter bg-surface-white'
+                        : 'border-border bg-surface-white'
+                  }`}
                 >
                   {isCurrent && (
-                    <span
-                      className="absolute -top-2.5 left-3 px-2 py-0.5 text-xs font-semibold rounded-full"
-                      style={{ backgroundColor: '#1B4332', color: '#FFFFFF' }}
-                    >
+                    <span className="absolute -top-2.5 left-3 px-2 py-0.5 text-xs font-semibold rounded-full bg-primary text-surface-white">
                       Current
                     </span>
                   )}
                   {tier.label === 'Popular' && !isCurrent && (
-                    <span
-                      className="absolute -top-2.5 right-3 px-2 py-0.5 text-xs font-semibold rounded-full"
-                      style={{ backgroundColor: '#E76F51', color: '#FFFFFF' }}
-                    >
+                    <span className="absolute -top-2.5 right-3 px-2 py-0.5 text-xs font-semibold rounded-full bg-accent text-surface-white">
                       Popular
                     </span>
                   )}
                   {tier.label === 'Best Value' && (
-                    <span
-                      className="absolute -top-2.5 right-3 px-2 py-0.5 text-xs font-semibold rounded-full"
-                      style={{ backgroundColor: '#059669', color: '#FFFFFF' }}
-                    >
+                    <span className="absolute -top-2.5 right-3 px-2 py-0.5 text-xs font-semibold rounded-full bg-success text-surface-white">
                       Best Value
                     </span>
                   )}
-                  <p className="font-bold text-lg" style={{ color: '#1A1A2E' }}>
+                  <p className="font-bold text-lg text-text-primary">
                     {tier.meals} meals
                   </p>
-                  <p className="text-sm" style={{ color: '#6B7280' }}>
+                  <p className="text-sm text-text-secondary">
                     {tier.label} &middot; {formatPeso(tier.perMeal)}/meal
                   </p>
-                  <p className="font-semibold mt-1" style={{ color: '#1B4332' }}>
+                  <p className="font-semibold mt-1 text-primary">
                     {formatPeso(tier.price)}/mo
                   </p>
                   {!isCurrent && (
                     <p
-                      className="text-xs mt-1 font-semibold"
-                      style={{ color: diff > 0 ? '#D97706' : '#059669' }}
+                      className={`text-xs mt-1 font-semibold ${diff > 0 ? 'text-warning' : 'text-success'}`}
                     >
                       {diff > 0 ? '+' : ''}
                       {formatPeso(Math.abs(diff))}/mo
                     </p>
                   )}
                   {tier.savings > 0 && (
-                    <p className="text-xs mt-1" style={{ color: '#059669' }}>
+                    <p className="text-xs mt-1 text-success">
                       Save {tier.savings}%
                     </p>
                   )}
@@ -409,11 +356,8 @@ export default function SubscriptionPage() {
           </div>
           )}
           {selectedPlan !== 10 && (
-            <div
-              className="rounded-xl p-3 mb-4"
-              style={{ backgroundColor: '#EFF6FF', border: '1px solid #BFDBFE' }}
-            >
-              <p className="text-sm" style={{ color: '#1E40AF' }}>
+            <div className="rounded-xl p-3 mb-4 bg-info-50 border border-info-200">
+              <p className="text-sm text-info-800">
                 Your billing will be pro-rated for the remainder of the current cycle. Changes take
                 effect on your next billing date.
               </p>
@@ -435,29 +379,21 @@ export default function SubscriptionPage() {
                 showToast('You are already on this plan', 'info');
               }
             }}
-            className="w-full px-4 py-3 rounded-xl font-semibold text-white transition-colors hover:opacity-90"
-            style={{ backgroundColor: '#1B4332' }}
+            className="w-full px-4 py-3 rounded-xl font-semibold text-white transition-colors hover:opacity-90 bg-primary"
           >
             Confirm Change
           </button>
         </div>
 
         {/* D) Skip a Week */}
-        <div
-          className="rounded-2xl p-6 mb-6"
-          style={{
-            backgroundColor: '#FFFFFF',
-            border: '1px solid #E5E7EB',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
-          }}
-        >
+        <div className="rounded-2xl p-6 mb-6 bg-surface-white border border-border shadow-card">
           <div className="flex items-center gap-2 mb-4">
-            <CalendarOff size={20} color="#D97706" />
-            <h2 className="text-lg font-semibold" style={{ color: '#1A1A2E' }}>
+            <CalendarOff size={20} className="text-warning" />
+            <h2 className="text-lg font-semibold text-text-primary">
               Skip a Week
             </h2>
           </div>
-          <p className="text-sm mb-4" style={{ color: '#6B7280' }}>
+          <p className="text-sm mb-4 text-text-secondary">
             Select weeks to skip. You&apos;ll receive a credit for each skipped week.
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
@@ -467,31 +403,27 @@ export default function SubscriptionPage() {
                 <button
                   key={week.id}
                   onClick={() => toggleSkipWeek(week.id)}
-                  className="rounded-xl p-4 text-center transition-all relative"
-                  style={{
-                    border: `2px solid ${isSkipped ? '#D97706' : '#E5E7EB'}`,
-                    backgroundColor: isSkipped ? '#FFF7ED' : '#FFFFFF',
-                  }}
+                  className={`rounded-xl p-4 text-center transition-all relative border-2 ${
+                    isSkipped
+                      ? 'border-warning bg-warning-50'
+                      : 'border-border bg-surface-white'
+                  }`}
                 >
                   {isSkipped && (
-                    <div
-                      className="absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center"
-                      style={{ backgroundColor: '#D97706' }}
-                    >
-                      <Check size={12} color="#FFFFFF" />
+                    <div className="absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center bg-warning">
+                      <Check size={12} className="text-white" />
                     </div>
                   )}
-                  <p className="text-xs font-medium mb-1" style={{ color: '#6B7280' }}>
+                  <p className="text-xs font-medium mb-1 text-text-secondary">
                     {week.date}
                   </p>
                   <p
-                    className="text-sm font-semibold"
-                    style={{ color: isSkipped ? '#D97706' : '#1A1A2E' }}
+                    className={`text-sm font-semibold ${isSkipped ? 'text-warning' : 'text-text-primary'}`}
                   >
                     {week.label}
                   </p>
                   {isSkipped && (
-                    <p className="text-xs mt-1 font-medium" style={{ color: '#D97706' }}>
+                    <p className="text-xs mt-1 font-medium text-warning">
                       Skipped
                     </p>
                   )}
@@ -500,11 +432,8 @@ export default function SubscriptionPage() {
             })}
           </div>
           {skippedWeeks.length > 0 && (
-            <div
-              className="rounded-xl p-3 mb-4"
-              style={{ backgroundColor: '#FFF7ED', border: '1px solid #FED7AA' }}
-            >
-              <p className="text-sm" style={{ color: '#92400E' }}>
+            <div className="rounded-xl p-3 mb-4 bg-warning-50 border border-warning-200">
+              <p className="text-sm text-warning-dark">
                 Credit for {skippedWeeks.length} skipped week{skippedWeeks.length > 1 ? 's' : ''}:{' '}
                 <strong>{formatPeso(skippedWeeks.length * creditPerWeek)}</strong>
               </p>
@@ -522,43 +451,30 @@ export default function SubscriptionPage() {
                 showToast('No weeks selected to skip', 'info');
               }
             }}
-            className="w-full px-4 py-3 rounded-xl font-semibold text-white transition-colors hover:opacity-90"
-            style={{ backgroundColor: '#D97706' }}
+            className="w-full px-4 py-3 rounded-xl font-semibold text-white transition-colors hover:opacity-90 bg-warning"
           >
             Confirm Skips
           </button>
         </div>
 
         {/* E) Cancel Subscription */}
-        <div
-          className="rounded-2xl p-6 mb-6"
-          style={{
-            backgroundColor: '#FFFFFF',
-            border: '1px solid #FEE2E2',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
-          }}
-        >
+        <div className="rounded-2xl p-6 mb-6 bg-surface-white border border-error-light shadow-card">
           <div className="flex items-center gap-2 mb-4">
-            <XCircle size={20} color="#DC2626" />
-            <h2 className="text-lg font-semibold" style={{ color: '#1A1A2E' }}>
+            <XCircle size={20} className="text-error" />
+            <h2 className="text-lg font-semibold text-text-primary">
               Cancel Subscription
             </h2>
           </div>
 
           {cancelStep === 0 && (
             <div>
-              <p className="text-sm mb-4" style={{ color: '#6B7280' }}>
+              <p className="text-sm mb-4 text-text-secondary">
                 We&apos;d hate to see you go. If something isn&apos;t working, consider pausing
                 instead.
               </p>
               <button
                 onClick={() => setCancelStep(1)}
-                className="px-6 py-2.5 rounded-xl font-medium transition-colors hover:opacity-90"
-                style={{
-                  color: '#DC2626',
-                  border: '1px solid #FCA5A5',
-                  backgroundColor: '#FEF2F2',
-                }}
+                className="px-6 py-2.5 rounded-xl font-medium transition-colors hover:opacity-90 text-error border border-error-300 bg-error-50"
               >
                 Cancel Subscription
               </button>
@@ -575,7 +491,7 @@ export default function SubscriptionPage() {
                 exit={{ opacity: 0, x: -20 }}
                 className="space-y-4"
               >
-                <p className="font-medium" style={{ color: '#1A1A2E' }}>
+                <p className="font-medium text-text-primary">
                   We&apos;re sorry to hear that. Can you tell us why?
                 </p>
                 <div className="space-y-2">
@@ -584,11 +500,11 @@ export default function SubscriptionPage() {
                     return (
                       <label
                         key={reason}
-                        className="flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all"
-                        style={{
-                          border: `1px solid ${isChecked ? '#DC2626' : '#E5E7EB'}`,
-                          backgroundColor: isChecked ? '#FEF2F2' : '#FFFFFF',
-                        }}
+                        className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all border ${
+                          isChecked
+                            ? 'border-error bg-error-50'
+                            : 'border-border bg-surface-white'
+                        }`}
                       >
                         <input
                           type="checkbox"
@@ -597,15 +513,15 @@ export default function SubscriptionPage() {
                           className="sr-only"
                         />
                         <div
-                          className="w-5 h-5 rounded border-2 flex items-center justify-center"
-                          style={{
-                            borderColor: isChecked ? '#DC2626' : '#D1D5DB',
-                            backgroundColor: isChecked ? '#DC2626' : 'transparent',
-                          }}
+                          className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
+                            isChecked
+                              ? 'border-error bg-error'
+                              : 'border-gray-300 bg-transparent'
+                          }`}
                         >
-                          {isChecked && <Check size={12} color="#FFFFFF" />}
+                          {isChecked && <Check size={12} className="text-white" />}
                         </div>
-                        <span className="font-medium" style={{ color: '#1A1A2E' }}>
+                        <span className="font-medium text-text-primary">
                           {reason}
                         </span>
                       </label>
@@ -618,16 +534,14 @@ export default function SubscriptionPage() {
                       setCancelStep(0);
                       setCancelReasons([]);
                     }}
-                    className="flex-1 px-4 py-2.5 rounded-xl font-medium transition-colors hover:bg-gray-100"
-                    style={{ border: '1px solid #E5E7EB', color: '#1A1A2E' }}
+                    className="flex-1 px-4 py-2.5 rounded-xl font-medium transition-colors hover:bg-gray-100 border border-border text-text-primary"
                   >
                     Go Back
                   </button>
                   <button
                     onClick={() => setCancelStep(2)}
                     disabled={cancelReasons.length === 0}
-                    className="flex-1 px-4 py-2.5 rounded-xl font-medium text-white transition-colors hover:opacity-90 disabled:opacity-50"
-                    style={{ backgroundColor: '#DC2626' }}
+                    className="flex-1 px-4 py-2.5 rounded-xl font-medium text-white transition-colors hover:opacity-90 disabled:opacity-50 bg-error"
                   >
                     Continue
                   </button>
@@ -645,19 +559,13 @@ export default function SubscriptionPage() {
                 className="space-y-4"
               >
                 <div
-                  className="rounded-xl p-5 text-center"
-                  style={{
-                    background: 'linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%)',
-                  }}
+                  className="rounded-xl p-5 text-center bg-linear-to-br from-primary to-primary-light"
                 >
-                  <Gift size={36} color="#F4A261" className="mx-auto mb-3" />
-                  <h3
-                    className="text-xl font-bold text-white mb-2"
-                    style={{ fontFamily: "'DM Serif Display', serif" }}
-                  >
+                  <Gift size={36} className="mx-auto mb-3 text-accent-light" />
+                  <h3 className="text-xl font-bold text-white mb-2 font-display">
                     Stay and get 20% off next month!
                   </h3>
-                  <p className="text-sm mb-4" style={{ color: '#D1FAE5' }}>
+                  <p className="text-sm mb-4 text-success-light">
                     We value your membership. As a special offer, enjoy 20% off your next monthly
                     billing — that&apos;s only {formatPeso(3600)} instead of {formatPeso(4500)}.
                   </p>
@@ -667,8 +575,7 @@ export default function SubscriptionPage() {
                       setCancelReasons([]);
                       showToast('20% discount applied to your next billing!', 'success');
                     }}
-                    className="px-6 py-3 rounded-xl font-semibold transition-colors hover:opacity-90"
-                    style={{ backgroundColor: '#E76F51', color: '#FFFFFF' }}
+                    className="px-6 py-3 rounded-xl font-semibold transition-colors hover:opacity-90 bg-accent text-surface-white"
                   >
                     Claim 20% Off & Stay
                   </button>
@@ -676,15 +583,13 @@ export default function SubscriptionPage() {
                 <div className="flex gap-3">
                   <button
                     onClick={() => setCancelStep(1)}
-                    className="flex-1 px-4 py-2.5 rounded-xl font-medium transition-colors hover:bg-gray-100"
-                    style={{ border: '1px solid #E5E7EB', color: '#1A1A2E' }}
+                    className="flex-1 px-4 py-2.5 rounded-xl font-medium transition-colors hover:bg-gray-100 border border-border text-text-primary"
                   >
                     Go Back
                   </button>
                   <button
                     onClick={() => setCancelStep(3)}
-                    className="flex-1 px-4 py-2.5 rounded-xl font-medium transition-colors hover:opacity-90"
-                    style={{ color: '#DC2626', border: '1px solid #FCA5A5' }}
+                    className="flex-1 px-4 py-2.5 rounded-xl font-medium transition-colors hover:opacity-90 text-error border border-error-300"
                   >
                     No thanks, continue
                   </button>
@@ -701,17 +606,14 @@ export default function SubscriptionPage() {
                 exit={{ opacity: 0, x: -20 }}
                 className="space-y-4"
               >
-                <div
-                  className="rounded-xl p-4"
-                  style={{ backgroundColor: '#FEF2F2', border: '1px solid #FECACA' }}
-                >
+                <div className="rounded-xl p-4 bg-error-50 border border-error-200">
                   <div className="flex items-start gap-3">
-                    <AlertTriangle size={20} color="#DC2626" className="mt-0.5 flex-shrink-0" />
+                    <AlertTriangle size={20} className="mt-0.5 flex-shrink-0 text-error" />
                     <div>
-                      <p className="font-semibold mb-1" style={{ color: '#991B1B' }}>
+                      <p className="font-semibold mb-1 text-error-900">
                         This action cannot be undone
                       </p>
-                      <p className="text-sm" style={{ color: '#991B1B' }}>
+                      <p className="text-sm text-error-900">
                         Your subscription will be cancelled immediately. You&apos;ll still have
                         access until your current billing period ends on April 5, 2026. Any remaining
                         credits will be forfeited.
@@ -725,8 +627,7 @@ export default function SubscriptionPage() {
                       setCancelStep(0);
                       setCancelReasons([]);
                     }}
-                    className="flex-1 px-4 py-2.5 rounded-xl font-semibold text-white transition-colors hover:opacity-90"
-                    style={{ backgroundColor: '#1B4332' }}
+                    className="flex-1 px-4 py-2.5 rounded-xl font-semibold text-white transition-colors hover:opacity-90 bg-primary"
                   >
                     Keep My Subscription
                   </button>
@@ -742,8 +643,7 @@ export default function SubscriptionPage() {
                       setCancelReasons([]);
                       showToast('Subscription cancelled', 'error');
                     }}
-                    className="flex-1 px-4 py-2.5 rounded-xl font-semibold text-white transition-colors hover:opacity-90 disabled:opacity-50"
-                    style={{ backgroundColor: '#DC2626' }}
+                    className="flex-1 px-4 py-2.5 rounded-xl font-semibold text-white transition-colors hover:opacity-90 disabled:opacity-50 bg-error"
                   >
                     {isCancelling ? 'Cancelling...' : 'I want to cancel'}
                   </button>

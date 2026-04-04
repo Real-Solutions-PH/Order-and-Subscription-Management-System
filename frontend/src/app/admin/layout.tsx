@@ -3,11 +3,11 @@ import AdminHeader from '@/components/AdminHeader';
 
 export default function AdminLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   return (
-    <div className="flex min-h-screen" style={{ backgroundColor: '#F9FAFB' }}>
+    <div className="flex min-h-screen bg-gray-50">
       <AdminSidebar />
       <div className="flex flex-1 flex-col min-w-0">
         <AdminHeader />
