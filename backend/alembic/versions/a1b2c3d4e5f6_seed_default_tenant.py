@@ -18,7 +18,7 @@ down_revision: Union[str, None] = "b88bb57ae855"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
-DEFAULT_TENANT_ID = UUID("00000000-0000-0000-0000-000000000001")
+DEFAULT_TENANT_ID = str(UUID("00000000-0000-0000-0000-000000000001"))
 
 
 def upgrade() -> None:
@@ -27,7 +27,7 @@ def upgrade() -> None:
         sa.text(
             """
             INSERT INTO tenants (id, name, slug, status)
-            VALUES (:id, :name, :slug, 'active')
+            VALUES (CAST(:id AS uuid), :name, :slug, 'active')
             ON CONFLICT (id) DO NOTHING
             """
         ).bindparams(
@@ -38,12 +38,12 @@ def upgrade() -> None:
     )
 
     # Seed tenant config with sensible defaults
-    tenant_config_id = uuid4()
+    tenant_config_id = str(uuid4())
     op.execute(
         sa.text(
             """
             INSERT INTO tenant_configs (id, tenant_id, business_name, timezone, currency, tax_rate, tax_label, order_cutoff_hours, max_pause_days)
-            VALUES (:id, :tenant_id, :business_name, :timezone, :currency, :tax_rate, :tax_label, :order_cutoff_hours, :max_pause_days)
+            VALUES (CAST(:id AS uuid), CAST(:tenant_id AS uuid), :business_name, :timezone, :currency, :tax_rate, :tax_label, :order_cutoff_hours, :max_pause_days)
             ON CONFLICT (tenant_id) DO NOTHING
             """
         ).bindparams(
@@ -60,12 +60,12 @@ def upgrade() -> None:
     )
 
     # Seed customer role (required by auth registration flow)
-    customer_role_id = uuid4()
+    customer_role_id = str(uuid4())
     op.execute(
         sa.text(
             """
             INSERT INTO roles (id, tenant_id, name, description, is_system, hierarchy_level)
-            VALUES (:id, :tenant_id, :name, :description, true, 0)
+            VALUES (CAST(:id AS uuid), CAST(:tenant_id AS uuid), :name, :description, true, 0)
             ON CONFLICT DO NOTHING
             """
         ).bindparams(
@@ -79,11 +79,11 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     op.execute(
-        sa.text("DELETE FROM roles WHERE tenant_id = :tid AND name = 'customer'").bindparams(tid=DEFAULT_TENANT_ID)
+        sa.text("DELETE FROM roles WHERE tenant_id = CAST(:tid AS uuid) AND name = 'customer'").bindparams(tid=DEFAULT_TENANT_ID)
     )
     op.execute(
-        sa.text("DELETE FROM tenant_configs WHERE tenant_id = :tid").bindparams(tid=DEFAULT_TENANT_ID)
+        sa.text("DELETE FROM tenant_configs WHERE tenant_id = CAST(:tid AS uuid)").bindparams(tid=DEFAULT_TENANT_ID)
     )
     op.execute(
-        sa.text("DELETE FROM tenants WHERE id = :tid").bindparams(tid=DEFAULT_TENANT_ID)
+        sa.text("DELETE FROM tenants WHERE id = CAST(:tid AS uuid)").bindparams(tid=DEFAULT_TENANT_ID)
     )
