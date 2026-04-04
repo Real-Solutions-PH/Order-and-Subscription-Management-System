@@ -9,10 +9,6 @@ import {
   Users,
   Repeat,
   BarChart3,
-  Clock,
-  AlertTriangle,
-  AlertCircle,
-  UserPlus,
   Package,
 } from 'lucide-react';
 import {
@@ -77,42 +73,6 @@ const kpis = [
   },
 ];
 
-const alerts = [
-  {
-    type: 'warning' as const,
-    icon: Clock,
-    text: 'Menu cutoff in 4 hours',
-    time: '2 min ago',
-    action: 'View Menu',
-  },
-  {
-    type: 'error' as const,
-    icon: AlertCircle,
-    text: '3 failed payments need attention',
-    time: '15 min ago',
-    action: 'Review',
-  },
-  {
-    type: 'warning' as const,
-    icon: AlertTriangle,
-    text: 'Low stock: Salmon Fillet (2 portions left)',
-    time: '1 hr ago',
-    action: 'Restock',
-  },
-  {
-    type: 'info' as const,
-    icon: UserPlus,
-    text: 'New subscriber: Carlos Mendoza',
-    time: '3 hrs ago',
-    action: 'View',
-  },
-];
-
-const alertStyles = {
-  warning: { iconColor: '#D97706', bg: '#FFFBEB', border: '#FDE68A' },
-  error: { iconColor: '#DC2626', bg: '#FEF2F2', border: '#FECACA' },
-  info: { iconColor: '#2563EB', bg: '#EFF6FF', border: '#BFDBFE' },
-};
 
 export default function AdminDashboard() {
   // Count orders by status
@@ -403,65 +363,6 @@ export default function AdminDashboard() {
         </motion.div>
       </div>
 
-      {/* Alerts */}
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.35, duration: 0.3 }}
-        className="rounded-xl p-5"
-        style={{
-          backgroundColor: '#FFFFFF',
-          boxShadow: 'var(--shadow-card)',
-          border: '1px solid #E5E7EB',
-        }}
-      >
-        <h2
-          className="mb-4 text-base font-semibold"
-          style={{ color: '#1A1A2E' }}
-        >
-          Alerts
-        </h2>
-        <div className="space-y-3">
-          {alerts.map((alert, i) => {
-            const Icon = alert.icon;
-            const style = alertStyles[alert.type];
-            return (
-              <div
-                key={i}
-                className="flex items-center justify-between rounded-lg p-3"
-                style={{
-                  backgroundColor: style.bg,
-                  border: `1px solid ${style.border}`,
-                }}
-              >
-                <div className="flex items-center gap-3">
-                  <Icon size={18} style={{ color: style.iconColor }} />
-                  <div>
-                    <p
-                      className="text-sm font-medium"
-                      style={{ color: '#1A1A2E' }}
-                    >
-                      {alert.text}
-                    </p>
-                    <p className="text-xs" style={{ color: '#6B7280' }}>
-                      {alert.time}
-                    </p>
-                  </div>
-                </div>
-                <button
-                  className="rounded-md px-3 py-1.5 text-xs font-medium transition-colors hover:opacity-80"
-                  style={{
-                    backgroundColor: style.iconColor,
-                    color: '#FFFFFF',
-                  }}
-                >
-                  {alert.action}
-                </button>
-              </div>
-            );
-          })}
-        </div>
-      </motion.div>
     </div>
   );
 }

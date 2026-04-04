@@ -30,6 +30,13 @@
   --font-mono: 'JetBrains Mono', monospace;
   --color-background: var(--color-surface);
   --color-foreground: var(--color-text-primary);
+  --color-border: #E5E7EB;
+  --color-popover: #FFFFFF;
+  --color-popover-foreground: #1A1A2E;
+  --color-card: #FFFFFF;
+  --color-card-foreground: #1A1A2E;
+  --color-muted: #F3F4F6;
+  --color-muted-foreground: #6B7280;
 }
 
 body {
