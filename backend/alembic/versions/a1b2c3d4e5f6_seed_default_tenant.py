@@ -6,7 +6,7 @@ Create Date: 2026-04-05 12:00:00.000000
 
 """
 from typing import Sequence, Union
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from alembic import op
 import sqlalchemy as sa
@@ -18,7 +18,7 @@ down_revision: Union[str, None] = "b88bb57ae855"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
-DEFAULT_TENANT_ID = "00000000-0000-0000-0000-000000000001"
+DEFAULT_TENANT_ID = UUID("00000000-0000-0000-0000-000000000001")
 
 
 def upgrade() -> None:
@@ -38,7 +38,7 @@ def upgrade() -> None:
     )
 
     # Seed tenant config with sensible defaults
-    tenant_config_id = str(uuid4())
+    tenant_config_id = uuid4()
     op.execute(
         sa.text(
             """
@@ -60,7 +60,7 @@ def upgrade() -> None:
     )
 
     # Seed customer role (required by auth registration flow)
-    customer_role_id = str(uuid4())
+    customer_role_id = uuid4()
     op.execute(
         sa.text(
             """
