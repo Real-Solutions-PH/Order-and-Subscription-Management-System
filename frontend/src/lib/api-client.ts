@@ -7,7 +7,8 @@
 
 const API_BASE =
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1";
-const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID ?? "00000000-0000-0000-0000-000000000001";
+const TENANT_ID =
+  process.env.NEXT_PUBLIC_TENANT_ID ?? "00000000-0000-0000-0000-000000000001";
 
 // ---------------------------------------------------------------------------
 // Token helpers (stored in memory; persist in localStorage for refresh)
