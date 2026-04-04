@@ -1130,8 +1130,8 @@ export default function AdminDashboard() {
                         borderRadius: 8,
                         fontSize: 12,
                       }}
-                      formatter={(value: number | string) => [
-                        formatPeso(Number(value)),
+                      formatter={(value) => [
+                        formatPeso(Number(value ?? 0)),
                         "LTV",
                       ]}
                     />

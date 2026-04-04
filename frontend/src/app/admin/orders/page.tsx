@@ -94,14 +94,14 @@ export default function OrdersPage() {
   const { updateStatus, isUpdatingStatus } = useOrderMutations();
   const isLoadingOrders = ordersQuery.isLoading;
 
-  const displayOrders = ordersQuery.data?.items?.map((o: Record<string, unknown> & { order_number: string; items: Array<Record<string, unknown>>; total: string | number; status: string; delivered_at?: string; placed_at?: string; created_at: string; notes?: string }) => ({
+  const displayOrders = ordersQuery.data?.items?.map((o) => ({
     id: o.order_number,
     customerId: 0,
-    customerName: (o.items[0]?.product_name as string) ?? 'Customer',
-    items: o.items.map((i: Record<string, unknown>) => ({
+    customerName: o.items[0]?.product_name ?? 'Customer',
+    items: o.items.map((i) => ({
       mealId: 0,
-      mealName: i.product_name as string,
-      quantity: i.quantity as number,
+      mealName: i.product_name,
+      quantity: i.quantity,
       price: Number(i.unit_price),
     })),
     total: Number(o.total),
