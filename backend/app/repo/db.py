@@ -828,7 +828,6 @@ class Order(TimestampMixin, Base):
     tenant_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("tenants.id"), nullable=False)
     user_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("users.id"), nullable=True)
     subscription_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("subscriptions.id"), nullable=True)
-    subscription_cycle_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("subscription_cycles.id"), nullable=True)
     order_number: Mapped[str] = mapped_column(String(20), nullable=False)
     status: Mapped[OrderStatus] = mapped_column(
         SAEnum(OrderStatus, name="order_status", create_constraint=True),
