@@ -9,7 +9,7 @@ from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.permissions import PermissionChecker
-from app.repo.session import get_iam_db
+from app.repo.session import get_app_db
 from app.schemas.base import MessageResponse
 from app.schemas.user import UserListResponse, UserResponse, UserUpdate
 from app.services.user import UserService
@@ -22,7 +22,7 @@ async def list_users(
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
     current_user: dict[str, Any] = Depends(PermissionChecker(["users:read"])),
-    session: AsyncSession = Depends(get_iam_db),
+    session: AsyncSession = Depends(get_app_db),
 ) -> Any:
     """List all users in the tenant (admin only)."""
     tenant_id = current_user["tenant_id"]
@@ -43,7 +43,7 @@ async def list_users(
 async def get_user(
     user_id: UUID,
     current_user: dict[str, Any] = Depends(PermissionChecker(["users:read"])),
-    session: AsyncSession = Depends(get_iam_db),
+    session: AsyncSession = Depends(get_app_db),
 ) -> Any:
     """Get a specific user by ID (admin only)."""
     service = UserService(session)
@@ -55,7 +55,7 @@ async def update_user(
     user_id: UUID,
     data: UserUpdate,
     current_user: dict[str, Any] = Depends(PermissionChecker(["users:write"])),
-    session: AsyncSession = Depends(get_iam_db),
+    session: AsyncSession = Depends(get_app_db),
 ) -> Any:
     """Update a user's profile (admin only)."""
     service = UserService(session)
@@ -70,7 +70,7 @@ async def update_user(
 async def deactivate_user(
     user_id: UUID,
     current_user: dict[str, Any] = Depends(PermissionChecker(["users:write"])),
-    session: AsyncSession = Depends(get_iam_db),
+    session: AsyncSession = Depends(get_app_db),
 ) -> Any:
     """Deactivate a user (admin only). Performs a soft-delete."""
     service = UserService(session)
