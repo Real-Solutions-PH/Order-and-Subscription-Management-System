@@ -3,13 +3,12 @@
 from __future__ import annotations
 
 import secrets
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.events import get_event_bus
 from app.core.exceptions import NotFoundException
 from app.repo.db import (
     AuditLog,
@@ -110,7 +109,7 @@ class IntegrationService:
             # Update last_triggered_at on the webhook
             await self.webhook_repo.update(
                 webhook.id,
-                {"last_triggered_at": datetime.now(timezone.utc)},
+                {"last_triggered_at": datetime.now(UTC)},
                 tenant_id=tenant_id,
             )
 

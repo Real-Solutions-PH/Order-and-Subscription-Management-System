@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from decimal import Decimal
-from typing import Any
 from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -15,7 +14,6 @@ from app.core.events import get_event_bus
 from app.core.exceptions import BadRequestException, NotFoundException
 from app.repo.db import (
     Cart,
-    CartItem,
     Order,
     OrderItem,
     OrderItemCustomization,
@@ -43,7 +41,6 @@ from app.schemas.order import (
     OrderResponse,
     OrderStatusUpdate,
 )
-
 
 # ---------------------------------------------------------------------------
 # Valid status transitions
@@ -241,7 +238,7 @@ class CartService:
         if promo is None:
             raise BadRequestException("Invalid promo code")
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         if now < promo.starts_at or now > promo.expires_at:
             raise BadRequestException("Promo code is not currently active")
 
@@ -358,7 +355,7 @@ class OrderService:
             total = Decimal("0")
 
         order_number = await self.order_repo.generate_order_number(tenant_id)
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
 
         order = await self.order_repo.create(
             {
@@ -441,7 +438,6 @@ class OrderService:
     async def get_order(self, order_id: UUID | str, tenant_id: UUID | str) -> OrderResponse:
         """Retrieve a single order by ID."""
         from sqlalchemy import select
-        from sqlalchemy.orm import selectinload
 
         stmt = (
             select(Order)
@@ -502,7 +498,7 @@ class OrderService:
         order.status = data.status
 
         # Set timestamp fields based on new status
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         if data.status == OrderStatus.confirmed:
             order.confirmed_at = now
         elif data.status in (OrderStatus.delivered, OrderStatus.picked_up):
@@ -549,7 +545,7 @@ class OrderService:
 
         from_status = order.status
         order.status = OrderStatus.cancelled
-        order.cancelled_at = datetime.now(timezone.utc)
+        order.cancelled_at = datetime.now(UTC)
         order.cancellation_reason = data.reason
         await self.session.flush()
 

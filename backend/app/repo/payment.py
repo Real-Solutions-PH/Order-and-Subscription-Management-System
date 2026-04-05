@@ -5,13 +5,11 @@ from __future__ import annotations
 from uuid import UUID
 
 from sqlalchemy import func, select
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.repo.base import BaseRepository
 from app.repo.db import (
     Invoice,
-    InvoiceLineItem,
     Payment,
     PaymentMethod,
     PaymentStatus,

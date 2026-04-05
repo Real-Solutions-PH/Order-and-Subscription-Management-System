@@ -13,7 +13,6 @@ from app.repo.session import get_app_db
 from app.schemas.base import MessageResponse
 from app.schemas.integration import (
     AuditLogListResponse,
-    AuditLogResponse,
     IntegrationConfigCreate,
     IntegrationConfigResponse,
     WebhookCreate,

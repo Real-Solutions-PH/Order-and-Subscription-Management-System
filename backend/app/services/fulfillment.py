@@ -2,22 +2,22 @@
 
 from __future__ import annotations
 
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 from uuid import UUID
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.events import get_event_bus
-from app.core.exceptions import BadRequestException, NotFoundException
+from app.core.exceptions import NotFoundException
 from app.repo.db import (
+    Address,
     DeliverySlot,
     DeliveryZone,
     FulfillmentOrder,
     FulfillmentStatus,
     Order,
     OrderItem,
-    Address,
 )
 from app.repo.fulfillment import (
     AddressRepository,
@@ -81,7 +81,7 @@ class FulfillmentService:
         update_data: dict = {"status": data.status}
 
         # Set timestamp fields based on the new status
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         if data.status == FulfillmentStatus.shipped:
             update_data["shipped_at"] = now
         elif data.status in (

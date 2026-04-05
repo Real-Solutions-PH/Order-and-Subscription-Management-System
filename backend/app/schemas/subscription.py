@@ -11,7 +11,6 @@ from pydantic import Field
 from app.repo.db import BillingInterval, CycleStatus, SubscriptionStatus
 from app.schemas.base import BaseSchema
 
-
 # ---------------------------------------------------------------------------
 # Tier
 # ---------------------------------------------------------------------------

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 from uuid import UUID
 
@@ -10,7 +10,7 @@ from jinja2 import Template as Jinja2Template
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.events import get_event_bus
-from app.core.exceptions import BadRequestException, NotFoundException
+from app.core.exceptions import NotFoundException
 from app.repo.db import (
     Notification,
     NotificationChannel,
@@ -89,7 +89,7 @@ class NotificationService:
             notification.id,
             {
                 "status": NotificationStatus.sent,
-                "sent_at": datetime.now(timezone.utc),
+                "sent_at": datetime.now(UTC),
             },
         )
 
@@ -146,7 +146,7 @@ class NotificationService:
                 notification.id,
                 {
                     "status": NotificationStatus.sent,
-                    "sent_at": datetime.now(timezone.utc),
+                    "sent_at": datetime.now(UTC),
                 },
             )
             await self.log_repo.create(

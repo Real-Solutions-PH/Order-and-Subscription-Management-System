@@ -11,7 +11,6 @@ from pydantic import Field
 from app.repo.db import AttributeType, CatalogStatus, ProductStatus
 from app.schemas.base import BaseSchema, PaginatedResponse
 
-
 # ---------------------------------------------------------------------------
 # Category
 # ---------------------------------------------------------------------------

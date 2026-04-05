@@ -83,7 +83,7 @@ async def export_report(
     report_type: str = Query(..., description="Type of report to export"),
     period_start: date = Query(..., description="Start of report period"),
     period_end: date = Query(..., description="End of report period"),
-    format: str = Query("csv", description="Export format: csv, xlsx"),
+    export_format: str = Query("csv", description="Export format: csv, xlsx", alias="format"),
     current_user: dict[str, Any] = Depends(PermissionChecker(["analytics:read"])),
     session: AsyncSession = Depends(get_app_db),
 ) -> Any:
@@ -96,7 +96,7 @@ async def export_report(
         report_type=report_type,
         period_start=period_start,
         period_end=period_end,
-        format=format,
+        format=export_format,
     )
     file_path = await service.export_report(current_user["tenant_id"], data)
     return MessageResponse(message=f"Report generated: {file_path}")

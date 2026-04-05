@@ -17,7 +17,6 @@ from app.repo.db import (
 )
 from app.schemas.base import BaseSchema, PaginatedResponse
 
-
 # ---------------------------------------------------------------------------
 # Payment intent / payment
 # ---------------------------------------------------------------------------

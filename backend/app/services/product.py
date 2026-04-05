@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 import json
-from typing import Any, Sequence
+from collections.abc import Sequence
+from datetime import UTC
+from typing import Any
 from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.cache import RedisCache, get_cache
+from app.core.cache import RedisCache
 from app.core.events import get_event_bus
 from app.core.exceptions import BadRequestException, NotFoundException
 from app.repo.db import (
@@ -299,7 +301,7 @@ class CatalogService:
         )
 
     async def publish_catalog(self, catalog_id: UUID | str, tenant_id: UUID | str):
-        from datetime import datetime, timezone
+        from datetime import datetime
 
         catalog = await self.catalog_repo.get_by_id(catalog_id, tenant_id=tenant_id)
         if catalog is None:
@@ -312,7 +314,7 @@ class CatalogService:
             catalog_id,
             {
                 "status": CatalogStatus.published,
-                "published_at": datetime.now(timezone.utc),
+                "published_at": datetime.now(UTC),
             },
             tenant_id=tenant_id,
         )

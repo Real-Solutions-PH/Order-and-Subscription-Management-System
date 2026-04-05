@@ -30,8 +30,8 @@ def _require_tenant_id(x_tenant_id: str = Header(...)) -> str:
     """Extract and validate the X-Tenant-ID header."""
     try:
         UUID(x_tenant_id)
-    except ValueError:
-        raise BadRequestException("X-Tenant-ID must be a valid UUID")
+    except ValueError as err:
+        raise BadRequestException("X-Tenant-ID must be a valid UUID") from err
     return x_tenant_id
 
 

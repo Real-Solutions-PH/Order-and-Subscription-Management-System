@@ -5,18 +5,19 @@ Revises: b88bb57ae855
 Create Date: 2026-04-05 12:00:00.000000
 
 """
-from typing import Sequence, Union
+
+from collections.abc import Sequence
 from uuid import UUID, uuid4
 
-from alembic import op
 import sqlalchemy as sa
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "a1b2c3d4e5f6"
-down_revision: Union[str, None] = "b88bb57ae855"
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | None = "b88bb57ae855"
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 DEFAULT_TENANT_ID = str(UUID("00000000-0000-0000-0000-000000000001"))
 
@@ -79,11 +80,11 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     op.execute(
-        sa.text("DELETE FROM roles WHERE tenant_id = CAST(:tid AS uuid) AND name = 'customer'").bindparams(tid=DEFAULT_TENANT_ID)
+        sa.text("DELETE FROM roles WHERE tenant_id = CAST(:tid AS uuid) AND name = 'customer'").bindparams(
+            tid=DEFAULT_TENANT_ID
+        )
     )
     op.execute(
         sa.text("DELETE FROM tenant_configs WHERE tenant_id = CAST(:tid AS uuid)").bindparams(tid=DEFAULT_TENANT_ID)
     )
-    op.execute(
-        sa.text("DELETE FROM tenants WHERE id = CAST(:tid AS uuid)").bindparams(tid=DEFAULT_TENANT_ID)
-    )
+    op.execute(sa.text("DELETE FROM tenants WHERE id = CAST(:tid AS uuid)").bindparams(tid=DEFAULT_TENANT_ID))

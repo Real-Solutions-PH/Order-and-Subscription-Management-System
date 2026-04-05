@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from decimal import Decimal
 from typing import Any
 from uuid import UUID
@@ -13,19 +13,16 @@ from sqlalchemy.orm import selectinload
 
 from app.core.cache import RedisCache
 from app.core.events import get_event_bus
-from app.core.exceptions import BadRequestException, NotFoundException, PaymentException
+from app.core.exceptions import BadRequestException, NotFoundException
 from app.repo.db import (
     DiscountType,
     Invoice,
     InvoiceLineItem,
     InvoiceStatus,
     Order,
-    OrderItem,
     Payment,
     PaymentChannel,
-    PaymentMethod,
     PaymentStatus,
-    PromoCode,
     TransactionStatus,
     TransactionType,
 )
@@ -39,7 +36,6 @@ from app.repo.payment import (
 from app.schemas.base import PaginatedResponse
 from app.schemas.payment import (
     AttachMethodRequest,
-    CODCollectRequest,
     CODCreateRequest,
     InvoiceLineItemResponse,
     InvoiceResponse,
@@ -188,7 +184,7 @@ class PaymentService:
             raise BadRequestException("Payment is already paid")
 
         payment.status = PaymentStatus.paid
-        payment.paid_at = datetime.now(timezone.utc)
+        payment.paid_at = datetime.now(UTC)
         await self.session.flush()
 
         await self.tx_repo.create(
@@ -268,7 +264,7 @@ class PaymentService:
             return
 
         payment.status = PaymentStatus.paid
-        payment.paid_at = datetime.now(timezone.utc)
+        payment.paid_at = datetime.now(UTC)
         await self.session.flush()
 
         await self.tx_repo.create(
@@ -394,7 +390,7 @@ class PaymentService:
             raise BadRequestException("COD payment already collected")
 
         payment.status = PaymentStatus.paid
-        payment.paid_at = datetime.now(timezone.utc)
+        payment.paid_at = datetime.now(UTC)
         await self.session.flush()
 
         await self.tx_repo.create(
@@ -486,7 +482,7 @@ class PaymentService:
         if promo is None:
             raise BadRequestException("Invalid promo code")
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         if now < promo.starts_at or now > promo.expires_at:
             raise BadRequestException("Promo code is not currently active")
 
@@ -670,7 +666,7 @@ class InvoiceService:
             return self._build_invoice_response(existing)
 
         invoice_number = await self.invoice_repo.generate_invoice_number(tenant_id)
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
 
         invoice = await self.invoice_repo.create(
             {

@@ -11,7 +11,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.permissions import PermissionChecker, get_current_user
 from app.repo.session import get_app_db
 from app.schemas.notification import (
-    NotificationListResponse,
     NotificationResponse,
     NotificationSend,
     TemplateCreate,

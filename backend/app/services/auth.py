@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -91,7 +91,7 @@ class AuthService:
         )
 
         # Update last login timestamp
-        user.last_login_at = datetime.now(timezone.utc)
+        user.last_login_at = datetime.now(UTC)
         await self.session.flush()
 
         return TokenResponse(
@@ -103,8 +103,8 @@ class AuthService:
         """Validate a refresh token and issue a new token pair."""
         try:
             payload = decode_token(data)
-        except Exception:
-            raise UnauthorizedException("Invalid or expired refresh token")
+        except Exception as err:
+            raise UnauthorizedException("Invalid or expired refresh token") from err
 
         if payload.get("token_type") != "refresh":
             raise UnauthorizedException("Invalid token type")

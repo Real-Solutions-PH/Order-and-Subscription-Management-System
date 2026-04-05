@@ -6,7 +6,10 @@
       "Bash(taskkill //F //IM \"node.exe\")",
       "Bash(npm install:*)",
       "Bash(npm run:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(pip install:*)",
+      "Bash(pre-commit install:*)",
+      "Bash(pre-commit run:*)"
     ]
   }
 }

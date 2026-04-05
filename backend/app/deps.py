@@ -4,8 +4,6 @@ from uuid import UUID
 
 from fastapi import Depends, Header
 
-from app.config import Settings, get_settings
-from app.core.cache import RedisCache, get_cache
 from app.core.exceptions import UnauthorizedException
 from app.core.permissions import get_current_user  # noqa: F401 -- re-exported
 from app.repo.session import get_app_db, get_iam_db

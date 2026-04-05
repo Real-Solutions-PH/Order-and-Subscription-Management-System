@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from uuid import UUID
 
 from sqlalchemy import delete, func, select
@@ -16,7 +16,6 @@ from app.repo.db import (
     CartItemCustomization,
     Order,
     OrderItem,
-    OrderItemCustomization,
     OrderStatus,
     OrderStatusHistory,
 )
@@ -68,7 +67,7 @@ class CartRepository(BaseRepository[Cart]):
                 "tenant_id": tenant_id,
                 "user_id": user_id,
                 "session_id": session_id or "",
-                "expires_at": datetime.now(timezone.utc) + timedelta(days=7),
+                "expires_at": datetime.now(UTC) + timedelta(days=7),
             }
         )
 

@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
-from typing import Any, Sequence
+from collections.abc import Sequence
+from datetime import UTC, datetime, timedelta
+from typing import Any
 from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -123,7 +124,7 @@ class SubscriptionService:
         if plan is None:
             raise NotFoundException("Subscription plan")
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         cycle_end = _cycle_end(now, plan.billing_interval)
 
         subscription = await self.sub_repo.create(
@@ -196,7 +197,7 @@ class SubscriptionService:
         if sub.status != SubscriptionStatus.active:
             raise BadRequestException("Only active subscriptions can be paused")
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         update_data: dict[str, Any] = {
             "status": SubscriptionStatus.paused,
             "paused_at": now,
@@ -204,10 +205,7 @@ class SubscriptionService:
 
         # Calculate pause_expires_at (default 30 days max)
         max_pause_days = 30
-        if data.resume_date:
-            pause_expires = data.resume_date
-        else:
-            pause_expires = now + timedelta(days=max_pause_days)
+        pause_expires = data.resume_date if data.resume_date else now + timedelta(days=max_pause_days)
         update_data["pause_expires_at"] = pause_expires
 
         updated = await self.sub_repo.update(subscription_id, update_data, tenant_id=tenant_id)
@@ -281,7 +279,7 @@ class SubscriptionService:
         ):
             raise BadRequestException("Subscription is already cancelled or pending cancellation")
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         updated = await self.sub_repo.update(
             subscription_id,
             {

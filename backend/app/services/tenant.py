@@ -12,7 +12,6 @@ from app.repo.db import FeatureFlag, TenantConfig
 from app.repo.tenant import FeatureFlagRepository, TenantConfigRepository
 from app.schemas.tenant import TenantConfigUpdate
 
-
 _CONFIG_CACHE_PREFIX = "tenant_config:"
 _FEATURE_CACHE_PREFIX = "feature_flag:"
 _CONFIG_TTL = 300  # 5 minutes

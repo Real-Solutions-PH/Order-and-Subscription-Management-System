@@ -11,7 +11,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.repo.analytics import CohortDataRepository, MetricSnapshotRepository
 from app.repo.db import (
-    CohortData,
     Order,
     OrderItem,
     OrderStatus,

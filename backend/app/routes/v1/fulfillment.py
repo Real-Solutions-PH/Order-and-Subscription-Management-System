@@ -16,7 +16,6 @@ from app.schemas.fulfillment import (
     AddressCreate,
     AddressResponse,
     AddressUpdate,
-    DeliverySlotCreate,
     DeliverySlotResponse,
     DeliveryZoneCreate,
     DeliveryZoneResponse,

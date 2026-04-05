@@ -25,26 +25,26 @@ import enum
 import uuid
 from datetime import date, datetime, time
 from decimal import Decimal
-from typing import Any, Optional
 
 from sqlalchemy import (
+    DECIMAL,
+    JSON,
+    TIMESTAMP,
     Boolean,
     Column,
     Date,
     ForeignKey,
+    Index,
     Integer,
     String,
     Table,
     Text,
     Time,
     UniqueConstraint,
-    Index,
 )
 from sqlalchemy import Enum as SAEnum
-from sqlalchemy import DECIMAL, JSON, TIMESTAMP
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
-
 
 # ---------------------------------------------------------------------------
 # Base & mixins
@@ -285,41 +285,41 @@ class Tenant(TimestampMixin, Base):
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     slug: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
-    domain: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    domain: Mapped[str | None] = mapped_column(String(255), nullable=True)
     status: Mapped[TenantStatus] = mapped_column(
         SAEnum(TenantStatus, name="tenant_status", create_constraint=True),
         nullable=False,
         server_default="active",
     )
-    trial_ends_at: Mapped[Optional[datetime]] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
+    trial_ends_at: Mapped[datetime | None] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
 
     # relationships
-    users: Mapped[list["User"]] = relationship(back_populates="tenant")
-    roles: Mapped[list["Role"]] = relationship(back_populates="tenant")
-    tenant_config: Mapped[Optional["TenantConfig"]] = relationship(back_populates="tenant")
-    feature_flags: Mapped[list["FeatureFlag"]] = relationship(back_populates="tenant")
-    product_categories: Mapped[list["ProductCategory"]] = relationship(back_populates="tenant")
-    products: Mapped[list["Product"]] = relationship(back_populates="tenant")
-    product_attributes: Mapped[list["ProductAttribute"]] = relationship(back_populates="tenant")
-    catalogs: Mapped[list["Catalog"]] = relationship(back_populates="tenant")
-    subscription_plans: Mapped[list["SubscriptionPlan"]] = relationship(back_populates="tenant")
-    subscriptions: Mapped[list["Subscription"]] = relationship(back_populates="tenant")
-    carts: Mapped[list["Cart"]] = relationship(back_populates="tenant")
-    orders: Mapped[list["Order"]] = relationship(back_populates="tenant")
-    payment_methods: Mapped[list["PaymentMethod"]] = relationship(back_populates="tenant")
-    payments: Mapped[list["Payment"]] = relationship(back_populates="tenant")
-    invoices: Mapped[list["Invoice"]] = relationship(back_populates="tenant")
-    promo_codes: Mapped[list["PromoCode"]] = relationship(back_populates="tenant")
-    addresses: Mapped[list["Address"]] = relationship(back_populates="tenant")
-    delivery_zones: Mapped[list["DeliveryZone"]] = relationship(back_populates="tenant")
-    fulfillment_orders: Mapped[list["FulfillmentOrder"]] = relationship(back_populates="tenant")
-    notification_templates: Mapped[list["NotificationTemplate"]] = relationship(back_populates="tenant")
-    notifications: Mapped[list["Notification"]] = relationship(back_populates="tenant")
-    metric_snapshots: Mapped[list["MetricSnapshot"]] = relationship(back_populates="tenant")
-    cohort_data: Mapped[list["CohortData"]] = relationship(back_populates="tenant")
-    webhooks: Mapped[list["Webhook"]] = relationship(back_populates="tenant")
-    integration_configs: Mapped[list["IntegrationConfig"]] = relationship(back_populates="tenant")
-    audit_logs: Mapped[list["AuditLog"]] = relationship(back_populates="tenant")
+    users: Mapped[list[User]] = relationship(back_populates="tenant")
+    roles: Mapped[list[Role]] = relationship(back_populates="tenant")
+    tenant_config: Mapped[TenantConfig | None] = relationship(back_populates="tenant")
+    feature_flags: Mapped[list[FeatureFlag]] = relationship(back_populates="tenant")
+    product_categories: Mapped[list[ProductCategory]] = relationship(back_populates="tenant")
+    products: Mapped[list[Product]] = relationship(back_populates="tenant")
+    product_attributes: Mapped[list[ProductAttribute]] = relationship(back_populates="tenant")
+    catalogs: Mapped[list[Catalog]] = relationship(back_populates="tenant")
+    subscription_plans: Mapped[list[SubscriptionPlan]] = relationship(back_populates="tenant")
+    subscriptions: Mapped[list[Subscription]] = relationship(back_populates="tenant")
+    carts: Mapped[list[Cart]] = relationship(back_populates="tenant")
+    orders: Mapped[list[Order]] = relationship(back_populates="tenant")
+    payment_methods: Mapped[list[PaymentMethod]] = relationship(back_populates="tenant")
+    payments: Mapped[list[Payment]] = relationship(back_populates="tenant")
+    invoices: Mapped[list[Invoice]] = relationship(back_populates="tenant")
+    promo_codes: Mapped[list[PromoCode]] = relationship(back_populates="tenant")
+    addresses: Mapped[list[Address]] = relationship(back_populates="tenant")
+    delivery_zones: Mapped[list[DeliveryZone]] = relationship(back_populates="tenant")
+    fulfillment_orders: Mapped[list[FulfillmentOrder]] = relationship(back_populates="tenant")
+    notification_templates: Mapped[list[NotificationTemplate]] = relationship(back_populates="tenant")
+    notifications: Mapped[list[Notification]] = relationship(back_populates="tenant")
+    metric_snapshots: Mapped[list[MetricSnapshot]] = relationship(back_populates="tenant")
+    cohort_data: Mapped[list[CohortData]] = relationship(back_populates="tenant")
+    webhooks: Mapped[list[Webhook]] = relationship(back_populates="tenant")
+    integration_configs: Mapped[list[IntegrationConfig]] = relationship(back_populates="tenant")
+    audit_logs: Mapped[list[AuditLog]] = relationship(back_populates="tenant")
 
 
 class User(TimestampMixin, Base):
@@ -329,32 +329,32 @@ class User(TimestampMixin, Base):
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     tenant_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("tenants.id"), nullable=False)
     email: Mapped[str] = mapped_column(String(255), nullable=False)
-    phone: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
+    phone: Mapped[str | None] = mapped_column(String(20), nullable=True)
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     first_name: Mapped[str] = mapped_column(String(100), nullable=False)
     last_name: Mapped[str] = mapped_column(String(100), nullable=False)
-    avatar_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    avatar_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
     status: Mapped[UserStatus] = mapped_column(
         SAEnum(UserStatus, name="user_status", create_constraint=True),
         nullable=False,
         server_default="active",
     )
-    email_verified_at: Mapped[Optional[datetime]] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
-    last_login_at: Mapped[Optional[datetime]] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
-    metadata_: Mapped[Optional[dict]] = mapped_column("metadata", JSON, nullable=True)
+    email_verified_at: Mapped[datetime | None] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
+    last_login_at: Mapped[datetime | None] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
+    metadata_: Mapped[dict | None] = mapped_column("metadata", JSON, nullable=True)
 
     # relationships
-    tenant: Mapped["Tenant"] = relationship(back_populates="users")
-    user_roles: Mapped[list["UserRole"]] = relationship(back_populates="user")
-    subscriptions: Mapped[list["Subscription"]] = relationship(back_populates="user")
-    carts: Mapped[list["Cart"]] = relationship(back_populates="user")
-    orders: Mapped[list["Order"]] = relationship(back_populates="user")
-    payment_methods: Mapped[list["PaymentMethod"]] = relationship(back_populates="user")
-    addresses: Mapped[list["Address"]] = relationship(back_populates="user")
-    notifications: Mapped[list["Notification"]] = relationship(back_populates="user")
-    subscription_events: Mapped[list["SubscriptionEvent"]] = relationship(back_populates="actor")
-    order_status_changes: Mapped[list["OrderStatusHistory"]] = relationship(back_populates="changed_by_user")
-    promo_code_usages: Mapped[list["PromoCodeUsage"]] = relationship(back_populates="user")
+    tenant: Mapped[Tenant] = relationship(back_populates="users")
+    user_roles: Mapped[list[UserRole]] = relationship(back_populates="user")
+    subscriptions: Mapped[list[Subscription]] = relationship(back_populates="user")
+    carts: Mapped[list[Cart]] = relationship(back_populates="user")
+    orders: Mapped[list[Order]] = relationship(back_populates="user")
+    payment_methods: Mapped[list[PaymentMethod]] = relationship(back_populates="user")
+    addresses: Mapped[list[Address]] = relationship(back_populates="user")
+    notifications: Mapped[list[Notification]] = relationship(back_populates="user")
+    subscription_events: Mapped[list[SubscriptionEvent]] = relationship(back_populates="actor")
+    order_status_changes: Mapped[list[OrderStatusHistory]] = relationship(back_populates="changed_by_user")
+    promo_code_usages: Mapped[list[PromoCodeUsage]] = relationship(back_populates="user")
 
 
 class Role(TimestampMixin, Base):
@@ -368,9 +368,9 @@ class Role(TimestampMixin, Base):
     hierarchy_level: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
 
     # relationships
-    tenant: Mapped["Tenant"] = relationship(back_populates="roles")
-    user_roles: Mapped[list["UserRole"]] = relationship(back_populates="role")
-    role_permissions: Mapped[list["RolePermission"]] = relationship(back_populates="role")
+    tenant: Mapped[Tenant] = relationship(back_populates="roles")
+    user_roles: Mapped[list[UserRole]] = relationship(back_populates="role")
+    role_permissions: Mapped[list[RolePermission]] = relationship(back_populates="role")
 
 
 class Permission(Base):
@@ -382,7 +382,7 @@ class Permission(Base):
     description: Mapped[str] = mapped_column(String(255), nullable=False, server_default="")
 
     # relationships
-    role_permissions: Mapped[list["RolePermission"]] = relationship(back_populates="permission")
+    role_permissions: Mapped[list[RolePermission]] = relationship(back_populates="permission")
 
 
 class UserRole(Base):
@@ -394,8 +394,8 @@ class UserRole(Base):
     assigned_at: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
 
     # relationships
-    user: Mapped["User"] = relationship(back_populates="user_roles")
-    role: Mapped["Role"] = relationship(back_populates="user_roles")
+    user: Mapped[User] = relationship(back_populates="user_roles")
+    role: Mapped[Role] = relationship(back_populates="user_roles")
 
 
 class RolePermission(Base):
@@ -405,8 +405,8 @@ class RolePermission(Base):
     permission_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("permissions.id"), primary_key=True)
 
     # relationships
-    role: Mapped["Role"] = relationship(back_populates="role_permissions")
-    permission: Mapped["Permission"] = relationship(back_populates="role_permissions")
+    role: Mapped[Role] = relationship(back_populates="role_permissions")
+    permission: Mapped[Permission] = relationship(back_populates="role_permissions")
 
 
 # ===========================================================================
@@ -420,9 +420,9 @@ class TenantConfig(Base):
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     tenant_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("tenants.id"), unique=True, nullable=False)
     business_name: Mapped[str] = mapped_column(String(255), nullable=False)
-    logo_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
-    primary_color: Mapped[Optional[str]] = mapped_column(String(7), nullable=True)
-    secondary_color: Mapped[Optional[str]] = mapped_column(String(7), nullable=True)
+    logo_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    primary_color: Mapped[str | None] = mapped_column(String(7), nullable=True)
+    secondary_color: Mapped[str | None] = mapped_column(String(7), nullable=True)
     timezone: Mapped[str] = mapped_column(String(50), nullable=False, server_default="UTC")
     currency: Mapped[str] = mapped_column(String(3), nullable=False, server_default="PHP")
     default_language: Mapped[str] = mapped_column(String(5), nullable=False, server_default="en")
@@ -430,13 +430,13 @@ class TenantConfig(Base):
     tax_label: Mapped[str] = mapped_column(String(50), nullable=False, server_default="VAT")
     order_cutoff_hours: Mapped[int] = mapped_column(Integer, nullable=False, server_default="24")
     max_pause_days: Mapped[int] = mapped_column(Integer, nullable=False, server_default="30")
-    operating_hours: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
-    payment_gateways: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
-    notification_settings: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
-    metadata_: Mapped[Optional[dict]] = mapped_column("metadata", JSON, nullable=True)
+    operating_hours: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    payment_gateways: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    notification_settings: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    metadata_: Mapped[dict | None] = mapped_column("metadata", JSON, nullable=True)
 
     # relationships
-    tenant: Mapped["Tenant"] = relationship(back_populates="tenant_config")
+    tenant: Mapped[Tenant] = relationship(back_populates="tenant_config")
 
 
 class FeatureFlag(TimestampMixin, Base):
@@ -447,10 +447,10 @@ class FeatureFlag(TimestampMixin, Base):
     tenant_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("tenants.id"), nullable=False)
     flag_key: Mapped[str] = mapped_column(String(100), nullable=False)
     enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="false")
-    metadata_: Mapped[Optional[dict]] = mapped_column("metadata", JSON, nullable=True)
+    metadata_: Mapped[dict | None] = mapped_column("metadata", JSON, nullable=True)
 
     # relationships
-    tenant: Mapped["Tenant"] = relationship(back_populates="feature_flags")
+    tenant: Mapped[Tenant] = relationship(back_populates="feature_flags")
 
 
 # ===========================================================================
@@ -472,22 +472,18 @@ class ProductCategory(TimestampMixin, Base):
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     tenant_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("tenants.id"), nullable=False)
-    parent_id: Mapped[Optional[uuid.UUID]] = mapped_column(ForeignKey("product_categories.id"), nullable=True)
+    parent_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("product_categories.id"), nullable=True)
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     slug: Mapped[str] = mapped_column(String(100), nullable=False)
-    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
     sort_order: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="true")
 
     # relationships
-    tenant: Mapped["Tenant"] = relationship(back_populates="product_categories")
-    parent: Mapped[Optional["ProductCategory"]] = relationship(
-        back_populates="children", remote_side="ProductCategory.id"
-    )
-    children: Mapped[list["ProductCategory"]] = relationship(back_populates="parent")
-    products: Mapped[list["Product"]] = relationship(
-        secondary=product_category_association, back_populates="categories"
-    )
+    tenant: Mapped[Tenant] = relationship(back_populates="product_categories")
+    parent: Mapped[ProductCategory | None] = relationship(back_populates="children", remote_side="ProductCategory.id")
+    children: Mapped[list[ProductCategory]] = relationship(back_populates="parent")
+    products: Mapped[list[Product]] = relationship(secondary=product_category_association, back_populates="categories")
 
 
 class Product(TimestampMixin, Base):
@@ -498,9 +494,9 @@ class Product(TimestampMixin, Base):
     tenant_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("tenants.id"), nullable=False)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     slug: Mapped[str] = mapped_column(String(255), nullable=False)
-    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    short_description: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
-    sku: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    short_description: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    sku: Mapped[str | None] = mapped_column(String(100), nullable=True)
     status: Mapped[ProductStatus] = mapped_column(
         SAEnum(ProductStatus, name="product_status", create_constraint=True),
         nullable=False,
@@ -508,14 +504,14 @@ class Product(TimestampMixin, Base):
     )
     is_subscribable: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="false")
     is_standalone: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="true")
-    metadata_: Mapped[Optional[dict]] = mapped_column("metadata", JSON, nullable=True)
+    metadata_: Mapped[dict | None] = mapped_column("metadata", JSON, nullable=True)
 
     # relationships
-    tenant: Mapped["Tenant"] = relationship(back_populates="products")
-    variants: Mapped[list["ProductVariant"]] = relationship(back_populates="product")
-    attribute_values: Mapped[list["ProductAttributeValue"]] = relationship(back_populates="product")
-    images: Mapped[list["ProductImage"]] = relationship(back_populates="product")
-    categories: Mapped[list["ProductCategory"]] = relationship(
+    tenant: Mapped[Tenant] = relationship(back_populates="products")
+    variants: Mapped[list[ProductVariant]] = relationship(back_populates="product")
+    attribute_values: Mapped[list[ProductAttributeValue]] = relationship(back_populates="product")
+    images: Mapped[list[ProductImage]] = relationship(back_populates="product")
+    categories: Mapped[list[ProductCategory]] = relationship(
         secondary=product_category_association, back_populates="products"
     )
 
@@ -528,20 +524,20 @@ class ProductVariant(TimestampMixin, Base):
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     sku: Mapped[str] = mapped_column(String(100), nullable=False)
     price: Mapped[Decimal] = mapped_column(DECIMAL(12, 2), nullable=False)
-    compare_at_price: Mapped[Optional[Decimal]] = mapped_column(DECIMAL(12, 2), nullable=True)
-    cost_price: Mapped[Optional[Decimal]] = mapped_column(DECIMAL(12, 2), nullable=True)
-    weight: Mapped[Optional[Decimal]] = mapped_column(DECIMAL(8, 2), nullable=True)
+    compare_at_price: Mapped[Decimal | None] = mapped_column(DECIMAL(12, 2), nullable=True)
+    cost_price: Mapped[Decimal | None] = mapped_column(DECIMAL(12, 2), nullable=True)
+    weight: Mapped[Decimal | None] = mapped_column(DECIMAL(8, 2), nullable=True)
     is_default: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="false")
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="true")
-    stock_quantity: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    metadata_: Mapped[Optional[dict]] = mapped_column("metadata", JSON, nullable=True)
+    stock_quantity: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    metadata_: Mapped[dict | None] = mapped_column("metadata", JSON, nullable=True)
 
     # relationships
-    product: Mapped["Product"] = relationship(back_populates="variants")
-    catalog_items: Mapped[list["CatalogItem"]] = relationship(back_populates="product_variant")
-    subscription_selections: Mapped[list["SubscriptionSelection"]] = relationship(back_populates="product_variant")
-    cart_items: Mapped[list["CartItem"]] = relationship(back_populates="product_variant")
-    order_items: Mapped[list["OrderItem"]] = relationship(back_populates="product_variant")
+    product: Mapped[Product] = relationship(back_populates="variants")
+    catalog_items: Mapped[list[CatalogItem]] = relationship(back_populates="product_variant")
+    subscription_selections: Mapped[list[SubscriptionSelection]] = relationship(back_populates="product_variant")
+    cart_items: Mapped[list[CartItem]] = relationship(back_populates="product_variant")
+    order_items: Mapped[list[OrderItem]] = relationship(back_populates="product_variant")
 
 
 class ProductAttribute(TimestampMixin, Base):
@@ -560,8 +556,8 @@ class ProductAttribute(TimestampMixin, Base):
     sort_order: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
 
     # relationships
-    tenant: Mapped["Tenant"] = relationship(back_populates="product_attributes")
-    attribute_values: Mapped[list["ProductAttributeValue"]] = relationship(back_populates="attribute")
+    tenant: Mapped[Tenant] = relationship(back_populates="product_attributes")
+    attribute_values: Mapped[list[ProductAttributeValue]] = relationship(back_populates="attribute")
 
 
 class ProductAttributeValue(Base):
@@ -573,8 +569,8 @@ class ProductAttributeValue(Base):
     value: Mapped[str] = mapped_column(String(255), nullable=False)
 
     # relationships
-    product: Mapped["Product"] = relationship(back_populates="attribute_values")
-    attribute: Mapped["ProductAttribute"] = relationship(back_populates="attribute_values")
+    product: Mapped[Product] = relationship(back_populates="attribute_values")
+    attribute: Mapped[ProductAttribute] = relationship(back_populates="attribute_values")
 
 
 class ProductImage(Base):
@@ -583,12 +579,12 @@ class ProductImage(Base):
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     product_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("products.id"), nullable=False)
     url: Mapped[str] = mapped_column(String(500), nullable=False)
-    alt_text: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    alt_text: Mapped[str | None] = mapped_column(String(255), nullable=True)
     sort_order: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
     is_primary: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="false")
 
     # relationships
-    product: Mapped["Product"] = relationship(back_populates="images")
+    product: Mapped[Product] = relationship(back_populates="images")
 
 
 class Catalog(TimestampMixin, Base):
@@ -599,18 +595,18 @@ class Catalog(TimestampMixin, Base):
     tenant_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("tenants.id"), nullable=False)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     slug: Mapped[str] = mapped_column(String(255), nullable=False)
-    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
     status: Mapped[CatalogStatus] = mapped_column(
         SAEnum(CatalogStatus, name="catalog_status", create_constraint=True),
         nullable=False,
         server_default="draft",
     )
-    published_at: Mapped[Optional[datetime]] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
+    published_at: Mapped[datetime | None] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
 
     # relationships
-    tenant: Mapped["Tenant"] = relationship(back_populates="catalogs")
-    items: Mapped[list["CatalogItem"]] = relationship(back_populates="catalog")
-    schedules: Mapped[list["CatalogSchedule"]] = relationship(back_populates="catalog")
+    tenant: Mapped[Tenant] = relationship(back_populates="catalogs")
+    items: Mapped[list[CatalogItem]] = relationship(back_populates="catalog")
+    schedules: Mapped[list[CatalogSchedule]] = relationship(back_populates="catalog")
 
 
 class CatalogItem(Base):
@@ -621,11 +617,11 @@ class CatalogItem(Base):
     product_variant_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("product_variants.id"), nullable=False)
     sort_order: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
     is_featured: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="false")
-    availability_limit: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    availability_limit: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
     # relationships
-    catalog: Mapped["Catalog"] = relationship(back_populates="items")
-    product_variant: Mapped["ProductVariant"] = relationship(back_populates="catalog_items")
+    catalog: Mapped[Catalog] = relationship(back_populates="items")
+    product_variant: Mapped[ProductVariant] = relationship(back_populates="catalog_items")
 
 
 class CatalogSchedule(Base):
@@ -635,10 +631,10 @@ class CatalogSchedule(Base):
     catalog_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("catalogs.id"), nullable=False)
     starts_at: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), nullable=False)
     ends_at: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), nullable=False)
-    recurrence_rule: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    recurrence_rule: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
     # relationships
-    catalog: Mapped["Catalog"] = relationship(back_populates="schedules")
+    catalog: Mapped[Catalog] = relationship(back_populates="schedules")
 
 
 # ===========================================================================
@@ -654,17 +650,17 @@ class SubscriptionPlan(TimestampMixin, Base):
     tenant_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("tenants.id"), nullable=False)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     slug: Mapped[str] = mapped_column(String(255), nullable=False)
-    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
     billing_interval: Mapped[BillingInterval] = mapped_column(
         SAEnum(BillingInterval, name="billing_interval", create_constraint=True), nullable=False
     )
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="true")
     sort_order: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
-    metadata_: Mapped[Optional[dict]] = mapped_column("metadata", JSON, nullable=True)
+    metadata_: Mapped[dict | None] = mapped_column("metadata", JSON, nullable=True)
 
     # relationships
-    tenant: Mapped["Tenant"] = relationship(back_populates="subscription_plans")
-    tiers: Mapped[list["SubscriptionPlanTier"]] = relationship(back_populates="plan")
+    tenant: Mapped[Tenant] = relationship(back_populates="subscription_plans")
+    tiers: Mapped[list[SubscriptionPlanTier]] = relationship(back_populates="plan")
 
 
 class SubscriptionPlanTier(TimestampMixin, Base):
@@ -675,13 +671,13 @@ class SubscriptionPlanTier(TimestampMixin, Base):
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     items_per_cycle: Mapped[int] = mapped_column(Integer, nullable=False)
     price: Mapped[Decimal] = mapped_column(DECIMAL(12, 2), nullable=False)
-    compare_at_price: Mapped[Optional[Decimal]] = mapped_column(DECIMAL(12, 2), nullable=True)
+    compare_at_price: Mapped[Decimal | None] = mapped_column(DECIMAL(12, 2), nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="true")
     sort_order: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
 
     # relationships
-    plan: Mapped["SubscriptionPlan"] = relationship(back_populates="tiers")
-    subscriptions: Mapped[list["Subscription"]] = relationship(back_populates="plan_tier")
+    plan: Mapped[SubscriptionPlan] = relationship(back_populates="tiers")
+    subscriptions: Mapped[list[Subscription]] = relationship(back_populates="plan_tier")
 
 
 class Subscription(TimestampMixin, Base):
@@ -699,23 +695,23 @@ class Subscription(TimestampMixin, Base):
     current_cycle_start: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), nullable=False)
     current_cycle_end: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), nullable=False)
     next_billing_date: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), nullable=False)
-    paused_at: Mapped[Optional[datetime]] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
-    pause_expires_at: Mapped[Optional[datetime]] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
-    cancelled_at: Mapped[Optional[datetime]] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
-    cancellation_reason: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
-    payment_method_id: Mapped[Optional[uuid.UUID]] = mapped_column(ForeignKey("payment_methods.id"), nullable=True)
-    metadata_: Mapped[Optional[dict]] = mapped_column("metadata", JSON, nullable=True)
+    paused_at: Mapped[datetime | None] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
+    pause_expires_at: Mapped[datetime | None] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
+    cancelled_at: Mapped[datetime | None] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
+    cancellation_reason: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    payment_method_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("payment_methods.id"), nullable=True)
+    metadata_: Mapped[dict | None] = mapped_column("metadata", JSON, nullable=True)
 
     # relationships
-    tenant: Mapped["Tenant"] = relationship(back_populates="subscriptions")
-    user: Mapped["User"] = relationship(back_populates="subscriptions")
-    plan_tier: Mapped["SubscriptionPlanTier"] = relationship(back_populates="subscriptions")
-    payment_method: Mapped[Optional["PaymentMethod"]] = relationship(back_populates="subscriptions")
-    cycles: Mapped[list["SubscriptionCycle"]] = relationship(back_populates="subscription")
-    events: Mapped[list["SubscriptionEvent"]] = relationship(back_populates="subscription")
-    orders: Mapped[list["Order"]] = relationship(back_populates="subscription")
-    payments: Mapped[list["Payment"]] = relationship(back_populates="subscription")
-    invoices: Mapped[list["Invoice"]] = relationship(back_populates="subscription")
+    tenant: Mapped[Tenant] = relationship(back_populates="subscriptions")
+    user: Mapped[User] = relationship(back_populates="subscriptions")
+    plan_tier: Mapped[SubscriptionPlanTier] = relationship(back_populates="subscriptions")
+    payment_method: Mapped[PaymentMethod | None] = relationship(back_populates="subscriptions")
+    cycles: Mapped[list[SubscriptionCycle]] = relationship(back_populates="subscription")
+    events: Mapped[list[SubscriptionEvent]] = relationship(back_populates="subscription")
+    orders: Mapped[list[Order]] = relationship(back_populates="subscription")
+    payments: Mapped[list[Payment]] = relationship(back_populates="subscription")
+    invoices: Mapped[list[Invoice]] = relationship(back_populates="subscription")
 
 
 class SubscriptionCycle(TimestampMixin, Base):
@@ -732,13 +728,13 @@ class SubscriptionCycle(TimestampMixin, Base):
         nullable=False,
         server_default="upcoming",
     )
-    order_id: Mapped[Optional[uuid.UUID]] = mapped_column(ForeignKey("orders.id"), nullable=True)
-    billed_amount: Mapped[Optional[Decimal]] = mapped_column(DECIMAL(12, 2), nullable=True)
+    order_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("orders.id"), nullable=True)
+    billed_amount: Mapped[Decimal | None] = mapped_column(DECIMAL(12, 2), nullable=True)
 
     # relationships
-    subscription: Mapped["Subscription"] = relationship(back_populates="cycles")
-    order: Mapped[Optional["Order"]] = relationship(back_populates="subscription_cycle")
-    selections: Mapped[list["SubscriptionSelection"]] = relationship(back_populates="cycle")
+    subscription: Mapped[Subscription] = relationship(back_populates="cycles")
+    order: Mapped[Order | None] = relationship(back_populates="subscription_cycle")
+    selections: Mapped[list[SubscriptionSelection]] = relationship(back_populates="cycle")
 
 
 class SubscriptionSelection(Base):
@@ -748,11 +744,11 @@ class SubscriptionSelection(Base):
     cycle_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("subscription_cycles.id"), nullable=False)
     product_variant_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("product_variants.id"), nullable=False)
     quantity: Mapped[int] = mapped_column(Integer, nullable=False, server_default="1")
-    customization: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+    customization: Mapped[dict | None] = mapped_column(JSON, nullable=True)
 
     # relationships
-    cycle: Mapped["SubscriptionCycle"] = relationship(back_populates="selections")
-    product_variant: Mapped["ProductVariant"] = relationship(back_populates="subscription_selections")
+    cycle: Mapped[SubscriptionCycle] = relationship(back_populates="selections")
+    product_variant: Mapped[ProductVariant] = relationship(back_populates="subscription_selections")
 
 
 class SubscriptionEvent(Base):
@@ -764,13 +760,13 @@ class SubscriptionEvent(Base):
         SAEnum(SubscriptionEventType, name="subscription_event_type", create_constraint=True),
         nullable=False,
     )
-    event_data: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+    event_data: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     actor_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"), nullable=False)
     created_at: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
 
     # relationships
-    subscription: Mapped["Subscription"] = relationship(back_populates="events")
-    actor: Mapped["User"] = relationship(back_populates="subscription_events")
+    subscription: Mapped[Subscription] = relationship(back_populates="events")
+    actor: Mapped[User] = relationship(back_populates="subscription_events")
 
 
 # ===========================================================================
@@ -783,17 +779,17 @@ class Cart(TimestampMixin, Base):
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     tenant_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("tenants.id"), nullable=False)
-    user_id: Mapped[Optional[uuid.UUID]] = mapped_column(ForeignKey("users.id"), nullable=True)
+    user_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("users.id"), nullable=True)
     session_id: Mapped[str] = mapped_column(String(255), nullable=False)
-    promo_code_id: Mapped[Optional[uuid.UUID]] = mapped_column(ForeignKey("promo_codes.id"), nullable=True)
+    promo_code_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("promo_codes.id"), nullable=True)
     expires_at: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), nullable=False)
-    metadata_: Mapped[Optional[dict]] = mapped_column("metadata", JSON, nullable=True)
+    metadata_: Mapped[dict | None] = mapped_column("metadata", JSON, nullable=True)
 
     # relationships
-    tenant: Mapped["Tenant"] = relationship(back_populates="carts")
-    user: Mapped[Optional["User"]] = relationship(back_populates="carts")
-    promo_code: Mapped[Optional["PromoCode"]] = relationship(back_populates="carts")
-    items: Mapped[list["CartItem"]] = relationship(back_populates="cart")
+    tenant: Mapped[Tenant] = relationship(back_populates="carts")
+    user: Mapped[User | None] = relationship(back_populates="carts")
+    promo_code: Mapped[PromoCode | None] = relationship(back_populates="carts")
+    items: Mapped[list[CartItem]] = relationship(back_populates="cart")
 
 
 class CartItem(TimestampMixin, Base):
@@ -806,9 +802,9 @@ class CartItem(TimestampMixin, Base):
     unit_price: Mapped[Decimal] = mapped_column(DECIMAL(12, 2), nullable=False)
 
     # relationships
-    cart: Mapped["Cart"] = relationship(back_populates="items")
-    product_variant: Mapped["ProductVariant"] = relationship(back_populates="cart_items")
-    customizations: Mapped[list["CartItemCustomization"]] = relationship(back_populates="cart_item")
+    cart: Mapped[Cart] = relationship(back_populates="items")
+    product_variant: Mapped[ProductVariant] = relationship(back_populates="cart_items")
+    customizations: Mapped[list[CartItemCustomization]] = relationship(back_populates="cart_item")
 
 
 class CartItemCustomization(Base):
@@ -821,7 +817,7 @@ class CartItemCustomization(Base):
     price_adjustment: Mapped[Decimal] = mapped_column(DECIMAL(12, 2), nullable=False, server_default="0.00")
 
     # relationships
-    cart_item: Mapped["CartItem"] = relationship(back_populates="customizations")
+    cart_item: Mapped[CartItem] = relationship(back_populates="customizations")
 
 
 class Order(TimestampMixin, Base):
@@ -830,11 +826,9 @@ class Order(TimestampMixin, Base):
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     tenant_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("tenants.id"), nullable=False)
-    user_id: Mapped[Optional[uuid.UUID]] = mapped_column(ForeignKey("users.id"), nullable=True)
-    subscription_id: Mapped[Optional[uuid.UUID]] = mapped_column(ForeignKey("subscriptions.id"), nullable=True)
-    subscription_cycle_id: Mapped[Optional[uuid.UUID]] = mapped_column(
-        ForeignKey("subscription_cycles.id"), nullable=True
-    )
+    user_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    subscription_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("subscriptions.id"), nullable=True)
+    subscription_cycle_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("subscription_cycles.id"), nullable=True)
     order_number: Mapped[str] = mapped_column(String(20), nullable=False)
     status: Mapped[OrderStatus] = mapped_column(
         SAEnum(OrderStatus, name="order_status", create_constraint=True),
@@ -850,31 +844,31 @@ class Order(TimestampMixin, Base):
     delivery_fee: Mapped[Decimal] = mapped_column(DECIMAL(12, 2), nullable=False, server_default="0.00")
     total: Mapped[Decimal] = mapped_column(DECIMAL(12, 2), nullable=False)
     currency: Mapped[str] = mapped_column(String(3), nullable=False, server_default="PHP")
-    delivery_address_id: Mapped[Optional[uuid.UUID]] = mapped_column(ForeignKey("addresses.id"), nullable=True)
-    delivery_slot_id: Mapped[Optional[uuid.UUID]] = mapped_column(ForeignKey("delivery_slots.id"), nullable=True)
-    promo_code_id: Mapped[Optional[uuid.UUID]] = mapped_column(ForeignKey("promo_codes.id"), nullable=True)
-    notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    placed_at: Mapped[Optional[datetime]] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
-    confirmed_at: Mapped[Optional[datetime]] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
-    delivered_at: Mapped[Optional[datetime]] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
-    cancelled_at: Mapped[Optional[datetime]] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
-    cancellation_reason: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
-    metadata_: Mapped[Optional[dict]] = mapped_column("metadata", JSON, nullable=True)
+    delivery_address_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("addresses.id"), nullable=True)
+    delivery_slot_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("delivery_slots.id"), nullable=True)
+    promo_code_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("promo_codes.id"), nullable=True)
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    placed_at: Mapped[datetime | None] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
+    confirmed_at: Mapped[datetime | None] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
+    delivered_at: Mapped[datetime | None] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
+    cancelled_at: Mapped[datetime | None] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
+    cancellation_reason: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    metadata_: Mapped[dict | None] = mapped_column("metadata", JSON, nullable=True)
 
     # relationships
-    tenant: Mapped["Tenant"] = relationship(back_populates="orders")
-    user: Mapped[Optional["User"]] = relationship(back_populates="orders")
-    subscription: Mapped[Optional["Subscription"]] = relationship(back_populates="orders")
-    subscription_cycle: Mapped[Optional["SubscriptionCycle"]] = relationship(back_populates="order")
-    delivery_address: Mapped[Optional["Address"]] = relationship(back_populates="orders")
-    delivery_slot: Mapped[Optional["DeliverySlot"]] = relationship(back_populates="orders")
-    promo_code: Mapped[Optional["PromoCode"]] = relationship(back_populates="orders")
-    items: Mapped[list["OrderItem"]] = relationship(back_populates="order")
-    status_history: Mapped[list["OrderStatusHistory"]] = relationship(back_populates="order")
-    payments: Mapped[list["Payment"]] = relationship(back_populates="order")
-    invoices: Mapped[list["Invoice"]] = relationship(back_populates="order")
-    fulfillment_orders: Mapped[list["FulfillmentOrder"]] = relationship(back_populates="order")
-    promo_code_usages: Mapped[list["PromoCodeUsage"]] = relationship(back_populates="order")
+    tenant: Mapped[Tenant] = relationship(back_populates="orders")
+    user: Mapped[User | None] = relationship(back_populates="orders")
+    subscription: Mapped[Subscription | None] = relationship(back_populates="orders")
+    subscription_cycle: Mapped[SubscriptionCycle | None] = relationship(back_populates="order")
+    delivery_address: Mapped[Address | None] = relationship(back_populates="orders")
+    delivery_slot: Mapped[DeliverySlot | None] = relationship(back_populates="orders")
+    promo_code: Mapped[PromoCode | None] = relationship(back_populates="orders")
+    items: Mapped[list[OrderItem]] = relationship(back_populates="order")
+    status_history: Mapped[list[OrderStatusHistory]] = relationship(back_populates="order")
+    payments: Mapped[list[Payment]] = relationship(back_populates="order")
+    invoices: Mapped[list[Invoice]] = relationship(back_populates="order")
+    fulfillment_orders: Mapped[list[FulfillmentOrder]] = relationship(back_populates="order")
+    promo_code_usages: Mapped[list[PromoCodeUsage]] = relationship(back_populates="order")
 
 
 class OrderItem(Base):
@@ -890,9 +884,9 @@ class OrderItem(Base):
     total_price: Mapped[Decimal] = mapped_column(DECIMAL(12, 2), nullable=False)
 
     # relationships
-    order: Mapped["Order"] = relationship(back_populates="items")
-    product_variant: Mapped["ProductVariant"] = relationship(back_populates="order_items")
-    customizations: Mapped[list["OrderItemCustomization"]] = relationship(back_populates="order_item")
+    order: Mapped[Order] = relationship(back_populates="items")
+    product_variant: Mapped[ProductVariant] = relationship(back_populates="order_items")
+    customizations: Mapped[list[OrderItemCustomization]] = relationship(back_populates="order_item")
 
 
 class OrderItemCustomization(Base):
@@ -905,7 +899,7 @@ class OrderItemCustomization(Base):
     price_adjustment: Mapped[Decimal] = mapped_column(DECIMAL(12, 2), nullable=False, server_default="0.00")
 
     # relationships
-    order_item: Mapped["OrderItem"] = relationship(back_populates="customizations")
+    order_item: Mapped[OrderItem] = relationship(back_populates="customizations")
 
 
 class OrderStatusHistory(Base):
@@ -913,19 +907,19 @@ class OrderStatusHistory(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     order_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("orders.id"), nullable=False)
-    from_status: Mapped[Optional[OrderStatus]] = mapped_column(
+    from_status: Mapped[OrderStatus | None] = mapped_column(
         SAEnum(OrderStatus, name="order_status", create_constraint=False), nullable=True
     )
     to_status: Mapped[OrderStatus] = mapped_column(
         SAEnum(OrderStatus, name="order_status", create_constraint=False), nullable=False
     )
     changed_by: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"), nullable=False)
-    notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
 
     # relationships
-    order: Mapped["Order"] = relationship(back_populates="status_history")
-    changed_by_user: Mapped["User"] = relationship(back_populates="order_status_changes")
+    order: Mapped[Order] = relationship(back_populates="status_history")
+    changed_by_user: Mapped[User] = relationship(back_populates="order_status_changes")
 
 
 # ===========================================================================
@@ -942,18 +936,18 @@ class PaymentMethod(TimestampMixin, Base):
     type: Mapped[PaymentMethodType] = mapped_column(
         SAEnum(PaymentMethodType, name="payment_method_type", create_constraint=True), nullable=False
     )
-    paymongo_method_id: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
-    last_four: Mapped[Optional[str]] = mapped_column(String(4), nullable=True)
+    paymongo_method_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    last_four: Mapped[str | None] = mapped_column(String(4), nullable=True)
     display_name: Mapped[str] = mapped_column(String(100), nullable=False)
-    card_brand: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
+    card_brand: Mapped[str | None] = mapped_column(String(20), nullable=True)
     is_default: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="false")
-    expires_at: Mapped[Optional[datetime]] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
-    metadata_: Mapped[Optional[dict]] = mapped_column("metadata", JSON, nullable=True)
+    expires_at: Mapped[datetime | None] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
+    metadata_: Mapped[dict | None] = mapped_column("metadata", JSON, nullable=True)
 
     # relationships
-    tenant: Mapped["Tenant"] = relationship(back_populates="payment_methods")
-    user: Mapped["User"] = relationship(back_populates="payment_methods")
-    subscriptions: Mapped[list["Subscription"]] = relationship(back_populates="payment_method")
+    tenant: Mapped[Tenant] = relationship(back_populates="payment_methods")
+    user: Mapped[User] = relationship(back_populates="payment_methods")
+    subscriptions: Mapped[list[Subscription]] = relationship(back_populates="payment_method")
 
 
 class Payment(TimestampMixin, Base):
@@ -961,9 +955,9 @@ class Payment(TimestampMixin, Base):
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     tenant_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("tenants.id"), nullable=False)
-    order_id: Mapped[Optional[uuid.UUID]] = mapped_column(ForeignKey("orders.id"), nullable=True)
-    subscription_id: Mapped[Optional[uuid.UUID]] = mapped_column(ForeignKey("subscriptions.id"), nullable=True)
-    payment_method_id: Mapped[Optional[uuid.UUID]] = mapped_column(ForeignKey("payment_methods.id"), nullable=True)
+    order_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("orders.id"), nullable=True)
+    subscription_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("subscriptions.id"), nullable=True)
+    payment_method_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("payment_methods.id"), nullable=True)
     amount: Mapped[Decimal] = mapped_column(DECIMAL(12, 2), nullable=False)
     currency: Mapped[str] = mapped_column(String(3), nullable=False, server_default="PHP")
     status: Mapped[PaymentStatus] = mapped_column(
@@ -974,21 +968,21 @@ class Payment(TimestampMixin, Base):
     payment_channel: Mapped[PaymentChannel] = mapped_column(
         SAEnum(PaymentChannel, name="payment_channel", create_constraint=True), nullable=False
     )
-    paymongo_intent_id: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
-    paymongo_payment_id: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
-    paymongo_checkout_id: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
-    checkout_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    paymongo_intent_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    paymongo_payment_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    paymongo_checkout_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    checkout_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
     retry_count: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
-    next_retry_at: Mapped[Optional[datetime]] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
-    paid_at: Mapped[Optional[datetime]] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
-    metadata_: Mapped[Optional[dict]] = mapped_column("metadata", JSON, nullable=True)
+    next_retry_at: Mapped[datetime | None] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
+    paid_at: Mapped[datetime | None] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
+    metadata_: Mapped[dict | None] = mapped_column("metadata", JSON, nullable=True)
 
     # relationships
-    tenant: Mapped["Tenant"] = relationship(back_populates="payments")
-    order: Mapped[Optional["Order"]] = relationship(back_populates="payments")
-    subscription: Mapped[Optional["Subscription"]] = relationship(back_populates="payments")
-    payment_method: Mapped[Optional["PaymentMethod"]] = relationship()
-    transactions: Mapped[list["PaymentTransaction"]] = relationship(back_populates="payment")
+    tenant: Mapped[Tenant] = relationship(back_populates="payments")
+    order: Mapped[Order | None] = relationship(back_populates="payments")
+    subscription: Mapped[Subscription | None] = relationship(back_populates="payments")
+    payment_method: Mapped[PaymentMethod | None] = relationship()
+    transactions: Mapped[list[PaymentTransaction]] = relationship(back_populates="payment")
 
 
 class PaymentTransaction(Base):
@@ -1003,18 +997,18 @@ class PaymentTransaction(Base):
     status: Mapped[TransactionStatus] = mapped_column(
         SAEnum(TransactionStatus, name="transaction_status", create_constraint=True), nullable=False
     )
-    paymongo_event_id: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
-    paymongo_resource_id: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
-    paymongo_response: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
-    payment_method_type: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
-    fee_amount: Mapped[Optional[Decimal]] = mapped_column(DECIMAL(12, 2), nullable=True)
-    net_amount: Mapped[Optional[Decimal]] = mapped_column(DECIMAL(12, 2), nullable=True)
-    error_code: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
-    error_message: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    paymongo_event_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    paymongo_resource_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    paymongo_response: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    payment_method_type: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    fee_amount: Mapped[Decimal | None] = mapped_column(DECIMAL(12, 2), nullable=True)
+    net_amount: Mapped[Decimal | None] = mapped_column(DECIMAL(12, 2), nullable=True)
+    error_code: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
 
     # relationships
-    payment: Mapped["Payment"] = relationship(back_populates="transactions")
+    payment: Mapped[Payment] = relationship(back_populates="transactions")
 
 
 class Invoice(TimestampMixin, Base):
@@ -1023,8 +1017,8 @@ class Invoice(TimestampMixin, Base):
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     tenant_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("tenants.id"), nullable=False)
-    order_id: Mapped[Optional[uuid.UUID]] = mapped_column(ForeignKey("orders.id"), nullable=True)
-    subscription_id: Mapped[Optional[uuid.UUID]] = mapped_column(ForeignKey("subscriptions.id"), nullable=True)
+    order_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("orders.id"), nullable=True)
+    subscription_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("subscriptions.id"), nullable=True)
     invoice_number: Mapped[str] = mapped_column(String(20), nullable=False)
     status: Mapped[InvoiceStatus] = mapped_column(
         SAEnum(InvoiceStatus, name="invoice_status", create_constraint=True),
@@ -1037,14 +1031,14 @@ class Invoice(TimestampMixin, Base):
     total: Mapped[Decimal] = mapped_column(DECIMAL(12, 2), nullable=False)
     currency: Mapped[str] = mapped_column(String(3), nullable=False, server_default="PHP")
     issued_at: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), nullable=False)
-    paid_at: Mapped[Optional[datetime]] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
-    pdf_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    paid_at: Mapped[datetime | None] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
+    pdf_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
 
     # relationships
-    tenant: Mapped["Tenant"] = relationship(back_populates="invoices")
-    order: Mapped[Optional["Order"]] = relationship(back_populates="invoices")
-    subscription: Mapped[Optional["Subscription"]] = relationship(back_populates="invoices")
-    line_items: Mapped[list["InvoiceLineItem"]] = relationship(back_populates="invoice")
+    tenant: Mapped[Tenant] = relationship(back_populates="invoices")
+    order: Mapped[Order | None] = relationship(back_populates="invoices")
+    subscription: Mapped[Subscription | None] = relationship(back_populates="invoices")
+    line_items: Mapped[list[InvoiceLineItem]] = relationship(back_populates="invoice")
 
 
 class InvoiceLineItem(Base):
@@ -1058,7 +1052,7 @@ class InvoiceLineItem(Base):
     total_price: Mapped[Decimal] = mapped_column(DECIMAL(12, 2), nullable=False)
 
     # relationships
-    invoice: Mapped["Invoice"] = relationship(back_populates="line_items")
+    invoice: Mapped[Invoice] = relationship(back_populates="line_items")
 
 
 class PromoCode(TimestampMixin, Base):
@@ -1072,20 +1066,20 @@ class PromoCode(TimestampMixin, Base):
         SAEnum(DiscountType, name="discount_type", create_constraint=True), nullable=False
     )
     discount_value: Mapped[Decimal] = mapped_column(DECIMAL(12, 2), nullable=False)
-    min_order_amount: Mapped[Optional[Decimal]] = mapped_column(DECIMAL(12, 2), nullable=True)
-    max_discount_amount: Mapped[Optional[Decimal]] = mapped_column(DECIMAL(12, 2), nullable=True)
-    usage_limit: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    per_user_limit: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    min_order_amount: Mapped[Decimal | None] = mapped_column(DECIMAL(12, 2), nullable=True)
+    max_discount_amount: Mapped[Decimal | None] = mapped_column(DECIMAL(12, 2), nullable=True)
+    usage_limit: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    per_user_limit: Mapped[int | None] = mapped_column(Integer, nullable=True)
     first_order_only: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="false")
     starts_at: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), nullable=False)
     expires_at: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="true")
 
     # relationships
-    tenant: Mapped["Tenant"] = relationship(back_populates="promo_codes")
-    carts: Mapped[list["Cart"]] = relationship(back_populates="promo_code")
-    orders: Mapped[list["Order"]] = relationship(back_populates="promo_code")
-    usages: Mapped[list["PromoCodeUsage"]] = relationship(back_populates="promo_code")
+    tenant: Mapped[Tenant] = relationship(back_populates="promo_codes")
+    carts: Mapped[list[Cart]] = relationship(back_populates="promo_code")
+    orders: Mapped[list[Order]] = relationship(back_populates="promo_code")
+    usages: Mapped[list[PromoCodeUsage]] = relationship(back_populates="promo_code")
 
 
 class PromoCodeUsage(Base):
@@ -1099,9 +1093,9 @@ class PromoCodeUsage(Base):
     created_at: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
 
     # relationships
-    promo_code: Mapped["PromoCode"] = relationship(back_populates="usages")
-    user: Mapped["User"] = relationship(back_populates="promo_code_usages")
-    order: Mapped["Order"] = relationship(back_populates="promo_code_usages")
+    promo_code: Mapped[PromoCode] = relationship(back_populates="usages")
+    user: Mapped[User] = relationship(back_populates="promo_code_usages")
+    order: Mapped[Order] = relationship(back_populates="promo_code_usages")
 
 
 # ===========================================================================
@@ -1117,21 +1111,21 @@ class Address(TimestampMixin, Base):
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"), nullable=False)
     label: Mapped[str] = mapped_column(String(50), nullable=False)
     line_1: Mapped[str] = mapped_column(String(255), nullable=False)
-    line_2: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    line_2: Mapped[str | None] = mapped_column(String(255), nullable=True)
     city: Mapped[str] = mapped_column(String(100), nullable=False)
     province: Mapped[str] = mapped_column(String(100), nullable=False)
     postal_code: Mapped[str] = mapped_column(String(20), nullable=False)
     country: Mapped[str] = mapped_column(String(2), nullable=False, server_default="PH")
-    latitude: Mapped[Optional[Decimal]] = mapped_column(DECIMAL(10, 7), nullable=True)
-    longitude: Mapped[Optional[Decimal]] = mapped_column(DECIMAL(10, 7), nullable=True)
+    latitude: Mapped[Decimal | None] = mapped_column(DECIMAL(10, 7), nullable=True)
+    longitude: Mapped[Decimal | None] = mapped_column(DECIMAL(10, 7), nullable=True)
     is_default: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="false")
-    notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     # relationships
-    tenant: Mapped["Tenant"] = relationship(back_populates="addresses")
-    user: Mapped["User"] = relationship(back_populates="addresses")
-    orders: Mapped[list["Order"]] = relationship(back_populates="delivery_address")
-    fulfillment_orders: Mapped[list["FulfillmentOrder"]] = relationship(back_populates="address")
+    tenant: Mapped[Tenant] = relationship(back_populates="addresses")
+    user: Mapped[User] = relationship(back_populates="addresses")
+    orders: Mapped[list[Order]] = relationship(back_populates="delivery_address")
+    fulfillment_orders: Mapped[list[FulfillmentOrder]] = relationship(back_populates="address")
 
 
 class DeliveryZone(TimestampMixin, Base):
@@ -1140,16 +1134,16 @@ class DeliveryZone(TimestampMixin, Base):
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     tenant_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("tenants.id"), nullable=False)
     name: Mapped[str] = mapped_column(String(100), nullable=False)
-    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
     delivery_fee: Mapped[Decimal] = mapped_column(DECIMAL(12, 2), nullable=False)
-    min_order_amount: Mapped[Optional[Decimal]] = mapped_column(DECIMAL(12, 2), nullable=True)
-    boundaries: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+    min_order_amount: Mapped[Decimal | None] = mapped_column(DECIMAL(12, 2), nullable=True)
+    boundaries: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     cutoff_hours: Mapped[int] = mapped_column(Integer, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="true")
 
     # relationships
-    tenant: Mapped["Tenant"] = relationship(back_populates="delivery_zones")
-    slots: Mapped[list["DeliverySlot"]] = relationship(back_populates="zone")
+    tenant: Mapped[Tenant] = relationship(back_populates="delivery_zones")
+    slots: Mapped[list[DeliverySlot]] = relationship(back_populates="zone")
 
 
 class DeliverySlot(TimestampMixin, Base):
@@ -1164,9 +1158,9 @@ class DeliverySlot(TimestampMixin, Base):
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="true")
 
     # relationships
-    zone: Mapped["DeliveryZone"] = relationship(back_populates="slots")
-    orders: Mapped[list["Order"]] = relationship(back_populates="delivery_slot")
-    fulfillment_orders: Mapped[list["FulfillmentOrder"]] = relationship(back_populates="delivery_slot")
+    zone: Mapped[DeliveryZone] = relationship(back_populates="slots")
+    orders: Mapped[list[Order]] = relationship(back_populates="delivery_slot")
+    fulfillment_orders: Mapped[list[FulfillmentOrder]] = relationship(back_populates="delivery_slot")
 
 
 class FulfillmentOrder(TimestampMixin, Base):
@@ -1175,8 +1169,8 @@ class FulfillmentOrder(TimestampMixin, Base):
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     tenant_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("tenants.id"), nullable=False)
     order_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("orders.id"), nullable=False)
-    address_id: Mapped[Optional[uuid.UUID]] = mapped_column(ForeignKey("addresses.id"), nullable=True)
-    delivery_slot_id: Mapped[Optional[uuid.UUID]] = mapped_column(ForeignKey("delivery_slots.id"), nullable=True)
+    address_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("addresses.id"), nullable=True)
+    delivery_slot_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("delivery_slots.id"), nullable=True)
     fulfillment_type: Mapped[FulfillmentType] = mapped_column(
         SAEnum(FulfillmentType, name="fulfillment_type", create_constraint=True), nullable=False
     )
@@ -1186,17 +1180,17 @@ class FulfillmentOrder(TimestampMixin, Base):
         server_default="created",
     )
     scheduled_date: Mapped[date] = mapped_column(Date, nullable=False)
-    shipped_at: Mapped[Optional[datetime]] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
-    delivered_at: Mapped[Optional[datetime]] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
-    tracking_number: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
-    driver_notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    metadata_: Mapped[Optional[dict]] = mapped_column("metadata", JSON, nullable=True)
+    shipped_at: Mapped[datetime | None] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
+    delivered_at: Mapped[datetime | None] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
+    tracking_number: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    driver_notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    metadata_: Mapped[dict | None] = mapped_column("metadata", JSON, nullable=True)
 
     # relationships
-    tenant: Mapped["Tenant"] = relationship(back_populates="fulfillment_orders")
-    order: Mapped["Order"] = relationship(back_populates="fulfillment_orders")
-    address: Mapped[Optional["Address"]] = relationship(back_populates="fulfillment_orders")
-    delivery_slot: Mapped[Optional["DeliverySlot"]] = relationship(back_populates="fulfillment_orders")
+    tenant: Mapped[Tenant] = relationship(back_populates="fulfillment_orders")
+    order: Mapped[Order] = relationship(back_populates="fulfillment_orders")
+    address: Mapped[Address | None] = relationship(back_populates="fulfillment_orders")
+    delivery_slot: Mapped[DeliverySlot | None] = relationship(back_populates="fulfillment_orders")
 
 
 # ===========================================================================
@@ -1216,13 +1210,13 @@ class NotificationTemplate(TimestampMixin, Base):
     channel: Mapped[NotificationChannel] = mapped_column(
         SAEnum(NotificationChannel, name="notification_channel", create_constraint=True), nullable=False
     )
-    subject: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    subject: Mapped[str | None] = mapped_column(String(255), nullable=True)
     body_template: Mapped[str] = mapped_column(Text, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="true")
 
     # relationships
-    tenant: Mapped["Tenant"] = relationship(back_populates="notification_templates")
-    notifications: Mapped[list["Notification"]] = relationship(back_populates="template")
+    tenant: Mapped[Tenant] = relationship(back_populates="notification_templates")
+    notifications: Mapped[list[Notification]] = relationship(back_populates="template")
 
 
 class Notification(Base):
@@ -1230,7 +1224,7 @@ class Notification(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     tenant_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("tenants.id"), nullable=False)
-    template_id: Mapped[Optional[uuid.UUID]] = mapped_column(ForeignKey("notification_templates.id"), nullable=True)
+    template_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("notification_templates.id"), nullable=True)
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"), nullable=False)
     channel: Mapped[NotificationChannel] = mapped_column(
         SAEnum(NotificationChannel, name="notification_channel", create_constraint=False), nullable=False
@@ -1243,15 +1237,15 @@ class Notification(Base):
         nullable=False,
         server_default="queued",
     )
-    scheduled_for: Mapped[Optional[datetime]] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
-    sent_at: Mapped[Optional[datetime]] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
+    scheduled_for: Mapped[datetime | None] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
+    sent_at: Mapped[datetime | None] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
 
     # relationships
-    tenant: Mapped["Tenant"] = relationship(back_populates="notifications")
-    template: Mapped[Optional["NotificationTemplate"]] = relationship(back_populates="notifications")
-    user: Mapped["User"] = relationship(back_populates="notifications")
-    logs: Mapped[list["NotificationLog"]] = relationship(back_populates="notification")
+    tenant: Mapped[Tenant] = relationship(back_populates="notifications")
+    template: Mapped[NotificationTemplate | None] = relationship(back_populates="notifications")
+    user: Mapped[User] = relationship(back_populates="notifications")
+    logs: Mapped[list[NotificationLog]] = relationship(back_populates="notification")
 
 
 class NotificationLog(Base):
@@ -1264,12 +1258,12 @@ class NotificationLog(Base):
         SAEnum(NotificationLogStatus, name="notification_log_status", create_constraint=True),
         nullable=False,
     )
-    provider_response: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
-    error_message: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    provider_response: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
 
     # relationships
-    notification: Mapped["Notification"] = relationship(back_populates="logs")
+    notification: Mapped[Notification] = relationship(back_populates="logs")
 
 
 # ===========================================================================
@@ -1291,11 +1285,11 @@ class MetricSnapshot(Base):
     )
     period_start: Mapped[date] = mapped_column(Date, nullable=False)
     value: Mapped[Decimal] = mapped_column(DECIMAL(14, 4), nullable=False)
-    metadata_: Mapped[Optional[dict]] = mapped_column("metadata", JSON, nullable=True)
+    metadata_: Mapped[dict | None] = mapped_column("metadata", JSON, nullable=True)
     created_at: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
 
     # relationships
-    tenant: Mapped["Tenant"] = relationship(back_populates="metric_snapshots")
+    tenant: Mapped[Tenant] = relationship(back_populates="metric_snapshots")
 
 
 class CohortData(Base):
@@ -1312,7 +1306,7 @@ class CohortData(Base):
     created_at: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
 
     # relationships
-    tenant: Mapped["Tenant"] = relationship(back_populates="cohort_data")
+    tenant: Mapped[Tenant] = relationship(back_populates="cohort_data")
 
 
 # ===========================================================================
@@ -1329,11 +1323,11 @@ class Webhook(TimestampMixin, Base):
     secret: Mapped[str] = mapped_column(String(255), nullable=False)
     events: Mapped[dict] = mapped_column(JSON, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="true")
-    last_triggered_at: Mapped[Optional[datetime]] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
+    last_triggered_at: Mapped[datetime | None] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
 
     # relationships
-    tenant: Mapped["Tenant"] = relationship(back_populates="webhooks")
-    webhook_events: Mapped[list["WebhookEvent"]] = relationship(back_populates="webhook")
+    tenant: Mapped[Tenant] = relationship(back_populates="webhooks")
+    webhook_events: Mapped[list[WebhookEvent]] = relationship(back_populates="webhook")
 
 
 class WebhookEvent(Base):
@@ -1348,13 +1342,13 @@ class WebhookEvent(Base):
         nullable=False,
         server_default="pending",
     )
-    response_code: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    response_code: Mapped[int | None] = mapped_column(Integer, nullable=True)
     retry_count: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
-    next_retry_at: Mapped[Optional[datetime]] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
+    next_retry_at: Mapped[datetime | None] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
 
     # relationships
-    webhook: Mapped["Webhook"] = relationship(back_populates="webhook_events")
+    webhook: Mapped[Webhook] = relationship(back_populates="webhook_events")
 
 
 class IntegrationConfig(TimestampMixin, Base):
@@ -1368,12 +1362,12 @@ class IntegrationConfig(TimestampMixin, Base):
     )
     base_url: Mapped[str] = mapped_column(String(500), nullable=False)
     api_key: Mapped[str] = mapped_column(String(500), nullable=False)
-    settings: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+    settings: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="true")
-    last_sync_at: Mapped[Optional[datetime]] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
+    last_sync_at: Mapped[datetime | None] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
 
     # relationships
-    tenant: Mapped["Tenant"] = relationship(back_populates="integration_configs")
+    tenant: Mapped[Tenant] = relationship(back_populates="integration_configs")
 
 
 class AuditLog(Base):
@@ -1385,16 +1379,16 @@ class AuditLog(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     tenant_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("tenants.id"), nullable=False)
-    actor_id: Mapped[Optional[uuid.UUID]] = mapped_column(ForeignKey("users.id"), nullable=True)
+    actor_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("users.id"), nullable=True)
     action: Mapped[str] = mapped_column(String(100), nullable=False)
     resource_type: Mapped[str] = mapped_column(String(50), nullable=False)
     resource_id: Mapped[uuid.UUID] = mapped_column(nullable=False)
-    before_state: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
-    after_state: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+    before_state: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    after_state: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     ip_address: Mapped[str] = mapped_column(String(45), nullable=False)
-    user_agent: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    user_agent: Mapped[str | None] = mapped_column(String(500), nullable=True)
     created_at: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
 
     # relationships
-    tenant: Mapped["Tenant"] = relationship(back_populates="audit_logs")
-    actor: Mapped[Optional["User"]] = relationship()
+    tenant: Mapped[Tenant] = relationship(back_populates="audit_logs")
+    actor: Mapped[User | None] = relationship()

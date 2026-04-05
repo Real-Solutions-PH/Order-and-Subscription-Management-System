@@ -4,14 +4,12 @@ from __future__ import annotations
 
 from datetime import date, datetime, time
 from decimal import Decimal
-from typing import Optional
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.repo.db import FulfillmentStatus, FulfillmentType
 from app.schemas.base import BaseSchema
-
 
 # ---------------------------------------------------------------------------
 # Address
@@ -21,44 +19,44 @@ from app.schemas.base import BaseSchema
 class AddressCreate(BaseModel):
     label: str
     line_1: str
-    line_2: Optional[str] = None
+    line_2: str | None = None
     city: str
     province: str
     postal_code: str
     country: str = "PH"
-    latitude: Optional[Decimal] = None
-    longitude: Optional[Decimal] = None
+    latitude: Decimal | None = None
+    longitude: Decimal | None = None
     is_default: bool = False
-    notes: Optional[str] = None
+    notes: str | None = None
 
 
 class AddressUpdate(BaseModel):
-    label: Optional[str] = None
-    line_1: Optional[str] = None
-    line_2: Optional[str] = None
-    city: Optional[str] = None
-    province: Optional[str] = None
-    postal_code: Optional[str] = None
-    country: Optional[str] = None
-    latitude: Optional[Decimal] = None
-    longitude: Optional[Decimal] = None
-    is_default: Optional[bool] = None
-    notes: Optional[str] = None
+    label: str | None = None
+    line_1: str | None = None
+    line_2: str | None = None
+    city: str | None = None
+    province: str | None = None
+    postal_code: str | None = None
+    country: str | None = None
+    latitude: Decimal | None = None
+    longitude: Decimal | None = None
+    is_default: bool | None = None
+    notes: str | None = None
 
 
 class AddressResponse(BaseSchema):
     id: UUID
     label: str
     line_1: str
-    line_2: Optional[str] = None
+    line_2: str | None = None
     city: str
     province: str
     postal_code: str
     country: str
-    latitude: Optional[Decimal] = None
-    longitude: Optional[Decimal] = None
+    latitude: Decimal | None = None
+    longitude: Decimal | None = None
     is_default: bool
-    notes: Optional[str] = None
+    notes: str | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -84,9 +82,9 @@ class DeliverySlotResponse(BaseSchema):
 
 class DeliveryZoneCreate(BaseModel):
     name: str
-    description: Optional[str] = None
+    description: str | None = None
     delivery_fee: Decimal
-    min_order_amount: Optional[Decimal] = None
+    min_order_amount: Decimal | None = None
     boundaries: dict
     cutoff_hours: int
 
@@ -94,13 +92,13 @@ class DeliveryZoneCreate(BaseModel):
 class DeliveryZoneResponse(BaseSchema):
     id: UUID
     name: str
-    description: Optional[str] = None
+    description: str | None = None
     delivery_fee: Decimal
-    min_order_amount: Optional[Decimal] = None
-    boundaries: Optional[dict] = None
+    min_order_amount: Decimal | None = None
+    boundaries: dict | None = None
     cutoff_hours: int
     is_active: bool
-    slots: Optional[list[DeliverySlotResponse]] = None
+    slots: list[DeliverySlotResponse] | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -114,14 +112,14 @@ class FulfillmentResponse(BaseSchema):
     fulfillment_type: FulfillmentType
     status: FulfillmentStatus
     scheduled_date: date
-    shipped_at: Optional[datetime] = None
-    delivered_at: Optional[datetime] = None
-    tracking_number: Optional[str] = None
+    shipped_at: datetime | None = None
+    delivered_at: datetime | None = None
+    tracking_number: str | None = None
 
 
 class FulfillmentStatusUpdate(BaseModel):
     status: FulfillmentStatus
-    notes: Optional[str] = None
+    notes: str | None = None
 
 
 # ---------------------------------------------------------------------------

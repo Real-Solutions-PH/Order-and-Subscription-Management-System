@@ -84,10 +84,10 @@ async def list_products(
     if q:
         items = await service.search_products(tenant_id, q)
         from app.schemas.base import PaginatedResponse
-        from app.schemas.product import ProductResponse as PR
+        from app.schemas.product import ProductResponse
 
-        return PaginatedResponse[PR].build(
-            items=[PR.model_validate(p) for p in items],
+        return PaginatedResponse[ProductResponse].build(
+            items=[ProductResponse.model_validate(p) for p in items],
             total=len(items),
             page=1,
             page_size=len(items) or 1,
