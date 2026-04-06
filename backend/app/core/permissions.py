@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from fastapi import Depends, Request
+from fastapi import Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError
 
@@ -30,8 +30,8 @@ async def get_current_user(
 
     try:
         payload = decode_token(credentials.credentials)
-    except JWTError:
-        raise UnauthorizedException("Invalid or expired token")
+    except JWTError as err:
+        raise UnauthorizedException("Invalid or expired token") from err
 
     if payload.get("token_type") != "access":
         raise UnauthorizedException("Invalid token type")
@@ -62,9 +62,7 @@ class PermissionChecker:
 
         missing = [p for p in self.required_permissions if p not in user_permissions]
         if missing:
-            raise ForbiddenException(
-                f"Missing required permissions: {', '.join(missing)}"
-            )
+            raise ForbiddenException(f"Missing required permissions: {', '.join(missing)}")
 
         return user
 

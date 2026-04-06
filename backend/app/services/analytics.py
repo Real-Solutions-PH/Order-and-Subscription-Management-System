@@ -11,7 +11,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.repo.analytics import CohortDataRepository, MetricSnapshotRepository
 from app.repo.db import (
-    CohortData,
     Order,
     OrderItem,
     OrderStatus,
@@ -40,33 +39,26 @@ class AnalyticsService:
         self.metric_repo = MetricSnapshotRepository(session)
         self.cohort_repo = CohortDataRepository(session)
 
-    async def get_dashboard(
-        self, tenant_id: UUID | str, period: str = "monthly"
-    ) -> DashboardResponse:
+    async def get_dashboard(self, tenant_id: UUID | str, period: str = "monthly") -> DashboardResponse:
         """Aggregate metrics for the dashboard summary."""
         # Total revenue from paid orders
-        revenue_stmt = (
-            select(func.coalesce(func.sum(Order.total), 0))
-            .where(
-                Order.tenant_id == tenant_id,
-                Order.status.in_([
+        revenue_stmt = select(func.coalesce(func.sum(Order.total), 0)).where(
+            Order.tenant_id == tenant_id,
+            Order.status.in_(
+                [
                     OrderStatus.confirmed,
                     OrderStatus.processing,
                     OrderStatus.ready,
                     OrderStatus.delivered,
                     OrderStatus.picked_up,
-                ]),
-            )
+                ]
+            ),
         )
         revenue_result = await self.session.execute(revenue_stmt)
         total_revenue = revenue_result.scalar_one() or Decimal("0")
 
         # Total orders
-        order_count_stmt = (
-            select(func.count())
-            .select_from(Order)
-            .where(Order.tenant_id == tenant_id)
-        )
+        order_count_stmt = select(func.count()).select_from(Order).where(Order.tenant_id == tenant_id)
         order_result = await self.session.execute(order_count_stmt)
         total_orders = order_result.scalar_one()
 
@@ -113,11 +105,7 @@ class AnalyticsService:
         churn_rate = (total_cancelled / total_subs * 100) if total_subs > 0 else 0.0
 
         # AOV
-        aov = (
-            Decimal(str(total_revenue / total_orders))
-            if total_orders > 0
-            else Decimal("0")
-        )
+        aov = Decimal(str(total_revenue / total_orders)) if total_orders > 0 else Decimal("0")
 
         return DashboardResponse(
             total_revenue=total_revenue,
@@ -168,9 +156,7 @@ class AnalyticsService:
 
         return MRRBreakdown(total=total, by_plan=by_plan)
 
-    async def get_churn(
-        self, tenant_id: UUID | str, period_start: date, period_end: date
-    ) -> ChurnData:
+    async def get_churn(self, tenant_id: UUID | str, period_start: date, period_end: date) -> ChurnData:
         """Calculate churn metrics for a period."""
         # Cancelled subscriptions in the period
         cancelled_stmt = (
@@ -198,10 +184,12 @@ class AnalyticsService:
             .select_from(Subscription)
             .where(
                 Subscription.tenant_id == tenant_id,
-                Subscription.status.in_([
-                    SubscriptionStatus.active,
-                    SubscriptionStatus.cancelled,
-                ]),
+                Subscription.status.in_(
+                    [
+                        SubscriptionStatus.active,
+                        SubscriptionStatus.cancelled,
+                    ]
+                ),
             )
         )
         active_result = await self.session.execute(active_stmt)
@@ -227,9 +215,7 @@ class AnalyticsService:
             reasons=reasons,
         )
 
-    async def get_popular_items(
-        self, tenant_id: UUID | str, limit: int = 10
-    ) -> list[PopularItem]:
+    async def get_popular_items(self, tenant_id: UUID | str, limit: int = 10) -> list[PopularItem]:
         """Get popular items ranked by order count."""
         stmt = (
             select(
@@ -265,19 +251,13 @@ class AnalyticsService:
                 months_since_signup=row.months_since_signup,
                 total_users=row.total_users,
                 active_users=row.active_users,
-                retention_rate=(
-                    round(row.active_users / row.total_users * 100, 2)
-                    if row.total_users > 0
-                    else 0.0
-                ),
+                retention_rate=(round(row.active_users / row.total_users * 100, 2) if row.total_users > 0 else 0.0),
                 revenue=row.revenue,
             )
             for row in cohort_rows
         ]
 
-    async def export_report(
-        self, tenant_id: UUID | str, data: ExportRequest
-    ) -> str:
+    async def export_report(self, tenant_id: UUID | str, data: ExportRequest) -> str:
         """Generate an export file and return the file path.
 
         TODO: Implement actual report generation (CSV/Excel export).

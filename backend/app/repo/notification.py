@@ -94,9 +94,7 @@ class NotificationLogRepository(BaseRepository[NotificationLog]):
 
     model = NotificationLog
 
-    async def get_by_notification(
-        self, notification_id: UUID | str
-    ) -> list[NotificationLog]:
+    async def get_by_notification(self, notification_id: UUID | str) -> list[NotificationLog]:
         """Return all log entries for a specific notification."""
         stmt = (
             select(NotificationLog)

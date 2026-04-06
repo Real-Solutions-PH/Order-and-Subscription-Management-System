@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { api } from '@/lib/api-client';
-import { queryKeys } from './query-keys';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { api } from "@/lib/api-client";
+import { queryKeys } from "./query-keys";
 
 /** Subscription plans list. */
 export function useSubscriptionPlans() {
@@ -62,8 +62,13 @@ export function useSubscriptionMutations() {
   });
 
   const modifyPlan = useMutation({
-    mutationFn: ({ id, new_plan_tier_id }: { id: string; new_plan_tier_id: string }) =>
-      api.subscriptions.modifyPlan(id, { new_plan_tier_id }),
+    mutationFn: ({
+      id,
+      new_plan_tier_id,
+    }: {
+      id: string;
+      new_plan_tier_id: string;
+    }) => api.subscriptions.modifyPlan(id, { new_plan_tier_id }),
     onSuccess: (_, vars) => invalidateSub(vars.id),
   });
 
@@ -74,8 +79,15 @@ export function useSubscriptionMutations() {
   });
 
   const setSelections = useMutation({
-    mutationFn: ({ subId, cycleId, selections }: { subId: string; cycleId: string; selections: { product_variant_id: string; quantity?: number }[] }) =>
-      api.subscriptions.setSelections(subId, cycleId, selections),
+    mutationFn: ({
+      subId,
+      cycleId,
+      selections,
+    }: {
+      subId: string;
+      cycleId: string;
+      selections: { product_variant_id: string; quantity?: number }[];
+    }) => api.subscriptions.setSelections(subId, cycleId, selections),
     onSuccess: (_, vars) => invalidateSub(vars.subId),
   });
 

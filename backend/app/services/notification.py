@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 from uuid import UUID
 
@@ -10,7 +10,7 @@ from jinja2 import Template as Jinja2Template
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.events import get_event_bus
-from app.core.exceptions import BadRequestException, NotFoundException
+from app.core.exceptions import NotFoundException
 from app.repo.db import (
     Notification,
     NotificationChannel,
@@ -59,18 +59,12 @@ class NotificationService:
         if isinstance(channel, str):
             channel = NotificationChannel(channel)
 
-        template = await self.template_repo.get_by_event(
-            tenant_id, event_type, channel
-        )
+        template = await self.template_repo.get_by_event(tenant_id, event_type, channel)
         if template is None:
             raise NotFoundException("NotificationTemplate", f"{event_type}/{channel.value}")
 
         # Render subject and body with Jinja2
-        subject = (
-            Jinja2Template(template.subject).render(**context)
-            if template.subject
-            else event_type
-        )
+        subject = Jinja2Template(template.subject).render(**context) if template.subject else event_type
         body = Jinja2Template(template.body_template).render(**context)
 
         # Resolve recipient from context
@@ -95,7 +89,7 @@ class NotificationService:
             notification.id,
             {
                 "status": NotificationStatus.sent,
-                "sent_at": datetime.now(timezone.utc),
+                "sent_at": datetime.now(UTC),
             },
         )
 
@@ -152,7 +146,7 @@ class NotificationService:
                 notification.id,
                 {
                     "status": NotificationStatus.sent,
-                    "sent_at": datetime.now(timezone.utc),
+                    "sent_at": datetime.now(UTC),
                 },
             )
             await self.log_repo.create(
@@ -179,17 +173,13 @@ class NotificationService:
         limit: int = 50,
     ) -> list[Notification]:
         """List notifications for a user."""
-        return await self.notification_repo.get_by_user(
-            user_id, tenant_id=tenant_id, skip=skip, limit=limit
-        )
+        return await self.notification_repo.get_by_user(user_id, tenant_id=tenant_id, skip=skip, limit=limit)
 
     # ------------------------------------------------------------------
     # Template management
     # ------------------------------------------------------------------
 
-    async def create_template(
-        self, tenant_id: UUID | str, data: TemplateCreate
-    ) -> NotificationTemplate:
+    async def create_template(self, tenant_id: UUID | str, data: TemplateCreate) -> NotificationTemplate:
         """Create a new notification template."""
         template_data = data.model_dump()
         template_data["tenant_id"] = tenant_id
@@ -204,23 +194,17 @@ class NotificationService:
         """Update an existing notification template."""
         update_data = data.model_dump(exclude_unset=True)
         if not update_data:
-            template = await self.template_repo.get_by_id(
-                template_id, tenant_id=tenant_id
-            )
+            template = await self.template_repo.get_by_id(template_id, tenant_id=tenant_id)
             if template is None:
                 raise NotFoundException("NotificationTemplate", str(template_id))
             return template
 
-        updated = await self.template_repo.update(
-            template_id, update_data, tenant_id=tenant_id
-        )
+        updated = await self.template_repo.update(template_id, update_data, tenant_id=tenant_id)
         if updated is None:
             raise NotFoundException("NotificationTemplate", str(template_id))
         return updated
 
-    async def list_templates(
-        self, tenant_id: UUID | str
-    ) -> list[NotificationTemplate]:
+    async def list_templates(self, tenant_id: UUID | str) -> list[NotificationTemplate]:
         """List all notification templates for a tenant."""
         templates = await self.template_repo.get_all(tenant_id=tenant_id)
         return list(templates)

@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from decimal import Decimal
-from typing import Any
 from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -15,7 +14,6 @@ from app.core.events import get_event_bus
 from app.core.exceptions import BadRequestException, NotFoundException
 from app.repo.db import (
     Cart,
-    CartItem,
     Order,
     OrderItem,
     OrderItemCustomization,
@@ -44,7 +42,6 @@ from app.schemas.order import (
     OrderStatusUpdate,
 )
 
-
 # ---------------------------------------------------------------------------
 # Valid status transitions
 # ---------------------------------------------------------------------------
@@ -70,9 +67,7 @@ _VALID_TRANSITIONS: dict[OrderStatus, set[OrderStatus]] = {
 class CartService:
     """Service layer for shopping cart operations."""
 
-    def __init__(
-        self, session: AsyncSession, cache: RedisCache | None = None
-    ) -> None:
+    def __init__(self, session: AsyncSession, cache: RedisCache | None = None) -> None:
         self.session = session
         self.cache = cache
         self.cart_repo = CartRepository(session)
@@ -86,9 +81,7 @@ class CartService:
         items: list[CartItemResponse] = []
         subtotal = Decimal("0")
         for ci in cart.items:
-            customization_adj = sum(
-                (c.price_adjustment for c in ci.customizations), Decimal("0")
-            )
+            customization_adj = sum((c.price_adjustment for c in ci.customizations), Decimal("0"))
             item_subtotal = (ci.unit_price + customization_adj) * ci.quantity
             subtotal += item_subtotal
             items.append(
@@ -128,13 +121,12 @@ class CartService:
             raise NotFoundException("Cart", str(cart.id))
         # Eager-load items/customizations via the user lookup (which has selectinload)
         cart_full = await self.cart_repo.get_by_user(
-            reloaded.user_id, reloaded.tenant_id  # type: ignore[arg-type]
+            reloaded.user_id,
+            reloaded.tenant_id,  # type: ignore[arg-type]
         )
         if cart_full is None:
             # Fallback for session-based carts
-            cart_full = await self.cart_repo.get_by_session(
-                reloaded.session_id, reloaded.tenant_id
-            )
+            cart_full = await self.cart_repo.get_by_session(reloaded.session_id, reloaded.tenant_id)
         return cart_full or reloaded
 
     # -- public API ----------------------------------------------------------
@@ -160,9 +152,7 @@ class CartService:
         cart = await self.cart_repo.get_or_create(user_id, tenant_id)
 
         # Check if variant already in cart
-        existing = await self.item_repo.get_by_variant(
-            cart.id, data.product_variant_id
-        )
+        existing = await self.item_repo.get_by_variant(cart.id, data.product_variant_id)
 
         if existing is not None:
             existing.quantity += data.quantity
@@ -229,9 +219,7 @@ class CartService:
         cart = await self._reload_cart(cart)
         return self._build_cart_response(cart)
 
-    async def clear_cart(
-        self, user_id: UUID | str, tenant_id: UUID | str
-    ) -> None:
+    async def clear_cart(self, user_id: UUID | str, tenant_id: UUID | str) -> None:
         """Remove all items from the user's cart."""
         cart = await self.cart_repo.get_by_user(user_id, tenant_id)
         if cart is not None:
@@ -250,7 +238,7 @@ class CartService:
         if promo is None:
             raise BadRequestException("Invalid promo code")
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         if now < promo.starts_at or now > promo.expires_at:
             raise BadRequestException("Promo code is not currently active")
 
@@ -272,9 +260,7 @@ class CartService:
 class OrderService:
     """Service layer for order lifecycle management."""
 
-    def __init__(
-        self, session: AsyncSession, cache: RedisCache | None = None
-    ) -> None:
+    def __init__(self, session: AsyncSession, cache: RedisCache | None = None) -> None:
         self.session = session
         self.cache = cache
         self.order_repo = OrderRepository(session)
@@ -343,9 +329,7 @@ class OrderService:
         # Calculate totals
         subtotal = Decimal("0")
         for ci in cart.items:
-            customization_adj = sum(
-                (c.price_adjustment for c in ci.customizations), Decimal("0")
-            )
+            customization_adj = sum((c.price_adjustment for c in ci.customizations), Decimal("0"))
             subtotal += (ci.unit_price + customization_adj) * ci.quantity
 
         # Discount
@@ -371,7 +355,7 @@ class OrderService:
             total = Decimal("0")
 
         order_number = await self.order_repo.generate_order_number(tenant_id)
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
 
         order = await self.order_repo.create(
             {
@@ -400,9 +384,7 @@ class OrderService:
             product_name = "Product"
             variant_name = "Default"
 
-            customization_adj = sum(
-                (c.price_adjustment for c in ci.customizations), Decimal("0")
-            )
+            customization_adj = sum((c.price_adjustment for c in ci.customizations), Decimal("0"))
             item_total = (ci.unit_price + customization_adj) * ci.quantity
 
             oi = await self.order_item_repo.create(
@@ -453,19 +435,14 @@ class OrderService:
             raise NotFoundException("Order", str(order.id))
         return self._build_order_response(order_full)
 
-    async def get_order(
-        self, order_id: UUID | str, tenant_id: UUID | str
-    ) -> OrderResponse:
+    async def get_order(self, order_id: UUID | str, tenant_id: UUID | str) -> OrderResponse:
         """Retrieve a single order by ID."""
         from sqlalchemy import select
-        from sqlalchemy.orm import selectinload
 
         stmt = (
             select(Order)
             .where(Order.id == order_id, Order.tenant_id == tenant_id)
-            .options(
-                selectinload(Order.items).selectinload(OrderItem.customizations)
-            )
+            .options(selectinload(Order.items).selectinload(OrderItem.customizations))
         )
         result = await self.session.execute(stmt)
         order = result.scalar_one_or_none()
@@ -483,21 +460,13 @@ class OrderService:
     ) -> PaginatedResponse[OrderResponse]:
         """Return a paginated list of orders with optional filters."""
         if user_id is not None:
-            orders = await self.order_repo.get_by_user(
-                user_id, tenant_id, skip, limit
-            )
+            orders = await self.order_repo.get_by_user(user_id, tenant_id, skip, limit)
             total = await self.order_repo.count_by_user(user_id, tenant_id)
         elif status is not None:
-            orders = await self.order_repo.get_by_status(
-                tenant_id, status, skip, limit
-            )
+            orders = await self.order_repo.get_by_status(tenant_id, status, skip, limit)
             total = await self.order_repo.count_by_status(tenant_id, status)
         else:
-            orders = list(
-                await self.order_repo.get_all(
-                    skip=skip, limit=limit, tenant_id=tenant_id
-                )
-            )
+            orders = list(await self.order_repo.get_all(skip=skip, limit=limit, tenant_id=tenant_id))
             total = await self.order_repo.count(tenant_id=tenant_id)
 
         page = (skip // limit) + 1 if limit > 0 else 1
@@ -523,15 +492,13 @@ class OrderService:
 
         allowed = _VALID_TRANSITIONS.get(order.status, set())
         if data.status not in allowed:
-            raise BadRequestException(
-                f"Cannot transition from '{order.status.value}' to '{data.status.value}'"
-            )
+            raise BadRequestException(f"Cannot transition from '{order.status.value}' to '{data.status.value}'")
 
         from_status = order.status
         order.status = data.status
 
         # Set timestamp fields based on new status
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         if data.status == OrderStatus.confirmed:
             order.confirmed_at = now
         elif data.status in (OrderStatus.delivered, OrderStatus.picked_up):
@@ -574,13 +541,11 @@ class OrderService:
             raise NotFoundException("Order", str(order_id))
 
         if order.status not in (OrderStatus.pending, OrderStatus.confirmed):
-            raise BadRequestException(
-                f"Cannot cancel an order with status '{order.status.value}'"
-            )
+            raise BadRequestException(f"Cannot cancel an order with status '{order.status.value}'")
 
         from_status = order.status
         order.status = OrderStatus.cancelled
-        order.cancelled_at = datetime.now(timezone.utc)
+        order.cancelled_at = datetime.now(UTC)
         order.cancellation_reason = data.reason
         await self.session.flush()
 

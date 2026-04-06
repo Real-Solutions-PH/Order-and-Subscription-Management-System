@@ -1,8 +1,15 @@
-'use client';
+"use client";
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { api, setAccessToken, setRefreshToken, type LoginRequest, type RegisterRequest, type UserUpdate } from '@/lib/api-client';
-import { queryKeys } from './query-keys';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  api,
+  setAccessToken,
+  setRefreshToken,
+  type LoginRequest,
+  type RegisterRequest,
+  type UserUpdate,
+} from "@/lib/api-client";
+import { queryKeys } from "./query-keys";
 
 /** Current user profile query + auth mutations. */
 export function useAuth() {
@@ -24,7 +31,12 @@ export function useAuth() {
   });
 
   const registerMutation = useMutation({
-    mutationFn: (data: RegisterRequest) => api.auth.register(data),
+    mutationFn: async (data: RegisterRequest) => {
+      // Backend register returns UserResponse, not tokens.
+      // Chain a login call to get tokens after successful registration.
+      await api.auth.register(data);
+      return api.auth.login({ email: data.email, password: data.password });
+    },
     onSuccess: (res) => {
       setAccessToken(res.access_token);
       setRefreshToken(res.refresh_token);
@@ -34,8 +46,8 @@ export function useAuth() {
 
   const logoutMutation = useMutation({
     mutationFn: () => {
-      const rt = localStorage.getItem('prepflow_refresh_token');
-      return api.auth.logout(rt ?? '');
+      const rt = localStorage.getItem("prepflow_refresh_token");
+      return api.auth.logout(rt ?? "");
     },
     onSettled: () => {
       setAccessToken(null);

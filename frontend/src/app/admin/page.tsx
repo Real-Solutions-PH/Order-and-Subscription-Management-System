@@ -59,8 +59,14 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useDashboardMetrics, useMRRBreakdown, usePopularItems, useCohorts, useOrders } from '@/hooks';
-import { SkeletonKPI, SkeletonChart } from '@/components/ui/skeleton';
+import {
+  useDashboardMetrics,
+  useMRRBreakdown,
+  usePopularItems,
+  useCohorts,
+  useOrders,
+} from "@/hooks";
+import { SkeletonKPI, SkeletonChart } from "@/components/ui/skeleton";
 
 const statusColors: Record<string, { bg: string; text: string; dotBg: string }> = {
   new: { bg: "bg-info-light", text: "text-blue-800", dotBg: "bg-blue-800" },
@@ -145,7 +151,13 @@ type SortKey =
   | "cookMins"
   | "packMins";
 
-function SortIcon({ column, sortConfig }: { column: SortKey; sortConfig: { key: SortKey; direction: "asc" | "desc" } }) {
+function SortIcon({
+  column,
+  sortConfig,
+}: {
+  column: SortKey;
+  sortConfig: { key: SortKey; direction: "asc" | "desc" };
+}) {
   if (sortConfig.key !== column) return <div className="w-4" />;
   return sortConfig.direction === "asc" ? (
     <ChevronUp size={14} />
@@ -169,13 +181,15 @@ export default function AdminDashboard() {
   const displayAnalytics = {
     ...analyticsData,
     // Override with API data when available
-    ...(dashMetrics ? {
-      mrr: Number(dashMetrics.mrr),
-      activeSubscribers: dashMetrics.active_subscribers,
-      churnRate: dashMetrics.churn_rate,
-      avgOrderValue: Number(dashMetrics.aov),
-      todayRevenue: Number(dashMetrics.total_revenue),
-    } : {}),
+    ...(dashMetrics
+      ? {
+          mrr: Number(dashMetrics.mrr),
+          activeSubscribers: dashMetrics.active_subscribers,
+          churnRate: dashMetrics.churn_rate,
+          avgOrderValue: Number(dashMetrics.aov),
+          todayRevenue: Number(dashMetrics.total_revenue),
+        }
+      : {}),
   };
 
   // Use API orders when available, fall back to mock
@@ -192,7 +206,8 @@ export default function AdminDashboard() {
         displayAnalytics.todayGrossSalesLastMonth,
       ),
       trendUp:
-        displayAnalytics.todayGrossSales > displayAnalytics.todayGrossSalesLastMonth,
+        displayAnalytics.todayGrossSales >
+        displayAnalytics.todayGrossSalesLastMonth,
       icon: DollarSign,
       iconBg: "bg-green-50",
       iconColor: "text-green-600",
@@ -205,7 +220,9 @@ export default function AdminDashboard() {
         displayAnalytics.todayNetSales,
         displayAnalytics.todayNetSalesLastMonth,
       ),
-      trendUp: displayAnalytics.todayNetSales > displayAnalytics.todayNetSalesLastMonth,
+      trendUp:
+        displayAnalytics.todayNetSales >
+        displayAnalytics.todayNetSalesLastMonth,
       icon: Activity,
       iconBg: "bg-emerald-50",
       iconColor: "text-success",
@@ -219,7 +236,8 @@ export default function AdminDashboard() {
         displayAnalytics.todayTotalMealsLastMonth,
       ),
       trendUp:
-        displayAnalytics.todayTotalMeals > displayAnalytics.todayTotalMealsLastMonth,
+        displayAnalytics.todayTotalMeals >
+        displayAnalytics.todayTotalMealsLastMonth,
       icon: Package,
       iconBg: "bg-amber-50",
       iconColor: "text-warning",
@@ -228,7 +246,10 @@ export default function AdminDashboard() {
       label: "MRR",
       value: formatPeso(displayAnalytics.mrr),
       lastMonthValue: formatPeso(displayAnalytics.mrrLastMonth),
-      trend: calculateTrend(displayAnalytics.mrr, displayAnalytics.mrrLastMonth),
+      trend: calculateTrend(
+        displayAnalytics.mrr,
+        displayAnalytics.mrrLastMonth,
+      ),
       trendUp: displayAnalytics.mrr > displayAnalytics.mrrLastMonth,
       icon: Repeat,
       iconBg: "bg-violet-50",
@@ -260,7 +281,10 @@ export default function AdminDashboard() {
       label: "CAC",
       value: formatPeso(displayAnalytics.cac),
       lastMonthValue: formatPeso(displayAnalytics.cacLastMonth),
-      trend: calculateTrend(displayAnalytics.cac, displayAnalytics.cacLastMonth),
+      trend: calculateTrend(
+        displayAnalytics.cac,
+        displayAnalytics.cacLastMonth,
+      ),
       trendUp: displayAnalytics.cac < displayAnalytics.cacLastMonth,
       icon: Target,
       iconBg: "bg-orange-50",
@@ -271,7 +295,9 @@ export default function AdminDashboard() {
       value: `${displayAnalytics.cacPaybackMonths} mo`,
       lastMonthValue: `${displayAnalytics.cacPaybackMonthsLastMonth} mo`,
       trend: `${(displayAnalytics.cacPaybackMonths - displayAnalytics.cacPaybackMonthsLastMonth).toFixed(1)} mo`,
-      trendUp: displayAnalytics.cacPaybackMonths < displayAnalytics.cacPaybackMonthsLastMonth,
+      trendUp:
+        displayAnalytics.cacPaybackMonths <
+        displayAnalytics.cacPaybackMonthsLastMonth,
       icon: Timer,
       iconBg: "bg-fuchsia-50",
       iconColor: "text-purple-500",
@@ -295,7 +321,10 @@ export default function AdminDashboard() {
       label: "MRR",
       value: formatPeso(displayAnalytics.mrr),
       lastMonthValue: formatPeso(displayAnalytics.mrrLastMonth),
-      trend: calculateTrend(displayAnalytics.mrr, displayAnalytics.mrrLastMonth),
+      trend: calculateTrend(
+        displayAnalytics.mrr,
+        displayAnalytics.mrrLastMonth,
+      ),
       trendUp: displayAnalytics.mrr > displayAnalytics.mrrLastMonth,
       icon: Repeat,
       iconBg: "bg-violet-100",
@@ -333,15 +362,20 @@ export default function AdminDashboard() {
 
   const sortedContribution = useMemo(() => {
     const sortableData = [...displayAnalytics.menuContribution];
-    sortableData.sort((a: Record<string, number | string>, b: Record<string, number | string>) => {
-      if (a[sortConfig.key] < b[sortConfig.key]) {
-        return sortConfig.direction === "asc" ? -1 : 1;
-      }
-      if (a[sortConfig.key] > b[sortConfig.key]) {
-        return sortConfig.direction === "asc" ? 1 : -1;
-      }
-      return 0;
-    });
+    sortableData.sort(
+      (
+        a: Record<string, number | string>,
+        b: Record<string, number | string>,
+      ) => {
+        if (a[sortConfig.key] < b[sortConfig.key]) {
+          return sortConfig.direction === "asc" ? -1 : 1;
+        }
+        if (a[sortConfig.key] > b[sortConfig.key]) {
+          return sortConfig.direction === "asc" ? 1 : -1;
+        }
+        return 0;
+      },
+    );
     return sortableData;
   }, [sortConfig, displayAnalytics.menuContribution]);
 
@@ -546,7 +580,9 @@ export default function AdminDashboard() {
           {/* KPI Cards */}
           {dashboardQuery.isLoading ? (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4">
-              {Array.from({length: 8}).map((_, i) => <SkeletonKPI key={i} />)}
+              {Array.from({ length: 8 }).map((_, i) => (
+                <SkeletonKPI key={i} />
+              ))}
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4">
@@ -568,7 +604,8 @@ export default function AdminDashboard() {
                             <Icon size={18} className={kpi.iconColor} />
                           </div>
                           <span
-                            className={`inline-flex items-center gap-0.5 text-[10px] font-bold uppercase tracking-wider ${kpi.trendUp ? "text-success" : "text-error"}`}
+                            className="inline-flex items-center gap-0.5 text-[10px] font-bold uppercase tracking-wider"
+                            style={{ color: kpi.trendUp ? "#059669" : "#DC2626" }}
                           >
                             {kpi.trendUp ? (
                               <TrendingUp size={12} />
@@ -622,9 +659,17 @@ export default function AdminDashboard() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.25, duration: 0.3 }}
-              className="rounded-xl border border-border bg-surface-white p-5 shadow-card"
+              className="rounded-xl p-5"
+              style={{
+                backgroundColor: "#FFFFFF",
+                boxShadow: "var(--shadow-card)",
+                border: "1px solid #E5E7EB",
+              }}
             >
-              <h2 className="mb-4 text-base font-semibold text-text-primary">
+              <h2
+                className="mb-4 text-base font-semibold"
+                style={{ color: "#1A1A2E" }}
+              >
                 Revenue (Last 30 Days)
               </h2>
               <div style={{ height: 300 }}>
@@ -749,7 +794,7 @@ export default function AdminDashboard() {
                 <h2 className="text-base font-semibold text-text-primary">
                   Menu Profitability & Performance
                 </h2>
-                <p className="mt-0.5 text-xs text-text-secondary">
+                <p className="mt-0.5 text-xs" style={{ color: "#6B7280" }}>
                   Ranked by {sortConfig.key === 'name' ? 'name' : sortConfig.key === 'revenue' ? 'revenue' : 'selected metric'} — this week
                 </p>
               </div>
@@ -757,55 +802,63 @@ export default function AdminDashboard() {
             <div className="overflow-x-auto" style={{ maxHeight: 480 }}>
               <table className="w-full text-sm" style={{ minWidth: 700 }}>
                 <thead>
-                  <tr className="border-b-2 border-border">
-                    <th className="px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-wider text-text-secondary">#</th>
-                    <th className="cursor-pointer px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-wider text-text-secondary transition-colors hover:bg-gray-50" onClick={() => handleSort("name")}>
+                  <tr style={{ borderBottom: "2px solid #E5E7EB" }}>
+                    <th className="px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: "#6B7280" }}>#</th>
+                    <th className="cursor-pointer px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-wider transition-colors hover:bg-gray-50" onClick={() => handleSort("name")} style={{ color: "#6B7280" }}>
                       <div className="flex items-center gap-1">Meal <SortIcon column="name" sortConfig={sortConfig} /></div>
                     </th>
-                    <th className="cursor-pointer px-3 py-2.5 text-right text-xs font-semibold uppercase tracking-wider text-text-secondary transition-colors hover:bg-gray-50" onClick={() => handleSort("sold")}>
+                    <th className="cursor-pointer px-3 py-2.5 text-right text-xs font-semibold uppercase tracking-wider transition-colors hover:bg-gray-50" onClick={() => handleSort("sold")} style={{ color: "#6B7280" }}>
                       <div className="flex items-center justify-end gap-1">Sold <SortIcon column="sold" sortConfig={sortConfig} /></div>
                     </th>
-                    <th className="cursor-pointer px-3 py-2.5 text-right text-xs font-semibold uppercase tracking-wider text-text-secondary transition-colors hover:bg-gray-50" onClick={() => handleSort("pricePerUnit")}>
+                    <th className="cursor-pointer px-3 py-2.5 text-right text-xs font-semibold uppercase tracking-wider transition-colors hover:bg-gray-50" onClick={() => handleSort("pricePerUnit")} style={{ color: "#6B7280" }}>
                       <div className="flex items-center justify-end gap-1">AOV <SortIcon column="pricePerUnit" sortConfig={sortConfig} /></div>
                     </th>
-                    <th className="cursor-pointer px-3 py-2.5 text-right text-xs font-semibold uppercase tracking-wider text-text-secondary transition-colors hover:bg-gray-50" onClick={() => handleSort("costPerUnit")}>
+                    <th className="cursor-pointer px-3 py-2.5 text-right text-xs font-semibold uppercase tracking-wider transition-colors hover:bg-gray-50" onClick={() => handleSort("costPerUnit")} style={{ color: "#6B7280" }}>
                       <div className="flex items-center justify-end gap-1">COGS <SortIcon column="costPerUnit" sortConfig={sortConfig} /></div>
                     </th>
-                    <th className="cursor-pointer px-3 py-2.5 text-right text-xs font-semibold uppercase tracking-wider text-text-secondary transition-colors hover:bg-gray-50" onClick={() => handleSort("marginPct")}>
+                    <th className="cursor-pointer px-3 py-2.5 text-right text-xs font-semibold uppercase tracking-wider transition-colors hover:bg-gray-50" onClick={() => handleSort("marginPct")} style={{ color: "#6B7280" }}>
                       <div className="flex items-center justify-end gap-1">Gross Margin <SortIcon column="marginPct" sortConfig={sortConfig} /></div>
                     </th>
-                    <th className="cursor-pointer px-3 py-2.5 text-right text-xs font-semibold uppercase tracking-wider text-text-secondary transition-colors hover:bg-gray-50" onClick={() => handleSort("revenue")}>
+                    <th className="cursor-pointer px-3 py-2.5 text-right text-xs font-semibold uppercase tracking-wider transition-colors hover:bg-gray-50" onClick={() => handleSort("revenue")} style={{ color: "#6B7280" }}>
                       <div className="flex items-center justify-end gap-1">Revenue <SortIcon column="revenue" sortConfig={sortConfig} /></div>
                     </th>
-                    <th className="cursor-pointer px-3 py-2.5 text-right text-xs font-semibold uppercase tracking-wider text-text-secondary transition-colors hover:bg-gray-50" onClick={() => handleSort("cookMins")}>
+                    <th className="cursor-pointer px-3 py-2.5 text-right text-xs font-semibold uppercase tracking-wider transition-colors hover:bg-gray-50" onClick={() => handleSort("cookMins")} style={{ color: "#6B7280" }}>
                       <div className="flex items-center justify-end gap-1">Cook <SortIcon column="cookMins" sortConfig={sortConfig} /></div>
                     </th>
-                    <th className="cursor-pointer px-3 py-2.5 text-right text-xs font-semibold uppercase tracking-wider text-text-secondary transition-colors hover:bg-gray-50" onClick={() => handleSort("packMins")}>
+                    <th className="cursor-pointer px-3 py-2.5 text-right text-xs font-semibold uppercase tracking-wider transition-colors hover:bg-gray-50" onClick={() => handleSort("packMins")} style={{ color: "#6B7280" }}>
                       <div className="flex items-center justify-end gap-1">Pack <SortIcon column="packMins" sortConfig={sortConfig} /></div>
                     </th>
                   </tr>
                 </thead>
                 <tbody>
                   {sortedContribution.map((item, i) => {
-                    const topRevenue = Math.max(...displayAnalytics.menuContribution.map((m) => m.revenue));
+                    const topRevenue = Math.max(
+                      ...displayAnalytics.menuContribution.map(
+                        (m) => m.revenue,
+                      ),
+                    );
                     const revenueBarPct = (item.revenue / topRevenue) * 100;
                     const isTop3 = i < 3;
                     return (
-                      <tr key={item.name} className={`border-b border-border-light ${isTop3 ? "bg-green-50" : "bg-transparent"}`}>
-                        <td className={`px-3 py-2.5 text-left text-xs font-bold ${isTop3 ? "text-primary" : "text-text-secondary"}`}>{i + 1}</td>
-                        <td className="px-3 py-2.5 font-medium text-text-primary">{item.name}</td>
+                      <tr key={item.name} style={{ borderBottom: "1px solid #F3F4F6", backgroundColor: isTop3 ? "#F0FDF4" : "transparent" }}>
+                        <td className="px-3 py-2.5 text-left text-xs font-bold" style={{ color: isTop3 ? "#1B4332" : "#6B7280" }}>{i + 1}</td>
+                        <td className="px-3 py-2.5 font-medium" style={{ color: "#1A1A2E" }}>{item.name}</td>
                         <td className="px-3 py-2.5 text-right font-semibold">{item.sold}</td>
-                        <td className="px-3 py-2.5 text-right text-xs font-semibold text-text-primary">{formatPeso(item.pricePerUnit)}</td>
-                        <td className="px-3 py-2.5 text-right text-xs font-semibold text-text-secondary">{formatPeso(item.costPerUnit)}</td>
-                        <td className={`px-3 py-2.5 text-right text-xs font-semibold ${item.marginPct >= 55 ? "text-emerald-800" : "text-red-800"}`}>{item.marginPct.toFixed(1)}%</td>
+                        <td className="px-3 py-2.5 text-right text-xs font-semibold" style={{ color: "#1A1A2E" }}>{formatPeso(item.pricePerUnit)}</td>
+                        <td className="px-3 py-2.5 text-right text-xs font-semibold" style={{ color: "#6B7280" }}>{formatPeso(item.costPerUnit)}</td>
+                        <td className="px-3 py-2.5 text-right text-xs font-semibold" style={{ color: item.marginPct >= 55 ? "#065F46" : "#991B1B" }}>{item.marginPct.toFixed(1)}%</td>
                         <td className="px-3 py-2.5 text-right">
                           <div className="flex items-center justify-end gap-2">
-                            <div className="h-2 rounded-full bg-primary-light opacity-35" style={{ width: `${Math.max(revenueBarPct, 8)}%`, maxWidth: 80 }} />
-                            <span className="font-semibold text-text-primary" style={{ minWidth: 64, textAlign: "right" }}>{formatPeso(item.revenue)}</span>
+                            <div className="h-2 rounded-full" style={{ width: `${Math.max(revenueBarPct, 8)}%`, maxWidth: 80, backgroundColor: "#2D6A4F", opacity: 0.35 }} />
+                            <span className="font-semibold" style={{ color: "#1A1A2E", minWidth: 64, textAlign: "right" }}>{formatPeso(item.revenue)}</span>
                           </div>
                         </td>
-                        <td className="px-3 py-2.5 text-right text-xs text-gray-500">{item.cookMins}m</td>
-                        <td className="px-3 py-2.5 text-right text-xs text-gray-500">{item.packMins}m</td>
+                        <td className="px-3 py-2.5 text-right text-xs text-gray-500">
+                          {item.cookMins}m
+                        </td>
+                        <td className="px-3 py-2.5 text-right text-xs text-gray-500">
+                          {item.packMins}m
+                        </td>
                       </tr>
                     );
                   })}
@@ -821,7 +874,9 @@ export default function AdminDashboard() {
           {/* Subscription KPI Cards */}
           {dashboardQuery.isLoading ? (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              {Array.from({length: 4}).map((_, i) => <SkeletonKPI key={i} />)}
+              {Array.from({ length: 4 }).map((_, i) => (
+                <SkeletonKPI key={i} />
+              ))}
             </div>
           ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -834,13 +889,19 @@ export default function AdminDashboard() {
                       initial={{ opacity: 0, y: 16 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: i * 0.05, duration: 0.3 }}
-                      className="rounded-xl border border-border bg-surface-white p-5 shadow-card cursor-help"
+                      className="rounded-xl p-5 cursor-help"
+                      style={{
+                        backgroundColor: "#FFFFFF",
+                        boxShadow: "var(--shadow-card)",
+                        border: "1px solid #E5E7EB",
+                      }}
                     >
                       <div className="flex items-start justify-between">
                         <div
-                          className={`flex h-10 w-10 items-center justify-center rounded-lg ${kpi.iconBg}`}
+                          className="flex h-10 w-10 items-center justify-center rounded-lg"
+                          style={{ backgroundColor: kpi.iconBg }}
                         >
-                          <Icon size={20} className={kpi.iconColor} />
+                          <Icon size={20} style={{ color: kpi.iconColor }} />
                         </div>
                         {kpi.label === "Churn Rate" ? (
                           <div className="relative h-10 w-10">
@@ -863,7 +924,10 @@ export default function AdminDashboard() {
                           </div>
                         ) : (
                           <span
-                            className={`inline-flex items-center gap-1 text-xs font-medium ${kpi.trendUp ? "text-success" : "text-error"}`}
+                            className="inline-flex items-center gap-1 text-xs font-medium"
+                            style={{
+                              color: kpi.trendUp ? "#059669" : "#DC2626",
+                            }}
                           >
                             {kpi.trendUp ? (
                               <TrendingUp size={14} />
@@ -874,19 +938,22 @@ export default function AdminDashboard() {
                           </span>
                         )}
                       </div>
-                      <p className="mt-3 text-2xl font-bold text-text-primary">
+                      <p
+                        className="mt-3 text-2xl font-bold"
+                        style={{ color: "#1A1A2E" }}
+                      >
                         {kpi.value}
                       </p>
-                      <p className="mt-1 text-xs text-text-secondary">
+                      <p className="mt-1 text-xs" style={{ color: "#6B7280" }}>
                         {kpi.label}
                         {kpi.label === "Churn Rate" && kpi.trendUp && (
-                          <span className="text-success">
+                          <span style={{ color: "#059669" }}>
                             {" "}
                             ({kpi.trend})
                           </span>
                         )}
                         {kpi.label === "Churn Rate" && !kpi.trendUp && (
-                          <span className="text-error">
+                          <span style={{ color: "#DC2626" }}>
                             {" "}
                             ({kpi.trend})
                           </span>
@@ -933,9 +1000,17 @@ export default function AdminDashboard() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.3 }}
-              className="rounded-xl border border-border bg-surface-white p-5 shadow-card"
+              className="rounded-xl p-5"
+              style={{
+                backgroundColor: "#FFFFFF",
+                boxShadow: "var(--shadow-card)",
+                border: "1px solid #E5E7EB",
+              }}
             >
-              <h2 className="mb-4 text-base font-semibold text-text-primary">
+              <h2
+                className="mb-4 text-base font-semibold"
+                style={{ color: "#1A1A2E" }}
+              >
                 New vs Churned Subscribers
               </h2>
               <div style={{ height: 300 }}>
@@ -984,9 +1059,17 @@ export default function AdminDashboard() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.25, duration: 0.3 }}
-              className="rounded-xl border border-border bg-surface-white p-5 shadow-card"
+              className="rounded-xl p-5"
+              style={{
+                backgroundColor: "#FFFFFF",
+                boxShadow: "var(--shadow-card)",
+                border: "1px solid #E5E7EB",
+              }}
             >
-              <h2 className="mb-4 text-base font-semibold text-text-primary">
+              <h2
+                className="mb-4 text-base font-semibold"
+                style={{ color: "#1A1A2E" }}
+              >
                 Plan Distribution
               </h2>
               <div className="flex items-center gap-4">
@@ -1031,14 +1114,23 @@ export default function AdminDashboard() {
                       />
                       <div className="flex-1">
                         <div className="flex items-center justify-between">
-                          <span className="text-sm font-medium text-text-primary">
+                          <span
+                            className="text-sm font-medium"
+                            style={{ color: "#1A1A2E" }}
+                          >
                             {plan.name}
                           </span>
-                          <span className="text-sm text-text-secondary">
+                          <span
+                            className="text-sm"
+                            style={{ color: "#6B7280" }}
+                          >
                             {plan.value}
                           </span>
                         </div>
-                        <div className="mt-1 h-1.5 w-full rounded-full bg-muted">
+                        <div
+                          className="mt-1 h-1.5 w-full rounded-full"
+                          style={{ backgroundColor: "#F3F4F6" }}
+                        >
                           <div
                             className="h-1.5 rounded-full"
                             style={{
@@ -1048,7 +1140,7 @@ export default function AdminDashboard() {
                           />
                         </div>
                       </div>
-                      <span className="text-xs text-text-secondary">
+                      <span className="text-xs" style={{ color: "#6B7280" }}>
                         {((plan.value / totalSubscribers) * 100).toFixed(1)}%
                       </span>
                     </div>
@@ -1157,22 +1249,34 @@ export default function AdminDashboard() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.3 }}
-            className="rounded-xl border border-border bg-surface-white p-5 shadow-card"
+            className="rounded-xl p-5"
+            style={{
+              backgroundColor: "#FFFFFF",
+              boxShadow: "var(--shadow-card)",
+              border: "1px solid #E5E7EB",
+            }}
           >
-            <h2 className="mb-4 text-base font-semibold text-text-primary">
+            <h2
+              className="mb-4 text-base font-semibold"
+              style={{ color: "#1A1A2E" }}
+            >
               Cohort Retention Heatmap
             </h2>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-text-secondary">
+                    <th
+                      className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider"
+                      style={{ color: "#6B7280" }}
+                    >
                       Signup Month
                     </th>
                     {cohortColumns.map((col, i) => (
                       <th
                         key={col}
-                        className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-text-secondary"
+                        className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider"
+                        style={{ color: "#6B7280" }}
                       >
                         Month {i + 1}
                       </th>
@@ -1183,9 +1287,12 @@ export default function AdminDashboard() {
                   {displayAnalytics.cohortRetention.map((row) => (
                     <tr
                       key={row.month}
-                      className="border-b border-border-light"
+                      style={{ borderBottom: "1px solid #F3F4F6" }}
                     >
-                      <td className="px-4 py-3 font-medium text-text-primary">
+                      <td
+                        className="px-4 py-3 font-medium"
+                        style={{ color: "#1A1A2E" }}
+                      >
                         {row.month}
                       </td>
                       {cohortColumns.map((col) => {
@@ -1194,12 +1301,22 @@ export default function AdminDashboard() {
                           <td key={col} className="px-2 py-2 text-center">
                             {value !== undefined ? (
                               <span
-                                className={`inline-flex h-10 w-16 items-center justify-center rounded-md text-xs font-bold ${getCohortBgClass(value)} ${getCohortTextClass(value)}`}
+                                className="inline-flex h-10 w-16 items-center justify-center rounded-md text-xs font-bold"
+                                style={{
+                                  backgroundColor: getCohortColor(value),
+                                  color: getCohortTextColor(value),
+                                }}
                               >
                                 {value}%
                               </span>
                             ) : (
-                              <span className="inline-flex h-10 w-16 items-center justify-center rounded-md bg-gray-50 text-xs text-gray-300">
+                              <span
+                                className="inline-flex h-10 w-16 items-center justify-center rounded-md text-xs"
+                                style={{
+                                  backgroundColor: "#F9FAFB",
+                                  color: "#D1D5DB",
+                                }}
+                              >
                                 --
                               </span>
                             )}
@@ -1213,25 +1330,26 @@ export default function AdminDashboard() {
             </div>
             {/* Color scale legend */}
             <div className="mt-4 flex items-center justify-end gap-2">
-              <span className="text-xs text-text-secondary">
+              <span className="text-xs" style={{ color: "#6B7280" }}>
                 Low
               </span>
               <div className="flex gap-0.5">
                 {[
-                  "bg-error",
-                  "bg-accent",
-                  "bg-accent-light",
-                  "bg-emerald-400",
-                  "bg-emerald-500",
-                  "bg-success",
-                ].map((bgClass) => (
+                  "#DC2626",
+                  "#E76F51",
+                  "#F4A261",
+                  "#34D399",
+                  "#10B981",
+                  "#059669",
+                ].map((color) => (
                   <div
-                    key={bgClass}
-                    className={`h-3 w-6 first:rounded-l last:rounded-r ${bgClass}`}
+                    key={color}
+                    className="h-3 w-6 first:rounded-l last:rounded-r"
+                    style={{ backgroundColor: color }}
                   />
                 ))}
               </div>
-              <span className="text-xs text-text-secondary">
+              <span className="text-xs" style={{ color: "#6B7280" }}>
                 High
               </span>
             </div>
@@ -1240,18 +1358,18 @@ export default function AdminDashboard() {
 
           {/* ─── CUSTOMER BEHAVIOR ─── */}
           <div>
-            <h2 className="mb-4 text-lg font-bold text-text-primary font-display">
+            <h2 className="mb-4 text-lg font-bold" style={{ color: "#1A1A2E", fontFamily: "'DM Serif Display', serif" }}>
               Customer Behavior
             </h2>
 
             {/* Behavior KPI row */}
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-5">
               {[
-                { label: "Upgrade Rate", value: `${customerBehaviorData.upgradeRate}%`, prev: `${customerBehaviorData.upgradeRateLastMonth}%`, up: customerBehaviorData.upgradeRate > customerBehaviorData.upgradeRateLastMonth, icon: TrendingUp, iconBg: "bg-success-light", iconColor: "text-success" },
-                { label: "Downgrade Rate", value: `${customerBehaviorData.downgradeRate}%`, prev: `${customerBehaviorData.downgradeRateLastMonth}%`, up: customerBehaviorData.downgradeRate < customerBehaviorData.downgradeRateLastMonth, icon: TrendingDown, iconBg: "bg-error-light", iconColor: "text-error" },
-                { label: "Pause Rate", value: `${customerBehaviorData.pauseRate}%`, prev: `${customerBehaviorData.pauseRateLastMonth}%`, up: customerBehaviorData.pauseRate < customerBehaviorData.pauseRateLastMonth, icon: Pause, iconBg: "bg-warning-light", iconColor: "text-warning" },
-                { label: "Reactivation Rate", value: `${customerBehaviorData.reactivationRate}%`, prev: `${customerBehaviorData.reactivationRateLastMonth}%`, up: customerBehaviorData.reactivationRate > customerBehaviorData.reactivationRateLastMonth, icon: RefreshCw, iconBg: "bg-info-light", iconColor: "text-info" },
-                { label: "NPS Score", value: customerBehaviorData.npsScore.toString(), prev: customerBehaviorData.npsLastMonth.toString(), up: customerBehaviorData.npsScore > customerBehaviorData.npsLastMonth, icon: Star, iconBg: "bg-fuchsia-50", iconColor: "text-purple-500" },
+                { label: "Upgrade Rate", value: `${customerBehaviorData.upgradeRate}%`, prev: `${customerBehaviorData.upgradeRateLastMonth}%`, up: customerBehaviorData.upgradeRate > customerBehaviorData.upgradeRateLastMonth, icon: TrendingUp, iconBg: "#D1FAE5", iconColor: "#059669" },
+                { label: "Downgrade Rate", value: `${customerBehaviorData.downgradeRate}%`, prev: `${customerBehaviorData.downgradeRateLastMonth}%`, up: customerBehaviorData.downgradeRate < customerBehaviorData.downgradeRateLastMonth, icon: TrendingDown, iconBg: "#FEE2E2", iconColor: "#DC2626" },
+                { label: "Pause Rate", value: `${customerBehaviorData.pauseRate}%`, prev: `${customerBehaviorData.pauseRateLastMonth}%`, up: customerBehaviorData.pauseRate < customerBehaviorData.pauseRateLastMonth, icon: Pause, iconBg: "#FEF3C7", iconColor: "#D97706" },
+                { label: "Reactivation Rate", value: `${customerBehaviorData.reactivationRate}%`, prev: `${customerBehaviorData.reactivationRateLastMonth}%`, up: customerBehaviorData.reactivationRate > customerBehaviorData.reactivationRateLastMonth, icon: RefreshCw, iconBg: "#DBEAFE", iconColor: "#2563EB" },
+                { label: "NPS Score", value: customerBehaviorData.npsScore.toString(), prev: customerBehaviorData.npsLastMonth.toString(), up: customerBehaviorData.npsScore > customerBehaviorData.npsLastMonth, icon: Star, iconBg: "#FDF4FF", iconColor: "#A855F7" },
               ].map((kpi, i) => {
                 const Icon = kpi.icon;
                 return (
@@ -1261,28 +1379,37 @@ export default function AdminDashboard() {
                         initial={{ opacity: 0, y: 16 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.05, duration: 0.3 }}
-                        className="cursor-help rounded-xl border border-border bg-surface-white p-4 shadow-card"
+                        className="cursor-help rounded-xl p-4"
+                        style={{ backgroundColor: "#FFFFFF", boxShadow: "var(--shadow-card)", border: "1px solid #E5E7EB" }}
                       >
                         <div className="flex items-start justify-between">
-                          <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${kpi.iconBg}`}>
-                            <Icon size={18} className={kpi.iconColor} />
+                          <div className="flex h-9 w-9 items-center justify-center rounded-lg" style={{ backgroundColor: kpi.iconBg }}>
+                            <Icon size={18} style={{ color: kpi.iconColor }} />
                           </div>
-                          <span className={`inline-flex items-center gap-0.5 text-[10px] font-bold uppercase tracking-wider ${kpi.up ? "text-success" : "text-error"}`}>
+                          <span className="inline-flex items-center gap-0.5 text-[10px] font-bold uppercase tracking-wider" style={{ color: kpi.up ? "#059669" : "#DC2626" }}>
                             {kpi.up ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
                           </span>
                         </div>
-                        <p className="mt-3 text-xl font-bold tracking-tight text-text-primary">{kpi.value}</p>
-                        <p className="mt-0.5 text-[11px] font-medium text-text-secondary">{kpi.label}</p>
+                        <p className="mt-3 text-xl font-bold tracking-tight" style={{ color: "#1A1A2E" }}>{kpi.value}</p>
+                        <p className="mt-0.5 text-[11px] font-medium" style={{ color: "#6B7280" }}>{kpi.label}</p>
                       </motion.div>
                     </TooltipTrigger>
-                    <TooltipContent side="top" align="center" className="flex flex-col gap-1 p-2">
+                    <TooltipContent
+                      side="top"
+                      align="center"
+                      className="flex flex-col gap-1 p-2"
+                    >
                       <div className="flex items-center justify-between gap-4">
                         <span className="text-gray-500">Current</span>
-                        <span className="font-bold text-slate-900">{kpi.value}</span>
+                        <span className="font-bold text-slate-900">
+                          {kpi.value}
+                        </span>
                       </div>
                       <div className="flex items-center justify-between gap-4 border-t border-gray-100 pt-1">
                         <span className="text-gray-500">Last Month</span>
-                        <span className="font-semibold text-slate-700">{kpi.prev}</span>
+                        <span className="font-semibold text-slate-700">
+                          {kpi.prev}
+                        </span>
                       </div>
                     </TooltipContent>
                   </Tooltip>
@@ -1297,21 +1424,48 @@ export default function AdminDashboard() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.45, duration: 0.3 }}
-              className="rounded-xl border border-border bg-surface-white p-5 shadow-card"
+              className="rounded-xl p-5"
+              style={{ backgroundColor: "#FFFFFF", boxShadow: "var(--shadow-card)", border: "1px solid #E5E7EB" }}
             >
-              <h2 className="mb-4 text-base font-semibold text-text-primary">
+              <h2 className="mb-4 text-base font-semibold" style={{ color: "#1A1A2E" }}>
                 Plan Upgrade / Downgrade Trend
               </h2>
               <div style={{ height: 280 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={customerBehaviorData.planMovement}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                    <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#6B7280" }} tickLine={false} axisLine={{ stroke: "#E5E7EB" }} />
-                    <YAxis tick={{ fontSize: 11, fill: "#6B7280" }} tickLine={false} axisLine={{ stroke: "#E5E7EB" }} />
-                    <RechartsTooltip contentStyle={{ backgroundColor: "#FFFFFF", border: "1px solid #E5E7EB", borderRadius: 8, fontSize: 12 }} />
+                    <XAxis
+                      dataKey="month"
+                      tick={{ fontSize: 11, fill: "#6B7280" }}
+                      tickLine={false}
+                      axisLine={{ stroke: "#E5E7EB" }}
+                    />
+                    <YAxis
+                      tick={{ fontSize: 11, fill: "#6B7280" }}
+                      tickLine={false}
+                      axisLine={{ stroke: "#E5E7EB" }}
+                    />
+                    <RechartsTooltip
+                      contentStyle={{
+                        backgroundColor: "#FFFFFF",
+                        border: "1px solid #E5E7EB",
+                        borderRadius: 8,
+                        fontSize: 12,
+                      }}
+                    />
                     <Legend wrapperStyle={{ fontSize: 12, paddingTop: 8 }} />
-                    <Bar dataKey="upgrades" name="Upgrades" fill="#059669" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="downgrades" name="Downgrades" fill="#DC2626" radius={[4, 4, 0, 0]} />
+                    <Bar
+                      dataKey="upgrades"
+                      name="Upgrades"
+                      fill="#059669"
+                      radius={[4, 4, 0, 0]}
+                    />
+                    <Bar
+                      dataKey="downgrades"
+                      name="Downgrades"
+                      fill="#DC2626"
+                      radius={[4, 4, 0, 0]}
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -1322,36 +1476,49 @@ export default function AdminDashboard() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5, duration: 0.3 }}
-              className="rounded-xl border border-border bg-surface-white p-5 shadow-card"
+              className="rounded-xl p-5"
+              style={{ backgroundColor: "#FFFFFF", boxShadow: "var(--shadow-card)", border: "1px solid #E5E7EB" }}
             >
-              <h2 className="mb-2 text-base font-semibold text-text-primary">
+              <h2 className="mb-2 text-base font-semibold" style={{ color: "#1A1A2E" }}>
                 NPS / Satisfaction Score
               </h2>
-              <p className="mb-4 text-xs text-text-secondary">Net Promoter Score breakdown</p>
+              <p className="mb-4 text-xs" style={{ color: "#6B7280" }}>Net Promoter Score breakdown</p>
               <div className="flex items-center gap-6">
                 <div className="flex flex-col items-center justify-center">
                   <div className="relative flex h-28 w-28 items-center justify-center">
                     <svg viewBox="0 0 36 36" className="h-28 w-28">
-                      <path d="M18 2.0845a 15.9155 15.9155 0 0 1 0 31.831a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#E5E7EB" strokeWidth="3" />
-                      <path d="M18 2.0845a 15.9155 15.9155 0 0 1 0 31.831a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#059669" strokeWidth="3" strokeDasharray={`${customerBehaviorData.npsScore}, 100`} strokeLinecap="round" />
+                      <path
+                        d="M18 2.0845a 15.9155 15.9155 0 0 1 0 31.831a 15.9155 15.9155 0 0 1 0 -31.831"
+                        fill="none"
+                        stroke="#E5E7EB"
+                        strokeWidth="3"
+                      />
+                      <path
+                        d="M18 2.0845a 15.9155 15.9155 0 0 1 0 31.831a 15.9155 15.9155 0 0 1 0 -31.831"
+                        fill="none"
+                        stroke="#059669"
+                        strokeWidth="3"
+                        strokeDasharray={`${customerBehaviorData.npsScore}, 100`}
+                        strokeLinecap="round"
+                      />
                     </svg>
-                    <span className="absolute text-2xl font-black text-text-primary">{customerBehaviorData.npsScore}</span>
+                    <span className="absolute text-2xl font-black" style={{ color: "#1A1A2E" }}>{customerBehaviorData.npsScore}</span>
                   </div>
-                  <span className="mt-1 text-xs font-medium text-success">Great</span>
+                  <span className="mt-1 text-xs font-medium" style={{ color: "#059669" }}>Great</span>
                 </div>
                 <div className="flex-1 space-y-4">
                   {[
-                    { label: "Promoters (9-10)", value: customerBehaviorData.npsPromoters, bgClass: "bg-success" },
-                    { label: "Passives (7-8)", value: customerBehaviorData.npsPassives, bgClass: "bg-warning" },
-                    { label: "Detractors (0-6)", value: customerBehaviorData.npsDetractors, bgClass: "bg-error" },
+                    { label: "Promoters (9-10)", value: customerBehaviorData.npsPromoters, color: "#059669" },
+                    { label: "Passives (7-8)", value: customerBehaviorData.npsPassives, color: "#D97706" },
+                    { label: "Detractors (0-6)", value: customerBehaviorData.npsDetractors, color: "#DC2626" },
                   ].map((seg) => (
                     <div key={seg.label}>
                       <div className="mb-1 flex items-center justify-between">
-                        <span className="text-xs text-text-secondary">{seg.label}</span>
-                        <span className="text-sm font-bold text-text-primary">{seg.value}%</span>
+                        <span className="text-xs" style={{ color: "#6B7280" }}>{seg.label}</span>
+                        <span className="text-sm font-bold" style={{ color: "#1A1A2E" }}>{seg.value}%</span>
                       </div>
-                      <div className="h-2 w-full rounded-full bg-muted">
-                        <div className={`h-2 rounded-full ${seg.bgClass}`} style={{ width: `${seg.value}%` }} />
+                      <div className="h-2 w-full rounded-full" style={{ backgroundColor: "#F3F4F6" }}>
+                        <div className="h-2 rounded-full" style={{ backgroundColor: seg.color, width: `${seg.value}%` }} />
                       </div>
                     </div>
                   ))}
@@ -1367,32 +1534,33 @@ export default function AdminDashboard() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.55, duration: 0.3 }}
-              className="rounded-xl border border-border bg-surface-white p-5 shadow-card"
+              className="rounded-xl p-5"
+              style={{ backgroundColor: "#FFFFFF", boxShadow: "var(--shadow-card)", border: "1px solid #E5E7EB" }}
             >
-              <h2 className="mb-2 text-base font-semibold text-text-primary">
+              <h2 className="mb-2 text-base font-semibold" style={{ color: "#1A1A2E" }}>
                 Subscriber Flow — Pause vs Cancel
               </h2>
-              <p className="mb-4 text-xs text-text-secondary">Recoverable churn vs permanent churn this month</p>
+              <p className="mb-4 text-xs" style={{ color: "#6B7280" }}>Recoverable churn vs permanent churn this month</p>
               <div className="space-y-4">
                 {[
-                  { label: "Paused (Recoverable)", value: customerBehaviorData.subscriberFlow.pausedRecoverable, total: customerBehaviorData.subscriberFlow.pausedRecoverable + customerBehaviorData.subscriberFlow.cancelledChurned, iconBg: "bg-warning/15", iconColor: "text-warning", barBg: "bg-warning", icon: Pause },
-                  { label: "Cancelled (Churned)", value: customerBehaviorData.subscriberFlow.cancelledChurned, total: customerBehaviorData.subscriberFlow.pausedRecoverable + customerBehaviorData.subscriberFlow.cancelledChurned, iconBg: "bg-error/15", iconColor: "text-error", barBg: "bg-error", icon: TrendingDown },
-                  { label: "Reactivated (Win-back)", value: customerBehaviorData.subscriberFlow.reactivated, total: customerBehaviorData.subscriberFlow.pausedRecoverable + customerBehaviorData.subscriberFlow.cancelledChurned, iconBg: "bg-success/15", iconColor: "text-success", barBg: "bg-success", icon: RefreshCw },
+                  { label: "Paused (Recoverable)", value: customerBehaviorData.subscriberFlow.pausedRecoverable, total: customerBehaviorData.subscriberFlow.pausedRecoverable + customerBehaviorData.subscriberFlow.cancelledChurned, color: "#D97706", icon: Pause },
+                  { label: "Cancelled (Churned)", value: customerBehaviorData.subscriberFlow.cancelledChurned, total: customerBehaviorData.subscriberFlow.pausedRecoverable + customerBehaviorData.subscriberFlow.cancelledChurned, color: "#DC2626", icon: TrendingDown },
+                  { label: "Reactivated (Win-back)", value: customerBehaviorData.subscriberFlow.reactivated, total: customerBehaviorData.subscriberFlow.pausedRecoverable + customerBehaviorData.subscriberFlow.cancelledChurned, color: "#059669", icon: RefreshCw },
                 ].map((item) => {
                   const Icon = item.icon;
                   const pct = ((item.value / item.total) * 100).toFixed(1);
                   return (
                     <div key={item.label} className="flex items-center gap-3">
-                      <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${item.iconBg}`}>
-                        <Icon size={16} className={item.iconColor} />
+                      <div className="flex h-9 w-9 items-center justify-center rounded-lg" style={{ backgroundColor: `${item.color}15` }}>
+                        <Icon size={16} style={{ color: item.color }} />
                       </div>
                       <div className="flex-1">
                         <div className="mb-1 flex items-center justify-between">
-                          <span className="text-sm font-medium text-text-primary">{item.label}</span>
-                          <span className="text-sm font-bold text-text-primary">{item.value} <span className="text-xs font-normal text-gray-400">({pct}%)</span></span>
+                          <span className="text-sm font-medium" style={{ color: "#1A1A2E" }}>{item.label}</span>
+                          <span className="text-sm font-bold" style={{ color: "#1A1A2E" }}>{item.value} <span className="text-xs font-normal text-gray-400">({pct}%)</span></span>
                         </div>
-                        <div className="h-2 w-full rounded-full bg-muted">
-                          <div className={`h-2 rounded-full ${item.barBg}`} style={{ width: `${pct}%` }} />
+                        <div className="h-2 w-full rounded-full" style={{ backgroundColor: "#F3F4F6" }}>
+                          <div className="h-2 rounded-full" style={{ backgroundColor: item.color, width: `${pct}%` }} />
                         </div>
                       </div>
                     </div>
@@ -1406,12 +1574,13 @@ export default function AdminDashboard() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6, duration: 0.3 }}
-              className="rounded-xl border border-border bg-surface-white p-5 shadow-card"
+              className="rounded-xl p-5"
+              style={{ backgroundColor: "#FFFFFF", boxShadow: "var(--shadow-card)", border: "1px solid #E5E7EB" }}
             >
-              <h2 className="mb-2 text-base font-semibold text-text-primary">
+              <h2 className="mb-2 text-base font-semibold" style={{ color: "#1A1A2E" }}>
                 Most & Least Popular Meals
               </h2>
-              <p className="mb-3 text-xs text-text-secondary">Subscriber meal preferences — informs menu planning</p>
+              <p className="mb-3 text-xs" style={{ color: "#6B7280" }}>Subscriber meal preferences — informs menu planning</p>
               <div className="space-y-2" style={{ maxHeight: 320, overflowY: "auto" }}>
                 {[...customerBehaviorData.mealPopularityBySubscribers]
                   .sort((a, b) => b.orders - a.orders)
@@ -1420,20 +1589,20 @@ export default function AdminDashboard() {
                     const isTop3 = i < 3;
                     const isBottom3 = i >= arr.length - 3;
                     return (
-                      <div key={meal.name} className={`flex items-center gap-3 rounded-lg px-3 py-2 ${isTop3 ? "bg-green-50" : isBottom3 ? "bg-red-50" : "bg-transparent"}`}>
-                        <span className={`w-5 text-xs font-bold ${isTop3 ? "text-success" : isBottom3 ? "text-error" : "text-text-secondary"}`}>
-                          {isTop3 ? <Flame size={14} className="text-success" /> : isBottom3 ? <Snowflake size={14} className="text-error" /> : `${i + 1}`}
+                      <div key={meal.name} className="flex items-center gap-3 rounded-lg px-3 py-2" style={{ backgroundColor: isTop3 ? "#F0FDF4" : isBottom3 ? "#FEF2F2" : "transparent" }}>
+                        <span className="w-5 text-xs font-bold" style={{ color: isTop3 ? "#059669" : isBottom3 ? "#DC2626" : "#6B7280" }}>
+                          {isTop3 ? <Flame size={14} style={{ color: "#059669" }} /> : isBottom3 ? <Snowflake size={14} style={{ color: "#DC2626" }} /> : `${i + 1}`}
                         </span>
                         <div className="flex-1">
                           <div className="flex items-center justify-between">
-                            <span className="text-sm font-medium text-text-primary">{meal.name}</span>
-                            <span className="text-xs font-semibold text-text-secondary">{meal.orders} orders</span>
+                            <span className="text-sm font-medium" style={{ color: "#1A1A2E" }}>{meal.name}</span>
+                            <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>{meal.orders} orders</span>
                           </div>
-                          <div className="mt-1 h-1.5 w-full rounded-full bg-muted">
-                            <div className={`h-1.5 rounded-full ${isTop3 ? "bg-success" : isBottom3 ? "bg-error" : "bg-primary-light"}`} style={{ width: `${(meal.orders / maxOrders) * 100}%` }} />
+                          <div className="mt-1 h-1.5 w-full rounded-full" style={{ backgroundColor: "#F3F4F6" }}>
+                            <div className="h-1.5 rounded-full" style={{ backgroundColor: isTop3 ? "#059669" : isBottom3 ? "#DC2626" : "#2D6A4F", width: `${(meal.orders / maxOrders) * 100}%` }} />
                           </div>
                         </div>
-                        <span className="text-xs text-warning">{meal.rating}</span>
+                        <span className="text-xs" style={{ color: "#D97706" }}>{meal.rating}</span>
                       </div>
                     );
                   })}
@@ -1443,7 +1612,7 @@ export default function AdminDashboard() {
 
           {/* ─── DEMAND PLANNING ─── */}
           <div>
-            <h2 className="mb-4 text-lg font-bold text-text-primary font-display">
+            <h2 className="mb-4 text-lg font-bold" style={{ color: "#1A1A2E", fontFamily: "'DM Serif Display', serif" }}>
               Demand Planning
             </h2>
           </div>
@@ -1453,25 +1622,69 @@ export default function AdminDashboard() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.65, duration: 0.3 }}
-            className="rounded-xl border border-border bg-surface-white p-5 shadow-card"
+            className="rounded-xl p-5"
+            style={{ backgroundColor: "#FFFFFF", boxShadow: "var(--shadow-card)", border: "1px solid #E5E7EB" }}
           >
-            <h2 className="mb-2 text-base font-semibold text-text-primary">
+            <h2 className="mb-2 text-base font-semibold" style={{ color: "#1A1A2E" }}>
               Meals by Plan Type
             </h2>
-            <p className="mb-4 text-xs text-text-secondary">Breakdown of meal orders per subscription tier — capacity planning</p>
+            <p className="mb-4 text-xs" style={{ color: "#6B7280" }}>Breakdown of meal orders per subscription tier — capacity planning</p>
             <div style={{ height: 300 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={demandPlanningData.mealsByPlanType}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                  <XAxis dataKey="plan" tick={{ fontSize: 11, fill: "#6B7280" }} tickLine={false} axisLine={{ stroke: "#E5E7EB" }} />
-                  <YAxis tick={{ fontSize: 11, fill: "#6B7280" }} tickLine={false} axisLine={{ stroke: "#E5E7EB" }} />
-                  <RechartsTooltip contentStyle={{ backgroundColor: "#FFFFFF", border: "1px solid #E5E7EB", borderRadius: 8, fontSize: 12 }} />
+                  <XAxis
+                    dataKey="plan"
+                    tick={{ fontSize: 11, fill: "#6B7280" }}
+                    tickLine={false}
+                    axisLine={{ stroke: "#E5E7EB" }}
+                  />
+                  <YAxis
+                    tick={{ fontSize: 11, fill: "#6B7280" }}
+                    tickLine={false}
+                    axisLine={{ stroke: "#E5E7EB" }}
+                  />
+                  <RechartsTooltip
+                    contentStyle={{
+                      backgroundColor: "#FFFFFF",
+                      border: "1px solid #E5E7EB",
+                      borderRadius: 8,
+                      fontSize: 12,
+                    }}
+                  />
                   <Legend wrapperStyle={{ fontSize: 12, paddingTop: 8 }} />
-                  <Bar dataKey="garlic" name="Garlic Chicken" fill="#1B4332" radius={[2, 2, 0, 0]} stackId="a" />
-                  <Bar dataKey="adobo" name="Chicken Adobo" fill="#2D6A4F" stackId="a" />
-                  <Bar dataKey="salmon" name="Salmon Teriyaki" fill="#40916C" stackId="a" />
-                  <Bar dataKey="korean" name="Korean BBQ" fill="#E76F51" stackId="a" />
-                  <Bar dataKey="others" name="Others" fill="#D1D5DB" radius={[2, 2, 0, 0]} stackId="a" />
+                  <Bar
+                    dataKey="garlic"
+                    name="Garlic Chicken"
+                    fill="#1B4332"
+                    radius={[2, 2, 0, 0]}
+                    stackId="a"
+                  />
+                  <Bar
+                    dataKey="adobo"
+                    name="Chicken Adobo"
+                    fill="#2D6A4F"
+                    stackId="a"
+                  />
+                  <Bar
+                    dataKey="salmon"
+                    name="Salmon Teriyaki"
+                    fill="#40916C"
+                    stackId="a"
+                  />
+                  <Bar
+                    dataKey="korean"
+                    name="Korean BBQ"
+                    fill="#E76F51"
+                    stackId="a"
+                  />
+                  <Bar
+                    dataKey="others"
+                    name="Others"
+                    fill="#D1D5DB"
+                    radius={[2, 2, 0, 0]}
+                    stackId="a"
+                  />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -1483,28 +1696,61 @@ export default function AdminDashboard() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.7, duration: 0.3 }}
-              className="rounded-xl border border-border bg-surface-white p-5 shadow-card"
+              className="rounded-xl p-5"
+              style={{ backgroundColor: "#FFFFFF", boxShadow: "var(--shadow-card)", border: "1px solid #E5E7EB" }}
             >
               <div className="mb-4 flex items-center justify-between">
                 <div>
-                  <h2 className="text-base font-semibold text-text-primary">Demand Forecast vs Actual</h2>
-                  <p className="mt-0.5 text-xs text-text-secondary">Helps reduce waste and stockouts</p>
+                  <h2 className="text-base font-semibold" style={{ color: "#1A1A2E" }}>Demand Forecast vs Actual</h2>
+                  <p className="mt-0.5 text-xs" style={{ color: "#6B7280" }}>Helps reduce waste and stockouts</p>
                 </div>
-                <div className="flex items-center gap-2 rounded-full bg-green-50 px-3 py-1">
-                  <Target size={12} className="text-success" />
-                  <span className="text-xs font-bold text-success">{demandPlanningData.forecastAccuracy}% accuracy</span>
+                <div className="flex items-center gap-2 rounded-full px-3 py-1" style={{ backgroundColor: "#F0FDF4" }}>
+                  <Target size={12} style={{ color: "#059669" }} />
+                  <span className="text-xs font-bold" style={{ color: "#059669" }}>{demandPlanningData.forecastAccuracy}% accuracy</span>
                 </div>
               </div>
               <div style={{ height: 280 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={demandPlanningData.demandForecast}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                    <XAxis dataKey="week" tick={{ fontSize: 11, fill: "#6B7280" }} tickLine={false} axisLine={{ stroke: "#E5E7EB" }} />
-                    <YAxis tick={{ fontSize: 11, fill: "#6B7280" }} tickLine={false} axisLine={{ stroke: "#E5E7EB" }} />
-                    <RechartsTooltip contentStyle={{ backgroundColor: "#FFFFFF", border: "1px solid #E5E7EB", borderRadius: 8, fontSize: 12 }} />
+                    <XAxis
+                      dataKey="week"
+                      tick={{ fontSize: 11, fill: "#6B7280" }}
+                      tickLine={false}
+                      axisLine={{ stroke: "#E5E7EB" }}
+                    />
+                    <YAxis
+                      tick={{ fontSize: 11, fill: "#6B7280" }}
+                      tickLine={false}
+                      axisLine={{ stroke: "#E5E7EB" }}
+                    />
+                    <RechartsTooltip
+                      contentStyle={{
+                        backgroundColor: "#FFFFFF",
+                        border: "1px solid #E5E7EB",
+                        borderRadius: 8,
+                        fontSize: 12,
+                      }}
+                    />
                     <Legend wrapperStyle={{ fontSize: 12, paddingTop: 8 }} />
-                    <Line type="monotone" dataKey="forecast" name="Forecast" stroke="#2D6A4F" strokeWidth={2} strokeDasharray="6 3" dot={{ fill: "#2D6A4F", r: 3 }} />
-                    <Line type="monotone" dataKey="actual" name="Actual" stroke="#E76F51" strokeWidth={2.5} dot={{ fill: "#E76F51", r: 4 }} connectNulls={false} />
+                    <Line
+                      type="monotone"
+                      dataKey="forecast"
+                      name="Forecast"
+                      stroke="#2D6A4F"
+                      strokeWidth={2}
+                      strokeDasharray="6 3"
+                      dot={{ fill: "#2D6A4F", r: 3 }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="actual"
+                      name="Actual"
+                      stroke="#E76F51"
+                      strokeWidth={2.5}
+                      dot={{ fill: "#E76F51", r: 4 }}
+                      connectNulls={false}
+                    />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
@@ -1514,21 +1760,47 @@ export default function AdminDashboard() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.75, duration: 0.3 }}
-              className="rounded-xl border border-border bg-surface-white p-5 shadow-card"
+              className="rounded-xl p-5"
+              style={{ backgroundColor: "#FFFFFF", boxShadow: "var(--shadow-card)", border: "1px solid #E5E7EB" }}
             >
-              <h2 className="mb-2 text-base font-semibold text-text-primary">Peak Order Days</h2>
-              <p className="mb-4 text-xs text-text-secondary">Staffing and delivery route optimization</p>
+              <h2 className="mb-2 text-base font-semibold" style={{ color: "#1A1A2E" }}>Peak Order Days</h2>
+              <p className="mb-4 text-xs" style={{ color: "#6B7280" }}>Staffing and delivery route optimization</p>
               <div style={{ height: 280 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={demandPlanningData.peakOrderDays}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                    <XAxis dataKey="day" tick={{ fontSize: 11, fill: "#6B7280" }} tickLine={false} axisLine={{ stroke: "#E5E7EB" }} />
-                    <YAxis tick={{ fontSize: 11, fill: "#6B7280" }} tickLine={false} axisLine={{ stroke: "#E5E7EB" }} />
-                    <RechartsTooltip contentStyle={{ backgroundColor: "#FFFFFF", border: "1px solid #E5E7EB", borderRadius: 8, fontSize: 12 }} />
+                    <XAxis
+                      dataKey="day"
+                      tick={{ fontSize: 11, fill: "#6B7280" }}
+                      tickLine={false}
+                      axisLine={{ stroke: "#E5E7EB" }}
+                    />
+                    <YAxis
+                      tick={{ fontSize: 11, fill: "#6B7280" }}
+                      tickLine={false}
+                      axisLine={{ stroke: "#E5E7EB" }}
+                    />
+                    <RechartsTooltip
+                      contentStyle={{
+                        backgroundColor: "#FFFFFF",
+                        border: "1px solid #E5E7EB",
+                        borderRadius: 8,
+                        fontSize: 12,
+                      }}
+                    />
                     <Bar dataKey="orders" name="Orders" radius={[6, 6, 0, 0]}>
                       {demandPlanningData.peakOrderDays.map((entry, index) => {
-                        const max = Math.max(...demandPlanningData.peakOrderDays.map(d => d.orders));
-                        return <Cell key={index} fill={entry.orders === max ? "#E76F51" : "#2D6A4F"} />;
+                        const max = Math.max(
+                          ...demandPlanningData.peakOrderDays.map(
+                            (d) => d.orders,
+                          ),
+                        );
+                        return (
+                          <Cell
+                            key={index}
+                            fill={entry.orders === max ? "#E76F51" : "#2D6A4F"}
+                          />
+                        );
                       })}
                     </Bar>
                   </BarChart>
@@ -1542,24 +1814,56 @@ export default function AdminDashboard() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8, duration: 0.3 }}
-            className="rounded-xl border border-border bg-surface-white p-5 shadow-card"
+            className="rounded-xl p-5"
+            style={{ backgroundColor: "#FFFFFF", boxShadow: "var(--shadow-card)", border: "1px solid #E5E7EB" }}
           >
-            <h2 className="mb-2 text-base font-semibold text-text-primary">Peak Order Hours</h2>
-            <p className="mb-4 text-xs text-text-secondary">Hourly order distribution — delivery and kitchen scheduling</p>
+            <h2 className="mb-2 text-base font-semibold" style={{ color: "#1A1A2E" }}>Peak Order Hours</h2>
+            <p className="mb-4 text-xs" style={{ color: "#6B7280" }}>Hourly order distribution — delivery and kitchen scheduling</p>
             <div style={{ height: 250 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={demandPlanningData.peakOrderHours}>
                   <defs>
-                    <linearGradient id="gradPeakHours" x1="0" y1="0" x2="0" y2="1">
+                    <linearGradient
+                      id="gradPeakHours"
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
                       <stop offset="5%" stopColor="#1B4332" stopOpacity={0.3} />
                       <stop offset="95%" stopColor="#1B4332" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                  <XAxis dataKey="hour" tick={{ fontSize: 11, fill: "#6B7280" }} tickLine={false} axisLine={{ stroke: "#E5E7EB" }} />
-                  <YAxis tick={{ fontSize: 11, fill: "#6B7280" }} tickLine={false} axisLine={{ stroke: "#E5E7EB" }} />
-                  <RechartsTooltip contentStyle={{ backgroundColor: "#FFFFFF", border: "1px solid #E5E7EB", borderRadius: 8, fontSize: 12 }} formatter={(value) => [`${value} orders`]} />
-                  <Area type="monotone" dataKey="orders" stroke="#1B4332" strokeWidth={2.5} fill="url(#gradPeakHours)" dot={{ fill: "#1B4332", r: 3 }} activeDot={{ r: 6 }} />
+                  <XAxis
+                    dataKey="hour"
+                    tick={{ fontSize: 11, fill: "#6B7280" }}
+                    tickLine={false}
+                    axisLine={{ stroke: "#E5E7EB" }}
+                  />
+                  <YAxis
+                    tick={{ fontSize: 11, fill: "#6B7280" }}
+                    tickLine={false}
+                    axisLine={{ stroke: "#E5E7EB" }}
+                  />
+                  <RechartsTooltip
+                    contentStyle={{
+                      backgroundColor: "#FFFFFF",
+                      border: "1px solid #E5E7EB",
+                      borderRadius: 8,
+                      fontSize: 12,
+                    }}
+                    formatter={(value) => [`${value} orders`]}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="orders"
+                    stroke="#1B4332"
+                    strokeWidth={2.5}
+                    fill="url(#gradPeakHours)"
+                    dot={{ fill: "#1B4332", r: 3 }}
+                    activeDot={{ r: 6 }}
+                  />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -1572,7 +1876,9 @@ export default function AdminDashboard() {
           {/* Operations KPI Cards */}
           {dashboardQuery.isLoading ? (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              {Array.from({length: 4}).map((_, i) => <SkeletonKPI key={i} />)}
+              {Array.from({ length: 4 }).map((_, i) => (
+                <SkeletonKPI key={i} />
+              ))}
             </div>
           ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -1584,8 +1890,8 @@ export default function AdminDashboard() {
                 trend: calculateTrend(displayAnalytics.orderFulfillmentRate, displayAnalytics.orderFulfillmentRateLastMonth),
                 trendUp: displayAnalytics.orderFulfillmentRate > displayAnalytics.orderFulfillmentRateLastMonth,
                 icon: CheckCircle2,
-                iconBg: "bg-success-light",
-                iconColor: "text-success",
+                iconBg: "#D1FAE5",
+                iconColor: "#059669",
                 description: "% of orders delivered on time",
               },
               {
@@ -1595,8 +1901,8 @@ export default function AdminDashboard() {
                 trend: calculateTrend(displayAnalytics.avgPrepTimeMinutes, displayAnalytics.avgPrepTimeMinutesLastMonth),
                 trendUp: displayAnalytics.avgPrepTimeMinutes < displayAnalytics.avgPrepTimeMinutesLastMonth,
                 icon: Clock,
-                iconBg: "bg-warning-light",
-                iconColor: "text-warning",
+                iconBg: "#FEF3C7",
+                iconColor: "#D97706",
                 description: "Kitchen efficiency per order",
               },
               {
@@ -1606,8 +1912,8 @@ export default function AdminDashboard() {
                 trend: calculateTrend(displayAnalytics.foodWastePercent, displayAnalytics.foodWastePercentLastMonth),
                 trendUp: displayAnalytics.foodWastePercent < displayAnalytics.foodWastePercentLastMonth,
                 icon: Trash2,
-                iconBg: "bg-error-light",
-                iconColor: "text-error",
+                iconBg: "#FEE2E2",
+                iconColor: "#DC2626",
                 description: "Over-prepped ingredients vs. orders",
               },
               {
@@ -1617,8 +1923,8 @@ export default function AdminDashboard() {
                 trend: calculateTrend(displayAnalytics.deliverySuccessRate, displayAnalytics.deliverySuccessRateLastMonth),
                 trendUp: displayAnalytics.deliverySuccessRate > displayAnalytics.deliverySuccessRateLastMonth,
                 icon: Truck,
-                iconBg: "bg-info-light",
-                iconColor: "text-info",
+                iconBg: "#DBEAFE",
+                iconColor: "#2563EB",
                 description: "Successful deliveries as % of total",
               },
             ].map((kpi, i) => {
@@ -1630,25 +1936,32 @@ export default function AdminDashboard() {
                       initial={{ opacity: 0, y: 16 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: i * 0.05, duration: 0.3 }}
-                      className="rounded-xl border border-border bg-surface-white p-5 shadow-card cursor-help"
+                      className="rounded-xl p-5 cursor-help"
+                      style={{
+                        backgroundColor: "#FFFFFF",
+                        boxShadow: "var(--shadow-card)",
+                        border: "1px solid #E5E7EB",
+                      }}
                     >
                       <div className="flex items-start justify-between">
                         <div
-                          className={`flex h-10 w-10 items-center justify-center rounded-lg ${kpi.iconBg}`}
+                          className="flex h-10 w-10 items-center justify-center rounded-lg"
+                          style={{ backgroundColor: kpi.iconBg }}
                         >
-                          <Icon size={20} className={kpi.iconColor} />
+                          <Icon size={20} style={{ color: kpi.iconColor }} />
                         </div>
                         <span
-                          className={`inline-flex items-center gap-0.5 text-[10px] font-bold uppercase tracking-wider ${kpi.trendUp ? "text-success" : "text-error"}`}
+                          className="inline-flex items-center gap-0.5 text-[10px] font-bold uppercase tracking-wider"
+                          style={{ color: kpi.trendUp ? "#059669" : "#DC2626" }}
                         >
                           {kpi.trendUp ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
                           {kpi.trend}
                         </span>
                       </div>
-                      <p className="mt-3 text-2xl font-bold tracking-tight text-text-primary">
+                      <p className="mt-3 text-2xl font-bold tracking-tight" style={{ color: "#1A1A2E" }}>
                         {kpi.value}
                       </p>
-                      <p className="mt-0.5 text-[11px] font-medium text-text-secondary">
+                      <p className="mt-0.5 text-[11px] font-medium" style={{ color: "#6B7280" }}>
                         {kpi.label}
                       </p>
                     </motion.div>
@@ -1674,12 +1987,17 @@ export default function AdminDashboard() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1, duration: 0.3 }}
-            className="rounded-2xl border border-border-light bg-surface-white p-6 shadow-elevated"
+            className="rounded-2xl p-6"
+            style={{
+              backgroundColor: "#FFFFFF",
+              boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05)",
+              border: "1px solid #F3F4F6",
+            }}
           >
-            <h2 className="mb-1 text-lg font-bold text-text-primary">
+            <h2 className="mb-1 text-lg font-bold" style={{ color: "#1A1A2E" }}>
               Weekly Fulfillment Trends
             </h2>
-            <p className="mb-4 text-sm text-text-secondary">
+            <p className="mb-4 text-sm" style={{ color: "#6B7280" }}>
               8-week rolling view of key operational metrics
             </p>
             <ResponsiveContainer width="100%" height={320}>
@@ -1705,24 +2023,50 @@ export default function AdminDashboard() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.15, duration: 0.3 }}
-              className="rounded-2xl border border-border-light bg-surface-white p-6 shadow-elevated"
+              className="rounded-2xl p-6"
+              style={{
+                backgroundColor: "#FFFFFF",
+                boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05)",
+                border: "1px solid #F3F4F6",
+              }}
             >
-              <h2 className="mb-1 text-lg font-bold text-text-primary">
+              <h2 className="mb-1 text-lg font-bold" style={{ color: "#1A1A2E" }}>
                 Prep Time by Meal
               </h2>
               <p className="mb-4 text-sm text-text-secondary">
                 Average preparation time (minutes) per meal
               </p>
               <ResponsiveContainer width="100%" height={280}>
-                <BarChart data={displayAnalytics.dailyPrepBreakdown} layout="vertical">
+                <BarChart
+                  data={displayAnalytics.dailyPrepBreakdown}
+                  layout="vertical"
+                >
                   <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
-                  <XAxis type="number" tick={{ fontSize: 12, fill: "#6B7280" }} unit=" min" />
-                  <YAxis dataKey="meal" type="category" tick={{ fontSize: 11, fill: "#6B7280" }} width={140} />
+                  <XAxis
+                    type="number"
+                    tick={{ fontSize: 12, fill: "#6B7280" }}
+                    unit=" min"
+                  />
+                  <YAxis
+                    dataKey="meal"
+                    type="category"
+                    tick={{ fontSize: 11, fill: "#6B7280" }}
+                    width={140}
+                  />
                   <RechartsTooltip
-                    contentStyle={{ borderRadius: 12, border: "1px solid #E5E7EB", fontSize: 12 }}
+                    contentStyle={{
+                      borderRadius: 12,
+                      border: "1px solid #E5E7EB",
+                      fontSize: 12,
+                    }}
                     formatter={(value) => [`${value} min`, "Prep Time"]}
                   />
-                  <Bar dataKey="prepTime" fill="#D97706" radius={[0, 6, 6, 0]} barSize={20} />
+                  <Bar
+                    dataKey="prepTime"
+                    fill="#D97706"
+                    radius={[0, 6, 6, 0]}
+                    barSize={20}
+                  />
                 </BarChart>
               </ResponsiveContainer>
             </motion.div>
@@ -1732,9 +2076,14 @@ export default function AdminDashboard() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.3 }}
-              className="rounded-2xl border border-border-light bg-surface-white p-6 shadow-elevated"
+              className="rounded-2xl p-6"
+              style={{
+                backgroundColor: "#FFFFFF",
+                boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05)",
+                border: "1px solid #F3F4F6",
+              }}
             >
-              <h2 className="mb-1 text-lg font-bold text-text-primary">
+              <h2 className="mb-1 text-lg font-bold" style={{ color: "#1A1A2E" }}>
                 Delivery Breakdown
               </h2>
               <p className="mb-4 text-sm text-text-secondary">
@@ -1744,10 +2093,26 @@ export default function AdminDashboard() {
                 <PieChart>
                   <Pie
                     data={[
-                      { name: "On Time", value: displayAnalytics.deliveryBreakdown.onTime, color: "#059669" },
-                      { name: "Late", value: displayAnalytics.deliveryBreakdown.late, color: "#D97706" },
-                      { name: "Failed", value: displayAnalytics.deliveryBreakdown.failed, color: "#DC2626" },
-                      { name: "Returned", value: displayAnalytics.deliveryBreakdown.returned, color: "#6B7280" },
+                      {
+                        name: "On Time",
+                        value: displayAnalytics.deliveryBreakdown.onTime,
+                        color: "#059669",
+                      },
+                      {
+                        name: "Late",
+                        value: displayAnalytics.deliveryBreakdown.late,
+                        color: "#D97706",
+                      },
+                      {
+                        name: "Failed",
+                        value: displayAnalytics.deliveryBreakdown.failed,
+                        color: "#DC2626",
+                      },
+                      {
+                        name: "Returned",
+                        value: displayAnalytics.deliveryBreakdown.returned,
+                        color: "#6B7280",
+                      },
                     ]}
                     cx="50%"
                     cy="50%"
@@ -1755,19 +2120,45 @@ export default function AdminDashboard() {
                     outerRadius={100}
                     paddingAngle={3}
                     dataKey="value"
-                    label={({ name, percent }: { name?: string; percent?: number }) => `${name ?? ''} ${((percent ?? 0) * 100).toFixed(0)}%`}
+                    label={({
+                      name,
+                      percent,
+                    }: {
+                      name?: string;
+                      percent?: number;
+                    }) => `${name ?? ""} ${((percent ?? 0) * 100).toFixed(0)}%`}
                   >
                     {[
-                      { name: "On Time", value: displayAnalytics.deliveryBreakdown.onTime, color: "#059669" },
-                      { name: "Late", value: displayAnalytics.deliveryBreakdown.late, color: "#D97706" },
-                      { name: "Failed", value: displayAnalytics.deliveryBreakdown.failed, color: "#DC2626" },
-                      { name: "Returned", value: displayAnalytics.deliveryBreakdown.returned, color: "#6B7280" },
+                      {
+                        name: "On Time",
+                        value: displayAnalytics.deliveryBreakdown.onTime,
+                        color: "#059669",
+                      },
+                      {
+                        name: "Late",
+                        value: displayAnalytics.deliveryBreakdown.late,
+                        color: "#D97706",
+                      },
+                      {
+                        name: "Failed",
+                        value: displayAnalytics.deliveryBreakdown.failed,
+                        color: "#DC2626",
+                      },
+                      {
+                        name: "Returned",
+                        value: displayAnalytics.deliveryBreakdown.returned,
+                        color: "#6B7280",
+                      },
                     ].map((entry) => (
                       <Cell key={entry.name} fill={entry.color} />
                     ))}
                   </Pie>
                   <RechartsTooltip
-                    contentStyle={{ borderRadius: 12, border: "1px solid #E5E7EB", fontSize: 12 }}
+                    contentStyle={{
+                      borderRadius: 12,
+                      border: "1px solid #E5E7EB",
+                      fontSize: 12,
+                    }}
                   />
                 </PieChart>
               </ResponsiveContainer>
@@ -1779,7 +2170,12 @@ export default function AdminDashboard() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.25, duration: 0.3 }}
-            className="rounded-2xl border border-border-light bg-surface-white p-6 shadow-elevated"
+            className="rounded-2xl p-6"
+            style={{
+              backgroundColor: "#FFFFFF",
+              boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05)",
+              border: "1px solid #F3F4F6",
+            }}
           >
             <h2 className="mb-1 text-lg font-bold text-text-primary">
               Food Waste by Meal
@@ -1790,12 +2186,12 @@ export default function AdminDashboard() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b-2 border-border">
-                    <th className="px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-wider text-text-secondary">Meal</th>
-                    <th className="px-3 py-2.5 text-right text-xs font-semibold uppercase tracking-wider text-text-secondary">Orders</th>
-                    <th className="px-3 py-2.5 text-right text-xs font-semibold uppercase tracking-wider text-text-secondary">Prep Time</th>
-                    <th className="px-3 py-2.5 text-right text-xs font-semibold uppercase tracking-wider text-text-secondary">Waste (kg)</th>
-                    <th className="px-3 py-2.5 text-right text-xs font-semibold uppercase tracking-wider text-text-secondary">Waste/Order</th>
+                  <tr style={{ borderBottom: "2px solid #E5E7EB" }}>
+                    <th className="px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: "#6B7280" }}>Meal</th>
+                    <th className="px-3 py-2.5 text-right text-xs font-semibold uppercase tracking-wider" style={{ color: "#6B7280" }}>Orders</th>
+                    <th className="px-3 py-2.5 text-right text-xs font-semibold uppercase tracking-wider" style={{ color: "#6B7280" }}>Prep Time</th>
+                    <th className="px-3 py-2.5 text-right text-xs font-semibold uppercase tracking-wider" style={{ color: "#6B7280" }}>Waste (kg)</th>
+                    <th className="px-3 py-2.5 text-right text-xs font-semibold uppercase tracking-wider" style={{ color: "#6B7280" }}>Waste/Order</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1804,13 +2200,13 @@ export default function AdminDashboard() {
                       key={item.meal}
                       className={`border-b border-border-light ${idx % 2 === 0 ? "bg-surface-white" : "bg-gray-50"}`}
                     >
-                      <td className="px-3 py-2.5 font-medium text-text-primary">{item.meal}</td>
-                      <td className="px-3 py-2.5 text-right text-text-secondary">{item.orders}</td>
-                      <td className="px-3 py-2.5 text-right text-text-secondary">{item.prepTime} min</td>
-                      <td className={`px-3 py-2.5 text-right font-medium ${item.wasteKg >= 1.5 ? "text-error" : "text-success"}`}>
+                      <td className="px-3 py-2.5 font-medium" style={{ color: "#1A1A2E" }}>{item.meal}</td>
+                      <td className="px-3 py-2.5 text-right" style={{ color: "#6B7280" }}>{item.orders}</td>
+                      <td className="px-3 py-2.5 text-right" style={{ color: "#6B7280" }}>{item.prepTime} min</td>
+                      <td className="px-3 py-2.5 text-right font-medium" style={{ color: item.wasteKg >= 1.5 ? "#DC2626" : "#059669" }}>
                         {item.wasteKg} kg
                       </td>
-                      <td className="px-3 py-2.5 text-right text-text-secondary">
+                      <td className="px-3 py-2.5 text-right" style={{ color: "#6B7280" }}>
                         {(item.wasteKg / item.orders * 1000).toFixed(0)}g
                       </td>
                     </tr>

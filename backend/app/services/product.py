@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 import json
-from typing import Any, Sequence
+from collections.abc import Sequence
+from datetime import UTC
+from typing import Any
 from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.cache import RedisCache, get_cache
+from app.core.cache import RedisCache
 from app.core.events import get_event_bus
 from app.core.exceptions import BadRequestException, NotFoundException
 from app.repo.db import (
@@ -61,9 +63,7 @@ class ProductService:
     # Products
     # ------------------------------------------------------------------
 
-    async def create_product(
-        self, tenant_id: UUID | str, data: ProductCreate
-    ) -> Product:
+    async def create_product(self, tenant_id: UUID | str, data: ProductCreate) -> Product:
         slug = generate_slug(data.name)
         product = await self.product_repo.create(
             {
@@ -139,9 +139,7 @@ class ProductService:
 
         return await self.product_repo.get_with_details(product_id)  # type: ignore[return-value]
 
-    async def get_product(
-        self, product_id: UUID | str, tenant_id: UUID | str
-    ) -> Product:
+    async def get_product(self, product_id: UUID | str, tenant_id: UUID | str) -> Product:
         # Try cache first
         if self.cache:
             cached = await self.cache.get(f"product:{product_id}")
@@ -199,9 +197,7 @@ class ProductService:
         )
         return items
 
-    async def delete_product(
-        self, product_id: UUID | str, tenant_id: UUID | str
-    ) -> Product:
+    async def delete_product(self, product_id: UUID | str, tenant_id: UUID | str) -> Product:
         """Soft-delete a product by setting its status to archived."""
         product = await self.product_repo.get_by_id(product_id, tenant_id=tenant_id)
         if product is None:
@@ -222,9 +218,7 @@ class ProductService:
     # Variants
     # ------------------------------------------------------------------
 
-    async def add_variant(
-        self, product_id: UUID | str, data: VariantCreate
-    ) -> ProductVariant:
+    async def add_variant(self, product_id: UUID | str, data: VariantCreate) -> ProductVariant:
         variant = await self.variant_repo.create(
             {
                 "product_id": product_id,
@@ -244,9 +238,7 @@ class ProductService:
     # Images
     # ------------------------------------------------------------------
 
-    async def add_image(
-        self, product_id: UUID | str, data: ImageCreate
-    ) -> ProductImage:
+    async def add_image(self, product_id: UUID | str, data: ImageCreate) -> ProductImage:
         image = ProductImage(
             product_id=product_id,
             url=data.url,
@@ -271,11 +263,7 @@ class ProductService:
         """Replace all attribute values for a product."""
         from sqlalchemy import delete
 
-        await self.session.execute(
-            delete(ProductAttributeValue).where(
-                ProductAttributeValue.product_id == product_id
-            )
-        )
+        await self.session.execute(delete(ProductAttributeValue).where(ProductAttributeValue.product_id == product_id))
 
         for attr in attributes:
             av = ProductAttributeValue(
@@ -301,9 +289,7 @@ class CatalogService:
         self.catalog_repo = CatalogRepository(session)
         self.item_repo = CatalogItemRepository(session)
 
-    async def create_catalog(
-        self, tenant_id: UUID | str, data: CatalogCreate
-    ):
+    async def create_catalog(self, tenant_id: UUID | str, data: CatalogCreate):
         slug = generate_slug(data.name)
         return await self.catalog_repo.create(
             {
@@ -314,10 +300,8 @@ class CatalogService:
             }
         )
 
-    async def publish_catalog(
-        self, catalog_id: UUID | str, tenant_id: UUID | str
-    ):
-        from datetime import datetime, timezone
+    async def publish_catalog(self, catalog_id: UUID | str, tenant_id: UUID | str):
+        from datetime import datetime
 
         catalog = await self.catalog_repo.get_by_id(catalog_id, tenant_id=tenant_id)
         if catalog is None:
@@ -330,7 +314,7 @@ class CatalogService:
             catalog_id,
             {
                 "status": CatalogStatus.published,
-                "published_at": datetime.now(timezone.utc),
+                "published_at": datetime.now(UTC),
             },
             tenant_id=tenant_id,
         )

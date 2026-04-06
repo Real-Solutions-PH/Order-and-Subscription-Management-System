@@ -5,7 +5,7 @@
  * This file re-exports everything so existing imports keep working while
  * pages are progressively migrated to the TanStack-powered hooks.
  */
-import seedData from './seed-data.json';
+import seedData from "./seed-data.json";
 
 // ---------------------------------------------------------------------------
 // Type definitions (unchanged)
@@ -31,7 +31,7 @@ export interface Customer {
   email: string;
   phone: string;
   planType: string;
-  status: 'active' | 'paused' | 'churned' | 'at_risk';
+  status: "active" | "paused" | "churned" | "at_risk";
   monthsSubscribed: number;
   ltv: number;
   joinDate: string;
@@ -47,13 +47,25 @@ export interface Order {
   id: string;
   customerId: number;
   customerName: string;
-  items: { mealId: number; mealName: string; quantity: number; price: number; customizations?: string[] }[];
+  items: {
+    mealId: number;
+    mealName: string;
+    quantity: number;
+    price: number;
+    customizations?: string[];
+  }[];
   total: number;
-  status: 'new' | 'preparing' | 'ready' | 'delivering' | 'delivered' | 'cancelled';
+  status:
+    | "new"
+    | "preparing"
+    | "ready"
+    | "delivering"
+    | "delivered"
+    | "cancelled";
   deliveryDate: string;
   deliverySlot: string;
   paymentMethod: string;
-  paymentStatus: 'paid' | 'pending' | 'failed';
+  paymentStatus: "paid" | "pending" | "failed";
   address: string;
   notes: string;
   createdAt: string;
@@ -81,7 +93,9 @@ export const analyticsData = {
       date: `Mar ${i + 1}`,
       subscription: 12000 + Math.floor(Math.random() * 6000),
       alaCarte: 3000 + Math.floor(Math.random() * 4000),
-      laborEfficiency: Number.parseFloat((totalMeals / (laborCost * workers)).toFixed(3)),
+      laborEfficiency: Number.parseFloat(
+        (totalMeals / (laborCost * workers)).toFixed(3),
+      ),
       totalMeals,
       laborCost,
       workers,

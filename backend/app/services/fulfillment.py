@@ -2,22 +2,22 @@
 
 from __future__ import annotations
 
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 from uuid import UUID
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.events import get_event_bus
-from app.core.exceptions import BadRequestException, NotFoundException
+from app.core.exceptions import NotFoundException
 from app.repo.db import (
+    Address,
     DeliverySlot,
     DeliveryZone,
     FulfillmentOrder,
     FulfillmentStatus,
     Order,
     OrderItem,
-    Address,
 )
 from app.repo.fulfillment import (
     AddressRepository,
@@ -81,7 +81,7 @@ class FulfillmentService:
         update_data: dict = {"status": data.status}
 
         # Set timestamp fields based on the new status
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         if data.status == FulfillmentStatus.shipped:
             update_data["shipped_at"] = now
         elif data.status in (
@@ -93,9 +93,7 @@ class FulfillmentService:
         if data.notes:
             update_data["driver_notes"] = data.notes
 
-        updated = await self.repo.update(
-            fulfillment_id, update_data, tenant_id=tenant_id
-        )
+        updated = await self.repo.update(fulfillment_id, update_data, tenant_id=tenant_id)
         if updated is None:
             raise NotFoundException("FulfillmentOrder", str(fulfillment_id))
 
@@ -111,18 +109,14 @@ class FulfillmentService:
         )
         return updated
 
-    async def get_fulfillment(
-        self, order_id: UUID | str, tenant_id: UUID | str
-    ) -> FulfillmentOrder:
+    async def get_fulfillment(self, order_id: UUID | str, tenant_id: UUID | str) -> FulfillmentOrder:
         """Get the fulfillment record for an order."""
         fulfillment = await self.repo.get_by_order(order_id)
         if fulfillment is None:
             raise NotFoundException("FulfillmentOrder", str(order_id))
         return fulfillment
 
-    async def get_production_report(
-        self, tenant_id: UUID | str, report_date: date
-    ) -> ProductionReportResponse:
+    async def get_production_report(self, tenant_id: UUID | str, report_date: date) -> ProductionReportResponse:
         """Aggregate all orders for a date into item quantities."""
         # Get fulfillment orders for the date
         fulfillments = await self.repo.get_by_date(tenant_id, report_date)
@@ -180,9 +174,7 @@ class AddressService:
         address_data["tenant_id"] = tenant_id
         return await self.repo.create(address_data)
 
-    async def list_addresses(
-        self, user_id: UUID | str, tenant_id: UUID | str
-    ) -> list[Address]:
+    async def list_addresses(self, user_id: UUID | str, tenant_id: UUID | str) -> list[Address]:
         """List all addresses for a user."""
         return await self.repo.get_by_user(user_id, tenant_id=tenant_id)
 
@@ -233,9 +225,7 @@ class DeliveryZoneService:
         self.zone_repo = DeliveryZoneRepository(session)
         self.slot_repo = DeliverySlotRepository(session)
 
-    async def create_zone(
-        self, tenant_id: UUID | str, data: DeliveryZoneCreate
-    ) -> DeliveryZone:
+    async def create_zone(self, tenant_id: UUID | str, data: DeliveryZoneCreate) -> DeliveryZone:
         """Create a new delivery zone."""
         zone_data = data.model_dump()
         zone_data["tenant_id"] = tenant_id
@@ -245,9 +235,7 @@ class DeliveryZoneService:
         """List all active delivery zones for a tenant."""
         return await self.zone_repo.get_active(tenant_id)
 
-    async def lookup_zone(
-        self, tenant_id: UUID | str, postal_code: str
-    ) -> DeliveryZone | None:
+    async def lookup_zone(self, tenant_id: UUID | str, postal_code: str) -> DeliveryZone | None:
         """Look up a delivery zone by postal code."""
         return await self.zone_repo.lookup_by_postal_code(postal_code, tenant_id)
 
@@ -266,8 +254,6 @@ class DeliveryZoneService:
         slot_data["zone_id"] = zone_id
         return await self.slot_repo.create(slot_data)
 
-    async def get_available_slots(
-        self, zone_id: UUID | str, target_date: date
-    ) -> list[DeliverySlot]:
+    async def get_available_slots(self, zone_id: UUID | str, target_date: date) -> list[DeliverySlot]:
         """Get available delivery slots for a zone and date."""
         return await self.slot_repo.get_available(zone_id, target_date)

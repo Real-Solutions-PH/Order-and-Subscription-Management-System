@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { api } from '@/lib/api-client';
-import { queryKeys } from './query-keys';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { api } from "@/lib/api-client";
+import { queryKeys } from "./query-keys";
 
 /** User's saved payment methods. */
 export function usePaymentMethods() {
@@ -37,7 +37,8 @@ export function usePaymentMutations() {
   const saveMethod = useMutation({
     mutationFn: (data: { type: string; display_name: string }) =>
       api.payments.saveMethods(data),
-    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.paymentMethods }),
+    onSuccess: () =>
+      qc.invalidateQueries({ queryKey: queryKeys.paymentMethods }),
   });
 
   return {

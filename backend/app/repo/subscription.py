@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from typing import Any, Sequence
+from collections.abc import Sequence
+from typing import Any
 from uuid import UUID
 
 from sqlalchemy import select
@@ -10,24 +11,21 @@ from sqlalchemy.orm import selectinload
 
 from app.repo.base import BaseRepository
 from app.repo.db import (
+    CycleStatus,
     Subscription,
     SubscriptionCycle,
     SubscriptionEvent,
     SubscriptionEventType,
     SubscriptionPlan,
-    SubscriptionPlanTier,
     SubscriptionSelection,
     SubscriptionStatus,
-    CycleStatus,
 )
 
 
 class SubscriptionPlanRepository(BaseRepository[SubscriptionPlan]):
     model = SubscriptionPlan
 
-    async def get_active_plans(
-        self, tenant_id: UUID | str
-    ) -> Sequence[SubscriptionPlan]:
+    async def get_active_plans(self, tenant_id: UUID | str) -> Sequence[SubscriptionPlan]:
         stmt = (
             select(self.model)
             .where(self.model.is_active.is_(True))
@@ -38,14 +36,8 @@ class SubscriptionPlanRepository(BaseRepository[SubscriptionPlan]):
         result = await self.session.execute(stmt)
         return result.scalars().all()
 
-    async def get_with_tiers(
-        self, plan_id: UUID | str
-    ) -> SubscriptionPlan | None:
-        stmt = (
-            select(self.model)
-            .where(self.model.id == plan_id)
-            .options(selectinload(self.model.tiers))
-        )
+    async def get_with_tiers(self, plan_id: UUID | str) -> SubscriptionPlan | None:
+        stmt = select(self.model).where(self.model.id == plan_id).options(selectinload(self.model.tiers))
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
 
@@ -53,21 +45,13 @@ class SubscriptionPlanRepository(BaseRepository[SubscriptionPlan]):
 class SubscriptionRepository(BaseRepository[Subscription]):
     model = Subscription
 
-    async def get_by_user(
-        self, user_id: UUID | str, tenant_id: UUID | str
-    ) -> Sequence[Subscription]:
-        stmt = (
-            select(self.model)
-            .where(self.model.user_id == user_id)
-            .options(selectinload(self.model.plan_tier))
-        )
+    async def get_by_user(self, user_id: UUID | str, tenant_id: UUID | str) -> Sequence[Subscription]:
+        stmt = select(self.model).where(self.model.user_id == user_id).options(selectinload(self.model.plan_tier))
         stmt = self._apply_tenant_filter(stmt, tenant_id)
         result = await self.session.execute(stmt)
         return result.scalars().all()
 
-    async def get_active_by_user(
-        self, user_id: UUID | str, tenant_id: UUID | str
-    ) -> Sequence[Subscription]:
+    async def get_active_by_user(self, user_id: UUID | str, tenant_id: UUID | str) -> Sequence[Subscription]:
         stmt = (
             select(self.model)
             .where(
@@ -83,11 +67,7 @@ class SubscriptionRepository(BaseRepository[Subscription]):
     async def count_active(self, tenant_id: UUID | str) -> int:
         from sqlalchemy import func
 
-        stmt = (
-            select(func.count())
-            .select_from(self.model)
-            .where(self.model.status == SubscriptionStatus.active)
-        )
+        stmt = select(func.count()).select_from(self.model).where(self.model.status == SubscriptionStatus.active)
         stmt = self._apply_tenant_filter(stmt, tenant_id)
         result = await self.session.execute(stmt)
         return result.scalar_one()
@@ -96,9 +76,7 @@ class SubscriptionRepository(BaseRepository[Subscription]):
 class SubscriptionCycleRepository(BaseRepository[SubscriptionCycle]):
     model = SubscriptionCycle
 
-    async def get_upcoming(
-        self, subscription_id: UUID | str
-    ) -> Sequence[SubscriptionCycle]:
+    async def get_upcoming(self, subscription_id: UUID | str) -> Sequence[SubscriptionCycle]:
         stmt = (
             select(self.model)
             .where(
@@ -110,9 +88,7 @@ class SubscriptionCycleRepository(BaseRepository[SubscriptionCycle]):
         result = await self.session.execute(stmt)
         return result.scalars().all()
 
-    async def get_current(
-        self, subscription_id: UUID | str
-    ) -> SubscriptionCycle | None:
+    async def get_current(self, subscription_id: UUID | str) -> SubscriptionCycle | None:
         from sqlalchemy import func as sa_func
 
         now = sa_func.now()
@@ -132,13 +108,8 @@ class SubscriptionCycleRepository(BaseRepository[SubscriptionCycle]):
 class SubscriptionSelectionRepository(BaseRepository[SubscriptionSelection]):
     model = SubscriptionSelection
 
-    async def get_by_cycle(
-        self, cycle_id: UUID | str
-    ) -> Sequence[SubscriptionSelection]:
-        stmt = (
-            select(self.model)
-            .where(self.model.cycle_id == cycle_id)
-        )
+    async def get_by_cycle(self, cycle_id: UUID | str) -> Sequence[SubscriptionSelection]:
+        stmt = select(self.model).where(self.model.cycle_id == cycle_id)
         result = await self.session.execute(stmt)
         return result.scalars().all()
 

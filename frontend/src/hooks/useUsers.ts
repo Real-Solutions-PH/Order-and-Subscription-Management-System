@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { api, type UserUpdate } from '@/lib/api-client';
-import { queryKeys } from './query-keys';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { api, type UserUpdate } from "@/lib/api-client";
+import { queryKeys } from "./query-keys";
 
 /** Users list (admin). */
 export function useUsers(params?: { page?: number; page_size?: number }) {
@@ -26,7 +26,8 @@ export function useUserMutations() {
   const qc = useQueryClient();
 
   const updateUser = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: UserUpdate }) => api.users.update(id, data),
+    mutationFn: ({ id, data }: { id: string; data: UserUpdate }) =>
+      api.users.update(id, data),
     onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.users.list() }),
   });
 

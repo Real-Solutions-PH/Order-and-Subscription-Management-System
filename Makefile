@@ -2,7 +2,7 @@
 # PrepFlow — Order & Subscription Management System
 # ============================================================================
 
-.PHONY: help install dev backend frontend lint lint-backend lint-frontend lint-fix format format-backend format-frontend format-check test migrate docker-up docker-down clean
+.PHONY: help install dev backend frontend lint lint-backend lint-frontend lint-fix format format-backend format-frontend format-check test migrate docker-up docker-down docker-nuke clean
 
 help: ## Show this help message
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | \
@@ -107,6 +107,9 @@ docker-logs: ## Tail Docker logs
 
 docker-db: ## Start only database and Redis
 	cd backend && docker compose up -d postgres redis
+
+docker-nuke: ## Stop all containers and delete volumes (wipes DB data)
+	cd backend && docker compose down -v --remove-orphans
 
 # --- Utilities ---------------------------------------------------------------
 

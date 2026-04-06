@@ -3,14 +3,12 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Optional
 from uuid import UUID
 
 from pydantic import BaseModel
 
 from app.repo.db import IntegrationSystemType, WebhookEventStatus
 from app.schemas.base import BaseSchema, PaginatedResponse
-
 
 # ---------------------------------------------------------------------------
 # Webhook
@@ -20,7 +18,7 @@ from app.schemas.base import BaseSchema, PaginatedResponse
 class WebhookCreate(BaseModel):
     url: str
     events: list[str]
-    secret: Optional[str] = None  # auto-generated if not provided
+    secret: str | None = None  # auto-generated if not provided
 
 
 class WebhookResponse(BaseSchema):
@@ -28,14 +26,14 @@ class WebhookResponse(BaseSchema):
     url: str
     events: list[str]
     is_active: bool
-    last_triggered_at: Optional[datetime] = None
+    last_triggered_at: datetime | None = None
 
 
 class WebhookEventResponse(BaseSchema):
     id: UUID
     event_type: str
     status: WebhookEventStatus
-    response_code: Optional[int] = None
+    response_code: int | None = None
     retry_count: int
     created_at: datetime
 
@@ -49,7 +47,7 @@ class IntegrationConfigCreate(BaseModel):
     system_type: IntegrationSystemType
     base_url: str
     api_key: str
-    settings: Optional[dict] = None
+    settings: dict | None = None
 
 
 class IntegrationConfigResponse(BaseSchema):
@@ -57,7 +55,7 @@ class IntegrationConfigResponse(BaseSchema):
     system_type: IntegrationSystemType
     base_url: str
     is_active: bool
-    last_sync_at: Optional[datetime] = None
+    last_sync_at: datetime | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -67,7 +65,7 @@ class IntegrationConfigResponse(BaseSchema):
 
 class AuditLogResponse(BaseSchema):
     id: UUID
-    actor_id: Optional[UUID] = None
+    actor_id: UUID | None = None
     action: str
     resource_type: str
     resource_id: UUID

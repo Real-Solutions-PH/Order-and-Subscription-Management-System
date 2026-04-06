@@ -4,11 +4,9 @@ from uuid import UUID
 
 from fastapi import Depends, Header
 
-from app.config import Settings, get_settings
-from app.core.cache import RedisCache, get_cache
 from app.core.exceptions import UnauthorizedException
 from app.core.permissions import get_current_user  # noqa: F401 -- re-exported
-from app.repo.session import get_app_db, get_iam_db
+from app.repo.session import get_app_db
 
 
 async def get_tenant_id(
@@ -39,6 +37,6 @@ def get_db() -> get_app_db:
     return get_app_db
 
 
-def get_iam() -> get_iam_db:
-    """Alias for the IAM database dependency."""
-    return get_iam_db
+def get_iam() -> get_app_db:
+    """Alias for the IAM database dependency (uses same database)."""
+    return get_app_db

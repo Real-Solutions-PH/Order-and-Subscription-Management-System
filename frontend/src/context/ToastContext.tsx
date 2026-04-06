@@ -1,10 +1,16 @@
-'use client';
+"use client";
 
-import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle, AlertCircle, Info, X } from 'lucide-react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  ReactNode,
+} from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { CheckCircle, AlertCircle, Info, X } from "lucide-react";
 
-type ToastType = 'success' | 'error' | 'info' | 'warning';
+type ToastType = "success" | "error" | "info" | "warning";
 
 interface Toast {
   id: string;
@@ -21,16 +27,19 @@ const ToastContext = createContext<ToastContextType | undefined>(undefined);
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
-  const showToast = useCallback((message: string, type: ToastType = 'success') => {
-    const id = Math.random().toString(36).slice(2);
-    setToasts(prev => [...prev, { id, message, type }]);
-    setTimeout(() => {
-      setToasts(prev => prev.filter(t => t.id !== id));
-    }, 4000);
-  }, []);
+  const showToast = useCallback(
+    (message: string, type: ToastType = "success") => {
+      const id = Math.random().toString(36).slice(2);
+      setToasts((prev) => [...prev, { id, message, type }]);
+      setTimeout(() => {
+        setToasts((prev) => prev.filter((t) => t.id !== id));
+      }, 4000);
+    },
+    [],
+  );
 
   const removeToast = useCallback((id: string) => {
-    setToasts(prev => prev.filter(t => t.id !== id));
+    setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
   const icons = {
@@ -41,10 +50,10 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   };
 
   const bgColors = {
-    success: 'bg-emerald-50 border-emerald-200',
-    error: 'bg-red-50 border-red-200',
-    info: 'bg-blue-50 border-blue-200',
-    warning: 'bg-amber-50 border-amber-200',
+    success: "bg-emerald-50 border-emerald-200",
+    error: "bg-red-50 border-red-200",
+    info: "bg-blue-50 border-blue-200",
+    warning: "bg-amber-50 border-amber-200",
   };
 
   return (
@@ -52,7 +61,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       {children}
       <div className="fixed top-4 right-4 z-[100] flex flex-col gap-2">
         <AnimatePresence>
-          {toasts.map(toast => (
+          {toasts.map((toast) => (
             <motion.div
               key={toast.id}
               initial={{ opacity: 0, x: 100, scale: 0.95 }}
@@ -62,8 +71,13 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               className={`flex items-center gap-3 px-4 py-3 rounded-lg border shadow-lg min-w-[300px] ${bgColors[toast.type]}`}
             >
               {icons[toast.type]}
-              <span className="flex-1 text-sm font-medium text-[#1A1A2E]">{toast.message}</span>
-              <button onClick={() => removeToast(toast.id)} className="text-gray-400 hover:text-gray-600">
+              <span className="flex-1 text-sm font-medium text-[#1A1A2E]">
+                {toast.message}
+              </span>
+              <button
+                onClick={() => removeToast(toast.id)}
+                className="text-gray-400 hover:text-gray-600"
+              >
                 <X className="w-4 h-4" />
               </button>
             </motion.div>
@@ -76,6 +90,6 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
 export function useToast() {
   const context = useContext(ToastContext);
-  if (!context) throw new Error('useToast must be used within ToastProvider');
+  if (!context) throw new Error("useToast must be used within ToastProvider");
   return context;
 }

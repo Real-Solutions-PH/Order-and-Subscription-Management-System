@@ -1,5 +1,8 @@
-import AdminSidebar from '@/components/AdminSidebar';
-import AdminHeader from '@/components/AdminHeader';
+"use client";
+
+import AdminSidebar from "@/components/AdminSidebar";
+import AdminHeader from "@/components/AdminHeader";
+import RequireRole from "@/components/RequireRole";
 
 export default function AdminLayout({
   children,
@@ -7,7 +10,7 @@ export default function AdminLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen" style={{ backgroundColor: '#F9FAFB' }}>
       <AdminSidebar />
       <div className="flex flex-1 flex-col min-w-0">
         <AdminHeader />
@@ -15,6 +18,6 @@ export default function AdminLayout({
           {children}
         </main>
       </div>
-    </div>
+    </RequireRole>
   );
 }

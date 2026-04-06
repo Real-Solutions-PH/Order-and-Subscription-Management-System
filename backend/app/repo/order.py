@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from uuid import UUID
 
 from sqlalchemy import delete, func, select
@@ -16,7 +16,6 @@ from app.repo.db import (
     CartItemCustomization,
     Order,
     OrderItem,
-    OrderItemCustomization,
     OrderStatus,
     OrderStatusHistory,
 )
@@ -27,30 +26,22 @@ class CartRepository(BaseRepository[Cart]):
 
     model = Cart
 
-    async def get_by_user(
-        self, user_id: UUID | str, tenant_id: UUID | str
-    ) -> Cart | None:
+    async def get_by_user(self, user_id: UUID | str, tenant_id: UUID | str) -> Cart | None:
         """Get the active cart for a user."""
         stmt = (
             select(Cart)
             .where(Cart.user_id == user_id, Cart.tenant_id == tenant_id)
-            .options(
-                selectinload(Cart.items).selectinload(CartItem.customizations)
-            )
+            .options(selectinload(Cart.items).selectinload(CartItem.customizations))
         )
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
 
-    async def get_by_session(
-        self, session_id: str, tenant_id: UUID | str
-    ) -> Cart | None:
+    async def get_by_session(self, session_id: str, tenant_id: UUID | str) -> Cart | None:
         """Get the active cart for an anonymous session."""
         stmt = (
             select(Cart)
             .where(Cart.session_id == session_id, Cart.tenant_id == tenant_id)
-            .options(
-                selectinload(Cart.items).selectinload(CartItem.customizations)
-            )
+            .options(selectinload(Cart.items).selectinload(CartItem.customizations))
         )
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
@@ -76,7 +67,7 @@ class CartRepository(BaseRepository[Cart]):
                 "tenant_id": tenant_id,
                 "user_id": user_id,
                 "session_id": session_id or "",
-                "expires_at": datetime.now(timezone.utc) + timedelta(days=7),
+                "expires_at": datetime.now(UTC) + timedelta(days=7),
             }
         )
 
@@ -88,17 +79,11 @@ class CartItemRepository(BaseRepository[CartItem]):
 
     async def get_by_cart(self, cart_id: UUID | str) -> list[CartItem]:
         """Get all items in a cart with customizations loaded."""
-        stmt = (
-            select(CartItem)
-            .where(CartItem.cart_id == cart_id)
-            .options(selectinload(CartItem.customizations))
-        )
+        stmt = select(CartItem).where(CartItem.cart_id == cart_id).options(selectinload(CartItem.customizations))
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
 
-    async def get_by_variant(
-        self, cart_id: UUID | str, variant_id: UUID | str
-    ) -> CartItem | None:
+    async def get_by_variant(self, cart_id: UUID | str, variant_id: UUID | str) -> CartItem | None:
         """Find an existing cart item for a specific product variant."""
         stmt = select(CartItem).where(
             CartItem.cart_id == cart_id,
@@ -114,13 +99,9 @@ class CartItemRepository(BaseRepository[CartItem]):
         item_ids = (await self.session.execute(items_stmt)).scalars().all()
         if item_ids:
             await self.session.execute(
-                delete(CartItemCustomization).where(
-                    CartItemCustomization.cart_item_id.in_(item_ids)
-                )
+                delete(CartItemCustomization).where(CartItemCustomization.cart_item_id.in_(item_ids))
             )
-        await self.session.execute(
-            delete(CartItem).where(CartItem.cart_id == cart_id)
-        )
+        await self.session.execute(delete(CartItem).where(CartItem.cart_id == cart_id))
         await self.session.flush()
 
 
@@ -129,9 +110,7 @@ class OrderRepository(BaseRepository[Order]):
 
     model = Order
 
-    async def get_by_number(
-        self, order_number: str, tenant_id: UUID | str
-    ) -> Order | None:
+    async def get_by_number(self, order_number: str, tenant_id: UUID | str) -> Order | None:
         """Find an order by its human-readable order number."""
         stmt = (
             select(Order)
@@ -139,9 +118,7 @@ class OrderRepository(BaseRepository[Order]):
                 Order.order_number == order_number,
                 Order.tenant_id == tenant_id,
             )
-            .options(
-                selectinload(Order.items).selectinload(OrderItem.customizations)
-            )
+            .options(selectinload(Order.items).selectinload(OrderItem.customizations))
         )
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
@@ -157,9 +134,7 @@ class OrderRepository(BaseRepository[Order]):
         stmt = (
             select(Order)
             .where(Order.user_id == user_id, Order.tenant_id == tenant_id)
-            .options(
-                selectinload(Order.items).selectinload(OrderItem.customizations)
-            )
+            .options(selectinload(Order.items).selectinload(OrderItem.customizations))
             .order_by(Order.created_at.desc())
             .offset(skip)
             .limit(limit)
@@ -167,15 +142,9 @@ class OrderRepository(BaseRepository[Order]):
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
 
-    async def count_by_user(
-        self, user_id: UUID | str, tenant_id: UUID | str
-    ) -> int:
+    async def count_by_user(self, user_id: UUID | str, tenant_id: UUID | str) -> int:
         """Count orders for a user."""
-        stmt = (
-            select(func.count())
-            .select_from(Order)
-            .where(Order.user_id == user_id, Order.tenant_id == tenant_id)
-        )
+        stmt = select(func.count()).select_from(Order).where(Order.user_id == user_id, Order.tenant_id == tenant_id)
         result = await self.session.execute(stmt)
         return result.scalar_one()
 
@@ -190,9 +159,7 @@ class OrderRepository(BaseRepository[Order]):
         stmt = (
             select(Order)
             .where(Order.tenant_id == tenant_id, Order.status == status)
-            .options(
-                selectinload(Order.items).selectinload(OrderItem.customizations)
-            )
+            .options(selectinload(Order.items).selectinload(OrderItem.customizations))
             .order_by(Order.created_at.desc())
             .offset(skip)
             .limit(limit)
@@ -200,15 +167,9 @@ class OrderRepository(BaseRepository[Order]):
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
 
-    async def count_by_status(
-        self, tenant_id: UUID | str, status: OrderStatus
-    ) -> int:
+    async def count_by_status(self, tenant_id: UUID | str, status: OrderStatus) -> int:
         """Count orders for a tenant with a given status."""
-        stmt = (
-            select(func.count())
-            .select_from(Order)
-            .where(Order.tenant_id == tenant_id, Order.status == status)
-        )
+        stmt = select(func.count()).select_from(Order).where(Order.tenant_id == tenant_id, Order.status == status)
         result = await self.session.execute(stmt)
         return result.scalar_one()
 
@@ -217,11 +178,7 @@ class OrderRepository(BaseRepository[Order]):
 
         Format: ``PF-XXXXXX`` where X is a zero-padded sequential number.
         """
-        stmt = (
-            select(func.count())
-            .select_from(Order)
-            .where(Order.tenant_id == tenant_id)
-        )
+        stmt = select(func.count()).select_from(Order).where(Order.tenant_id == tenant_id)
         result = await self.session.execute(stmt)
         count = result.scalar_one()
         return f"PF-{count + 1:06d}"
@@ -234,11 +191,7 @@ class OrderItemRepository(BaseRepository[OrderItem]):
 
     async def get_by_order(self, order_id: UUID | str) -> list[OrderItem]:
         """Get all items for an order with customizations loaded."""
-        stmt = (
-            select(OrderItem)
-            .where(OrderItem.order_id == order_id)
-            .options(selectinload(OrderItem.customizations))
-        )
+        stmt = select(OrderItem).where(OrderItem.order_id == order_id).options(selectinload(OrderItem.customizations))
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
 

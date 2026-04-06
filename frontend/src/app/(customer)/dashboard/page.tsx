@@ -39,6 +39,7 @@ import {
 } from "@/lib/mock-data";
 import { useToast } from "@/context/ToastContext";
 import { useAuth, useOrders } from "@/hooks";
+import RequireAuth from "@/components/RequireAuth";
 import { SkeletonCard } from "@/components/ui/skeleton";
 import {
   Select,
@@ -128,7 +129,10 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="h-screen overflow-hidden bg-surface">
+    <div
+      className="h-screen overflow-hidden"
+      style={{ backgroundColor: "#FEFAE0" }}
+    >
       <div className="h-full max-w-[1400px] mx-auto px-4 py-4 flex flex-col">
         {/* Two-column layout: Profile (left, narrower) | Main content (right, wider) */}
         <div className="flex-1 flex flex-col lg:grid lg:grid-cols-12 gap-4 min-h-0 overflow-y-auto lg:overflow-hidden">
@@ -138,35 +142,56 @@ export default function DashboardPage() {
               <SkeletonCard className="lg:flex-1" />
             ) : (
             <div
-              className="rounded-2xl p-5 lg:flex-1 lg:min-h-0 lg:overflow-y-auto bg-surface-white border border-border shadow-sm"
+              className="rounded-2xl p-5 lg:flex-1 lg:min-h-0 lg:overflow-y-auto"
+              style={{
+                backgroundColor: "#FFFFFF",
+                border: "1px solid #E5E7EB",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+              }}
             >
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-base font-semibold text-text-primary">
+                <h2
+                  className="text-base font-semibold"
+                  style={{ color: "#1A1A2E" }}
+                >
                   Profile & Preferences
                 </h2>
                 <button
                   onClick={() => setProfileModalOpen(true)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:shadow-md bg-primary text-surface-white"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:shadow-md"
+                  style={{ backgroundColor: "#1B4332", color: "#FFFFFF" }}
                 >
                   <Pencil size={12} /> Edit Profile
                 </button>
               </div>
 
               {/* User Info Summary */}
-              <div className="flex items-center gap-3 mb-4 rounded-xl p-3 bg-gray-50 border border-border">
+              <div
+                className="flex items-center gap-3 mb-4 rounded-xl p-3"
+                style={{
+                  backgroundColor: "#F9FAFB",
+                  border: "1px solid #E5E7EB",
+                }}
+              >
                 <div
-                  className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-gradient-to-br from-primary to-primary-light"
+                  className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+                  style={{
+                    background: "linear-gradient(135deg, #1B4332, #2D6A4F)",
+                  }}
                 >
-                  <User size={18} className="text-white" />
+                  <User size={18} color="#FFFFFF" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold truncate text-text-primary">
+                  <p
+                    className="text-sm font-semibold truncate"
+                    style={{ color: "#1A1A2E" }}
+                  >
                     {userName}
                   </p>
-                  <p className="text-xs truncate text-text-secondary">
+                  <p className="text-xs truncate" style={{ color: "#6B7280" }}>
                     {userEmail}
                   </p>
-                  <p className="text-xs text-text-secondary">
+                  <p className="text-xs" style={{ color: "#6B7280" }}>
                     {userPhone}
                   </p>
                 </div>
@@ -175,62 +200,102 @@ export default function DashboardPage() {
               {/* Spending Insights */}
               <div className="space-y-2 mb-4">
                 <div
-                  className="rounded-lg p-3 bg-green-50 border border-green-200"
+                  className="rounded-lg p-3"
+                  style={{
+                    backgroundColor: "#F0FDF4",
+                    border: "1px solid #BBF7D0",
+                  }}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5">
-                      <Wallet size={14} className="text-success" />
-                      <p className="text-xs font-medium text-text-secondary">
+                      <Wallet size={14} color="#059669" />
+                      <p
+                        className="text-xs font-medium"
+                        style={{ color: "#6B7280" }}
+                      >
                         This Month
                       </p>
                     </div>
-                    <p className="text-lg font-bold text-text-primary">
+                    <p
+                      className="text-lg font-bold"
+                      style={{ color: "#1A1A2E" }}
+                    >
                       {formatPeso(4500)}
                     </p>
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <div
-                    className="rounded-lg p-3 bg-orange-50 border border-orange-200"
+                    className="rounded-lg p-3"
+                    style={{
+                      backgroundColor: "#FFF7ED",
+                      border: "1px solid #FED7AA",
+                    }}
                   >
                     <div className="flex items-center gap-1.5 mb-1">
-                      <PiggyBank size={14} className="text-warning" />
-                      <p className="text-xs font-medium text-text-secondary">
+                      <PiggyBank size={14} color="#D97706" />
+                      <p
+                        className="text-xs font-medium"
+                        style={{ color: "#6B7280" }}
+                      >
                         Savings
                       </p>
                     </div>
-                    <p className="text-lg font-bold text-success">
+                    <p
+                      className="text-lg font-bold"
+                      style={{ color: "#059669" }}
+                    >
                       {formatPeso(680)}
                     </p>
                   </div>
                   <div
-                    className="rounded-lg p-3 bg-red-50 border border-red-200"
+                    className="rounded-lg p-3"
+                    style={{
+                      backgroundColor: "#FEF2F2",
+                      border: "1px solid #FECACA",
+                    }}
                   >
                     <div className="flex items-center gap-1.5 mb-1">
-                      <Heart size={14} className="text-accent" />
-                      <p className="text-xs font-medium text-text-secondary">
+                      <Heart size={14} color="#E76F51" />
+                      <p
+                        className="text-xs font-medium"
+                        style={{ color: "#6B7280" }}
+                      >
                         Favorite
                       </p>
                     </div>
-                    <p className="text-sm font-bold leading-tight text-text-primary">
+                    <p
+                      className="text-sm font-bold leading-tight"
+                      style={{ color: "#1A1A2E" }}
+                    >
                       {favoriteMeal}
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="border-t border-border pt-4 space-y-3">
+              <div
+                style={{ borderTop: "1px solid #E5E7EB" }}
+                className="pt-4 space-y-3"
+              >
                 {/* Delivery Address */}
                 <div className="flex items-start gap-2">
                   <MapPin
                     size={16}
-                    className="mt-0.5 flex-shrink-0 text-text-secondary"
+                    color="#6B7280"
+                    className="mt-0.5 flex-shrink-0"
                   />
                   <div>
-                    <p className="text-xs font-medium text-text-secondary">
+                    <p
+                      className="text-xs font-medium"
+                      style={{ color: "#6B7280" }}
+                    >
                       Delivery Address
                     </p>
-                    <p className="text-sm font-medium text-text-primary">
+                    <p
+                      className="text-sm font-medium"
+                      style={{ color: "#1A1A2E" }}
+                    >
                       {customer.address}
                     </p>
                   </div>
@@ -240,20 +305,30 @@ export default function DashboardPage() {
                 <div className="flex items-start gap-2">
                   <CreditCard
                     size={16}
-                    className="mt-0.5 flex-shrink-0 text-text-secondary"
+                    color="#6B7280"
+                    className="mt-0.5 flex-shrink-0"
                   />
                   <div>
-                    <p className="text-xs font-medium text-text-secondary">
+                    <p
+                      className="text-xs font-medium"
+                      style={{ color: "#6B7280" }}
+                    >
                       Payment Method
                     </p>
-                    <p className="text-sm font-medium text-text-primary">
+                    <p
+                      className="text-sm font-medium"
+                      style={{ color: "#1A1A2E" }}
+                    >
                       GCash ending in ****4567
                     </p>
                   </div>
                 </div>
 
                 <div className="pt-1">
-                  <p className="text-sm font-semibold mb-2 text-text-primary">
+                  <p
+                    className="text-sm font-semibold mb-2"
+                    style={{ color: "#1A1A2E" }}
+                  >
                     Dietary & Allergens
                   </p>
                 </div>
@@ -262,7 +337,8 @@ export default function DashboardPage() {
                 <div className="flex items-start gap-2">
                   <Tag
                     size={16}
-                    className="mt-0.5 flex-shrink-0 text-text-secondary"
+                    color="#6B7280"
+                    className="mt-0.5 flex-shrink-0"
                   />
                   <div>
                     {userDietary.length > 0 ? (
@@ -270,14 +346,21 @@ export default function DashboardPage() {
                         {userDietary.map((pref) => (
                           <span
                             key={pref}
-                            className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-success-light text-emerald-800"
+                            className="px-2.5 py-0.5 rounded-full text-xs font-medium"
+                            style={{
+                              backgroundColor: "#D1FAE5",
+                              color: "#065F46",
+                            }}
                           >
                             {pref}
                           </span>
                         ))}
                       </div>
                     ) : (
-                      <p className="text-xs italic text-text-tertiary">
+                      <p
+                        className="text-xs italic"
+                        style={{ color: "#9CA3AF" }}
+                      >
                         No dietary preferences
                       </p>
                     )}
@@ -288,7 +371,8 @@ export default function DashboardPage() {
                 <div className="flex items-start gap-2">
                   <AlertTriangle
                     size={16}
-                    className="mt-0.5 flex-shrink-0 text-warning"
+                    color="#D97706"
+                    className="mt-0.5 flex-shrink-0"
                   />
                   <div>
                     {userAllergens.length > 0 ? (
@@ -296,14 +380,21 @@ export default function DashboardPage() {
                         {userAllergens.map((allergen) => (
                           <span
                             key={allergen}
-                            className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-warning-light text-warning-dark"
+                            className="px-2.5 py-0.5 rounded-full text-xs font-medium"
+                            style={{
+                              backgroundColor: "#FEF3C7",
+                              color: "#92400E",
+                            }}
                           >
                             {allergen}
                           </span>
                         ))}
                       </div>
                     ) : (
-                      <p className="text-xs italic text-text-tertiary">
+                      <p
+                        className="text-xs italic"
+                        style={{ color: "#9CA3AF" }}
+                      >
                         No allergens
                       </p>
                     )}
@@ -312,20 +403,35 @@ export default function DashboardPage() {
               </div>
 
               {/* Notification Preferences */}
-              <div className="border-t border-border mt-4 pt-4">
-                <h3 className="text-sm font-semibold mb-3 text-text-primary">
+              <div
+                style={{ borderTop: "1px solid #E5E7EB" }}
+                className="mt-4 pt-4"
+              >
+                <h3
+                  className="text-sm font-semibold mb-3"
+                  style={{ color: "#1A1A2E" }}
+                >
                   Notifications
                 </h3>
                 <table className="w-full text-xs">
                   <thead>
-                    <tr className="border-b border-border">
-                      <th className="text-left py-1.5 font-semibold text-text-secondary"></th>
-                      <th className="text-center py-1.5 font-semibold text-text-secondary">
+                    <tr style={{ borderBottom: "1px solid #E5E7EB" }}>
+                      <th
+                        className="text-left py-1.5 font-semibold"
+                        style={{ color: "#6B7280" }}
+                      ></th>
+                      <th
+                        className="text-center py-1.5 font-semibold"
+                        style={{ color: "#6B7280" }}
+                      >
                         <div className="flex items-center justify-center gap-1">
                           <Mail size={12} /> Email
                         </div>
                       </th>
-                      <th className="text-center py-1.5 font-semibold text-text-secondary">
+                      <th
+                        className="text-center py-1.5 font-semibold"
+                        style={{ color: "#6B7280" }}
+                      >
                         <div className="flex items-center justify-center gap-1">
                           <Smartphone size={12} /> SMS
                         </div>
@@ -357,9 +463,12 @@ export default function DashboardPage() {
                     ].map((row) => (
                       <tr
                         key={row.label}
-                        className="border-b border-muted"
+                        style={{ borderBottom: "1px solid #F3F4F6" }}
                       >
-                        <td className="py-2 font-medium text-text-primary">
+                        <td
+                          className="py-2 font-medium"
+                          style={{ color: "#1A1A2E" }}
+                        >
                           {row.label}
                         </td>
                         <td className="py-2 text-center">
@@ -392,31 +501,51 @@ export default function DashboardPage() {
             <motion.div
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              className="rounded-2xl p-5 bg-gradient-to-br from-primary to-primary-light shadow-lg"
+              className="rounded-2xl p-5"
+              style={{
+                background: "linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%)",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+              }}
             >
               <div className="flex items-center justify-between gap-4">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
                     <span
-                      className="w-2.5 h-2.5 rounded-full inline-block bg-emerald-400"
+                      className="w-2.5 h-2.5 rounded-full inline-block"
                       style={{
+                        backgroundColor: "#34D399",
                         animation: "pulse-success 2s ease-in-out infinite",
                       }}
                     />
-                    <span className="text-xs font-semibold text-emerald-400">
+                    <span
+                      className="text-xs font-semibold"
+                      style={{ color: "#34D399" }}
+                    >
                       Active
                     </span>
                   </div>
-                  <h2 className="text-xl font-bold text-white mb-4 font-display">
+                  <h2
+                    className="text-xl font-bold text-white mb-4"
+                    style={{ fontFamily: "'DM Serif Display', serif" }}
+                  >
                     {customer.planType}
                   </h2>
                   <div className="flex flex-wrap gap-3 sm:gap-4 lg:gap-5">
-                    <div className="flex items-center gap-2.5 rounded-xl px-3 py-2 bg-white/8">
-                      <div className="w-8 h-8 flex-shrink-0 rounded-full flex items-center justify-center p-1.5 bg-emerald-300/15">
-                        <Truck size={16} className="text-success-pale" />
+                    <div
+                      className="flex items-center gap-2.5 rounded-xl px-3 py-2"
+                      style={{ backgroundColor: "rgba(255, 255, 255, 0.08)" }}
+                    >
+                      <div
+                        className="w-8 h-8 flex-shrink-0 rounded-full flex items-center justify-center p-1.5"
+                        style={{ backgroundColor: "rgba(167, 243, 208, 0.15)" }}
+                      >
+                        <Truck size={16} color="#A7F3D0" />
                       </div>
                       <div>
-                        <p className="text-[10px] uppercase font-semibold tracking-wider mb-0.5 text-emerald-300/80">
+                        <p
+                          className="text-[10px] uppercase font-semibold tracking-wider mb-0.5"
+                          style={{ color: "rgba(167, 243, 208, 0.8)" }}
+                        >
                           Next Delivery
                         </p>
                         <p className="text-white font-medium text-[13px] leading-none">
@@ -425,12 +554,21 @@ export default function DashboardPage() {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2.5 rounded-xl px-3 py-2 bg-white/8">
-                      <div className="w-8 h-8 flex-shrink-0 rounded-full flex items-center justify-center p-1.5 bg-emerald-300/15">
-                        <CalendarDays size={16} className="text-success-pale" />
+                    <div
+                      className="flex items-center gap-2.5 rounded-xl px-3 py-2"
+                      style={{ backgroundColor: "rgba(255, 255, 255, 0.08)" }}
+                    >
+                      <div
+                        className="w-8 h-8 flex-shrink-0 rounded-full flex items-center justify-center p-1.5"
+                        style={{ backgroundColor: "rgba(167, 243, 208, 0.15)" }}
+                      >
+                        <CalendarDays size={16} color="#A7F3D0" />
                       </div>
                       <div>
-                        <p className="text-[10px] uppercase font-semibold tracking-wider mb-0.5 text-emerald-300/80">
+                        <p
+                          className="text-[10px] uppercase font-semibold tracking-wider mb-0.5"
+                          style={{ color: "rgba(167, 243, 208, 0.8)" }}
+                        >
                           Next Billing
                         </p>
                         <p className="text-white font-medium text-[13px] leading-none">
@@ -439,15 +577,30 @@ export default function DashboardPage() {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2.5 rounded-xl px-3 py-2 bg-amber-400/15 border border-amber-400/30">
-                      <div className="w-8 h-8 flex-shrink-0 rounded-full flex items-center justify-center p-1.5 bg-amber-400/20">
-                        <Wallet size={16} className="text-warning-pale" />
+                    <div
+                      className="flex items-center gap-2.5 rounded-xl px-3 py-2"
+                      style={{
+                        backgroundColor: "rgba(251, 191, 36, 0.15)",
+                        border: "1px solid rgba(251, 191, 36, 0.3)",
+                      }}
+                    >
+                      <div
+                        className="w-8 h-8 flex-shrink-0 rounded-full flex items-center justify-center p-1.5"
+                        style={{ backgroundColor: "rgba(251, 191, 36, 0.2)" }}
+                      >
+                        <Wallet size={16} color="#FCD34D" />
                       </div>
                       <div>
-                        <p className="text-[10px] uppercase font-semibold tracking-wider mb-0.5 text-amber-200/90">
+                        <p
+                          className="text-[10px] uppercase font-semibold tracking-wider mb-0.5"
+                          style={{ color: "rgba(253, 230, 138, 0.9)" }}
+                        >
                           Cost
                         </p>
-                        <p className="font-bold text-[14px] leading-none tracking-wide text-yellow-300">
+                        <p
+                          className="font-bold text-[14px] leading-none tracking-wide"
+                          style={{ color: "#FCD34D" }}
+                        >
                           {formatPeso(4500)}
                         </p>
                       </div>
@@ -513,52 +666,48 @@ export default function DashboardPage() {
                 {
                   label: "Skip Next Week",
                   icon: CalendarOff,
-                  color: "warning" as const,
+                  color: "#D97706",
                   action: () => setSkipModalOpen(true),
                 },
                 {
                   label: "Pause Subscription",
                   icon: Pause,
-                  color: "accent" as const,
+                  color: "#E76F51",
                   action: () => openSubscriptionModal("pause"),
                 },
                 {
                   label: "Change Plan",
                   icon: ArrowRightLeft,
-                  color: "primary-light" as const,
+                  color: "#2D6A4F",
                   action: () => openSubscriptionModal("change"),
                 },
                 {
                   label: "Modify Meals",
                   icon: UtensilsCrossed,
-                  color: "primary" as const,
+                  color: "#1B4332",
                   action: () => setEditMealsModalOpen(true),
                 },
               ].map((item) => {
                 const Icon = item.icon;
-                const iconColorMap = {
-                  warning: "text-warning",
-                  accent: "text-accent",
-                  "primary-light": "text-primary-light",
-                  primary: "text-primary",
-                } as const;
-                const bgColorMap = {
-                  warning: "bg-warning/10",
-                  accent: "bg-accent/10",
-                  "primary-light": "bg-primary-light/10",
-                  primary: "bg-primary/10",
-                } as const;
                 const content = (
                   <div
-                    className="rounded-xl p-3 flex flex-col items-center gap-1.5 cursor-pointer transition-all hover:shadow-md bg-surface-white border border-border"
+                    className="rounded-xl p-3 flex flex-col items-center gap-1.5 cursor-pointer transition-all hover:shadow-md"
+                    style={{
+                      backgroundColor: "#FFFFFF",
+                      border: "1px solid #E5E7EB",
+                    }}
                     onClick={"action" in item ? item.action : undefined}
                   >
                     <div
-                      className={`w-8 h-8 rounded-full flex items-center justify-center ${bgColorMap[item.color]}`}
+                      className="w-8 h-8 rounded-full flex items-center justify-center"
+                      style={{ backgroundColor: `${item.color}15` }}
                     >
-                      <Icon size={16} className={iconColorMap[item.color]} />
+                      <Icon size={16} color={item.color} />
                     </div>
-                    <p className="text-xs font-medium text-center text-text-primary">
+                    <p
+                      className="text-xs font-medium text-center"
+                      style={{ color: "#1A1A2E" }}
+                    >
                       {item.label}
                     </p>
                   </div>
@@ -575,14 +724,25 @@ export default function DashboardPage() {
             </div>
 
             {/* C) Meals for Next Delivery */}
-            <div className="rounded-2xl p-4 bg-surface-white border border-border shadow-sm">
+            <div
+              className="rounded-2xl p-4"
+              style={{
+                backgroundColor: "#FFFFFF",
+                border: "1px solid #E5E7EB",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+              }}
+            >
               <div className="flex items-center justify-between mb-3">
-                <h2 className="text-base font-semibold text-text-primary">
+                <h2
+                  className="text-base font-semibold"
+                  style={{ color: "#1A1A2E" }}
+                >
                   Meals for Next Delivery
                 </h2>
                 <button
                   onClick={() => setEditMealsModalOpen(true)}
-                  className="text-sm font-medium flex items-center gap-1 text-primary"
+                  className="text-sm font-medium flex items-center gap-1"
+                  style={{ color: "#1B4332" }}
                 >
                   Edit Selection <ChevronRight size={16} />
                 </button>
@@ -594,19 +754,26 @@ export default function DashboardPage() {
                 {nextDeliveryMeals.map((meal) => (
                   <div
                     key={meal.id}
-                    className="flex-shrink-0 w-32 sm:w-36 rounded-xl overflow-hidden border border-border"
+                    className="flex-shrink-0 w-32 sm:w-36 rounded-xl overflow-hidden"
+                    style={{ border: "1px solid #E5E7EB" }}
                   >
                     <div
                       className="h-20 bg-cover bg-center"
                       style={{ backgroundImage: `url(${meal.image})` }}
                     />
                     <div className="p-2">
-                      <p className="text-xs font-medium leading-tight mb-0.5 text-text-primary">
+                      <p
+                        className="text-xs font-medium leading-tight mb-0.5"
+                        style={{ color: "#1A1A2E" }}
+                      >
                         {meal.name.length > 25
                           ? meal.name.slice(0, 25) + "..."
                           : meal.name}
                       </p>
-                      <p className="text-xs font-semibold text-primary">
+                      <p
+                        className="text-xs font-semibold"
+                        style={{ color: "#1B4332" }}
+                      >
                         {formatPeso(meal.price)}
                       </p>
                     </div>
@@ -619,14 +786,24 @@ export default function DashboardPage() {
             {isLoadingOrders ? (
               <SkeletonCard className="flex-1 min-h-[200px]" />
             ) : (
-            <div className="rounded-2xl p-4 flex-1 min-h-0 flex flex-col bg-surface-white border border-border shadow-sm">
-              <h2 className="text-base font-semibold mb-2 text-text-primary">
+            <div
+              className="rounded-2xl p-4 flex-1 min-h-0 flex flex-col"
+              style={{
+                backgroundColor: "#FFFFFF",
+                border: "1px solid #E5E7EB",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+              }}
+            >
+              <h2
+                className="text-base font-semibold mb-2"
+                style={{ color: "#1A1A2E" }}
+              >
                 Order History
               </h2>
               <div className="overflow-y-auto flex-1 min-h-0">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b-2 border-border">
+                    <tr style={{ borderBottom: "2px solid #E5E7EB" }}>
                       {[
                         "Date",
                         "Order ID",
@@ -637,7 +814,8 @@ export default function DashboardPage() {
                       ].map((h) => (
                         <th
                           key={h}
-                          className="text-left py-2 px-2 font-semibold text-xs text-text-secondary"
+                          className="text-left py-2 px-2 font-semibold text-xs"
+                          style={{ color: "#6B7280" }}
                         >
                           {h}
                         </th>
@@ -648,27 +826,39 @@ export default function DashboardPage() {
                     {displayOrders.slice(0, 6).map((order: { id: string; deliveryDate: string; items: unknown[]; total: number; status: string }) => (
                       <tr
                         key={order.id}
-                        className="border-b border-muted hover:bg-gray-50 transition-colors"
+                        style={{ borderBottom: "1px solid #F3F4F6" }}
+                        className="hover:bg-gray-50 transition-colors"
                       >
-                        <td className="py-2 px-2 text-xs text-text-primary">
+                        <td
+                          className="py-2 px-2 text-xs"
+                          style={{ color: "#1A1A2E" }}
+                        >
                           {new Date(order.deliveryDate).toLocaleDateString(
                             "en-US",
                             { month: "short", day: "numeric", year: "numeric" },
                           )}
                         </td>
                         <td
-                          className="py-2 px-2 text-primary text-[0.7rem]"
+                          className="py-2 px-2"
                           style={{
                             fontFamily: "'JetBrains Mono', monospace",
+                            color: "#1B4332",
+                            fontSize: "0.7rem",
                           }}
                         >
                           {order.id}
                         </td>
-                        <td className="py-2 px-2 text-xs text-text-primary">
+                        <td
+                          className="py-2 px-2 text-xs"
+                          style={{ color: "#1A1A2E" }}
+                        >
                           {order.items.length} item
                           {order.items.length > 1 ? "s" : ""}
                         </td>
-                        <td className="py-2 px-2 font-semibold text-xs text-text-primary">
+                        <td
+                          className="py-2 px-2 font-semibold text-xs"
+                          style={{ color: "#1A1A2E" }}
+                        >
                           {formatPeso(order.total)}
                         </td>
                         <td className="py-2 px-2">
@@ -679,7 +869,8 @@ export default function DashboardPage() {
                             onClick={() =>
                               showToast("Items added to cart", "success")
                             }
-                            className="flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-lg transition-colors hover:bg-gray-100 text-primary"
+                            className="flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-lg transition-colors hover:bg-gray-100"
+                            style={{ color: "#1B4332" }}
                           >
                             <RefreshCw size={12} /> Reorder
                           </button>
@@ -701,18 +892,19 @@ export default function DashboardPage() {
           title="Skip Next Week"
         >
           <div className="space-y-4">
-            <p className="text-text-secondary">
+            <p style={{ color: "#6B7280" }}>
               Are you sure you want to skip the delivery for the week of April 7
               - April 13, 2026?
             </p>
-            <p className="text-sm text-text-secondary">
+            <p className="text-sm" style={{ color: "#6B7280" }}>
               You&apos;ll receive a credit of {formatPeso(4500)} that will be
               applied to your next active week.
             </p>
             <div className="flex gap-3 pt-2">
               <button
                 onClick={() => setSkipModalOpen(false)}
-                className="flex-1 px-4 py-2.5 rounded-xl font-medium transition-colors hover:bg-gray-100 border border-border text-text-primary"
+                className="flex-1 px-4 py-2.5 rounded-xl font-medium transition-colors hover:bg-gray-100"
+                style={{ border: "1px solid #E5E7EB", color: "#1A1A2E" }}
               >
                 Cancel
               </button>
@@ -721,7 +913,8 @@ export default function DashboardPage() {
                   setSkipModalOpen(false);
                   showToast("Week of April 7 skipped successfully", "success");
                 }}
-                className="flex-1 px-4 py-2.5 rounded-xl font-medium text-white transition-colors hover:opacity-90 bg-warning"
+                className="flex-1 px-4 py-2.5 rounded-xl font-medium text-white transition-colors hover:opacity-90"
+                style={{ backgroundColor: "#D97706" }}
               >
                 Skip Week
               </button>
@@ -729,73 +922,74 @@ export default function DashboardPage() {
           </div>
         </Modal>
 
-        {/* Subscription Modal (Pause / Change Plan) */}
-        <Modal
-          isOpen={subscriptionModalOpen}
-          onClose={() => setSubscriptionModalOpen(false)}
-          title={
-            subscriptionModalMode === "pause"
-              ? "Pause Subscription"
-              : "Change Plan"
-          }
-          size="lg"
-        >
-          {subscriptionModalMode === "pause" ? (
-            <PauseSubscriptionContent
-              onClose={() => setSubscriptionModalOpen(false)}
-              showToast={showToast}
-            />
-          ) : (
-            <ChangePlanContent
-              onClose={() => setSubscriptionModalOpen(false)}
-              showToast={showToast}
-            />
-          )}
-        </Modal>
+          {/* Subscription Modal (Pause / Change Plan) */}
+          <Modal
+            isOpen={subscriptionModalOpen}
+            onClose={() => setSubscriptionModalOpen(false)}
+            title={
+              subscriptionModalMode === "pause"
+                ? "Pause Subscription"
+                : "Change Plan"
+            }
+            size="lg"
+          >
+            {subscriptionModalMode === "pause" ? (
+              <PauseSubscriptionContent
+                onClose={() => setSubscriptionModalOpen(false)}
+                showToast={showToast}
+              />
+            ) : (
+              <ChangePlanContent
+                onClose={() => setSubscriptionModalOpen(false)}
+                showToast={showToast}
+              />
+            )}
+          </Modal>
 
-        {/* Edit Profile Modal */}
-        <Modal
-          isOpen={profileModalOpen}
-          onClose={() => setProfileModalOpen(false)}
-          title="Edit Profile"
-          size="lg"
-        >
-          <EditProfileModalContent
-            initialName={userName}
-            initialEmail={userEmail}
-            initialPhone={userPhone}
-            initialDietary={userDietary}
-            initialAllergens={userAllergens}
-            initialFavoriteMeal={favoriteMeal}
-            onSave={(data) => {
-              setUserName(data.name);
-              setUserEmail(data.email);
-              setUserPhone(data.phone);
-              setUserDietary(data.dietary);
-              setUserAllergens(data.allergens);
-              setFavoriteMeal(data.favoriteMeal);
-              setProfileModalOpen(false);
-              showToast("Profile updated successfully", "success");
-            }}
+          {/* Edit Profile Modal */}
+          <Modal
+            isOpen={profileModalOpen}
             onClose={() => setProfileModalOpen(false)}
-          />
-        </Modal>
+            title="Edit Profile"
+            size="lg"
+          >
+            <EditProfileModalContent
+              initialName={userName}
+              initialEmail={userEmail}
+              initialPhone={userPhone}
+              initialDietary={userDietary}
+              initialAllergens={userAllergens}
+              initialFavoriteMeal={favoriteMeal}
+              onSave={(data) => {
+                setUserName(data.name);
+                setUserEmail(data.email);
+                setUserPhone(data.phone);
+                setUserDietary(data.dietary);
+                setUserAllergens(data.allergens);
+                setFavoriteMeal(data.favoriteMeal);
+                setProfileModalOpen(false);
+                showToast("Profile updated successfully", "success");
+              }}
+              onClose={() => setProfileModalOpen(false)}
+            />
+          </Modal>
 
-        {/* Edit Meals Modal */}
-        <Modal
-          isOpen={editMealsModalOpen}
-          onClose={() => setEditMealsModalOpen(false)}
-          title="Edit Next Delivery"
-          size="lg"
-        >
-          <EditMealsModalContent
+          {/* Edit Meals Modal */}
+          <Modal
+            isOpen={editMealsModalOpen}
             onClose={() => setEditMealsModalOpen(false)}
-            showToast={showToast}
-            customer={customer}
-          />
-        </Modal>
+            title="Edit Next Delivery"
+            size="lg"
+          >
+            <EditMealsModalContent
+              onClose={() => setEditMealsModalOpen(false)}
+              showToast={showToast}
+              customer={customer}
+            />
+          </Modal>
+        </div>
       </div>
-    </div>
+    </RequireAuth>
   );
 }
 

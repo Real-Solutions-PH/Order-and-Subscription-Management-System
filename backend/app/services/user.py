@@ -20,22 +20,16 @@ class UserService:
         self.user_repo = UserRepository(session)
         self.user_role_repo = UserRoleRepository(session)
 
-    async def get_user(
-        self, user_id: UUID | str, tenant_id: UUID | str
-    ) -> User:
+    async def get_user(self, user_id: UUID | str, tenant_id: UUID | str) -> User:
         """Retrieve a single user by ID, scoped to tenant."""
         user = await self.user_repo.get_by_id(user_id, tenant_id=tenant_id)
         if user is None:
             raise NotFoundException("User", str(user_id))
         return user
 
-    async def list_users(
-        self, tenant_id: UUID | str, skip: int = 0, limit: int = 100
-    ) -> tuple[list[User], int]:
+    async def list_users(self, tenant_id: UUID | str, skip: int = 0, limit: int = 100) -> tuple[list[User], int]:
         """Return a paginated list of users and total count."""
-        users = await self.user_repo.get_all(
-            skip=skip, limit=limit, tenant_id=tenant_id
-        )
+        users = await self.user_repo.get_all(skip=skip, limit=limit, tenant_id=tenant_id)
         total = await self.user_repo.count(tenant_id=tenant_id)
         return list(users), total
 
@@ -50,20 +44,14 @@ class UserService:
         if not update_data:
             return await self.get_user(user_id, tenant_id)
 
-        user = await self.user_repo.update(
-            user_id, update_data, tenant_id=tenant_id
-        )
+        user = await self.user_repo.update(user_id, update_data, tenant_id=tenant_id)
         if user is None:
             raise NotFoundException("User", str(user_id))
         return user
 
-    async def deactivate_user(
-        self, user_id: UUID | str, tenant_id: UUID | str
-    ) -> User:
+    async def deactivate_user(self, user_id: UUID | str, tenant_id: UUID | str) -> User:
         """Deactivate a user by setting status to inactive."""
-        user = await self.user_repo.update(
-            user_id, {"status": "inactive"}, tenant_id=tenant_id
-        )
+        user = await self.user_repo.update(user_id, {"status": "inactive"}, tenant_id=tenant_id)
         if user is None:
             raise NotFoundException("User", str(user_id))
         return user

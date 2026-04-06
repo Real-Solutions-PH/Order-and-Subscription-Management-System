@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from decimal import Decimal
 from typing import Any
 from uuid import UUID
@@ -13,19 +13,16 @@ from sqlalchemy.orm import selectinload
 
 from app.core.cache import RedisCache
 from app.core.events import get_event_bus
-from app.core.exceptions import BadRequestException, NotFoundException, PaymentException
+from app.core.exceptions import BadRequestException, NotFoundException
 from app.repo.db import (
     DiscountType,
     Invoice,
     InvoiceLineItem,
     InvoiceStatus,
     Order,
-    OrderItem,
     Payment,
     PaymentChannel,
-    PaymentMethod,
     PaymentStatus,
-    PromoCode,
     TransactionStatus,
     TransactionType,
 )
@@ -39,7 +36,6 @@ from app.repo.payment import (
 from app.schemas.base import PaginatedResponse
 from app.schemas.payment import (
     AttachMethodRequest,
-    CODCollectRequest,
     CODCreateRequest,
     InvoiceLineItemResponse,
     InvoiceResponse,
@@ -64,9 +60,7 @@ logger = logging.getLogger(__name__)
 class PaymentService:
     """Service layer for payment lifecycle and PayMongo integration (stubs)."""
 
-    def __init__(
-        self, session: AsyncSession, cache: RedisCache | None = None
-    ) -> None:
+    def __init__(self, session: AsyncSession, cache: RedisCache | None = None) -> None:
         self.session = session
         self.cache = cache
         self.payment_repo = PaymentRepository(session)
@@ -190,7 +184,7 @@ class PaymentService:
             raise BadRequestException("Payment is already paid")
 
         payment.status = PaymentStatus.paid
-        payment.paid_at = datetime.now(timezone.utc)
+        payment.paid_at = datetime.now(UTC)
         await self.session.flush()
 
         await self.tx_repo.create(
@@ -258,9 +252,7 @@ class PaymentService:
         else:
             logger.warning("Unhandled webhook event type: %s", event_type)
 
-    async def _handle_payment_paid(
-        self, resource: dict[str, Any], event_id: str
-    ) -> None:
+    async def _handle_payment_paid(self, resource: dict[str, Any], event_id: str) -> None:
         """Handle a payment.paid webhook event."""
         intent_id = resource.get("attributes", {}).get("payment_intent_id")
         if not intent_id:
@@ -272,7 +264,7 @@ class PaymentService:
             return
 
         payment.status = PaymentStatus.paid
-        payment.paid_at = datetime.now(timezone.utc)
+        payment.paid_at = datetime.now(UTC)
         await self.session.flush()
 
         await self.tx_repo.create(
@@ -292,9 +284,7 @@ class PaymentService:
             {"payment_id": str(payment.id), "order_id": str(payment.order_id)},
         )
 
-    async def _handle_payment_failed(
-        self, resource: dict[str, Any], event_id: str
-    ) -> None:
+    async def _handle_payment_failed(self, resource: dict[str, Any], event_id: str) -> None:
         """Handle a payment.failed webhook event."""
         intent_id = resource.get("attributes", {}).get("payment_intent_id")
         if not intent_id:
@@ -329,9 +319,7 @@ class PaymentService:
             {"payment_id": str(payment.id), "order_id": str(payment.order_id)},
         )
 
-    async def _handle_payment_refunded(
-        self, resource: dict[str, Any], event_id: str
-    ) -> None:
+    async def _handle_payment_refunded(self, resource: dict[str, Any], event_id: str) -> None:
         """Handle a payment.refunded webhook event."""
         intent_id = resource.get("attributes", {}).get("payment_intent_id")
         if not intent_id:
@@ -402,7 +390,7 @@ class PaymentService:
             raise BadRequestException("COD payment already collected")
 
         payment.status = PaymentStatus.paid
-        payment.paid_at = datetime.now(timezone.utc)
+        payment.paid_at = datetime.now(UTC)
         await self.session.flush()
 
         await self.tx_repo.create(
@@ -494,14 +482,12 @@ class PaymentService:
         if promo is None:
             raise BadRequestException("Invalid promo code")
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         if now < promo.starts_at or now > promo.expires_at:
             raise BadRequestException("Promo code is not currently active")
 
         if promo.min_order_amount and data.order_amount < promo.min_order_amount:
-            raise BadRequestException(
-                f"Minimum order amount of {promo.min_order_amount} required"
-            )
+            raise BadRequestException(f"Minimum order amount of {promo.min_order_amount} required")
 
         can_use = await self.promo_repo.validate_usage(promo.id, user_id)
         if not can_use:
@@ -554,9 +540,7 @@ class PaymentService:
             is_default=pm.is_default,
         )
 
-    async def list_payment_methods(
-        self, user_id: UUID | str, tenant_id: UUID | str
-    ) -> list[PaymentMethodResponse]:
+    async def list_payment_methods(self, user_id: UUID | str, tenant_id: UUID | str) -> list[PaymentMethodResponse]:
         """Return all saved payment methods for a user."""
         methods = await self.method_repo.get_by_user(user_id, tenant_id)
         return [
@@ -606,13 +590,9 @@ class PaymentService:
             discount_amount=Decimal("0"),
         )
 
-    async def list_promo_codes(
-        self, tenant_id: UUID | str, skip: int = 0, limit: int = 50
-    ) -> list[PromoCodeResponse]:
+    async def list_promo_codes(self, tenant_id: UUID | str, skip: int = 0, limit: int = 50) -> list[PromoCodeResponse]:
         """Return all promo codes for a tenant."""
-        promos = await self.promo_repo.get_all(
-            skip=skip, limit=limit, tenant_id=tenant_id
-        )
+        promos = await self.promo_repo.get_all(skip=skip, limit=limit, tenant_id=tenant_id)
         return [
             PromoCodeResponse(
                 id=p.id,
@@ -633,9 +613,7 @@ class PaymentService:
 class InvoiceService:
     """Service layer for invoice generation and retrieval."""
 
-    def __init__(
-        self, session: AsyncSession, cache: RedisCache | None = None
-    ) -> None:
+    def __init__(self, session: AsyncSession, cache: RedisCache | None = None) -> None:
         self.session = session
         self.cache = cache
         self.invoice_repo = InvoiceRepository(session)
@@ -675,9 +653,7 @@ class InvoiceService:
 
         # Load order with items
         stmt = (
-            select(Order)
-            .where(Order.id == order_id, Order.tenant_id == tenant_id)
-            .options(selectinload(Order.items))
+            select(Order).where(Order.id == order_id, Order.tenant_id == tenant_id).options(selectinload(Order.items))
         )
         result = await self.session.execute(stmt)
         order = result.scalar_one_or_none()
@@ -690,7 +666,7 @@ class InvoiceService:
             return self._build_invoice_response(existing)
 
         invoice_number = await self.invoice_repo.generate_invoice_number(tenant_id)
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
 
         invoice = await self.invoice_repo.create(
             {
