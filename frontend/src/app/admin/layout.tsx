@@ -6,17 +6,17 @@ import RequireRole from "@/components/RequireRole";
 
 export default function AdminLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   return (
-    <RequireRole role="admin">
-      <div className="flex min-h-screen" style={{ backgroundColor: "#F9FAFB" }}>
-        <AdminSidebar />
-        <div className="flex flex-1 flex-col min-w-0">
-          <AdminHeader />
-          <main className="page-enter flex-1 p-4 lg:p-8">{children}</main>
-        </div>
+    <div className="flex min-h-screen" style={{ backgroundColor: '#F9FAFB' }}>
+      <AdminSidebar />
+      <div className="flex flex-1 flex-col min-w-0">
+        <AdminHeader />
+        <main className="page-enter flex-1 p-4 lg:p-8">
+          {children}
+        </main>
       </div>
     </RequireRole>
   );

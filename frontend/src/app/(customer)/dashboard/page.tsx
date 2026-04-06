@@ -129,837 +129,798 @@ export default function DashboardPage() {
   };
 
   return (
-    <RequireAuth>
-      <div
-        className="h-screen overflow-hidden"
-        style={{ backgroundColor: "#FEFAE0" }}
-      >
-        <div className="h-full max-w-[1400px] mx-auto px-4 py-4 flex flex-col">
-          {/* Two-column layout: Profile (left, narrower) | Main content (right, wider) */}
-          <div className="flex-1 flex flex-col lg:grid lg:grid-cols-12 gap-4 min-h-0 overflow-y-auto lg:overflow-hidden">
-            {/* LEFT COLUMN - Profile & Preferences (4/12 on desktop) */}
-            <div className="lg:col-span-4 flex flex-col gap-4 min-h-0 order-2 lg:order-1">
-              {isLoadingUser ? (
-                <SkeletonCard className="lg:flex-1" />
-              ) : (
+    <div
+      className="h-screen overflow-hidden"
+      style={{ backgroundColor: "#FEFAE0" }}
+    >
+      <div className="h-full max-w-[1400px] mx-auto px-4 py-4 flex flex-col">
+        {/* Two-column layout: Profile (left, narrower) | Main content (right, wider) */}
+        <div className="flex-1 flex flex-col lg:grid lg:grid-cols-12 gap-4 min-h-0 overflow-y-auto lg:overflow-hidden">
+          {/* LEFT COLUMN - Profile & Preferences (4/12 on desktop) */}
+          <div className="lg:col-span-4 flex flex-col gap-4 min-h-0 order-2 lg:order-1">
+            {isLoadingUser ? (
+              <SkeletonCard className="lg:flex-1" />
+            ) : (
+            <div
+              className="rounded-2xl p-5 lg:flex-1 lg:min-h-0 lg:overflow-y-auto"
+              style={{
+                backgroundColor: "#FFFFFF",
+                border: "1px solid #E5E7EB",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+              }}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h2
+                  className="text-base font-semibold"
+                  style={{ color: "#1A1A2E" }}
+                >
+                  Profile & Preferences
+                </h2>
+                <button
+                  onClick={() => setProfileModalOpen(true)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:shadow-md"
+                  style={{ backgroundColor: "#1B4332", color: "#FFFFFF" }}
+                >
+                  <Pencil size={12} /> Edit Profile
+                </button>
+              </div>
+
+              {/* User Info Summary */}
+              <div
+                className="flex items-center gap-3 mb-4 rounded-xl p-3"
+                style={{
+                  backgroundColor: "#F9FAFB",
+                  border: "1px solid #E5E7EB",
+                }}
+              >
                 <div
-                  className="rounded-2xl p-5 lg:flex-1 lg:min-h-0 lg:overflow-y-auto"
+                  className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
                   style={{
-                    backgroundColor: "#FFFFFF",
-                    border: "1px solid #E5E7EB",
-                    boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+                    background: "linear-gradient(135deg, #1B4332, #2D6A4F)",
                   }}
                 >
-                  <div className="flex items-center justify-between mb-4">
-                    <h2
-                      className="text-base font-semibold"
-                      style={{ color: "#1A1A2E" }}
-                    >
-                      Profile & Preferences
-                    </h2>
-                    <button
-                      onClick={() => setProfileModalOpen(true)}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:shadow-md"
-                      style={{ backgroundColor: "#1B4332", color: "#FFFFFF" }}
-                    >
-                      <Pencil size={12} /> Edit Profile
-                    </button>
-                  </div>
-
-                  {/* User Info Summary */}
-                  <div
-                    className="flex items-center gap-3 mb-4 rounded-xl p-3"
-                    style={{
-                      backgroundColor: "#F9FAFB",
-                      border: "1px solid #E5E7EB",
-                    }}
+                  <User size={18} color="#FFFFFF" />
+                </div>
+                <div className="min-w-0">
+                  <p
+                    className="text-sm font-semibold truncate"
+                    style={{ color: "#1A1A2E" }}
                   >
-                    <div
-                      className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
-                      style={{
-                        background: "linear-gradient(135deg, #1B4332, #2D6A4F)",
-                      }}
-                    >
-                      <User size={18} color="#FFFFFF" />
-                    </div>
-                    <div className="min-w-0">
+                    {userName}
+                  </p>
+                  <p className="text-xs truncate" style={{ color: "#6B7280" }}>
+                    {userEmail}
+                  </p>
+                  <p className="text-xs" style={{ color: "#6B7280" }}>
+                    {userPhone}
+                  </p>
+                </div>
+              </div>
+
+              {/* Spending Insights */}
+              <div className="space-y-2 mb-4">
+                <div
+                  className="rounded-lg p-3"
+                  style={{
+                    backgroundColor: "#F0FDF4",
+                    border: "1px solid #BBF7D0",
+                  }}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5">
+                      <Wallet size={14} color="#059669" />
                       <p
-                        className="text-sm font-semibold truncate"
-                        style={{ color: "#1A1A2E" }}
-                      >
-                        {userName}
-                      </p>
-                      <p
-                        className="text-xs truncate"
+                        className="text-xs font-medium"
                         style={{ color: "#6B7280" }}
                       >
-                        {userEmail}
-                      </p>
-                      <p className="text-xs" style={{ color: "#6B7280" }}>
-                        {userPhone}
+                        This Month
                       </p>
                     </div>
+                    <p
+                      className="text-lg font-bold"
+                      style={{ color: "#1A1A2E" }}
+                    >
+                      {formatPeso(4500)}
+                    </p>
                   </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div
+                    className="rounded-lg p-3"
+                    style={{
+                      backgroundColor: "#FFF7ED",
+                      border: "1px solid #FED7AA",
+                    }}
+                  >
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <PiggyBank size={14} color="#D97706" />
+                      <p
+                        className="text-xs font-medium"
+                        style={{ color: "#6B7280" }}
+                      >
+                        Savings
+                      </p>
+                    </div>
+                    <p
+                      className="text-lg font-bold"
+                      style={{ color: "#059669" }}
+                    >
+                      {formatPeso(680)}
+                    </p>
+                  </div>
+                  <div
+                    className="rounded-lg p-3"
+                    style={{
+                      backgroundColor: "#FEF2F2",
+                      border: "1px solid #FECACA",
+                    }}
+                  >
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <Heart size={14} color="#E76F51" />
+                      <p
+                        className="text-xs font-medium"
+                        style={{ color: "#6B7280" }}
+                      >
+                        Favorite
+                      </p>
+                    </div>
+                    <p
+                      className="text-sm font-bold leading-tight"
+                      style={{ color: "#1A1A2E" }}
+                    >
+                      {favoriteMeal}
+                    </p>
+                  </div>
+                </div>
+              </div>
 
-                  {/* Spending Insights */}
-                  <div className="space-y-2 mb-4">
-                    <div
-                      className="rounded-lg p-3"
+              <div
+                style={{ borderTop: "1px solid #E5E7EB" }}
+                className="pt-4 space-y-3"
+              >
+                {/* Delivery Address */}
+                <div className="flex items-start gap-2">
+                  <MapPin
+                    size={16}
+                    color="#6B7280"
+                    className="mt-0.5 flex-shrink-0"
+                  />
+                  <div>
+                    <p
+                      className="text-xs font-medium"
+                      style={{ color: "#6B7280" }}
+                    >
+                      Delivery Address
+                    </p>
+                    <p
+                      className="text-sm font-medium"
+                      style={{ color: "#1A1A2E" }}
+                    >
+                      {customer.address}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Payment Method */}
+                <div className="flex items-start gap-2">
+                  <CreditCard
+                    size={16}
+                    color="#6B7280"
+                    className="mt-0.5 flex-shrink-0"
+                  />
+                  <div>
+                    <p
+                      className="text-xs font-medium"
+                      style={{ color: "#6B7280" }}
+                    >
+                      Payment Method
+                    </p>
+                    <p
+                      className="text-sm font-medium"
+                      style={{ color: "#1A1A2E" }}
+                    >
+                      GCash ending in ****4567
+                    </p>
+                  </div>
+                </div>
+
+                <div className="pt-1">
+                  <p
+                    className="text-sm font-semibold mb-2"
+                    style={{ color: "#1A1A2E" }}
+                  >
+                    Dietary & Allergens
+                  </p>
+                </div>
+
+                {/* Dietary Preferences */}
+                <div className="flex items-start gap-2">
+                  <Tag
+                    size={16}
+                    color="#6B7280"
+                    className="mt-0.5 flex-shrink-0"
+                  />
+                  <div>
+                    {userDietary.length > 0 ? (
+                      <div className="flex flex-wrap gap-1.5">
+                        {userDietary.map((pref) => (
+                          <span
+                            key={pref}
+                            className="px-2.5 py-0.5 rounded-full text-xs font-medium"
+                            style={{
+                              backgroundColor: "#D1FAE5",
+                              color: "#065F46",
+                            }}
+                          >
+                            {pref}
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <p
+                        className="text-xs italic"
+                        style={{ color: "#9CA3AF" }}
+                      >
+                        No dietary preferences
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Allergens */}
+                <div className="flex items-start gap-2">
+                  <AlertTriangle
+                    size={16}
+                    color="#D97706"
+                    className="mt-0.5 flex-shrink-0"
+                  />
+                  <div>
+                    {userAllergens.length > 0 ? (
+                      <div className="flex flex-wrap gap-1.5">
+                        {userAllergens.map((allergen) => (
+                          <span
+                            key={allergen}
+                            className="px-2.5 py-0.5 rounded-full text-xs font-medium"
+                            style={{
+                              backgroundColor: "#FEF3C7",
+                              color: "#92400E",
+                            }}
+                          >
+                            {allergen}
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <p
+                        className="text-xs italic"
+                        style={{ color: "#9CA3AF" }}
+                      >
+                        No allergens
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Notification Preferences */}
+              <div
+                style={{ borderTop: "1px solid #E5E7EB" }}
+                className="mt-4 pt-4"
+              >
+                <h3
+                  className="text-sm font-semibold mb-3"
+                  style={{ color: "#1A1A2E" }}
+                >
+                  Notifications
+                </h3>
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr style={{ borderBottom: "1px solid #E5E7EB" }}>
+                      <th
+                        className="text-left py-1.5 font-semibold"
+                        style={{ color: "#6B7280" }}
+                      ></th>
+                      <th
+                        className="text-center py-1.5 font-semibold"
+                        style={{ color: "#6B7280" }}
+                      >
+                        <div className="flex items-center justify-center gap-1">
+                          <Mail size={12} /> Email
+                        </div>
+                      </th>
+                      <th
+                        className="text-center py-1.5 font-semibold"
+                        style={{ color: "#6B7280" }}
+                      >
+                        <div className="flex items-center justify-center gap-1">
+                          <Smartphone size={12} /> SMS
+                        </div>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[
+                      {
+                        label: "Order Updates",
+                        emailKey: "orderUpdatesEmail" as const,
+                        smsKey: "orderUpdatesSms" as const,
+                      },
+                      {
+                        label: "Menu Drops",
+                        emailKey: "menuDropsEmail" as const,
+                        smsKey: "menuDropsSms" as const,
+                      },
+                      {
+                        label: "Payment Reminders",
+                        emailKey: "paymentRemindersEmail" as const,
+                        smsKey: "paymentRemindersSms" as const,
+                      },
+                      {
+                        label: "Promotions",
+                        emailKey: "promotionsEmail" as const,
+                        smsKey: "promotionsSms" as const,
+                      },
+                    ].map((row) => (
+                      <tr
+                        key={row.label}
+                        style={{ borderBottom: "1px solid #F3F4F6" }}
+                      >
+                        <td
+                          className="py-2 font-medium"
+                          style={{ color: "#1A1A2E" }}
+                        >
+                          {row.label}
+                        </td>
+                        <td className="py-2 text-center">
+                          <ToggleSwitch
+                            checked={notifications[row.emailKey]}
+                            onChange={() => toggleNotification(row.emailKey)}
+                          />
+                        </td>
+                        <td className="py-2 text-center">
+                          <ToggleSwitch
+                            checked={notifications[row.smsKey]}
+                            onChange={() => toggleNotification(row.smsKey)}
+                          />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            )}
+          </div>
+
+          {/* RIGHT COLUMN - Subscription, Actions, Meals, Orders (8/12 on desktop) */}
+          <div className="lg:col-span-8 flex flex-col gap-4 min-h-0 order-1 lg:order-2">
+            {/* A) Subscription Status Card */}
+            {isLoadingUser ? (
+              <SkeletonCard className="min-h-[140px]" />
+            ) : (
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="rounded-2xl p-5"
+              style={{
+                background: "linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%)",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+              }}
+            >
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span
+                      className="w-2.5 h-2.5 rounded-full inline-block"
                       style={{
-                        backgroundColor: "#F0FDF4",
-                        border: "1px solid #BBF7D0",
+                        backgroundColor: "#34D399",
+                        animation: "pulse-success 2s ease-in-out infinite",
+                      }}
+                    />
+                    <span
+                      className="text-xs font-semibold"
+                      style={{ color: "#34D399" }}
+                    >
+                      Active
+                    </span>
+                  </div>
+                  <h2
+                    className="text-xl font-bold text-white mb-4"
+                    style={{ fontFamily: "'DM Serif Display', serif" }}
+                  >
+                    {customer.planType}
+                  </h2>
+                  <div className="flex flex-wrap gap-3 sm:gap-4 lg:gap-5">
+                    <div
+                      className="flex items-center gap-2.5 rounded-xl px-3 py-2"
+                      style={{ backgroundColor: "rgba(255, 255, 255, 0.08)" }}
+                    >
+                      <div
+                        className="w-8 h-8 flex-shrink-0 rounded-full flex items-center justify-center p-1.5"
+                        style={{ backgroundColor: "rgba(167, 243, 208, 0.15)" }}
+                      >
+                        <Truck size={16} color="#A7F3D0" />
+                      </div>
+                      <div>
+                        <p
+                          className="text-[10px] uppercase font-semibold tracking-wider mb-0.5"
+                          style={{ color: "rgba(167, 243, 208, 0.8)" }}
+                        >
+                          Next Delivery
+                        </p>
+                        <p className="text-white font-medium text-[13px] leading-none">
+                          April 7, 2026
+                        </p>
+                      </div>
+                    </div>
+
+                    <div
+                      className="flex items-center gap-2.5 rounded-xl px-3 py-2"
+                      style={{ backgroundColor: "rgba(255, 255, 255, 0.08)" }}
+                    >
+                      <div
+                        className="w-8 h-8 flex-shrink-0 rounded-full flex items-center justify-center p-1.5"
+                        style={{ backgroundColor: "rgba(167, 243, 208, 0.15)" }}
+                      >
+                        <CalendarDays size={16} color="#A7F3D0" />
+                      </div>
+                      <div>
+                        <p
+                          className="text-[10px] uppercase font-semibold tracking-wider mb-0.5"
+                          style={{ color: "rgba(167, 243, 208, 0.8)" }}
+                        >
+                          Next Billing
+                        </p>
+                        <p className="text-white font-medium text-[13px] leading-none">
+                          April 5, 2026
+                        </p>
+                      </div>
+                    </div>
+
+                    <div
+                      className="flex items-center gap-2.5 rounded-xl px-3 py-2"
+                      style={{
+                        backgroundColor: "rgba(251, 191, 36, 0.15)",
+                        border: "1px solid rgba(251, 191, 36, 0.3)",
                       }}
                     >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-1.5">
-                          <Wallet size={14} color="#059669" />
-                          <p
-                            className="text-xs font-medium"
-                            style={{ color: "#6B7280" }}
-                          >
-                            This Month
-                          </p>
-                        </div>
+                      <div
+                        className="w-8 h-8 flex-shrink-0 rounded-full flex items-center justify-center p-1.5"
+                        style={{ backgroundColor: "rgba(251, 191, 36, 0.2)" }}
+                      >
+                        <Wallet size={16} color="#FCD34D" />
+                      </div>
+                      <div>
                         <p
-                          className="text-lg font-bold"
-                          style={{ color: "#1A1A2E" }}
+                          className="text-[10px] uppercase font-semibold tracking-wider mb-0.5"
+                          style={{ color: "rgba(253, 230, 138, 0.9)" }}
+                        >
+                          Cost
+                        </p>
+                        <p
+                          className="font-bold text-[14px] leading-none tracking-wide"
+                          style={{ color: "#FCD34D" }}
                         >
                           {formatPeso(4500)}
                         </p>
                       </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div
-                        className="rounded-lg p-3"
-                        style={{
-                          backgroundColor: "#FFF7ED",
-                          border: "1px solid #FED7AA",
-                        }}
-                      >
-                        <div className="flex items-center gap-1.5 mb-1">
-                          <PiggyBank size={14} color="#D97706" />
-                          <p
-                            className="text-xs font-medium"
-                            style={{ color: "#6B7280" }}
-                          >
-                            Savings
-                          </p>
-                        </div>
-                        <p
-                          className="text-lg font-bold"
-                          style={{ color: "#059669" }}
-                        >
-                          {formatPeso(680)}
-                        </p>
-                      </div>
-                      <div
-                        className="rounded-lg p-3"
-                        style={{
-                          backgroundColor: "#FEF2F2",
-                          border: "1px solid #FECACA",
-                        }}
-                      >
-                        <div className="flex items-center gap-1.5 mb-1">
-                          <Heart size={14} color="#E76F51" />
-                          <p
-                            className="text-xs font-medium"
-                            style={{ color: "#6B7280" }}
-                          >
-                            Favorite
-                          </p>
-                        </div>
-                        <p
-                          className="text-sm font-bold leading-tight"
-                          style={{ color: "#1A1A2E" }}
-                        >
-                          {favoriteMeal}
-                        </p>
-                      </div>
-                    </div>
                   </div>
-
-                  <div
-                    style={{ borderTop: "1px solid #E5E7EB" }}
-                    className="pt-4 space-y-3"
+                </div>
+                {/* Progress Ring */}
+                <svg
+                  width="72"
+                  height="72"
+                  viewBox="0 0 88 88"
+                  className="hidden sm:block"
+                >
+                  <circle
+                    cx="44"
+                    cy="44"
+                    r="36"
+                    fill="none"
+                    stroke="rgba(255,255,255,0.15)"
+                    strokeWidth="6"
+                  />
+                  <circle
+                    cx="44"
+                    cy="44"
+                    r="36"
+                    fill="none"
+                    stroke="#34D399"
+                    strokeWidth="6"
+                    strokeLinecap="round"
+                    strokeDasharray={circumference}
+                    strokeDashoffset={dashOffset}
+                    transform="rotate(-90 44 44)"
+                  />
+                  <text
+                    x="44"
+                    y="40"
+                    textAnchor="middle"
+                    fill="white"
+                    fontSize="20"
+                    fontWeight="bold"
+                    fontFamily="'DM Sans', sans-serif"
                   >
-                    {/* Delivery Address */}
-                    <div className="flex items-start gap-2">
-                      <MapPin
-                        size={16}
-                        color="#6B7280"
-                        className="mt-0.5 flex-shrink-0"
-                      />
-                      <div>
-                        <p
-                          className="text-xs font-medium"
-                          style={{ color: "#6B7280" }}
-                        >
-                          Delivery Address
-                        </p>
-                        <p
-                          className="text-sm font-medium"
-                          style={{ color: "#1A1A2E" }}
-                        >
-                          {customer.address}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Payment Method */}
-                    <div className="flex items-start gap-2">
-                      <CreditCard
-                        size={16}
-                        color="#6B7280"
-                        className="mt-0.5 flex-shrink-0"
-                      />
-                      <div>
-                        <p
-                          className="text-xs font-medium"
-                          style={{ color: "#6B7280" }}
-                        >
-                          Payment Method
-                        </p>
-                        <p
-                          className="text-sm font-medium"
-                          style={{ color: "#1A1A2E" }}
-                        >
-                          GCash ending in ****4567
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="pt-1">
-                      <p
-                        className="text-sm font-semibold mb-2"
-                        style={{ color: "#1A1A2E" }}
-                      >
-                        Dietary & Allergens
-                      </p>
-                    </div>
-
-                    {/* Dietary Preferences */}
-                    <div className="flex items-start gap-2">
-                      <Tag
-                        size={16}
-                        color="#6B7280"
-                        className="mt-0.5 flex-shrink-0"
-                      />
-                      <div>
-                        {userDietary.length > 0 ? (
-                          <div className="flex flex-wrap gap-1.5">
-                            {userDietary.map((pref) => (
-                              <span
-                                key={pref}
-                                className="px-2.5 py-0.5 rounded-full text-xs font-medium"
-                                style={{
-                                  backgroundColor: "#D1FAE5",
-                                  color: "#065F46",
-                                }}
-                              >
-                                {pref}
-                              </span>
-                            ))}
-                          </div>
-                        ) : (
-                          <p
-                            className="text-xs italic"
-                            style={{ color: "#9CA3AF" }}
-                          >
-                            No dietary preferences
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Allergens */}
-                    <div className="flex items-start gap-2">
-                      <AlertTriangle
-                        size={16}
-                        color="#D97706"
-                        className="mt-0.5 flex-shrink-0"
-                      />
-                      <div>
-                        {userAllergens.length > 0 ? (
-                          <div className="flex flex-wrap gap-1.5">
-                            {userAllergens.map((allergen) => (
-                              <span
-                                key={allergen}
-                                className="px-2.5 py-0.5 rounded-full text-xs font-medium"
-                                style={{
-                                  backgroundColor: "#FEF3C7",
-                                  color: "#92400E",
-                                }}
-                              >
-                                {allergen}
-                              </span>
-                            ))}
-                          </div>
-                        ) : (
-                          <p
-                            className="text-xs italic"
-                            style={{ color: "#9CA3AF" }}
-                          >
-                            No allergens
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Notification Preferences */}
-                  <div
-                    style={{ borderTop: "1px solid #E5E7EB" }}
-                    className="mt-4 pt-4"
+                    {daysUntilDelivery}
+                  </text>
+                  <text
+                    x="44"
+                    y="56"
+                    textAnchor="middle"
+                    fill="#A7F3D0"
+                    fontSize="10"
+                    fontFamily="'DM Sans', sans-serif"
                   >
-                    <h3
-                      className="text-sm font-semibold mb-3"
+                    days left
+                  </text>
+                </svg>
+              </div>
+            </motion.div>
+            )}
+
+            {/* B) Quick Actions */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {[
+                {
+                  label: "Skip Next Week",
+                  icon: CalendarOff,
+                  color: "#D97706",
+                  action: () => setSkipModalOpen(true),
+                },
+                {
+                  label: "Pause Subscription",
+                  icon: Pause,
+                  color: "#E76F51",
+                  action: () => openSubscriptionModal("pause"),
+                },
+                {
+                  label: "Change Plan",
+                  icon: ArrowRightLeft,
+                  color: "#2D6A4F",
+                  action: () => openSubscriptionModal("change"),
+                },
+                {
+                  label: "Modify Meals",
+                  icon: UtensilsCrossed,
+                  color: "#1B4332",
+                  action: () => setEditMealsModalOpen(true),
+                },
+              ].map((item) => {
+                const Icon = item.icon;
+                const content = (
+                  <div
+                    className="rounded-xl p-3 flex flex-col items-center gap-1.5 cursor-pointer transition-all hover:shadow-md"
+                    style={{
+                      backgroundColor: "#FFFFFF",
+                      border: "1px solid #E5E7EB",
+                    }}
+                    onClick={"action" in item ? item.action : undefined}
+                  >
+                    <div
+                      className="w-8 h-8 rounded-full flex items-center justify-center"
+                      style={{ backgroundColor: `${item.color}15` }}
+                    >
+                      <Icon size={16} color={item.color} />
+                    </div>
+                    <p
+                      className="text-xs font-medium text-center"
                       style={{ color: "#1A1A2E" }}
                     >
-                      Notifications
-                    </h3>
-                    <table className="w-full text-xs">
-                      <thead>
-                        <tr style={{ borderBottom: "1px solid #E5E7EB" }}>
-                          <th
-                            className="text-left py-1.5 font-semibold"
-                            style={{ color: "#6B7280" }}
-                          ></th>
-                          <th
-                            className="text-center py-1.5 font-semibold"
-                            style={{ color: "#6B7280" }}
-                          >
-                            <div className="flex items-center justify-center gap-1">
-                              <Mail size={12} /> Email
-                            </div>
-                          </th>
-                          <th
-                            className="text-center py-1.5 font-semibold"
-                            style={{ color: "#6B7280" }}
-                          >
-                            <div className="flex items-center justify-center gap-1">
-                              <Smartphone size={12} /> SMS
-                            </div>
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {[
-                          {
-                            label: "Order Updates",
-                            emailKey: "orderUpdatesEmail" as const,
-                            smsKey: "orderUpdatesSms" as const,
-                          },
-                          {
-                            label: "Menu Drops",
-                            emailKey: "menuDropsEmail" as const,
-                            smsKey: "menuDropsSms" as const,
-                          },
-                          {
-                            label: "Payment Reminders",
-                            emailKey: "paymentRemindersEmail" as const,
-                            smsKey: "paymentRemindersSms" as const,
-                          },
-                          {
-                            label: "Promotions",
-                            emailKey: "promotionsEmail" as const,
-                            smsKey: "promotionsSms" as const,
-                          },
-                        ].map((row) => (
-                          <tr
-                            key={row.label}
-                            style={{ borderBottom: "1px solid #F3F4F6" }}
-                          >
-                            <td
-                              className="py-2 font-medium"
-                              style={{ color: "#1A1A2E" }}
-                            >
-                              {row.label}
-                            </td>
-                            <td className="py-2 text-center">
-                              <ToggleSwitch
-                                checked={notifications[row.emailKey]}
-                                onChange={() =>
-                                  toggleNotification(row.emailKey)
-                                }
-                              />
-                            </td>
-                            <td className="py-2 text-center">
-                              <ToggleSwitch
-                                checked={notifications[row.smsKey]}
-                                onChange={() => toggleNotification(row.smsKey)}
-                              />
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                      {item.label}
+                    </p>
                   </div>
-                </div>
-              )}
+                );
+                if ("href" in item && item.href) {
+                  return (
+                    <Link key={item.label} href={item.href}>
+                      {content}
+                    </Link>
+                  );
+                }
+                return <div key={item.label}>{content}</div>;
+              })}
             </div>
 
-            {/* RIGHT COLUMN - Subscription, Actions, Meals, Orders (8/12 on desktop) */}
-            <div className="lg:col-span-8 flex flex-col gap-4 min-h-0 order-1 lg:order-2">
-              {/* A) Subscription Status Card */}
-              {isLoadingUser ? (
-                <SkeletonCard className="min-h-[140px]" />
-              ) : (
-                <motion.div
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="rounded-2xl p-5"
-                  style={{
-                    background:
-                      "linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%)",
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-                  }}
+            {/* C) Meals for Next Delivery */}
+            <div
+              className="rounded-2xl p-4"
+              style={{
+                backgroundColor: "#FFFFFF",
+                border: "1px solid #E5E7EB",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+              }}
+            >
+              <div className="flex items-center justify-between mb-3">
+                <h2
+                  className="text-base font-semibold"
+                  style={{ color: "#1A1A2E" }}
                 >
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span
-                          className="w-2.5 h-2.5 rounded-full inline-block"
-                          style={{
-                            backgroundColor: "#34D399",
-                            animation: "pulse-success 2s ease-in-out infinite",
-                          }}
-                        />
-                        <span
-                          className="text-xs font-semibold"
-                          style={{ color: "#34D399" }}
-                        >
-                          Active
-                        </span>
-                      </div>
-                      <h2
-                        className="text-xl font-bold text-white mb-4"
-                        style={{ fontFamily: "'DM Serif Display', serif" }}
-                      >
-                        {customer.planType}
-                      </h2>
-                      <div className="flex flex-wrap gap-3 sm:gap-4 lg:gap-5">
-                        <div
-                          className="flex items-center gap-2.5 rounded-xl px-3 py-2"
-                          style={{
-                            backgroundColor: "rgba(255, 255, 255, 0.08)",
-                          }}
-                        >
-                          <div
-                            className="w-8 h-8 flex-shrink-0 rounded-full flex items-center justify-center p-1.5"
-                            style={{
-                              backgroundColor: "rgba(167, 243, 208, 0.15)",
-                            }}
-                          >
-                            <Truck size={16} color="#A7F3D0" />
-                          </div>
-                          <div>
-                            <p
-                              className="text-[10px] uppercase font-semibold tracking-wider mb-0.5"
-                              style={{ color: "rgba(167, 243, 208, 0.8)" }}
-                            >
-                              Next Delivery
-                            </p>
-                            <p className="text-white font-medium text-[13px] leading-none">
-                              April 7, 2026
-                            </p>
-                          </div>
-                        </div>
-
-                        <div
-                          className="flex items-center gap-2.5 rounded-xl px-3 py-2"
-                          style={{
-                            backgroundColor: "rgba(255, 255, 255, 0.08)",
-                          }}
-                        >
-                          <div
-                            className="w-8 h-8 flex-shrink-0 rounded-full flex items-center justify-center p-1.5"
-                            style={{
-                              backgroundColor: "rgba(167, 243, 208, 0.15)",
-                            }}
-                          >
-                            <CalendarDays size={16} color="#A7F3D0" />
-                          </div>
-                          <div>
-                            <p
-                              className="text-[10px] uppercase font-semibold tracking-wider mb-0.5"
-                              style={{ color: "rgba(167, 243, 208, 0.8)" }}
-                            >
-                              Next Billing
-                            </p>
-                            <p className="text-white font-medium text-[13px] leading-none">
-                              April 5, 2026
-                            </p>
-                          </div>
-                        </div>
-
-                        <div
-                          className="flex items-center gap-2.5 rounded-xl px-3 py-2"
-                          style={{
-                            backgroundColor: "rgba(251, 191, 36, 0.15)",
-                            border: "1px solid rgba(251, 191, 36, 0.3)",
-                          }}
-                        >
-                          <div
-                            className="w-8 h-8 flex-shrink-0 rounded-full flex items-center justify-center p-1.5"
-                            style={{
-                              backgroundColor: "rgba(251, 191, 36, 0.2)",
-                            }}
-                          >
-                            <Wallet size={16} color="#FCD34D" />
-                          </div>
-                          <div>
-                            <p
-                              className="text-[10px] uppercase font-semibold tracking-wider mb-0.5"
-                              style={{ color: "rgba(253, 230, 138, 0.9)" }}
-                            >
-                              Cost
-                            </p>
-                            <p
-                              className="font-bold text-[14px] leading-none tracking-wide"
-                              style={{ color: "#FCD34D" }}
-                            >
-                              {formatPeso(4500)}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    {/* Progress Ring */}
-                    <svg
-                      width="72"
-                      height="72"
-                      viewBox="0 0 88 88"
-                      className="hidden sm:block"
-                    >
-                      <circle
-                        cx="44"
-                        cy="44"
-                        r="36"
-                        fill="none"
-                        stroke="rgba(255,255,255,0.15)"
-                        strokeWidth="6"
-                      />
-                      <circle
-                        cx="44"
-                        cy="44"
-                        r="36"
-                        fill="none"
-                        stroke="#34D399"
-                        strokeWidth="6"
-                        strokeLinecap="round"
-                        strokeDasharray={circumference}
-                        strokeDashoffset={dashOffset}
-                        transform="rotate(-90 44 44)"
-                      />
-                      <text
-                        x="44"
-                        y="40"
-                        textAnchor="middle"
-                        fill="white"
-                        fontSize="20"
-                        fontWeight="bold"
-                        fontFamily="'DM Sans', sans-serif"
-                      >
-                        {daysUntilDelivery}
-                      </text>
-                      <text
-                        x="44"
-                        y="56"
-                        textAnchor="middle"
-                        fill="#A7F3D0"
-                        fontSize="10"
-                        fontFamily="'DM Sans', sans-serif"
-                      >
-                        days left
-                      </text>
-                    </svg>
-                  </div>
-                </motion.div>
-              )}
-
-              {/* B) Quick Actions */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                {[
-                  {
-                    label: "Skip Next Week",
-                    icon: CalendarOff,
-                    color: "#D97706",
-                    action: () => setSkipModalOpen(true),
-                  },
-                  {
-                    label: "Pause Subscription",
-                    icon: Pause,
-                    color: "#E76F51",
-                    action: () => openSubscriptionModal("pause"),
-                  },
-                  {
-                    label: "Change Plan",
-                    icon: ArrowRightLeft,
-                    color: "#2D6A4F",
-                    action: () => openSubscriptionModal("change"),
-                  },
-                  {
-                    label: "Modify Meals",
-                    icon: UtensilsCrossed,
-                    color: "#1B4332",
-                    action: () => setEditMealsModalOpen(true),
-                  },
-                ].map((item) => {
-                  const Icon = item.icon;
-                  const content = (
+                  Meals for Next Delivery
+                </h2>
+                <button
+                  onClick={() => setEditMealsModalOpen(true)}
+                  className="text-sm font-medium flex items-center gap-1"
+                  style={{ color: "#1B4332" }}
+                >
+                  Edit Selection <ChevronRight size={16} />
+                </button>
+              </div>
+              <div
+                className="flex gap-3 overflow-x-auto pb-1"
+                style={{ scrollbarWidth: "thin" }}
+              >
+                {nextDeliveryMeals.map((meal) => (
+                  <div
+                    key={meal.id}
+                    className="flex-shrink-0 w-32 sm:w-36 rounded-xl overflow-hidden"
+                    style={{ border: "1px solid #E5E7EB" }}
+                  >
                     <div
-                      className="rounded-xl p-3 flex flex-col items-center gap-1.5 cursor-pointer transition-all hover:shadow-md"
-                      style={{
-                        backgroundColor: "#FFFFFF",
-                        border: "1px solid #E5E7EB",
-                      }}
-                      onClick={"action" in item ? item.action : undefined}
-                    >
-                      <div
-                        className="w-8 h-8 rounded-full flex items-center justify-center"
-                        style={{ backgroundColor: `${item.color}15` }}
-                      >
-                        <Icon size={16} color={item.color} />
-                      </div>
+                      className="h-20 bg-cover bg-center"
+                      style={{ backgroundImage: `url(${meal.image})` }}
+                    />
+                    <div className="p-2">
                       <p
-                        className="text-xs font-medium text-center"
+                        className="text-xs font-medium leading-tight mb-0.5"
                         style={{ color: "#1A1A2E" }}
                       >
-                        {item.label}
+                        {meal.name.length > 25
+                          ? meal.name.slice(0, 25) + "..."
+                          : meal.name}
+                      </p>
+                      <p
+                        className="text-xs font-semibold"
+                        style={{ color: "#1B4332" }}
+                      >
+                        {formatPeso(meal.price)}
                       </p>
                     </div>
-                  );
-                  if ("href" in item && item.href) {
-                    return (
-                      <Link key={item.label} href={item.href}>
-                        {content}
-                      </Link>
-                    );
-                  }
-                  return <div key={item.label}>{content}</div>;
-                })}
+                  </div>
+                ))}
               </div>
+            </div>
 
-              {/* C) Meals for Next Delivery */}
-              <div
-                className="rounded-2xl p-4"
-                style={{
-                  backgroundColor: "#FFFFFF",
-                  border: "1px solid #E5E7EB",
-                  boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
-                }}
+            {/* D) Order History Table */}
+            {isLoadingOrders ? (
+              <SkeletonCard className="flex-1 min-h-[200px]" />
+            ) : (
+            <div
+              className="rounded-2xl p-4 flex-1 min-h-0 flex flex-col"
+              style={{
+                backgroundColor: "#FFFFFF",
+                border: "1px solid #E5E7EB",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+              }}
+            >
+              <h2
+                className="text-base font-semibold mb-2"
+                style={{ color: "#1A1A2E" }}
               >
-                <div className="flex items-center justify-between mb-3">
-                  <h2
-                    className="text-base font-semibold"
-                    style={{ color: "#1A1A2E" }}
-                  >
-                    Meals for Next Delivery
-                  </h2>
-                  <button
-                    onClick={() => setEditMealsModalOpen(true)}
-                    className="text-sm font-medium flex items-center gap-1"
-                    style={{ color: "#1B4332" }}
-                  >
-                    Edit Selection <ChevronRight size={16} />
-                  </button>
-                </div>
-                <div
-                  className="flex gap-3 overflow-x-auto pb-1"
-                  style={{ scrollbarWidth: "thin" }}
-                >
-                  {nextDeliveryMeals.map((meal) => (
-                    <div
-                      key={meal.id}
-                      className="flex-shrink-0 w-32 sm:w-36 rounded-xl overflow-hidden"
-                      style={{ border: "1px solid #E5E7EB" }}
-                    >
-                      <div
-                        className="h-20 bg-cover bg-center"
-                        style={{ backgroundImage: `url(${meal.image})` }}
-                      />
-                      <div className="p-2">
-                        <p
-                          className="text-xs font-medium leading-tight mb-0.5"
+                Order History
+              </h2>
+              <div className="overflow-y-auto flex-1 min-h-0">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr style={{ borderBottom: "2px solid #E5E7EB" }}>
+                      {[
+                        "Date",
+                        "Order ID",
+                        "Items",
+                        "Total",
+                        "Status",
+                        "Action",
+                      ].map((h) => (
+                        <th
+                          key={h}
+                          className="text-left py-2 px-2 font-semibold text-xs"
+                          style={{ color: "#6B7280" }}
+                        >
+                          {h}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {displayOrders.slice(0, 6).map((order: { id: string; deliveryDate: string; items: unknown[]; total: number; status: string }) => (
+                      <tr
+                        key={order.id}
+                        style={{ borderBottom: "1px solid #F3F4F6" }}
+                        className="hover:bg-gray-50 transition-colors"
+                      >
+                        <td
+                          className="py-2 px-2 text-xs"
                           style={{ color: "#1A1A2E" }}
                         >
-                          {meal.name.length > 25
-                            ? meal.name.slice(0, 25) + "..."
-                            : meal.name}
-                        </p>
-                        <p
-                          className="text-xs font-semibold"
-                          style={{ color: "#1B4332" }}
-                        >
-                          {formatPeso(meal.price)}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* D) Order History Table */}
-              {isLoadingOrders ? (
-                <SkeletonCard className="flex-1 min-h-[200px]" />
-              ) : (
-                <div
-                  className="rounded-2xl p-4 flex-1 min-h-0 flex flex-col"
-                  style={{
-                    backgroundColor: "#FFFFFF",
-                    border: "1px solid #E5E7EB",
-                    boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
-                  }}
-                >
-                  <h2
-                    className="text-base font-semibold mb-2"
-                    style={{ color: "#1A1A2E" }}
-                  >
-                    Order History
-                  </h2>
-                  <div className="overflow-y-auto flex-1 min-h-0">
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr style={{ borderBottom: "2px solid #E5E7EB" }}>
-                          {[
-                            "Date",
-                            "Order ID",
-                            "Items",
-                            "Total",
-                            "Status",
-                            "Action",
-                          ].map((h) => (
-                            <th
-                              key={h}
-                              className="text-left py-2 px-2 font-semibold text-xs"
-                              style={{ color: "#6B7280" }}
-                            >
-                              {h}
-                            </th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {displayOrders
-                          .slice(0, 6)
-                          .map(
-                            (order: {
-                              id: string;
-                              deliveryDate: string;
-                              items: unknown[];
-                              total: number;
-                              status: string;
-                            }) => (
-                              <tr
-                                key={order.id}
-                                style={{ borderBottom: "1px solid #F3F4F6" }}
-                                className="hover:bg-gray-50 transition-colors"
-                              >
-                                <td
-                                  className="py-2 px-2 text-xs"
-                                  style={{ color: "#1A1A2E" }}
-                                >
-                                  {new Date(
-                                    order.deliveryDate,
-                                  ).toLocaleDateString("en-US", {
-                                    month: "short",
-                                    day: "numeric",
-                                    year: "numeric",
-                                  })}
-                                </td>
-                                <td
-                                  className="py-2 px-2"
-                                  style={{
-                                    fontFamily: "'JetBrains Mono', monospace",
-                                    color: "#1B4332",
-                                    fontSize: "0.7rem",
-                                  }}
-                                >
-                                  {order.id}
-                                </td>
-                                <td
-                                  className="py-2 px-2 text-xs"
-                                  style={{ color: "#1A1A2E" }}
-                                >
-                                  {order.items.length} item
-                                  {order.items.length > 1 ? "s" : ""}
-                                </td>
-                                <td
-                                  className="py-2 px-2 font-semibold text-xs"
-                                  style={{ color: "#1A1A2E" }}
-                                >
-                                  {formatPeso(order.total)}
-                                </td>
-                                <td className="py-2 px-2">
-                                  <StatusBadge
-                                    status={order.status}
-                                    size="sm"
-                                  />
-                                </td>
-                                <td className="py-2 px-2">
-                                  <button
-                                    onClick={() =>
-                                      showToast(
-                                        "Items added to cart",
-                                        "success",
-                                      )
-                                    }
-                                    className="flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-lg transition-colors hover:bg-gray-100"
-                                    style={{ color: "#1B4332" }}
-                                  >
-                                    <RefreshCw size={12} /> Reorder
-                                  </button>
-                                </td>
-                              </tr>
-                            ),
+                          {new Date(order.deliveryDate).toLocaleDateString(
+                            "en-US",
+                            { month: "short", day: "numeric", year: "numeric" },
                           )}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              )}
+                        </td>
+                        <td
+                          className="py-2 px-2"
+                          style={{
+                            fontFamily: "'JetBrains Mono', monospace",
+                            color: "#1B4332",
+                            fontSize: "0.7rem",
+                          }}
+                        >
+                          {order.id}
+                        </td>
+                        <td
+                          className="py-2 px-2 text-xs"
+                          style={{ color: "#1A1A2E" }}
+                        >
+                          {order.items.length} item
+                          {order.items.length > 1 ? "s" : ""}
+                        </td>
+                        <td
+                          className="py-2 px-2 font-semibold text-xs"
+                          style={{ color: "#1A1A2E" }}
+                        >
+                          {formatPeso(order.total)}
+                        </td>
+                        <td className="py-2 px-2">
+                          <StatusBadge status={order.status} size="sm" />
+                        </td>
+                        <td className="py-2 px-2">
+                          <button
+                            onClick={() =>
+                              showToast("Items added to cart", "success")
+                            }
+                            className="flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-lg transition-colors hover:bg-gray-100"
+                            style={{ color: "#1B4332" }}
+                          >
+                            <RefreshCw size={12} /> Reorder
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            )}
+          </div>
+        </div>
+
+        {/* Skip Next Week Modal */}
+        <Modal
+          isOpen={skipModalOpen}
+          onClose={() => setSkipModalOpen(false)}
+          title="Skip Next Week"
+        >
+          <div className="space-y-4">
+            <p style={{ color: "#6B7280" }}>
+              Are you sure you want to skip the delivery for the week of April 7
+              - April 13, 2026?
+            </p>
+            <p className="text-sm" style={{ color: "#6B7280" }}>
+              You&apos;ll receive a credit of {formatPeso(4500)} that will be
+              applied to your next active week.
+            </p>
+            <div className="flex gap-3 pt-2">
+              <button
+                onClick={() => setSkipModalOpen(false)}
+                className="flex-1 px-4 py-2.5 rounded-xl font-medium transition-colors hover:bg-gray-100"
+                style={{ border: "1px solid #E5E7EB", color: "#1A1A2E" }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  setSkipModalOpen(false);
+                  showToast("Week of April 7 skipped successfully", "success");
+                }}
+                className="flex-1 px-4 py-2.5 rounded-xl font-medium text-white transition-colors hover:opacity-90"
+                style={{ backgroundColor: "#D97706" }}
+              >
+                Skip Week
+              </button>
             </div>
           </div>
-
-          {/* Skip Next Week Modal */}
-          <Modal
-            isOpen={skipModalOpen}
-            onClose={() => setSkipModalOpen(false)}
-            title="Skip Next Week"
-          >
-            <div className="space-y-4">
-              <p style={{ color: "#6B7280" }}>
-                Are you sure you want to skip the delivery for the week of April
-                7 - April 13, 2026?
-              </p>
-              <p className="text-sm" style={{ color: "#6B7280" }}>
-                You&apos;ll receive a credit of {formatPeso(4500)} that will be
-                applied to your next active week.
-              </p>
-              <div className="flex gap-3 pt-2">
-                <button
-                  onClick={() => setSkipModalOpen(false)}
-                  className="flex-1 px-4 py-2.5 rounded-xl font-medium transition-colors hover:bg-gray-100"
-                  style={{ border: "1px solid #E5E7EB", color: "#1A1A2E" }}
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={() => {
-                    setSkipModalOpen(false);
-                    showToast(
-                      "Week of April 7 skipped successfully",
-                      "success",
-                    );
-                  }}
-                  className="flex-1 px-4 py-2.5 rounded-xl font-medium text-white transition-colors hover:opacity-90"
-                  style={{ backgroundColor: "#D97706" }}
-                >
-                  Skip Week
-                </button>
-              </div>
-            </div>
-          </Modal>
+        </Modal>
 
           {/* Subscription Modal (Pause / Change Plan) */}
           <Modal
@@ -1043,8 +1004,7 @@ function ToggleSwitch({
   return (
     <button
       onClick={onChange}
-      className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors"
-      style={{ backgroundColor: checked ? "#059669" : "#D1D5DB" }}
+      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${checked ? "bg-success" : "bg-gray-300"}`}
     >
       <span
         className="inline-block h-4 w-4 rounded-full bg-white transition-transform"
@@ -1092,7 +1052,7 @@ function PauseSubscriptionContent({
 
   return (
     <div className="space-y-4">
-      <p style={{ color: "#6B7280" }}>
+      <p className="text-text-secondary">
         Choose how long to pause your subscription:
       </p>
 
@@ -1102,13 +1062,11 @@ function PauseSubscriptionContent({
           <button
             key={preset.days}
             onClick={() => setPauseDays(preset.days)}
-            className="flex-1 px-3 py-2.5 rounded-xl text-sm font-medium transition-all"
-            style={{
-              border: `2px solid ${pauseDays === preset.days ? "#1B4332" : "#E5E7EB"}`,
-              backgroundColor:
-                pauseDays === preset.days ? "#F0FDF4" : "#FFFFFF",
-              color: pauseDays === preset.days ? "#1B4332" : "#6B7280",
-            }}
+            className={`flex-1 px-3 py-2.5 rounded-xl text-sm font-medium transition-all border-2 ${
+              pauseDays === preset.days
+                ? "border-primary bg-green-50 text-primary"
+                : "border-border bg-surface-white text-text-secondary"
+            }`}
           >
             {preset.label}
           </button>
@@ -1116,21 +1074,14 @@ function PauseSubscriptionContent({
       </div>
 
       {/* Custom days input */}
-      <div
-        className="rounded-xl p-4"
-        style={{ backgroundColor: "#F9FAFB", border: "1px solid #E5E7EB" }}
-      >
-        <label
-          className="block text-sm font-medium mb-2"
-          style={{ color: "#1A1A2E" }}
-        >
+      <div className="rounded-xl p-4 bg-gray-50 border border-border">
+        <label className="block text-sm font-medium mb-2 text-text-primary">
           Or enter a custom number of days
         </label>
         <div className="flex items-center gap-3">
           <button
             onClick={() => setPauseDays(Math.max(1, pauseDays - 1))}
-            className="w-9 h-9 rounded-lg flex items-center justify-center font-bold text-lg transition-all hover:opacity-80"
-            style={{ backgroundColor: "#E5E7EB", color: "#374151" }}
+            className="w-9 h-9 rounded-lg flex items-center justify-center font-bold text-lg transition-all hover:opacity-80 bg-border text-gray-700"
           >
             −
           </button>
@@ -1140,34 +1091,25 @@ function PauseSubscriptionContent({
             max={90}
             value={pauseDays}
             onChange={(e) => handleDaysChange(e.target.value)}
-            className="w-20 text-center text-lg font-semibold rounded-lg py-1.5 outline-none transition-colors"
-            style={{
-              border: "2px solid #1B4332",
-              color: "#1B4332",
-              backgroundColor: "#FFFFFF",
-            }}
+            className="w-20 text-center text-lg font-semibold rounded-lg py-1.5 outline-none transition-colors border-2 border-primary text-primary bg-surface-white"
           />
           <button
             onClick={() => setPauseDays(Math.min(90, pauseDays + 1))}
-            className="w-9 h-9 rounded-lg flex items-center justify-center font-bold text-lg transition-all hover:opacity-80"
-            style={{ backgroundColor: "#1B4332", color: "#FFFFFF" }}
+            className="w-9 h-9 rounded-lg flex items-center justify-center font-bold text-lg transition-all hover:opacity-80 bg-primary text-surface-white"
           >
             +
           </button>
-          <span className="text-sm font-medium" style={{ color: "#6B7280" }}>
+          <span className="text-sm font-medium text-text-secondary">
             day{pauseDays !== 1 ? "s" : ""}
           </span>
         </div>
-        <p className="text-xs mt-2" style={{ color: "#9CA3AF" }}>
+        <p className="text-xs mt-2 text-text-tertiary">
           Min 1 day · Max 90 days
         </p>
       </div>
 
-      <div
-        className="rounded-xl p-3"
-        style={{ backgroundColor: "#FFF7ED", border: "1px solid #FED7AA" }}
-      >
-        <p className="text-sm" style={{ color: "#92400E" }}>
+      <div className="rounded-xl p-3 bg-orange-50 border border-orange-200">
+        <p className="text-sm text-warning-dark">
           Your subscription will resume on <strong>{resumeLabel}</strong>. You
           won&apos;t be charged during the pause.
         </p>
@@ -1175,8 +1117,7 @@ function PauseSubscriptionContent({
       <div className="flex gap-3 pt-2">
         <button
           onClick={onClose}
-          className="flex-1 px-4 py-2.5 rounded-xl font-medium transition-colors hover:bg-gray-100"
-          style={{ border: "1px solid #E5E7EB", color: "#1A1A2E" }}
+          className="flex-1 px-4 py-2.5 rounded-xl font-medium transition-colors hover:bg-gray-100 border border-border text-text-primary"
         >
           Cancel
         </button>
@@ -1188,8 +1129,7 @@ function PauseSubscriptionContent({
               "success",
             );
           }}
-          className="flex-1 px-4 py-2.5 rounded-xl font-medium text-white transition-colors hover:opacity-90"
-          style={{ backgroundColor: "#D97706" }}
+          className="flex-1 px-4 py-2.5 rounded-xl font-medium text-white transition-colors hover:opacity-90 bg-warning"
         >
           Pause Subscription
         </button>
@@ -1213,7 +1153,7 @@ function ChangePlanContent({
 
   return (
     <div className="space-y-4">
-      <p style={{ color: "#6B7280" }}>Select your new plan:</p>
+      <p className="text-text-secondary">Select your new plan:</p>
       <div className="grid grid-cols-2 gap-3">
         {planTiers.map(
           (tier: {
@@ -1231,33 +1171,29 @@ function ChangePlanContent({
               <button
                 key={tier.id}
                 onClick={() => setSelectedPlan(tier.id)}
-                className="relative rounded-xl p-4 text-left transition-all"
-                style={{
-                  border: `2px solid ${isSelected ? "#1B4332" : "#E5E7EB"}`,
-                  backgroundColor: isSelected ? "#F0FDF4" : "#FFFFFF",
-                }}
+                className={`relative rounded-xl p-4 text-left transition-all border-2 ${
+                  isSelected
+                    ? "border-primary bg-green-50"
+                    : "border-border bg-surface-white"
+                }`}
               >
                 {isCurrent && (
-                  <span
-                    className="absolute -top-2.5 left-3 px-2 py-0.5 text-xs font-semibold rounded-full"
-                    style={{ backgroundColor: "#1B4332", color: "#FFFFFF" }}
-                  >
+                  <span className="absolute -top-2.5 left-3 px-2 py-0.5 text-xs font-semibold rounded-full bg-primary text-surface-white">
                     Current
                   </span>
                 )}
-                <p className="font-bold text-lg" style={{ color: "#1A1A2E" }}>
+                <p className="font-bold text-lg text-text-primary">
                   {tier.meals} meals
                 </p>
-                <p className="text-sm" style={{ color: "#6B7280" }}>
+                <p className="text-sm text-text-secondary">
                   {tier.label}
                 </p>
-                <p className="font-semibold mt-1" style={{ color: "#1B4332" }}>
+                <p className="font-semibold mt-1 text-primary">
                   {formatPeso(tier.price)}/mo
                 </p>
                 {!isCurrent && (
                   <p
-                    className="text-xs mt-1 font-medium"
-                    style={{ color: diff > 0 ? "#D97706" : "#059669" }}
+                    className={`text-xs mt-1 font-medium ${diff > 0 ? "text-warning" : "text-success"}`}
                   >
                     {diff > 0 ? "+" : ""}
                     {formatPeso(Math.abs(diff))}/mo
@@ -1269,11 +1205,8 @@ function ChangePlanContent({
         )}
       </div>
       {selectedPlan !== 10 && (
-        <div
-          className="rounded-xl p-3"
-          style={{ backgroundColor: "#EFF6FF", border: "1px solid #BFDBFE" }}
-        >
-          <p className="text-sm" style={{ color: "#1E40AF" }}>
+        <div className="rounded-xl p-3 bg-blue-50 border border-blue-200">
+          <p className="text-sm text-blue-800">
             Your billing will be pro-rated for the remainder of the current
             cycle.
           </p>
@@ -1282,8 +1215,7 @@ function ChangePlanContent({
       <div className="flex gap-3 pt-2">
         <button
           onClick={onClose}
-          className="flex-1 px-4 py-2.5 rounded-xl font-medium transition-colors hover:bg-gray-100"
-          style={{ border: "1px solid #E5E7EB", color: "#1A1A2E" }}
+          className="flex-1 px-4 py-2.5 rounded-xl font-medium transition-colors hover:bg-gray-100 border border-border text-text-primary"
         >
           Cancel
         </button>
@@ -1297,8 +1229,7 @@ function ChangePlanContent({
               );
             }
           }}
-          className="flex-1 px-4 py-2.5 rounded-xl font-medium text-white transition-colors hover:opacity-90"
-          style={{ backgroundColor: "#1B4332" }}
+          className="flex-1 px-4 py-2.5 rounded-xl font-medium text-white transition-colors hover:opacity-90 bg-primary"
         >
           Confirm Change
         </button>
@@ -1366,19 +1297,6 @@ function EditProfileModalContent({
     );
   };
 
-  const inputStyle = {
-    backgroundColor: "#FFFFFF",
-    border: "1px solid #E5E7EB",
-    color: "#1A1A2E",
-  };
-
-  const disabledInputStyle = {
-    backgroundColor: "#F9FAFB",
-    border: "1px solid #E5E7EB",
-    color: "#9CA3AF",
-    cursor: "not-allowed" as const,
-  };
-
   return (
     <div
       className="space-y-5 max-h-[70vh] overflow-y-auto pr-2"
@@ -1386,57 +1304,42 @@ function EditProfileModalContent({
     >
       {/* Personal Information */}
       <div>
-        <h3
-          className="text-sm font-semibold mb-3 flex items-center gap-2"
-          style={{ color: "#1A1A2E" }}
-        >
-          <User size={14} color="#1B4332" /> Personal Information
+        <h3 className="text-sm font-semibold mb-3 flex items-center gap-2 text-text-primary">
+          <User size={14} className="text-primary" /> Personal Information
         </h3>
         <div className="space-y-3">
           <div>
-            <label
-              className="block text-xs font-medium mb-1"
-              style={{ color: "#6B7280" }}
-            >
+            <label className="block text-xs font-medium mb-1 text-text-secondary">
               Full Name
             </label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-3 py-2 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-600 transition-shadow"
-              style={inputStyle}
+              className="w-full px-3 py-2 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-600 transition-shadow bg-surface-white border border-border text-text-primary"
             />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label
-                className="block text-xs font-medium mb-1 flex items-center gap-1"
-                style={{ color: "#6B7280" }}
-              >
+              <label className="block text-xs font-medium mb-1 flex items-center gap-1 text-text-secondary">
                 <Mail size={12} /> Email
               </label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-600 transition-shadow"
-                style={inputStyle}
+                className="w-full px-3 py-2 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-600 transition-shadow bg-surface-white border border-border text-text-primary"
               />
             </div>
             <div>
-              <label
-                className="block text-xs font-medium mb-1 flex items-center gap-1"
-                style={{ color: "#6B7280" }}
-              >
+              <label className="block text-xs font-medium mb-1 flex items-center gap-1 text-text-secondary">
                 <Phone size={12} /> Phone
               </label>
               <input
                 type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-600 transition-shadow"
-                style={inputStyle}
+                className="w-full px-3 py-2 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-600 transition-shadow bg-surface-white border border-border text-text-primary"
               />
             </div>
           </div>
@@ -1445,19 +1348,9 @@ function EditProfileModalContent({
 
       {/* Delivery Address (Disabled) */}
       <div>
-        <h3
-          className="text-sm font-semibold mb-3 flex items-center gap-2"
-          style={{ color: "#1A1A2E" }}
-        >
-          <MapPin size={14} color="#1B4332" /> Delivery Address
-          <span
-            className="ml-auto flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider"
-            style={{
-              backgroundColor: "#F3F4F6",
-              color: "#9CA3AF",
-              border: "1px solid #E5E7EB",
-            }}
-          >
+        <h3 className="text-sm font-semibold mb-3 flex items-center gap-2 text-text-primary">
+          <MapPin size={14} className="text-primary" /> Delivery Address
+          <span className="ml-auto flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-muted text-text-tertiary border border-border">
             <Lock size={10} /> Coming Soon
           </span>
         </h3>
@@ -1465,29 +1358,18 @@ function EditProfileModalContent({
           type="text"
           value={customers[0].address}
           disabled
-          className="w-full px-3 py-2 rounded-xl text-sm"
-          style={disabledInputStyle}
+          className="w-full px-3 py-2 rounded-xl text-sm bg-gray-50 border border-border text-text-tertiary cursor-not-allowed"
         />
-        <p className="text-[10px] mt-1.5 italic" style={{ color: "#9CA3AF" }}>
+        <p className="text-[10px] mt-1.5 italic text-text-tertiary">
           Address editing will be available in a future update.
         </p>
       </div>
 
       {/* Payment Method (Disabled) */}
       <div>
-        <h3
-          className="text-sm font-semibold mb-3 flex items-center gap-2"
-          style={{ color: "#1A1A2E" }}
-        >
-          <CreditCard size={14} color="#1B4332" /> Payment Method
-          <span
-            className="ml-auto flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider"
-            style={{
-              backgroundColor: "#F3F4F6",
-              color: "#9CA3AF",
-              border: "1px solid #E5E7EB",
-            }}
-          >
+        <h3 className="text-sm font-semibold mb-3 flex items-center gap-2 text-text-primary">
+          <CreditCard size={14} className="text-primary" /> Payment Method
+          <span className="ml-auto flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-muted text-text-tertiary border border-border">
             <Lock size={10} /> Coming Soon
           </span>
         </h3>
@@ -1495,21 +1377,17 @@ function EditProfileModalContent({
           type="text"
           value="GCash ending in ****4567"
           disabled
-          className="w-full px-3 py-2 rounded-xl text-sm"
-          style={disabledInputStyle}
+          className="w-full px-3 py-2 rounded-xl text-sm bg-gray-50 border border-border text-text-tertiary cursor-not-allowed"
         />
-        <p className="text-[10px] mt-1.5 italic" style={{ color: "#9CA3AF" }}>
+        <p className="text-[10px] mt-1.5 italic text-text-tertiary">
           Payment method management will be available in a future update.
         </p>
       </div>
 
       {/* Favorite Meal */}
       <div>
-        <h3
-          className="text-sm font-semibold mb-3 flex items-center gap-2"
-          style={{ color: "#1A1A2E" }}
-        >
-          <Heart size={14} color="#E76F51" /> Favorite Meal
+        <h3 className="text-sm font-semibold mb-3 flex items-center gap-2 text-text-primary">
+          <Heart size={14} className="text-accent" /> Favorite Meal
         </h3>
         <Select
           value={favoriteMeal}
@@ -1530,11 +1408,8 @@ function EditProfileModalContent({
 
       {/* Dietary Preferences */}
       <div>
-        <h3
-          className="text-sm font-semibold mb-3 flex items-center gap-2"
-          style={{ color: "#1A1A2E" }}
-        >
-          <Tag size={14} color="#059669" /> Dietary Preferences
+        <h3 className="text-sm font-semibold mb-3 flex items-center gap-2 text-text-primary">
+          <Tag size={14} className="text-success" /> Dietary Preferences
         </h3>
         <div className="flex flex-wrap gap-2">
           {dietaryFilters.map((pref) => {
@@ -1543,12 +1418,11 @@ function EditProfileModalContent({
               <button
                 key={pref}
                 onClick={() => toggleDietary(pref)}
-                className="px-3 py-1.5 rounded-full text-xs font-medium transition-colors border"
-                style={{
-                  backgroundColor: isSelected ? "#D1FAE5" : "#FFFFFF",
-                  color: isSelected ? "#065F46" : "#6B7280",
-                  borderColor: isSelected ? "#10B981" : "#E5E7EB",
-                }}
+                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors border ${
+                  isSelected
+                    ? "bg-success-light text-emerald-800 border-emerald-500"
+                    : "bg-surface-white text-text-secondary border-border"
+                }`}
               >
                 {pref}
               </button>
@@ -1559,11 +1433,8 @@ function EditProfileModalContent({
 
       {/* Allergens */}
       <div>
-        <h3
-          className="text-sm font-semibold mb-3 flex items-center gap-2"
-          style={{ color: "#1A1A2E" }}
-        >
-          <AlertTriangle size={14} color="#D97706" /> Allergies
+        <h3 className="text-sm font-semibold mb-3 flex items-center gap-2 text-text-primary">
+          <AlertTriangle size={14} className="text-warning" /> Allergies
         </h3>
         <div className="flex flex-wrap gap-2">
           {ALL_ALLERGENS.map((allergen) => {
@@ -1572,12 +1443,11 @@ function EditProfileModalContent({
               <button
                 key={allergen}
                 onClick={() => toggleAllergen(allergen)}
-                className="px-3 py-1.5 rounded-full text-xs font-medium transition-colors border"
-                style={{
-                  backgroundColor: isSelected ? "#FEF3C7" : "#FFFFFF",
-                  color: isSelected ? "#92400E" : "#6B7280",
-                  borderColor: isSelected ? "#F59E0B" : "#E5E7EB",
-                }}
+                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors border ${
+                  isSelected
+                    ? "bg-warning-light text-warning-dark border-amber-400"
+                    : "bg-surface-white text-text-secondary border-border"
+                }`}
               >
                 {allergen}
               </button>
@@ -1590,8 +1460,7 @@ function EditProfileModalContent({
       <div className="flex gap-3 pt-4 border-t border-gray-200">
         <button
           onClick={onClose}
-          className="flex-1 px-4 py-2.5 rounded-xl font-medium transition-colors hover:bg-gray-100"
-          style={{ border: "1px solid #E5E7EB", color: "#1A1A2E" }}
+          className="flex-1 px-4 py-2.5 rounded-xl font-medium transition-colors hover:bg-gray-100 border border-border text-text-primary"
         >
           Cancel
         </button>
@@ -1599,8 +1468,7 @@ function EditProfileModalContent({
           onClick={() =>
             onSave({ name, email, phone, dietary, allergens, favoriteMeal })
           }
-          className="flex-1 px-4 py-2.5 rounded-xl font-medium text-white transition-colors hover:opacity-90"
-          style={{ backgroundColor: "#1B4332" }}
+          className="flex-1 px-4 py-2.5 rounded-xl font-medium text-white transition-colors hover:opacity-90 bg-primary"
         >
           Save Changes
         </button>
@@ -1678,22 +1546,19 @@ function EditMealsModalContent({
       style={{ scrollbarWidth: "thin" }}
     >
       <div
-        className="rounded-xl p-4 sticky top-0 z-10"
-        style={{ backgroundColor: "#F0FDF4", border: "1px solid #BBF7D0" }}
+        className="rounded-xl p-4 sticky top-0 z-10 bg-green-50 border border-green-200"
       >
-        <h3 className="text-sm font-semibold mb-1" style={{ color: "#1B4332" }}>
+        <h3 className="text-sm font-semibold mb-1 text-primary">
           Current Plan: {customer.planType}
         </h3>
         <div className="flex items-center justify-between">
-          <p className="text-xs" style={{ color: "#065F46" }}>
+          <p className="text-xs text-emerald-800">
             {totalMealsSelected} of {planMealsLimit} meals selected
           </p>
           <span
-            className="text-xs font-semibold"
-            style={{
-              color:
-                totalMealsSelected === planMealsLimit ? "#059669" : "#065F46",
-            }}
+            className={`text-xs font-semibold ${
+              totalMealsSelected === planMealsLimit ? "text-success" : "text-emerald-800"
+            }`}
           >
             {totalMealsSelected === planMealsLimit
               ? "Ready!"
@@ -1701,14 +1566,10 @@ function EditMealsModalContent({
           </span>
         </div>
 
-        <div
-          className="mt-2 h-2 overflow-hidden rounded-full"
-          style={{ backgroundColor: "rgba(5, 150, 105, 0.2)" }}
-        >
+        <div className="mt-2 h-2 overflow-hidden rounded-full bg-emerald-600/20">
           <div
-            className="h-full rounded-full transition-all duration-300"
+            className="h-full rounded-full transition-all duration-300 bg-primary"
             style={{
-              backgroundColor: "#1B4332",
               width: `${Math.min((totalMealsSelected / planMealsLimit) * 100, 100)}%`,
             }}
           />
@@ -1716,10 +1577,7 @@ function EditMealsModalContent({
       </div>
 
       <div>
-        <h3
-          className="text-sm font-semibold mb-3 sticky top-[88px] bg-white py-2 z-10"
-          style={{ color: "#1A1A2E" }}
-        >
+        <h3 className="text-sm font-semibold mb-3 sticky top-[88px] bg-white py-2 z-10 text-text-primary">
           Available Meals for Next Week
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pb-4">
@@ -1730,13 +1588,11 @@ function EditMealsModalContent({
             return (
               <div
                 key={meal.id}
-                className="flex items-center gap-3 p-3 rounded-xl transition-all"
-                style={{
-                  border: isSelected
-                    ? "1px solid #1B4332"
-                    : "1px solid #E5E7EB",
-                  backgroundColor: isSelected ? "#F0FDF4" : "#FFFFFF",
-                }}
+                className={`flex items-center gap-3 p-3 rounded-xl transition-all border ${
+                  isSelected
+                    ? "border-primary bg-green-50"
+                    : "border-border bg-surface-white"
+                }`}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
@@ -1745,13 +1601,10 @@ function EditMealsModalContent({
                   className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
                 />
                 <div className="flex-1 min-w-0">
-                  <p
-                    className="text-sm font-semibold truncate"
-                    style={{ color: "#1A1A2E" }}
-                  >
+                  <p className="text-sm font-semibold truncate text-text-primary">
                     {meal.name}
                   </p>
-                  <p className="text-xs mt-0.5" style={{ color: "#6B7280" }}>
+                  <p className="text-xs mt-0.5 text-text-secondary">
                     {formatPeso(meal.price)}
                   </p>
 
@@ -1759,25 +1612,19 @@ function EditMealsModalContent({
                     <button
                       onClick={() => updateMealQuantity(meal, -1)}
                       disabled={qty === 0}
-                      className="flex h-7 w-7 items-center justify-center rounded-full transition-colors disabled:opacity-30"
-                      style={{
-                        backgroundColor: qty > 0 ? "#1B4332" : "#E5E7EB",
-                        color: qty > 0 ? "#FFFFFF" : "#6B7280",
-                      }}
+                      className={`flex h-7 w-7 items-center justify-center rounded-full transition-colors disabled:opacity-30 ${
+                        qty > 0 ? "bg-primary text-surface-white" : "bg-border text-text-secondary"
+                      }`}
                     >
                       <Minus size={14} />
                     </button>
-                    <span
-                      className="w-6 text-center text-sm font-bold"
-                      style={{ color: "#1A1A2E" }}
-                    >
+                    <span className="w-6 text-center text-sm font-bold text-text-primary">
                       {qty}
                     </span>
                     <button
                       onClick={() => updateMealQuantity(meal, 1)}
                       disabled={totalMealsSelected >= planMealsLimit}
-                      className="flex h-7 w-7 items-center justify-center rounded-full text-white transition-colors disabled:opacity-30"
-                      style={{ backgroundColor: "#E76F51" }}
+                      className="flex h-7 w-7 items-center justify-center rounded-full text-white transition-colors disabled:opacity-30 bg-accent"
                     >
                       <Plus size={14} />
                     </button>
@@ -1792,8 +1639,7 @@ function EditMealsModalContent({
       <div className="flex gap-3 pt-4 border-t border-gray-200 sticky bottom-0 bg-white pb-2 z-10">
         <button
           onClick={onClose}
-          className="flex-1 px-4 py-2.5 rounded-xl font-medium transition-colors hover:bg-gray-100"
-          style={{ border: "1px solid #E5E7EB", color: "#1A1A2E" }}
+          className="flex-1 px-4 py-2.5 rounded-xl font-medium transition-colors hover:bg-gray-100 border border-border text-text-primary"
         >
           Cancel
         </button>
@@ -1810,8 +1656,7 @@ function EditMealsModalContent({
             showToast("Next delivery meals updated successfully", "success");
           }}
           disabled={totalMealsSelected !== planMealsLimit}
-          className="flex-1 px-4 py-2.5 rounded-xl font-medium text-white transition-colors hover:opacity-90 disabled:opacity-50"
-          style={{ backgroundColor: "#1B4332" }}
+          className="flex-1 px-4 py-2.5 rounded-xl font-medium text-white transition-colors hover:opacity-90 disabled:opacity-50 bg-primary"
         >
           Save Meals
         </button>

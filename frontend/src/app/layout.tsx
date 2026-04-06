@@ -38,14 +38,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`h-full antialiased ${dmSans.variable} ${dmSerifDisplay.variable} ${jetbrainsMono.variable}`}
-    >
-      <body
-        className="min-h-full flex flex-col"
-        style={{ fontFamily: "var(--font-dm-sans), sans-serif" }}
-      >
+    <html lang="en" className={`h-full antialiased ${dmSans.variable} ${dmSerifDisplay.variable} ${jetbrainsMono.variable}`}>
+      <body className="min-h-full flex flex-col" style={{ fontFamily: "var(--font-dm-sans), sans-serif" }}>
         <QueryProvider>
           <AuthProvider>
             <CartProvider>
