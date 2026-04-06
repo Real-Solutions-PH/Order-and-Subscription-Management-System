@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
-from typing import Any, Sequence
+from collections.abc import Sequence
+from datetime import UTC, datetime, timedelta
+from typing import Any
 from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -71,9 +72,7 @@ class SubscriptionService:
     # Plans
     # ------------------------------------------------------------------
 
-    async def create_plan(
-        self, tenant_id: UUID | str, data: PlanCreate
-    ) -> SubscriptionPlan:
+    async def create_plan(self, tenant_id: UUID | str, data: PlanCreate) -> SubscriptionPlan:
         slug = generate_slug(data.name)
         plan = await self.plan_repo.create(
             {
@@ -99,9 +98,7 @@ class SubscriptionService:
         await self.session.flush()
         return await self.plan_repo.get_with_tiers(plan.id)  # type: ignore[return-value]
 
-    async def list_plans(
-        self, tenant_id: UUID | str
-    ) -> Sequence[SubscriptionPlan]:
+    async def list_plans(self, tenant_id: UUID | str) -> Sequence[SubscriptionPlan]:
         return await self.plan_repo.get_active_plans(tenant_id)
 
     # ------------------------------------------------------------------
@@ -117,9 +114,7 @@ class SubscriptionService:
         # Validate tier exists
         from sqlalchemy import select
 
-        stmt = select(SubscriptionPlanTier).where(
-            SubscriptionPlanTier.id == data.plan_tier_id
-        )
+        stmt = select(SubscriptionPlanTier).where(SubscriptionPlanTier.id == data.plan_tier_id)
         result = await self.session.execute(stmt)
         tier = result.scalar_one_or_none()
         if tier is None:
@@ -129,7 +124,7 @@ class SubscriptionService:
         if plan is None:
             raise NotFoundException("Subscription plan")
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         cycle_end = _cycle_end(now, plan.billing_interval)
 
         subscription = await self.sub_repo.create(
@@ -179,17 +174,13 @@ class SubscriptionService:
 
         return subscription
 
-    async def get_subscription(
-        self, subscription_id: UUID | str, tenant_id: UUID | str
-    ) -> Subscription:
+    async def get_subscription(self, subscription_id: UUID | str, tenant_id: UUID | str) -> Subscription:
         sub = await self.sub_repo.get_by_id(subscription_id, tenant_id=tenant_id)
         if sub is None:
             raise NotFoundException("Subscription", str(subscription_id))
         return sub
 
-    async def list_user_subscriptions(
-        self, user_id: UUID | str, tenant_id: UUID | str
-    ) -> Sequence[Subscription]:
+    async def list_user_subscriptions(self, user_id: UUID | str, tenant_id: UUID | str) -> Sequence[Subscription]:
         return await self.sub_repo.get_by_user(user_id, tenant_id)
 
     async def pause_subscription(
@@ -206,7 +197,7 @@ class SubscriptionService:
         if sub.status != SubscriptionStatus.active:
             raise BadRequestException("Only active subscriptions can be paused")
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         update_data: dict[str, Any] = {
             "status": SubscriptionStatus.paused,
             "paused_at": now,
@@ -214,15 +205,10 @@ class SubscriptionService:
 
         # Calculate pause_expires_at (default 30 days max)
         max_pause_days = 30
-        if data.resume_date:
-            pause_expires = data.resume_date
-        else:
-            pause_expires = now + timedelta(days=max_pause_days)
+        pause_expires = data.resume_date if data.resume_date else now + timedelta(days=max_pause_days)
         update_data["pause_expires_at"] = pause_expires
 
-        updated = await self.sub_repo.update(
-            subscription_id, update_data, tenant_id=tenant_id
-        )
+        updated = await self.sub_repo.update(subscription_id, update_data, tenant_id=tenant_id)
 
         await self.event_repo.create_event(
             subscription_id=subscription_id,
@@ -293,7 +279,7 @@ class SubscriptionService:
         ):
             raise BadRequestException("Subscription is already cancelled or pending cancellation")
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         updated = await self.sub_repo.update(
             subscription_id,
             {
@@ -331,16 +317,12 @@ class SubscriptionService:
             raise NotFoundException("Subscription", str(subscription_id))
 
         if sub.status not in (SubscriptionStatus.active, SubscriptionStatus.created):
-            raise BadRequestException(
-                "Plan can only be modified for active or created subscriptions"
-            )
+            raise BadRequestException("Plan can only be modified for active or created subscriptions")
 
         # Validate new tier exists
         from sqlalchemy import select
 
-        stmt = select(SubscriptionPlanTier).where(
-            SubscriptionPlanTier.id == data.new_plan_tier_id
-        )
+        stmt = select(SubscriptionPlanTier).where(SubscriptionPlanTier.id == data.new_plan_tier_id)
         result = await self.session.execute(stmt)
         new_tier = result.scalar_one_or_none()
         if new_tier is None:
@@ -375,9 +357,7 @@ class SubscriptionService:
     # Cycles
     # ------------------------------------------------------------------
 
-    async def get_cycles(
-        self, subscription_id: UUID | str, tenant_id: UUID | str
-    ) -> Sequence[SubscriptionCycle]:
+    async def get_cycles(self, subscription_id: UUID | str, tenant_id: UUID | str) -> Sequence[SubscriptionCycle]:
         # Verify subscription belongs to tenant
         sub = await self.sub_repo.get_by_id(subscription_id, tenant_id=tenant_id)
         if sub is None:
@@ -410,9 +390,7 @@ class SubscriptionService:
             raise NotFoundException("Subscription cycle", str(cycle_id))
 
         if cycle.status not in (CycleStatus.upcoming, CycleStatus.selection_open):
-            raise BadRequestException(
-                "Only upcoming or selection-open cycles can be skipped"
-            )
+            raise BadRequestException("Only upcoming or selection-open cycles can be skipped")
 
         cycle.status = CycleStatus.skipped
         await self.session.flush()
@@ -463,9 +441,7 @@ class SubscriptionService:
         # Validate against items_per_cycle limit
         from sqlalchemy import select
 
-        stmt = select(SubscriptionPlanTier).where(
-            SubscriptionPlanTier.id == sub.plan_tier_id
-        )
+        stmt = select(SubscriptionPlanTier).where(SubscriptionPlanTier.id == sub.plan_tier_id)
         result = await self.session.execute(stmt)
         tier = result.scalar_one_or_none()
 
@@ -473,8 +449,7 @@ class SubscriptionService:
             total_qty = sum(s.quantity for s in selections)
             if total_qty > tier.items_per_cycle:
                 raise BadRequestException(
-                    f"Total quantity ({total_qty}) exceeds the allowed "
-                    f"items per cycle ({tier.items_per_cycle})"
+                    f"Total quantity ({total_qty}) exceeds the allowed items per cycle ({tier.items_per_cycle})"
                 )
 
         # Save selections

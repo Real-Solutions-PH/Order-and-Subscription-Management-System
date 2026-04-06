@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import { DM_Sans, DM_Serif_Display, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { QueryProvider } from "@/context/QueryProvider";
+import { AuthProvider } from "@/context/AuthContext";
 import { CartProvider } from "@/context/CartContext";
 import { ToastProvider } from "@/context/ToastContext";
+import AuthModal from "@/components/AuthModal";
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -37,13 +39,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`h-full antialiased ${dmSans.variable} ${dmSerifDisplay.variable} ${jetbrainsMono.variable}`}>
-      <body className="min-h-full flex flex-col font-body">
+      <body className="min-h-full flex flex-col" style={{ fontFamily: "var(--font-dm-sans), sans-serif" }}>
         <QueryProvider>
-          <CartProvider>
-            <ToastProvider>
-              {children}
-            </ToastProvider>
-          </CartProvider>
+          <AuthProvider>
+            <CartProvider>
+              <ToastProvider>
+                {children}
+                <AuthModal />
+              </ToastProvider>
+            </CartProvider>
+          </AuthProvider>
         </QueryProvider>
       </body>
     </html>

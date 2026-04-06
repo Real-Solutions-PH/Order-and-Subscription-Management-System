@@ -31,9 +31,6 @@ class Settings(BaseSettings):
     DATABASE_MAX_OVERFLOW: int = 10
     DATABASE_POOL_TIMEOUT: int = 30
 
-    # IAM Database
-    IAM_DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/prepflow_iam"
-
     # Redis
     REDIS_URL: str = "redis://localhost:6379/0"
     REDIS_CACHE_TTL: int = 300
@@ -82,6 +79,7 @@ class Settings(BaseSettings):
     RATE_LIMIT_PER_MINUTE: int = 60
 
     # Tenant Defaults
+    DEFAULT_TENANT_ID: str = "00000000-0000-0000-0000-000000000001"
     DEFAULT_TIMEZONE: str = "Asia/Manila"
     DEFAULT_CURRENCY: str = "PHP"
     DEFAULT_TAX_RATE: float = 0.12

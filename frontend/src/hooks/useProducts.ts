@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { api, type ProductCreate, type ProductUpdate } from '@/lib/api-client';
-import { queryKeys } from './query-keys';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { api, type ProductCreate, type ProductUpdate } from "@/lib/api-client";
+import { queryKeys } from "./query-keys";
 
 interface ProductListParams {
   skip?: number;
@@ -32,7 +32,8 @@ export function useProduct(id: string | undefined) {
 
 export function useProductMutations() {
   const qc = useQueryClient();
-  const invalidate = () => qc.invalidateQueries({ queryKey: queryKeys.products.all });
+  const invalidate = () =>
+    qc.invalidateQueries({ queryKey: queryKeys.products.all });
 
   const createProduct = useMutation({
     mutationFn: (data: ProductCreate) => api.products.create(data),
@@ -40,7 +41,8 @@ export function useProductMutations() {
   });
 
   const updateProduct = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: ProductUpdate }) => api.products.update(id, data),
+    mutationFn: ({ id, data }: { id: string; data: ProductUpdate }) =>
+      api.products.update(id, data),
     onSuccess: invalidate,
   });
 

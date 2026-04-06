@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { api, type CustomizationInput } from '@/lib/api-client';
-import { queryKeys } from './query-keys';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { api, type CustomizationInput } from "@/lib/api-client";
+import { queryKeys } from "./query-keys";
 
 /**
  * Server-synced cart hook (TanStack-powered).
@@ -21,8 +21,11 @@ export function useServerCart() {
   });
 
   const addItemMutation = useMutation({
-    mutationFn: (data: { product_variant_id: string; quantity: number; customizations?: CustomizationInput[] }) =>
-      api.cart.addItem(data),
+    mutationFn: (data: {
+      product_variant_id: string;
+      quantity: number;
+      customizations?: CustomizationInput[];
+    }) => api.cart.addItem(data),
     onSuccess: invalidate,
   });
 

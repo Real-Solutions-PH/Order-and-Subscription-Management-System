@@ -16,25 +16,36 @@ const PopoverContent = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Content> & {
     showArrow?: boolean;
   }
->(({ className, align = "center", sideOffset = 4, showArrow = false, ...props }, ref) => (
-  <PopoverPrimitive.Portal>
-    <PopoverPrimitive.Content
-      ref={ref}
-      align={align}
-      sideOffset={sideOffset}
-      className={cn(
-        "z-50 max-h-[var(--radix-popover-content-available-height)] min-w-[8rem] overflow-y-auto overflow-x-hidden rounded-lg border border-border bg-popover p-4 text-popover-foreground shadow-lg shadow-black/5 outline-none",
-        className,
-      )}
-      {...props}
-    >
-      {props.children}
-      {showArrow && (
-        <PopoverPrimitive.Arrow className="-my-px fill-popover drop-shadow-[0_1px_0_hsl(var(--border))]" />
-      )}
-    </PopoverPrimitive.Content>
-  </PopoverPrimitive.Portal>
-));
+>(
+  (
+    {
+      className,
+      align = "center",
+      sideOffset = 4,
+      showArrow = false,
+      ...props
+    },
+    ref,
+  ) => (
+    <PopoverPrimitive.Portal>
+      <PopoverPrimitive.Content
+        ref={ref}
+        align={align}
+        sideOffset={sideOffset}
+        className={cn(
+          "z-50 max-h-[var(--radix-popover-content-available-height)] min-w-[8rem] overflow-y-auto overflow-x-hidden rounded-lg border border-border bg-popover p-4 text-popover-foreground shadow-lg shadow-black/5 outline-none",
+          className,
+        )}
+        {...props}
+      >
+        {props.children}
+        {showArrow && (
+          <PopoverPrimitive.Arrow className="-my-px fill-popover drop-shadow-[0_1px_0_hsl(var(--border))]" />
+        )}
+      </PopoverPrimitive.Content>
+    </PopoverPrimitive.Portal>
+  ),
+);
 PopoverContent.displayName = PopoverPrimitive.Content.displayName;
 
 export { Popover, PopoverAnchor, PopoverContent, PopoverTrigger };

@@ -1,4 +1,4 @@
-import CustomerNav from '@/components/CustomerNav';
+import CustomerNav from "@/components/CustomerNav";
 
 export default function CustomerLayout({
   children,
@@ -6,7 +6,7 @@ export default function CustomerLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="min-h-screen bg-surface">
+    <div className="min-h-screen" style={{ backgroundColor: '#FEFAE0' }}>
       <CustomerNav />
       <main className="page-enter">{children}</main>
     </div>

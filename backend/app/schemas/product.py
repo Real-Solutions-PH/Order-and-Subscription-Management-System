@@ -11,10 +11,10 @@ from pydantic import Field
 from app.repo.db import AttributeType, CatalogStatus, ProductStatus
 from app.schemas.base import BaseSchema, PaginatedResponse
 
-
 # ---------------------------------------------------------------------------
 # Category
 # ---------------------------------------------------------------------------
+
 
 class CategoryCreate(BaseSchema):
     name: str = Field(min_length=1, max_length=100)
@@ -36,6 +36,7 @@ class CategoryResponse(BaseSchema):
 # ---------------------------------------------------------------------------
 # Product
 # ---------------------------------------------------------------------------
+
 
 class VariantCreate(BaseSchema):
     name: str = Field(min_length=1, max_length=100)
@@ -143,6 +144,7 @@ class ProductListResponse(PaginatedResponse[ProductResponse]):
 # ---------------------------------------------------------------------------
 # Catalog
 # ---------------------------------------------------------------------------
+
 
 class CatalogItemCreate(BaseSchema):
     product_variant_id: UUID

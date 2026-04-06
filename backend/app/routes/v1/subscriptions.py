@@ -115,9 +115,7 @@ async def pause_subscription(
     """Pause an active subscription."""
     tenant_id = user["tenant_id"]
     actor_id = user["sub"]
-    return await service.pause_subscription(
-        subscription_id, tenant_id, data, actor_id=actor_id
-    )
+    return await service.pause_subscription(subscription_id, tenant_id, data, actor_id=actor_id)
 
 
 @router.post(
@@ -132,9 +130,7 @@ async def resume_subscription(
     """Resume a paused subscription."""
     tenant_id = user["tenant_id"]
     actor_id = user["sub"]
-    return await service.resume_subscription(
-        subscription_id, tenant_id, actor_id=actor_id
-    )
+    return await service.resume_subscription(subscription_id, tenant_id, actor_id=actor_id)
 
 
 @router.post(
@@ -150,9 +146,7 @@ async def cancel_subscription(
     """Cancel a subscription."""
     tenant_id = user["tenant_id"]
     actor_id = user["sub"]
-    return await service.cancel_subscription(
-        subscription_id, tenant_id, data, actor_id=actor_id
-    )
+    return await service.cancel_subscription(subscription_id, tenant_id, data, actor_id=actor_id)
 
 
 @router.patch(
@@ -168,9 +162,7 @@ async def modify_plan(
     """Modify the plan tier for an existing subscription."""
     tenant_id = user["tenant_id"]
     actor_id = user["sub"]
-    return await service.modify_plan(
-        subscription_id, tenant_id, data, actor_id=actor_id
-    )
+    return await service.modify_plan(subscription_id, tenant_id, data, actor_id=actor_id)
 
 
 # ------------------------------------------------------------------
@@ -206,9 +198,7 @@ async def set_selections(
     """Set product selections for a cycle."""
     tenant_id = user["tenant_id"]
     user_id = user["sub"]
-    return await service.set_selections(
-        subscription_id, cycle_id, tenant_id, user_id, selections
-    )
+    return await service.set_selections(subscription_id, cycle_id, tenant_id, user_id, selections)
 
 
 @router.post(
@@ -224,6 +214,4 @@ async def skip_cycle(
     """Skip a subscription cycle."""
     tenant_id = user["tenant_id"]
     actor_id = user["sub"]
-    return await service.skip_cycle(
-        subscription_id, cycle_id, tenant_id, actor_id=actor_id
-    )
+    return await service.skip_cycle(subscription_id, cycle_id, tenant_id, actor_id=actor_id)

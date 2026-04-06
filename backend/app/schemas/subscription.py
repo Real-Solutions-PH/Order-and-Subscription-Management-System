@@ -11,10 +11,10 @@ from pydantic import Field
 from app.repo.db import BillingInterval, CycleStatus, SubscriptionStatus
 from app.schemas.base import BaseSchema
 
-
 # ---------------------------------------------------------------------------
 # Tier
 # ---------------------------------------------------------------------------
+
 
 class TierCreate(BaseSchema):
     name: str = Field(min_length=1, max_length=100)
@@ -35,6 +35,7 @@ class TierResponse(BaseSchema):
 # ---------------------------------------------------------------------------
 # Plan
 # ---------------------------------------------------------------------------
+
 
 class PlanCreate(BaseSchema):
     name: str = Field(min_length=1, max_length=255)
@@ -63,6 +64,7 @@ class PlanResponse(BaseSchema):
 # ---------------------------------------------------------------------------
 # Subscription
 # ---------------------------------------------------------------------------
+
 
 class SubscriptionCreate(BaseSchema):
     plan_tier_id: UUID
@@ -98,6 +100,7 @@ class PlanModifyRequest(BaseSchema):
 # ---------------------------------------------------------------------------
 # Cycle & Selection
 # ---------------------------------------------------------------------------
+
 
 class SelectionCreate(BaseSchema):
     product_variant_id: UUID

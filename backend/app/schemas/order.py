@@ -4,14 +4,12 @@ from __future__ import annotations
 
 from datetime import datetime
 from decimal import Decimal
-from typing import Optional
 from uuid import UUID
 
 from pydantic import Field
 
 from app.repo.db import OrderStatus, OrderType
 from app.schemas.base import BaseSchema, PaginatedResponse
-
 
 # ---------------------------------------------------------------------------
 # Cart

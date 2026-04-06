@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { api } from '@/lib/api-client';
-import { queryKeys } from './query-keys';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { api } from "@/lib/api-client";
+import { queryKeys } from "./query-keys";
 
 interface OrderListParams {
   status?: string;
@@ -30,11 +30,17 @@ export function useOrder(id: string | undefined) {
 /** Order mutations: checkout, update status, cancel. */
 export function useOrderMutations() {
   const qc = useQueryClient();
-  const invalidate = () => qc.invalidateQueries({ queryKey: queryKeys.orders.all });
+  const invalidate = () =>
+    qc.invalidateQueries({ queryKey: queryKeys.orders.all });
 
   const checkout = useMutation({
-    mutationFn: (data: { delivery_address_id?: string; delivery_slot_id?: string; payment_method: string; promo_code?: string; notes?: string }) =>
-      api.orders.checkout(data),
+    mutationFn: (data: {
+      delivery_address_id?: string;
+      delivery_slot_id?: string;
+      payment_method: string;
+      promo_code?: string;
+      notes?: string;
+    }) => api.orders.checkout(data),
     onSuccess: () => {
       invalidate();
       qc.invalidateQueries({ queryKey: queryKeys.cart });
@@ -42,8 +48,15 @@ export function useOrderMutations() {
   });
 
   const updateStatus = useMutation({
-    mutationFn: ({ id, status, notes }: { id: string; status: string; notes?: string }) =>
-      api.orders.updateStatus(id, { status, notes }),
+    mutationFn: ({
+      id,
+      status,
+      notes,
+    }: {
+      id: string;
+      status: string;
+      notes?: string;
+    }) => api.orders.updateStatus(id, { status, notes }),
     onSuccess: invalidate,
   });
 

@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { api } from '@/lib/api-client';
-import { queryKeys } from './query-keys';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { api } from "@/lib/api-client";
+import { queryKeys } from "./query-keys";
 
 /** Delivery zones list. */
 export function useDeliveryZones() {
@@ -13,7 +13,10 @@ export function useDeliveryZones() {
 }
 
 /** Available delivery slots for a zone+date. */
-export function useDeliverySlots(zoneId: string | undefined, date: string | undefined) {
+export function useDeliverySlots(
+  zoneId: string | undefined,
+  date: string | undefined,
+) {
   return useQuery({
     queryKey: queryKeys.deliverySlots(zoneId!, date!),
     queryFn: () => api.fulfillment.listSlots({ zone_id: zoneId!, date: date! }),
@@ -42,20 +45,39 @@ export function useFulfillmentMutations() {
   const qc = useQueryClient();
 
   const createAddress = useMutation({
-    mutationFn: (data: { label: string; line_1: string; city: string; province: string; postal_code: string; is_default?: boolean; notes?: string }) =>
-      api.fulfillment.createAddress(data),
+    mutationFn: (data: {
+      label: string;
+      line_1: string;
+      city: string;
+      province: string;
+      postal_code: string;
+      is_default?: boolean;
+      notes?: string;
+    }) => api.fulfillment.createAddress(data),
     onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.addresses }),
   });
 
   const createZone = useMutation({
-    mutationFn: (data: { name: string; delivery_fee: number; boundaries: Record<string, unknown>; cutoff_hours: number }) =>
-      api.fulfillment.createZone(data),
-    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.deliveryZones }),
+    mutationFn: (data: {
+      name: string;
+      delivery_fee: number;
+      boundaries: Record<string, unknown>;
+      cutoff_hours: number;
+    }) => api.fulfillment.createZone(data),
+    onSuccess: () =>
+      qc.invalidateQueries({ queryKey: queryKeys.deliveryZones }),
   });
 
   const updateFulfillmentStatus = useMutation({
-    mutationFn: ({ id, status, notes }: { id: string; status: string; notes?: string }) =>
-      api.fulfillment.updateFulfillmentStatus(id, { status, notes }),
+    mutationFn: ({
+      id,
+      status,
+      notes,
+    }: {
+      id: string;
+      status: string;
+      notes?: string;
+    }) => api.fulfillment.updateFulfillmentStatus(id, { status, notes }),
   });
 
   return {

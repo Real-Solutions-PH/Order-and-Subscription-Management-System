@@ -4,12 +4,12 @@ from __future__ import annotations
 
 from typing import Any
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.cache import RedisCache, get_cache
 from app.core.permissions import PermissionChecker, get_current_user
-from app.repo.session import get_iam_db
+from app.repo.session import get_app_db
 from app.schemas.tenant import (
     FeatureFlagResponse,
     FeatureFlagUpdate,
@@ -24,7 +24,7 @@ router = APIRouter(prefix="/tenant", tags=["tenant"])
 @router.get("/config", response_model=TenantConfigResponse)
 async def get_tenant_config(
     current_user: dict[str, Any] = Depends(get_current_user),
-    session: AsyncSession = Depends(get_iam_db),
+    session: AsyncSession = Depends(get_app_db),
     cache: RedisCache = Depends(get_cache),
 ) -> Any:
     """Get the configuration for the current tenant."""
@@ -35,10 +35,8 @@ async def get_tenant_config(
 @router.patch("/config", response_model=TenantConfigResponse)
 async def update_tenant_config(
     data: TenantConfigUpdate,
-    current_user: dict[str, Any] = Depends(
-        PermissionChecker(["tenant:write"])
-    ),
-    session: AsyncSession = Depends(get_iam_db),
+    current_user: dict[str, Any] = Depends(PermissionChecker(["tenant:write"])),
+    session: AsyncSession = Depends(get_app_db),
     cache: RedisCache = Depends(get_cache),
 ) -> Any:
     """Update the tenant configuration (admin only)."""
@@ -49,7 +47,7 @@ async def update_tenant_config(
 @router.get("/features", response_model=list[FeatureFlagResponse])
 async def list_feature_flags(
     current_user: dict[str, Any] = Depends(get_current_user),
-    session: AsyncSession = Depends(get_iam_db),
+    session: AsyncSession = Depends(get_app_db),
 ) -> Any:
     """List all feature flags for the current tenant."""
     service = TenantService(session)
@@ -63,14 +61,10 @@ async def list_feature_flags(
 async def toggle_feature_flag(
     flag_key: str,
     data: FeatureFlagUpdate,
-    current_user: dict[str, Any] = Depends(
-        PermissionChecker(["tenant:write"])
-    ),
-    session: AsyncSession = Depends(get_iam_db),
+    current_user: dict[str, Any] = Depends(PermissionChecker(["tenant:write"])),
+    session: AsyncSession = Depends(get_app_db),
     cache: RedisCache = Depends(get_cache),
 ) -> Any:
     """Toggle a feature flag (admin only)."""
     service = TenantService(session, cache=cache)
-    return await service.toggle_feature(
-        current_user["tenant_id"], flag_key, data.enabled
-    )
+    return await service.toggle_feature(current_user["tenant_id"], flag_key, data.enabled)

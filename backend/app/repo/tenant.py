@@ -45,9 +45,7 @@ class FeatureFlagRepository(BaseRepository[FeatureFlag]):
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
 
-    async def get_flag(
-        self, tenant_id: UUID | str, flag_key: str
-    ) -> FeatureFlag | None:
+    async def get_flag(self, tenant_id: UUID | str, flag_key: str) -> FeatureFlag | None:
         """Get a specific feature flag by tenant and key."""
         stmt = select(FeatureFlag).where(
             FeatureFlag.tenant_id == tenant_id,
@@ -56,9 +54,7 @@ class FeatureFlagRepository(BaseRepository[FeatureFlag]):
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
 
-    async def toggle_flag(
-        self, tenant_id: UUID | str, flag_key: str, enabled: bool
-    ) -> FeatureFlag | None:
+    async def toggle_flag(self, tenant_id: UUID | str, flag_key: str, enabled: bool) -> FeatureFlag | None:
         """Toggle a feature flag's enabled state. Returns the updated flag or None."""
         flag = await self.get_flag(tenant_id, flag_key)
         if flag is None:

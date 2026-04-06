@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -23,18 +23,14 @@ from app.schemas.auth import LoginRequest, RegisterRequest, TokenResponse
 class AuthService:
     """Handles user authentication workflows."""
 
-    def __init__(
-        self, session: AsyncSession, cache: RedisCache | None = None
-    ) -> None:
+    def __init__(self, session: AsyncSession, cache: RedisCache | None = None) -> None:
         self.session = session
         self.cache = cache
         self.user_repo = UserRepository(session)
         self.role_repo = RoleRepository(session)
         self.user_role_repo = UserRoleRepository(session)
 
-    async def register(
-        self, tenant_id: str, data: RegisterRequest
-    ) -> User:
+    async def register(self, tenant_id: str, data: RegisterRequest) -> User:
         """Register a new user within a tenant.
 
         Hashes the password, checks for duplicate emails, creates the user,
@@ -62,9 +58,7 @@ class AuthService:
 
         return user
 
-    async def login(
-        self, tenant_id: str, data: LoginRequest
-    ) -> TokenResponse:
+    async def login(self, tenant_id: str, data: LoginRequest) -> TokenResponse:
         """Authenticate a user and return a JWT token pair."""
         user = await self.user_repo.get_by_email(data.email, tenant_id)
         if user is None or not verify_password(data.password, user.password_hash):
@@ -97,7 +91,7 @@ class AuthService:
         )
 
         # Update last login timestamp
-        user.last_login_at = datetime.now(timezone.utc)
+        user.last_login_at = datetime.now(UTC)
         await self.session.flush()
 
         return TokenResponse(
@@ -109,8 +103,8 @@ class AuthService:
         """Validate a refresh token and issue a new token pair."""
         try:
             payload = decode_token(data)
-        except Exception:
-            raise UnauthorizedException("Invalid or expired refresh token")
+        except Exception as err:
+            raise UnauthorizedException("Invalid or expired refresh token") from err
 
         if payload.get("token_type") != "refresh":
             raise UnauthorizedException("Invalid token type")

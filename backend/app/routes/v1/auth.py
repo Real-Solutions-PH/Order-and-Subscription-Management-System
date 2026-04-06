@@ -11,7 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.cache import RedisCache, get_cache
 from app.core.exceptions import BadRequestException
 from app.core.permissions import get_current_user
-from app.repo.session import get_iam_db
+from app.repo.session import get_app_db
 from app.schemas.auth import (
     LoginRequest,
     RefreshTokenRequest,
@@ -30,8 +30,8 @@ def _require_tenant_id(x_tenant_id: str = Header(...)) -> str:
     """Extract and validate the X-Tenant-ID header."""
     try:
         UUID(x_tenant_id)
-    except ValueError:
-        raise BadRequestException("X-Tenant-ID must be a valid UUID")
+    except ValueError as err:
+        raise BadRequestException("X-Tenant-ID must be a valid UUID") from err
     return x_tenant_id
 
 
@@ -43,7 +43,7 @@ def _require_tenant_id(x_tenant_id: str = Header(...)) -> str:
 async def register(
     data: RegisterRequest,
     tenant_id: str = Depends(_require_tenant_id),
-    session: AsyncSession = Depends(get_iam_db),
+    session: AsyncSession = Depends(get_app_db),
 ) -> Any:
     """Register a new user within the given tenant."""
     service = AuthService(session)
@@ -55,7 +55,7 @@ async def register(
 async def login(
     data: LoginRequest,
     tenant_id: str = Depends(_require_tenant_id),
-    session: AsyncSession = Depends(get_iam_db),
+    session: AsyncSession = Depends(get_app_db),
 ) -> Any:
     """Authenticate a user and return JWT tokens."""
     service = AuthService(session)
@@ -65,7 +65,7 @@ async def login(
 @router.post("/auth/refresh", response_model=TokenResponse)
 async def refresh_token(
     data: RefreshTokenRequest,
-    session: AsyncSession = Depends(get_iam_db),
+    session: AsyncSession = Depends(get_app_db),
     cache: RedisCache = Depends(get_cache),
 ) -> Any:
     """Refresh an access token using a valid refresh token."""
@@ -82,7 +82,7 @@ async def logout(
     data: RefreshTokenRequest,
     current_user: dict[str, Any] = Depends(get_current_user),
     cache: RedisCache = Depends(get_cache),
-    session: AsyncSession = Depends(get_iam_db),
+    session: AsyncSession = Depends(get_app_db),
 ) -> Any:
     """Blacklist the refresh token (requires authentication)."""
     service = AuthService(session, cache=cache)
@@ -93,23 +93,19 @@ async def logout(
 @router.get("/users/me", response_model=UserResponse)
 async def get_current_user_profile(
     current_user: dict[str, Any] = Depends(get_current_user),
-    session: AsyncSession = Depends(get_iam_db),
+    session: AsyncSession = Depends(get_app_db),
 ) -> Any:
     """Return the authenticated user's profile."""
     service = UserService(session)
-    return await service.get_user(
-        current_user["sub"], current_user["tenant_id"]
-    )
+    return await service.get_user(current_user["sub"], current_user["tenant_id"])
 
 
 @router.patch("/users/me", response_model=UserResponse)
 async def update_current_user_profile(
     data: UserUpdate,
     current_user: dict[str, Any] = Depends(get_current_user),
-    session: AsyncSession = Depends(get_iam_db),
+    session: AsyncSession = Depends(get_app_db),
 ) -> Any:
     """Update the authenticated user's profile."""
     service = UserService(session)
-    return await service.update_user(
-        current_user["sub"], current_user["tenant_id"], data
-    )
+    return await service.update_user(current_user["sub"], current_user["tenant_id"], data)

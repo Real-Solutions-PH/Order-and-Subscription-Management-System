@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from typing import Any, Sequence
+from collections.abc import Sequence
+from typing import Any
 from uuid import UUID
 
 from sqlalchemy import select
@@ -26,13 +27,8 @@ from app.repo.db import (
 class ProductRepository(BaseRepository[Product]):
     model = Product
 
-    async def get_by_slug(
-        self, slug: str, tenant_id: UUID | str
-    ) -> Product | None:
-        stmt = (
-            select(self.model)
-            .where(self.model.slug == slug)
-        )
+    async def get_by_slug(self, slug: str, tenant_id: UUID | str) -> Product | None:
+        stmt = select(self.model).where(self.model.slug == slug)
         stmt = self._apply_tenant_filter(stmt, tenant_id)
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
@@ -64,12 +60,9 @@ class ProductRepository(BaseRepository[Product]):
         """
         from sqlalchemy import func
 
-        stmt = (
-            select(self.model)
-            .options(
-                selectinload(self.model.variants),
-                selectinload(self.model.images),
-            )
+        stmt = select(self.model).options(
+            selectinload(self.model.variants),
+            selectinload(self.model.images),
         )
         stmt = self._apply_tenant_filter(stmt, tenant_id)
 
@@ -81,34 +74,22 @@ class ProductRepository(BaseRepository[Product]):
 
         if query:
             pattern = f"%{query}%"
-            stmt = stmt.where(
-                self.model.name.ilike(pattern)
-                | self.model.description.ilike(pattern)
-            )
+            stmt = stmt.where(self.model.name.ilike(pattern) | self.model.description.ilike(pattern))
 
         if filters:
             if "is_subscribable" in filters:
-                stmt = stmt.where(
-                    self.model.is_subscribable == filters["is_subscribable"]
-                )
+                stmt = stmt.where(self.model.is_subscribable == filters["is_subscribable"])
             if "is_standalone" in filters:
-                stmt = stmt.where(
-                    self.model.is_standalone == filters["is_standalone"]
-                )
+                stmt = stmt.where(self.model.is_standalone == filters["is_standalone"])
             if "category_id" in filters:
-                stmt = stmt.where(
-                    self.model.categories.any(
-                        ProductCategory.id == filters["category_id"]
-                    )
-                )
+                stmt = stmt.where(self.model.categories.any(ProductCategory.id == filters["category_id"]))
 
         # Attribute filtering
         if filters and "attributes" in filters:
             for attr_id, attr_value in filters["attributes"].items():
                 stmt = stmt.where(
                     self.model.attribute_values.any(
-                        (ProductAttributeValue.attribute_id == attr_id)
-                        & (ProductAttributeValue.value == attr_value)
+                        (ProductAttributeValue.attribute_id == attr_id) & (ProductAttributeValue.value == attr_value)
                     )
                 )
 
@@ -125,16 +106,12 @@ class ProductRepository(BaseRepository[Product]):
 class ProductVariantRepository(BaseRepository[ProductVariant]):
     model = ProductVariant
 
-    async def get_by_product(
-        self, product_id: UUID | str
-    ) -> Sequence[ProductVariant]:
+    async def get_by_product(self, product_id: UUID | str) -> Sequence[ProductVariant]:
         stmt = select(self.model).where(self.model.product_id == product_id)
         result = await self.session.execute(stmt)
         return result.scalars().all()
 
-    async def get_by_sku(
-        self, sku: str, tenant_id: UUID | str
-    ) -> ProductVariant | None:
+    async def get_by_sku(self, sku: str, tenant_id: UUID | str) -> ProductVariant | None:
         stmt = (
             select(self.model)
             .join(Product, self.model.product_id == Product.id)
@@ -148,26 +125,15 @@ class ProductVariantRepository(BaseRepository[ProductVariant]):
 class ProductCategoryRepository(BaseRepository[ProductCategory]):
     model = ProductCategory
 
-    async def get_by_slug(
-        self, slug: str, tenant_id: UUID | str
-    ) -> ProductCategory | None:
-        stmt = (
-            select(self.model)
-            .where(self.model.slug == slug)
-        )
+    async def get_by_slug(self, slug: str, tenant_id: UUID | str) -> ProductCategory | None:
+        stmt = select(self.model).where(self.model.slug == slug)
         stmt = self._apply_tenant_filter(stmt, tenant_id)
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
 
-    async def get_tree(
-        self, tenant_id: UUID | str
-    ) -> Sequence[ProductCategory]:
+    async def get_tree(self, tenant_id: UUID | str) -> Sequence[ProductCategory]:
         """Return all categories for a tenant (hierarchical via parent_id)."""
-        stmt = (
-            select(self.model)
-            .options(selectinload(self.model.children))
-            .where(self.model.parent_id.is_(None))
-        )
+        stmt = select(self.model).options(selectinload(self.model.children)).where(self.model.parent_id.is_(None))
         stmt = self._apply_tenant_filter(stmt, tenant_id)
         stmt = stmt.order_by(self.model.sort_order)
         result = await self.session.execute(stmt)
@@ -177,13 +143,8 @@ class ProductCategoryRepository(BaseRepository[ProductCategory]):
 class ProductAttributeRepository(BaseRepository[ProductAttribute]):
     model = ProductAttribute
 
-    async def get_filterable(
-        self, tenant_id: UUID | str
-    ) -> Sequence[ProductAttribute]:
-        stmt = (
-            select(self.model)
-            .where(self.model.is_filterable.is_(True))
-        )
+    async def get_filterable(self, tenant_id: UUID | str) -> Sequence[ProductAttribute]:
+        stmt = select(self.model).where(self.model.is_filterable.is_(True))
         stmt = self._apply_tenant_filter(stmt, tenant_id)
         result = await self.session.execute(stmt)
         return result.scalars().all()
@@ -192,13 +153,8 @@ class ProductAttributeRepository(BaseRepository[ProductAttribute]):
 class CatalogRepository(BaseRepository[Catalog]):
     model = Catalog
 
-    async def get_by_slug(
-        self, slug: str, tenant_id: UUID | str
-    ) -> Catalog | None:
-        stmt = (
-            select(self.model)
-            .where(self.model.slug == slug)
-        )
+    async def get_by_slug(self, slug: str, tenant_id: UUID | str) -> Catalog | None:
+        stmt = select(self.model).where(self.model.slug == slug)
         stmt = self._apply_tenant_filter(stmt, tenant_id)
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
@@ -246,13 +202,7 @@ class CatalogRepository(BaseRepository[Catalog]):
 class CatalogItemRepository(BaseRepository[CatalogItem]):
     model = CatalogItem
 
-    async def get_by_catalog(
-        self, catalog_id: UUID | str
-    ) -> Sequence[CatalogItem]:
-        stmt = (
-            select(self.model)
-            .where(self.model.catalog_id == catalog_id)
-            .order_by(self.model.sort_order)
-        )
+    async def get_by_catalog(self, catalog_id: UUID | str) -> Sequence[CatalogItem]:
+        stmt = select(self.model).where(self.model.catalog_id == catalog_id).order_by(self.model.sort_order)
         result = await self.session.execute(stmt)
         return result.scalars().all()

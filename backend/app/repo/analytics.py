@@ -16,9 +16,7 @@ class MetricSnapshotRepository(BaseRepository[MetricSnapshot]):
 
     model = MetricSnapshot
 
-    async def get_latest(
-        self, tenant_id: UUID | str, metric_type: str
-    ) -> MetricSnapshot | None:
+    async def get_latest(self, tenant_id: UUID | str, metric_type: str) -> MetricSnapshot | None:
         """Return the most recent snapshot for a given metric type."""
         stmt = (
             select(MetricSnapshot)
@@ -61,9 +59,7 @@ class CohortDataRepository(BaseRepository[CohortData]):
 
     model = CohortData
 
-    async def get_by_cohort(
-        self, tenant_id: UUID | str, cohort_month: date
-    ) -> list[CohortData]:
+    async def get_by_cohort(self, tenant_id: UUID | str, cohort_month: date) -> list[CohortData]:
         """Return all data points for a specific cohort month."""
         stmt = (
             select(CohortData)
@@ -76,9 +72,7 @@ class CohortDataRepository(BaseRepository[CohortData]):
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
 
-    async def get_all_cohorts(
-        self, tenant_id: UUID | str
-    ) -> list[CohortData]:
+    async def get_all_cohorts(self, tenant_id: UUID | str) -> list[CohortData]:
         """Return all cohort data for a tenant."""
         stmt = (
             select(CohortData)
