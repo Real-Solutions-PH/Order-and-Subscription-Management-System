@@ -1,0 +1,768 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "name": "PrepFlow Design System",
+  "version": "1.0.0",
+  "description": "Complete design system for PrepFlow — an Order & Subscription Management platform for meal prep businesses. The brand conveys freshness, trust, and warmth through an earthy green-and-cream palette with coral accents.",
+
+  "branding": {
+    "name": "PrepFlow",
+    "tagline": "Your Kitchen, Simplified",
+    "description": "Order & Subscription Management for meal prep businesses",
+    "voice": "Warm, professional, approachable — like a trusted chef guiding you through your week.",
+    "logo": {
+      "type": "wordmark",
+      "text": "PrepFlow",
+      "font": "DM Serif Display",
+      "color": "#1B4332",
+      "adminVariant": {
+        "text": "PrepFlow",
+        "suffix": "Admin",
+        "suffixColor": "#40916C"
+      }
+    },
+    "personality": [
+      "Fresh and organic — earthy tones evoke natural, wholesome food",
+      "Trustworthy — deep greens and clean whites signal reliability",
+      "Warm — cream backgrounds and coral accents feel inviting, not clinical",
+      "Efficient — clean layouts and clear hierarchy respect the user's time"
+    ]
+  },
+
+  "tokens": {
+    "colors": {
+      "primary": {
+        "default": "#1B4332",
+        "light": "#2D6A4F",
+        "lighter": "#40916C",
+        "dark": "rgba(27,67,50,0.85)",
+        "subtle": "rgba(27,67,50,0.05)",
+        "usage": "Brand identity, CTAs, active states, navigation highlights, focus rings"
+      },
+      "accent": {
+        "default": "#E76F51",
+        "light": "#F4A261",
+        "usage": "Call-to-action highlights, cart badges, secondary buttons, attention-grabbing elements"
+      },
+      "surface": {
+        "default": "#FEFAE0",
+        "white": "#FFFFFF",
+        "dark": "#1A1A2E",
+        "cream": "rgba(254,250,224,0.75)",
+        "usage": "Page backgrounds (cream for customer, white for cards, dark for admin sidebar)"
+      },
+      "text": {
+        "primary": "#1A1A2E",
+        "secondary": "#6B7280",
+        "tertiary": "#9CA3AF",
+        "inverse": "#FEFAE0",
+        "usage": "primary = headings/body, secondary = labels/meta, tertiary = placeholders, inverse = text on dark backgrounds"
+      },
+      "status": {
+        "success": {
+          "default": "#059669",
+          "light": "#D1FAE5",
+          "pale": "#A7F3D0",
+          "bright": "#34D399",
+          "subtle": "rgba(5,150,105,0.08)",
+          "50": "#F0FDF4",
+          "usage": "Active, delivered, paid, confirmations, positive metrics"
+        },
+        "warning": {
+          "default": "#D97706",
+          "light": "#FEF3C7",
+          "dark": "#92400E",
+          "pale": "#FCD34D",
+          "50": "#FFF7ED",
+          "200": "#FED7AA",
+          "usage": "Paused, pending, preparing, attention-needed states"
+        },
+        "error": {
+          "default": "#DC2626",
+          "light": "#FEE2E2",
+          "50": "#FEF2F2",
+          "200": "#FECACA",
+          "300": "#FCA5A5",
+          "900": "#991B1B",
+          "usage": "Cancelled, failed, churned, validation errors, destructive actions"
+        },
+        "info": {
+          "default": "#2563EB",
+          "light": "#DBEAFE",
+          "50": "#EFF6FF",
+          "200": "#BFDBFE",
+          "800": "#1E40AF",
+          "usage": "New, informational, ready, delivering, neutral highlights"
+        }
+      },
+      "ui": {
+        "popover": "#FFFFFF",
+        "popoverForeground": "#1A1A2E",
+        "card": "#FFFFFF",
+        "cardForeground": "#1A1A2E",
+        "muted": "#F3F4F6",
+        "mutedForeground": "#6B7280",
+        "border": "#E5E7EB",
+        "borderLight": "#F3F4F6",
+        "borderFocus": "#1B4332",
+        "gray300": "#D1D5DB",
+        "gray700": "#374151"
+      }
+    },
+
+    "typography": {
+      "fontFamilies": {
+        "display": {
+          "family": "'DM Serif Display', serif",
+          "source": "Google Fonts",
+          "weights": [400],
+          "usage": "Brand wordmark, hero headings, section titles, decorative text"
+        },
+        "body": {
+          "family": "'DM Sans', sans-serif",
+          "source": "Google Fonts",
+          "weights": [400, 500, 600, 700, 800, 900],
+          "usage": "All body text, UI labels, buttons, navigation, form elements"
+        },
+        "mono": {
+          "family": "'JetBrains Mono', monospace",
+          "source": "Google Fonts",
+          "weights": [400, 500, 600],
+          "usage": "Order IDs, promo codes, technical data, price displays"
+        }
+      },
+      "scale": {
+        "xs": "0.75rem",
+        "sm": "0.875rem",
+        "base": "1rem",
+        "lg": "1.125rem",
+        "xl": "1.25rem",
+        "2xl": "1.5rem",
+        "3xl": "1.875rem",
+        "4xl": "2.25rem",
+        "5xl": "3rem"
+      },
+      "fontRendering": "antialiased"
+    },
+
+    "spacing": {
+      "scale": {
+        "0": "0px",
+        "0.5": "0.125rem",
+        "1": "0.25rem",
+        "1.5": "0.375rem",
+        "2": "0.5rem",
+        "2.5": "0.625rem",
+        "3": "0.75rem",
+        "4": "1rem",
+        "5": "1.25rem",
+        "6": "1.5rem",
+        "8": "2rem",
+        "10": "2.5rem",
+        "12": "3rem",
+        "16": "4rem"
+      },
+      "patterns": {
+        "cardPadding": ["p-4", "p-5", "p-6"],
+        "sectionGap": ["gap-3", "gap-4", "gap-6"],
+        "verticalRhythm": ["space-y-2", "space-y-3", "space-y-4", "space-y-6"],
+        "gridGap": ["gap-2", "gap-3", "gap-4"],
+        "pagePadding": "px-4 sm:px-6 lg:px-8"
+      }
+    },
+
+    "borderRadius": {
+      "sm": "0.25rem",
+      "md": "0.375rem",
+      "lg": "0.5rem",
+      "xl": "0.75rem",
+      "2xl": "1rem",
+      "full": "9999px",
+      "patterns": {
+        "cards": "rounded-2xl",
+        "buttons": "rounded-lg",
+        "badges": "rounded-full",
+        "inputs": "rounded-lg",
+        "modals": "rounded-2xl"
+      }
+    },
+
+    "shadows": {
+      "card": "0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)",
+      "elevated": "0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04)",
+      "modal": "0 20px 60px rgba(0,0,0,0.15)",
+      "usage": {
+        "card": "Default card and container elevation",
+        "elevated": "Hover state, dropdowns, popovers",
+        "modal": "Modal dialogs and overlays"
+      }
+    },
+
+    "gradients": {
+      "brand": {
+        "value": "linear-gradient(135deg, #1B4332 0%, #2D6A4F 50%, #40916C 100%)",
+        "usage": "Hero sections, branded headers, premium card backgrounds"
+      },
+      "skeleton": {
+        "value": "linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%)",
+        "usage": "Loading skeleton shimmer effect"
+      }
+    },
+
+    "scrollbar": {
+      "width": "6px",
+      "trackBackground": "transparent",
+      "thumbBackground": "#D1D5DB",
+      "thumbHoverBackground": "#9CA3AF",
+      "thumbBorderRadius": "3px"
+    }
+  },
+
+  "animations": {
+    "shimmer": {
+      "keyframes": "background-position: -200% 0 → 200% 0",
+      "duration": "1.5s",
+      "iteration": "infinite",
+      "usage": "Skeleton loading placeholders"
+    },
+    "pulseSuccess": {
+      "keyframes": "scale(1) → scale(1.05) → scale(1)",
+      "duration": "0.6s",
+      "easing": "ease-in-out",
+      "usage": "Success confirmation feedback"
+    },
+    "float": {
+      "keyframes": "translateY(0) → translateY(-12px) → translateY(0)",
+      "duration": "3s",
+      "easing": "ease-in-out",
+      "iteration": "infinite",
+      "usage": "Hero decorative elements"
+    },
+    "fadeInUp": {
+      "keyframes": "opacity: 0 → 1",
+      "duration": "0.2s",
+      "easing": "ease-out",
+      "usage": "Page enter transitions"
+    },
+    "framerMotion": {
+      "pageTransition": {
+        "initial": { "opacity": 0, "x": 20 },
+        "animate": { "opacity": 1, "x": 0 },
+        "exit": { "opacity": 0, "x": -20 },
+        "duration": 0.2
+      },
+      "modalBackdrop": {
+        "initial": { "opacity": 0 },
+        "animate": { "opacity": 1 },
+        "exit": { "opacity": 0 }
+      },
+      "modalPanel": {
+        "initial": { "opacity": 0, "scale": 0.95 },
+        "animate": { "opacity": 1, "scale": 1 },
+        "exit": { "opacity": 0, "scale": 0.95 }
+      },
+      "cardHover": {
+        "whileHover": { "scale": 1.02 },
+        "transition": { "type": "spring", "stiffness": 300 }
+      },
+      "slideFromRight": {
+        "initial": { "opacity": 0, "x": 80 },
+        "animate": { "opacity": 1, "x": 0 },
+        "exit": { "opacity": 0, "x": 80 },
+        "transition": { "type": "spring", "damping": 25, "stiffness": 200 }
+      },
+      "staggerChildren": {
+        "staggerDirection": 1,
+        "delayChildren": 0.05,
+        "usage": "Animated lists, grid items, dashboard cards"
+      }
+    }
+  },
+
+  "components": {
+    "button": {
+      "variants": {
+        "primary": {
+          "classes": "rounded-lg px-4 py-2 text-sm font-semibold text-white bg-primary hover:opacity-90 transition-opacity",
+          "usage": "Main CTAs, form submissions, confirmations"
+        },
+        "accent": {
+          "classes": "rounded-full px-3 py-1.5 text-sm font-medium text-white bg-accent hover:bg-accent-light transition-colors",
+          "usage": "Add to cart, secondary CTAs"
+        },
+        "ghost": {
+          "classes": "rounded-lg px-4 py-2 text-sm font-medium border border-border bg-transparent hover:bg-muted transition-colors",
+          "usage": "Cancel actions, secondary options"
+        },
+        "danger": {
+          "classes": "rounded-lg px-4 py-2 text-sm font-semibold text-white bg-error hover:opacity-90 transition-opacity",
+          "usage": "Destructive actions, cancellations"
+        }
+      },
+      "states": {
+        "disabled": "opacity-50 cursor-not-allowed",
+        "loading": "opacity-70 pointer-events-none"
+      },
+      "iconGap": "gap-2"
+    },
+
+    "card": {
+      "base": "rounded-lg border bg-card text-card-foreground shadow-sm",
+      "parts": {
+        "header": "flex flex-col space-y-1.5 p-6",
+        "title": "text-lg font-semibold leading-none tracking-tight",
+        "description": "text-sm text-muted-foreground",
+        "content": "p-6 pt-0",
+        "footer": "flex items-center p-6 pt-0"
+      }
+    },
+
+    "mealCard": {
+      "container": "rounded-2xl bg-white transition-all duration-200 hover:shadow-lg shadow-card overflow-hidden",
+      "image": "aspect-[16/9] w-full object-cover",
+      "tagsOverlay": "absolute top-2 left-2 flex flex-wrap gap-1",
+      "tag": "rounded-full px-2 py-0.5 text-xs font-medium text-white bg-primary-dark",
+      "macros": "grid grid-cols-4 gap-2 text-center text-xs text-text-secondary",
+      "price": "font-mono font-semibold text-primary",
+      "addButton": "rounded-full px-3 py-1.5 text-sm font-medium text-white bg-accent flex items-center gap-1.5",
+      "hoverEffect": { "whileHover": { "scale": 1.02 } },
+      "compactVariant": "Reduced padding and text sizes for grid-dense views"
+    },
+
+    "statusBadge": {
+      "base": "inline-flex items-center rounded-full font-medium capitalize",
+      "sizes": {
+        "sm": "px-2 py-0.5 text-xs",
+        "md": "px-2.5 py-1 text-xs"
+      },
+      "statusMap": {
+        "success": {
+          "statuses": ["active", "delivered", "paid"],
+          "classes": "bg-success-light text-emerald-800"
+        },
+        "warning": {
+          "statuses": ["paused", "pending", "preparing"],
+          "classes": "bg-warning-light text-warning-dark"
+        },
+        "error": {
+          "statuses": ["cancelled", "failed", "churned"],
+          "classes": "bg-error-light text-error-900"
+        },
+        "info": {
+          "statuses": ["new", "info", "ready", "delivering"],
+          "classes": "bg-info-light text-info-800"
+        },
+        "default": {
+          "statuses": ["unknown"],
+          "classes": "bg-muted text-gray-700"
+        }
+      }
+    },
+
+    "modal": {
+      "backdrop": "fixed inset-0 z-50 bg-black/50 backdrop-blur-sm",
+      "panel": "rounded-2xl bg-white shadow-modal",
+      "sizes": {
+        "sm": "max-w-md",
+        "md": "max-w-lg",
+        "lg": "max-w-2xl"
+      },
+      "header": "flex items-center justify-between px-6 py-4 border-b border-border",
+      "title": "text-lg font-semibold text-text-primary",
+      "closeButton": "p-1 rounded-lg hover:bg-muted transition-colors",
+      "body": "p-6",
+      "behavior": {
+        "escapeKeyDismiss": true,
+        "backdropClickDismiss": true,
+        "bodyOverflowHidden": true
+      },
+      "animation": {
+        "backdrop": { "initial": { "opacity": 0 }, "animate": { "opacity": 1 } },
+        "panel": { "initial": { "opacity": 0, "scale": 0.95 }, "animate": { "opacity": 1, "scale": 1 } }
+      }
+    },
+
+    "select": {
+      "foundation": "Radix UI Select",
+      "trigger": "h-9 flex rounded-lg border border-border bg-transparent px-3 py-2 text-sm shadow-sm",
+      "focusRing": "focus:ring-1 focus:ring-primary",
+      "itemHover": "hover:bg-info hover:text-white",
+      "animation": "slide-in, zoom, fade"
+    },
+
+    "tooltip": {
+      "foundation": "Radix UI Tooltip",
+      "content": "z-50 rounded-md bg-white border border-gray-100 px-3 py-1.5 text-xs font-medium text-slate-800",
+      "animation": "fade-in, zoom-in with side-based offsets"
+    },
+
+    "popover": {
+      "foundation": "Radix UI Popover",
+      "content": "z-50 rounded-lg border border-border bg-popover p-4 text-popover-foreground shadow-lg",
+      "arrow": "Optional via showArrow prop",
+      "portal": true
+    },
+
+    "skeleton": {
+      "base": "bg-gray-200 animate-pulse rounded-lg",
+      "variants": {
+        "generic": "Arbitrary dimensions via className",
+        "card": "Card-shaped with header bar, description lines, and content area",
+        "row": "Table row with N configurable columns",
+        "mealCard": "Meal card shape with image area, text lines, and button",
+        "kpi": "Dashboard KPI card with icon circle, value bar, and label",
+        "chart": "Chart area with axis lines and bars"
+      },
+      "shimmerAnimation": {
+        "background": "linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%)",
+        "backgroundSize": "200% 100%",
+        "animationDuration": "1.5s"
+      }
+    },
+
+    "toast": {
+      "position": "fixed top-4 right-4 z-100",
+      "container": "min-w-[320px] rounded-xl shadow-elevated",
+      "types": {
+        "success": {
+          "icon": "CheckCircle",
+          "bgColor": "bg-success-light",
+          "textColor": "text-success",
+          "borderColor": "border-success"
+        },
+        "error": {
+          "icon": "AlertCircle",
+          "bgColor": "bg-error-light",
+          "textColor": "text-error",
+          "borderColor": "border-error"
+        },
+        "warning": {
+          "icon": "AlertCircle",
+          "bgColor": "bg-warning-light",
+          "textColor": "text-warning",
+          "borderColor": "border-warning"
+        },
+        "info": {
+          "icon": "Info",
+          "bgColor": "bg-info-light",
+          "textColor": "text-info",
+          "borderColor": "border-info"
+        }
+      },
+      "autoDismiss": "4000ms",
+      "animation": {
+        "enter": { "x": 80, "opacity": 0, "scale": 0.95 },
+        "visible": { "x": 0, "opacity": 1, "scale": 1 },
+        "exit": { "x": 80, "opacity": 0, "scale": 0.95 }
+      }
+    },
+
+    "notificationBell": {
+      "trigger": "Popover-based dropdown, w-96",
+      "tabs": ["Unread", "Read"],
+      "alertTypes": {
+        "warning": { "iconBg": "bg-warning/8", "iconColor": "text-warning" },
+        "error": { "iconBg": "bg-error/8", "iconColor": "text-error" },
+        "info": { "iconBg": "bg-info/8", "iconColor": "text-info" }
+      },
+      "unreadBadge": "rounded-full bg-error text-white text-xs",
+      "markAllAsRead": true
+    },
+
+    "input": {
+      "base": "rounded-lg border border-border px-3 py-2.5 text-sm text-text-primary outline-none transition-colors",
+      "focus": "focus:ring-2 focus:ring-primary focus:border-primary",
+      "placeholder": "placeholder:text-text-tertiary",
+      "disabled": "opacity-50 cursor-not-allowed bg-muted"
+    },
+
+    "checkbox": {
+      "styling": "Custom styled via hidden input + label wrapper",
+      "accentColor": "accent-primary",
+      "checkedState": "Background and border highlight"
+    },
+
+    "radioButton": {
+      "styling": "Flex layout with gap, card-style selection",
+      "selectedState": "Border-primary, bg-primary-subtle",
+      "unselectedState": "Border-border, bg-transparent"
+    },
+
+    "toggle": {
+      "pattern": "Flex container with absolute positioned slider",
+      "activeColor": "bg-primary",
+      "inactiveColor": "bg-gray-300",
+      "animation": "Smooth transition on toggle"
+    },
+
+    "table": {
+      "container": "overflow-x-auto",
+      "header": "uppercase text-xs font-semibold tracking-wider text-text-secondary",
+      "row": "border-b border-border-light hover:bg-muted/50 transition-colors",
+      "cell": "px-4 py-3 text-sm",
+      "sortable": "cursor-pointer with chevron icon indicator",
+      "selectableRow": "Checkbox column with select-all in header"
+    },
+
+    "progressBar": {
+      "container": "rounded-full bg-border h-2",
+      "fill": "rounded-full bg-primary transition-all duration-300",
+      "label": "Percentage or text above/below"
+    },
+
+    "timeline": {
+      "verticalLine": "w-0.5 bg-border min-h-full",
+      "node": "w-3 h-3 rounded-full",
+      "activeNode": "bg-primary",
+      "completedNode": "bg-success",
+      "inactiveNode": "bg-border",
+      "label": "text-sm positioned beside node"
+    }
+  },
+
+  "layouts": {
+    "root": {
+      "html": "h-full antialiased",
+      "body": "min-h-full flex flex-col font-body",
+      "fontVariables": [
+        "--font-dm-sans",
+        "--font-dm-serif-display",
+        "--font-jetbrains-mono"
+      ],
+      "providers": ["QueryProvider", "CartProvider", "ToastProvider"]
+    },
+
+    "customer": {
+      "description": "Full-width layout with sticky top navigation, cream background, optimized for browsing and ordering",
+      "background": "bg-surface",
+      "navigation": {
+        "component": "CustomerNav",
+        "position": "sticky top-0 z-50",
+        "height": "h-16",
+        "background": "bg-surface-white",
+        "border": "border-b border-border",
+        "logo": {
+          "text": "PrepFlow",
+          "classes": "font-display text-2xl text-primary"
+        },
+        "links": ["Menu", "Meal Plans", "My Account"],
+        "linkClasses": "text-sm font-medium transition-colors duration-150 hover:opacity-80",
+        "cartBadge": {
+          "classes": "rounded-full flex h-5 w-5 items-center justify-center text-xs font-bold text-white bg-accent",
+          "position": "Relative to ShoppingCart icon"
+        },
+        "mobileMenu": {
+          "trigger": "Hamburger (Menu icon) visible below md breakpoint",
+          "panel": "border-t border-border px-4 pb-4 pt-2 bg-surface-white",
+          "animation": "Slide down transition"
+        }
+      },
+      "content": {
+        "wrapper": "page-enter animation",
+        "maxWidth": "Responsive, full-width with section-level max-w constraints"
+      }
+    },
+
+    "admin": {
+      "description": "Two-column layout with dark sidebar and light content area, optimized for data management",
+      "structure": "flex min-h-screen bg-gray-50",
+      "sidebar": {
+        "component": "AdminSidebar",
+        "width": "w-64",
+        "background": "bg-surface-dark",
+        "position": "lg:sticky lg:top-0 lg:h-screen",
+        "logo": {
+          "text": "PrepFlow",
+          "suffix": "Admin",
+          "classes": "font-display text-xl text-white"
+        },
+        "navigationItems": [
+          { "label": "Dashboard", "icon": "LayoutDashboard", "path": "/admin" },
+          { "label": "Orders", "icon": "ClipboardList", "path": "/admin/orders" },
+          { "label": "Production", "icon": "ChefHat", "path": "/admin/production" },
+          { "label": "Menu", "icon": "UtensilsCrossed", "path": "/admin/menu" },
+          { "label": "Customers", "icon": "Users", "path": "/admin/customers" },
+          { "label": "Settings", "icon": "Settings", "path": "/admin/settings" }
+        ],
+        "navItem": {
+          "base": "gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+          "active": "text-white bg-primary-lighter",
+          "inactive": "text-white/60 bg-transparent hover:bg-white/8"
+        },
+        "mobile": {
+          "trigger": "Hamburger toggle in header",
+          "overlay": "fixed inset-0 z-40 bg-black/50",
+          "panel": "fixed inset-y-0 left-0 z-50 w-64",
+          "animation": "CSS transform slide-in"
+        }
+      },
+      "header": {
+        "component": "AdminHeader",
+        "height": "h-14",
+        "background": "bg-white",
+        "border": "border-b border-border",
+        "content": "Notification bell, right-aligned"
+      },
+      "content": {
+        "padding": "p-4 lg:p-8",
+        "animation": "page-enter"
+      }
+    },
+
+    "pagePatterns": {
+      "hero": {
+        "background": "bg-gradient-brand (primary → primary-light → primary-lighter)",
+        "textColor": "text-white",
+        "padding": "py-16 lg:py-24",
+        "decorativeElements": "Opacity circles with float animation"
+      },
+      "filterBar": {
+        "sticky": true,
+        "background": "bg-surface-white/95 backdrop-blur-sm",
+        "border": "border-b border-border",
+        "filterPills": "rounded-full px-4 py-2 text-sm font-medium, toggle active/inactive"
+      },
+      "menuGrid": {
+        "columns": {
+          "xl": 4,
+          "lg": 3,
+          "sm": 2,
+          "default": 1
+        },
+        "gap": "gap-4 lg:gap-6"
+      },
+      "dashboardStats": {
+        "layout": "grid grid-cols-2 lg:grid-cols-4 gap-4",
+        "card": "Rounded card with icon, metric value, label, and trend indicator"
+      },
+      "detailPanel": {
+        "position": "Fixed right, slide-in animation",
+        "width": "w-full max-w-md lg:max-w-lg",
+        "animation": "Spring-based slide from right",
+        "overlay": "bg-black/50 backdrop-blur-sm"
+      },
+      "multiStepForm": {
+        "progressIndicator": "Horizontal steps with connecting lines, numbered circles",
+        "stepTransition": "Framer Motion slide left/right",
+        "stickySidebar": "Order summary or plan summary on right"
+      }
+    }
+  },
+
+  "patterns": {
+    "dataDisplay": {
+      "currency": {
+        "format": "₱{amount.toLocaleString()}",
+        "symbol": "₱",
+        "locale": "Philippine Peso"
+      },
+      "dates": "Relative or formatted via toLocaleDateString",
+      "orderIds": "Displayed in monospace font (font-mono)",
+      "emptyState": "Centered text with muted color, optional illustration",
+      "loadingState": "Context-appropriate skeleton variant (SkeletonCard, SkeletonRow, SkeletonKPI, etc.)"
+    },
+
+    "interactionPatterns": {
+      "hoverCards": "Shadow elevation increase + subtle scale (1.02)",
+      "clickableRows": "Hover background change, cursor-pointer, opens detail panel",
+      "dragAndDrop": "Visual drop zone indicator, drag-over highlighting (used in menu calendar)",
+      "bulkSelection": "Checkbox column, select-all header, conditional bulk action bar",
+      "inlineEditing": "Toggle between display and edit mode within cards/rows",
+      "confirmationFlow": "Multi-step with animated transitions (e.g., cancel subscription)"
+    },
+
+    "navigationPatterns": {
+      "sidebarSegments": "Vertical list of filter segments with count badges (desktop), horizontal scrolling tabs (mobile)",
+      "operationalTimeline": "Vertical status flow with dots, counts, and click-to-filter",
+      "tabInterface": "Horizontal tabs with active underline or background highlight",
+      "breadcrumbs": "Text-based path with separator",
+      "weekNavigator": "Prev/Next buttons with week label display"
+    },
+
+    "formPatterns": {
+      "layout": "Vertical stack with space-y-4 between fields",
+      "labelPosition": "Above input",
+      "labelStyle": "text-sm font-medium text-text-primary mb-1.5",
+      "errorDisplay": "text-sm text-error below input field",
+      "gridForms": "grid grid-cols-2 gap-4 for side-by-side fields",
+      "sectionDividers": "border-t border-border with pt-6 spacing"
+    },
+
+    "responsiveStrategies": {
+      "breakpoints": {
+        "sm": "640px",
+        "md": "768px",
+        "lg": "1024px",
+        "xl": "1280px"
+      },
+      "mobileFirst": true,
+      "sidebarCollapse": "Hidden below lg, hamburger toggle for mobile",
+      "gridCollapse": "4-col → 3-col → 2-col → 1-col",
+      "stickyElements": "Cart bar (mobile), filter bar, sidebar summary",
+      "touchTargets": "Minimum 44px tap targets on mobile"
+    },
+
+    "printStyles": {
+      "hideElements": ".no-print class hides non-essential UI",
+      "background": "White override for body",
+      "usage": "Production reports, packing slips"
+    }
+  },
+
+  "iconography": {
+    "library": "Lucide React",
+    "version": "^1.7.0",
+    "style": "Outline stroke icons, 24px default",
+    "commonIcons": {
+      "navigation": ["LayoutDashboard", "ClipboardList", "ChefHat", "UtensilsCrossed", "Users", "Settings"],
+      "actions": ["Plus", "X", "ChevronDown", "ChevronUp", "ChevronLeft", "ChevronRight", "Search", "Filter"],
+      "status": ["CheckCircle", "AlertCircle", "Info", "Clock", "Truck"],
+      "commerce": ["ShoppingCart", "CreditCard", "Package", "Receipt"],
+      "communication": ["Bell", "Mail", "MessageSquare"],
+      "misc": ["Star", "Building2", "Calendar", "Printer", "Download", "ExternalLink"]
+    }
+  },
+
+  "thirdPartyIntegrations": {
+    "charts": {
+      "library": "Recharts",
+      "version": "^3.8.1",
+      "usage": "Dashboard analytics, MRR breakdown, churn data visualization"
+    },
+    "numberAnimations": {
+      "library": "@number-flow/react",
+      "version": "^0.6.0",
+      "usage": "Animated number transitions in metrics and counters"
+    },
+    "stateManagement": {
+      "serverState": {
+        "library": "TanStack React Query",
+        "version": "^5.96.2",
+        "config": {
+          "staleTime": "60000ms",
+          "gcTime": "300000ms",
+          "retry": 1,
+          "refetchOnWindowFocus": false
+        }
+      },
+      "clientState": "React Context (CartContext, ToastContext)"
+    }
+  },
+
+  "accessibility": {
+    "foundation": "Radix UI primitives for Select, Popover, Tooltip (ARIA-compliant)",
+    "keyboardNavigation": {
+      "modalDismiss": "Escape key",
+      "focusRing": "ring-2 ring-primary (visible on keyboard focus)",
+      "tabOrder": "Logical flow through interactive elements"
+    },
+    "semanticHTML": "Proper heading hierarchy, landmark elements, button vs anchor distinction",
+    "textRendering": "antialiased for consistent cross-browser rendering",
+    "contrastNotes": "Primary green (#1B4332) on white meets WCAG AA for large text; cream (#FEFAE0) backgrounds require dark text"
+  },
+
+  "darkMode": {
+    "status": "Not implemented as a toggle",
+    "adminUsesDarkSurface": "Admin sidebar uses surface-dark (#1A1A2E) intentionally as a design choice, not a dark mode",
+    "futureConsideration": "Color tokens are structured to support a future dark theme by swapping surface and text values"
+  }
+}

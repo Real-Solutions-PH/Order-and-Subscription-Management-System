@@ -1056,6 +1056,7 @@ dependencies = [
     { name = "python-multipart" },
     { name = "python-slugify" },
     { name = "redis" },
+    { name = "ruff" },
     { name = "sqlalchemy", extra = ["asyncio"] },
     { name = "uvicorn", extra = ["standard"] },
 ]
@@ -1092,6 +1093,7 @@ requires-dist = [
     { name = "python-multipart", specifier = ">=0.0.12" },
     { name = "python-slugify", specifier = ">=8.0.4" },
     { name = "redis", specifier = ">=5.2.0" },
+    { name = "ruff", specifier = ">=0.15.9" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.8.0" },
     { name = "sqlalchemy", extras = ["asyncio"], specifier = ">=2.0.36" },
     { name = "uvicorn", extras = ["standard"], specifier = ">=0.32.0" },
