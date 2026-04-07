@@ -21,7 +21,6 @@ app = FastAPI(
     title=settings.app_name,
     version=settings.app_version,
     lifespan=lifespan,
-    root_path="/api/v1",
 )
 
 app.add_middleware(
@@ -44,15 +43,17 @@ from app.modules.fulfillment.routes import router as fulfillment_router  # noqa:
 from app.modules.notification_hub.routes import router as notification_router  # noqa: E402
 from app.modules.analytics.routes import router as analytics_router  # noqa: E402
 
-app.include_router(iam_router)
-app.include_router(tenant_config_router)
-app.include_router(product_catalog_router)
-app.include_router(subscription_router)
-app.include_router(order_router)
-app.include_router(payment_router)
-app.include_router(fulfillment_router)
-app.include_router(notification_router)
-app.include_router(analytics_router)
+api_prefix = "/api/v1"
+
+app.include_router(iam_router, prefix=api_prefix)
+app.include_router(tenant_config_router, prefix=api_prefix)
+app.include_router(product_catalog_router, prefix=api_prefix)
+app.include_router(subscription_router, prefix=api_prefix)
+app.include_router(order_router, prefix=api_prefix)
+app.include_router(payment_router, prefix=api_prefix)
+app.include_router(fulfillment_router, prefix=api_prefix)
+app.include_router(notification_router, prefix=api_prefix)
+app.include_router(analytics_router, prefix=api_prefix)
 
 
 @app.get("/health")
