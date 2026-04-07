@@ -10,7 +10,23 @@
       "Bash(grep -io \"'#[0-9A-Fa-f]\\\\{3,6\\\\}\\\\|\\\\\"#[0-9A-Fa-f]\\\\{3,6\\\\}\")",
       "Read(//c/Users/kairu/Documents/Github/Order-and-Subscription-Management-System/Color declarations: $\\(wc -l < /tmp/**)",
       "Read(//c/Users/kairu/Documents/Github/Order-and-Subscription-Management-System/Total unique inline style lines: $\\(wc -l < /tmp/**)",
-      "Bash(ls -la /c/Users/kairu/Documents/Github/Order-and-Subscription-Management-System/frontend/*.config.*)"
+      "Bash(ls -la /c/Users/kairu/Documents/Github/Order-and-Subscription-Management-System/frontend/*.config.*)",
+      "Bash(python -c \"import ast; [ast.parse\\(open\\(f\\).read\\(\\)\\) for f in [''app/modules/payment_processing/__init__.py'', ''app/modules/payment_processing/models.py'', ''app/modules/payment_processing/schemas.py'', ''app/modules/payment_processing/repo.py'', ''app/modules/payment_processing/services.py'', ''app/modules/payment_processing/routes.py'']] and print\\(''All files parse OK''\\)\")",
+      "Bash(python3 -c \"import ast; [ast.parse\\(open\\(f\\).read\\(\\)\\) for f in [''app/modules/payment_processing/__init__.py'', ''app/modules/payment_processing/models.py'', ''app/modules/payment_processing/schemas.py'', ''app/modules/payment_processing/repo.py'', ''app/modules/payment_processing/services.py'', ''app/modules/payment_processing/routes.py'']]; print\\(''All files parse OK''\\)\")",
+      "Bash(python3 -c \":*)",
+      "Bash(uv lock:*)",
+      "Bash(export PATH=\"$HOME/.local/bin:$PATH\")",
+      "Bash(uv sync:*)",
+      "Bash(timeout 5 uv run uvicorn app.main:app --port 8001)",
+      "Bash(uv run:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(python -c \":*)",
+      "Bash(.venv/bin/python -c \":*)",
+      "Bash(.venv/bin/python -m alembic check)",
+      "Bash(.venv/bin/python -m alembic revision --autogenerate -m \"test_detection\")",
+      "Bash(.venv/bin/python -m alembic upgrade head)",
+      "Bash(.venv/bin/python -m alembic downgrade base)",
+      "Bash(.venv/bin/python -m alembic revision --autogenerate -m \"init tables\")"
     ]
   }
 }

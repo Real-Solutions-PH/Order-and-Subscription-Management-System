@@ -1,0 +1,50 @@
+[project]
+name = "osms-backend"
+version = "1.0.0"
+description = "Order & Subscription Management System — Backend API"
+requires-python = ">=3.11"
+dependencies = [
+    # Web framework
+    "fastapi[standard]>=0.115.6",
+    "uvicorn[standard]>=0.34.0",
+    # Database
+    "sqlalchemy[asyncio]>=2.0.36",
+    "asyncpg>=0.30.0",
+    "alembic>=1.14.1",
+    # Redis
+    "redis>=5.2.1",
+    # Auth
+    "pyjwt>=2.10.1",
+    "passlib[bcrypt]>=1.7.4",
+    # Validation / Settings
+    "pydantic>=2.10.4",
+    "pydantic-settings>=2.7.1",
+    "email-validator>=2.1.0",
+    # HTTP Client (PayMongo API)
+    "httpx>=0.28.1",
+    # S3 Storage
+    "boto3>=1.36.2",
+    # Utilities
+    "python-multipart>=0.0.20",
+    "python-dateutil>=2.9.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.24.0",
+    "httpx>=0.28.1",
+    "ruff>=0.8.0",
+    "mypy>=1.13.0",
+]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
