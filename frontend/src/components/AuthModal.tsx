@@ -66,7 +66,7 @@ export default function AuthModal() {
     e.preventDefault();
     setError("");
     try {
-      await login({ email: loginEmail, password: loginPassword });
+      await login({ email: loginEmail, password: loginPassword, tenant_slug: "default" });
       showToast("Welcome back!", "success");
       resetForms();
     } catch (err) {
@@ -98,6 +98,7 @@ export default function AuthModal() {
         first_name: regFirstName,
         last_name: regLastName,
         phone: regPhone || undefined,
+        tenant_slug: "default",
       });
       showToast("Account created successfully!", "success");
       resetForms();

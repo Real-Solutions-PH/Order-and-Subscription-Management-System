@@ -15,6 +15,7 @@ import {
   ShoppingBag,
   ArrowLeft,
   LogIn,
+  User,
   UserPlus,
 } from "lucide-react";
 import {
@@ -68,6 +69,9 @@ export default function CheckoutPage() {
 
   // Auth
   const { isAuthenticated, user, openAuthModal } = useAuthContext();
+
+  // Checkout mode
+  const [checkoutMode, setCheckoutMode] = useState<'guest' | 'account'>('guest');
 
   // Address fields
   const [street, setStreet] = useState("");
@@ -607,7 +611,8 @@ export default function CheckoutPage() {
                   return (
                     <label
                       key={pm.id}
-                      className={`flex cursor-pointer items-center gap-4 rounded-xl px-4 py-3 transition-all duration-150 border-2 ${
+                      className="flex cursor-pointer items-center gap-4 rounded-xl px-4 py-3 transition-all duration-150"
+                      style={
                         isSelected
                           ? {
                               backgroundColor: 'rgba(27,67,50,0.05)',
@@ -686,11 +691,11 @@ export default function CheckoutPage() {
               >
                 <CheckCircle size={16} style={{ color: '#059669' }} />
                 <span className="text-sm font-medium" style={{ color: '#059669' }}>
-                  {`${appliedPromo} applied — ${promoDiscount
+                  {appliedPromo + " applied \u2014 " + (promoDiscount
                     ? promoDiscount.type === 'percentage'
-                      ? `${promoDiscount.value}% off!`
-                      : `${formatPeso(promoDiscount.amount)} off!`
-                    : "15% off!"}`}
+                      ? promoDiscount.value + "% off!"
+                      : formatPeso(promoDiscount.amount) + " off!"
+                    : "15% off!")}
                 </span>
               </div>
             )}
@@ -746,9 +751,9 @@ export default function CheckoutPage() {
               {discount > 0 && (
                 <div className="flex justify-between text-sm">
                   <span style={{ color: '#059669' }}>
-                    Discount{promoDiscount
-                      ? promoDiscount.type === 'percentage' ? ` (${promoDiscount.value}%)` : ''
-                      : ' (15%)'}
+                    {"Discount" + (promoDiscount
+                      ? promoDiscount.type === 'percentage' ? " (" + promoDiscount.value + "%)" : ""
+                      : " (15%)")}
                   </span>
                   <span className="font-semibold" style={{ color: '#059669' }}>
                     -{formatPeso(discount)}

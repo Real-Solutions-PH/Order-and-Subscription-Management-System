@@ -214,6 +214,7 @@ function del<T>(path: string) {
 export interface LoginRequest {
   email: string;
   password: string;
+  tenant_slug: string;
 }
 export interface RegisterRequest {
   email: string;
@@ -221,6 +222,7 @@ export interface RegisterRequest {
   first_name: string;
   last_name: string;
   phone?: string;
+  tenant_slug: string;
 }
 export interface TokenResponse {
   access_token: string;
