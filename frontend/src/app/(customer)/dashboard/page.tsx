@@ -39,7 +39,6 @@ import {
 } from "@/lib/mock-data";
 import { useToast } from "@/context/ToastContext";
 import { useAuth, useOrders } from "@/hooks";
-import RequireAuth from "@/components/RequireAuth";
 import { SkeletonCard } from "@/components/ui/skeleton";
 import {
   Select,
@@ -989,7 +988,7 @@ export default function DashboardPage() {
           </Modal>
         </div>
       </div>
-    </RequireAuth>
+    </div>
   );
 }
 

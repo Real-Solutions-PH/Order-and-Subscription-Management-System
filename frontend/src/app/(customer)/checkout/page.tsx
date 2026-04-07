@@ -325,7 +325,7 @@ export default function CheckoutPage() {
                   />
                 </div>
               </div>
-            </div>
+            </motion.div>
           )}
 
           {/* A) Order Summary */}
@@ -686,11 +686,11 @@ export default function CheckoutPage() {
               >
                 <CheckCircle size={16} style={{ color: '#059669' }} />
                 <span className="text-sm font-medium" style={{ color: '#059669' }}>
-                  {appliedPromo} applied — {promoDiscount
+                  {`${appliedPromo} applied — ${promoDiscount
                     ? promoDiscount.type === 'percentage'
                       ? `${promoDiscount.value}% off!`
                       : `${formatPeso(promoDiscount.amount)} off!`
-                    : "15% off!"}
+                    : "15% off!"}`}
                 </span>
               </div>
             )}

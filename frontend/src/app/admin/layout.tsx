@@ -2,7 +2,6 @@
 
 import AdminSidebar from "@/components/AdminSidebar";
 import AdminHeader from "@/components/AdminHeader";
-import RequireRole from "@/components/RequireRole";
 
 export default function AdminLayout({
   children,
@@ -18,6 +17,6 @@ export default function AdminLayout({
           {children}
         </main>
       </div>
-    </RequireRole>
+    </div>
   );
 }
