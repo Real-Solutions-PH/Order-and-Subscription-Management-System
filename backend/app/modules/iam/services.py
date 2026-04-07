@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from uuid import UUID
 
-from passlib.context import CryptContext
+import bcrypt
 
 from app.exceptions import ConflictError, NotFoundError, UnauthorizedError
 from app.modules.iam.models import Tenant, User
@@ -9,15 +9,17 @@ from app.modules.iam.repo import UserRepo
 from app.modules.iam.schemas import RegisterRequest
 from app.shared.auth import create_access_token, create_refresh_token, decode_token
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
+    return bcrypt.checkpw(
+        plain_password.encode("utf-8"), hashed_password.encode("utf-8")
+    )
 
 
 def get_password_hash(password: str) -> str:
-    return pwd_context.hash(password)
+    return bcrypt.hashpw(
+        password.encode("utf-8"), bcrypt.gensalt()
+    ).decode("utf-8")
 
 
 class AuthService:

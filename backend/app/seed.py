@@ -4,13 +4,13 @@ import uuid
 from datetime import time
 from decimal import Decimal
 
-from passlib.context import CryptContext
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import get_settings
 from app.database import SessionLocal
 from app.logger import get_logger
+from app.modules.iam.services import get_password_hash
 
 # ── Models ───────────────────────────────────────────────────────────────
 from app.modules.iam.models import Tenant, User
@@ -34,7 +34,6 @@ from app.modules.notification_hub.models import NotificationChannel, Notificatio
 
 logger = get_logger(__name__)
 settings = get_settings()
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 # ── Helpers ──────────────────────────────────────────────────────────────
@@ -72,7 +71,7 @@ async def _seed_admin_user(session: AsyncSession, tenant_id: uuid.UUID) -> uuid.
         id=user_id,
         tenant_id=tenant_id,
         email=settings.seed_admin_email,
-        hashed_password=pwd_context.hash(settings.seed_admin_password),
+        hashed_password=get_password_hash(settings.seed_admin_password),
         first_name=settings.seed_admin_first_name,
         last_name=settings.seed_admin_last_name,
         is_active=True,
