@@ -812,5 +812,277 @@
     "status": "Not implemented as a toggle",
     "adminUsesDarkSurface": "Admin sidebar uses surface-dark (#1A1A2E) intentionally as a design choice, not a dark mode",
     "futureConsideration": "Color tokens are structured to support a future dark theme by swapping surface and text values"
+  },
+
+  "logo": {
+    "description": "PrepFlow uses a text-based wordmark logo rendered with DM Serif Display. There is no standalone image logo — the brand identity is typographic.",
+    "wordmark": {
+      "text": "PrepFlow",
+      "fontFamily": "'DM Serif Display', serif",
+      "fontWeight": 400,
+      "usage": "Primary brand identifier across all surfaces"
+    },
+    "variants": {
+      "customer": {
+        "text": "PrepFlow",
+        "fontSize": "text-2xl",
+        "color": "#1B4332 (primary)",
+        "background": "Light surfaces (white nav bar, cream pages)",
+        "context": "CustomerNav component — sticky top navigation"
+      },
+      "admin": {
+        "text": "PrepFlow Admin",
+        "fontSize": "text-xl",
+        "fontWeight": "font-bold tracking-tight",
+        "primaryColor": "#FFFFFF",
+        "suffixColor": "#40916C (primary-lighter)",
+        "suffixSize": "text-sm font-normal",
+        "background": "Dark surface (#1A1A2E sidebar)",
+        "context": "AdminSidebar component — sidebar header"
+      }
+    },
+    "favicon": {
+      "path": "src/app/favicon.ico",
+      "format": "ICO (multi-resolution: 16x16, 32x32 at 32bpp)",
+      "placement": "Auto-served by Next.js from app directory"
+    },
+    "guidelines": {
+      "minClearSpace": "Maintain at least 8px (0.5rem) padding around the wordmark",
+      "doNot": [
+        "Do not render the wordmark in any font other than DM Serif Display",
+        "Do not use all-caps or all-lowercase — always 'PrepFlow' with capital P and F",
+        "Do not add icons or symbols next to the wordmark — it stands alone",
+        "Do not place the dark variant (#1B4332) on dark backgrounds — use white instead",
+        "Do not stretch, skew, or alter letter spacing beyond tracking-tight"
+      ],
+      "colorPairings": {
+        "onLight": { "text": "#1B4332", "surfaces": ["#FFFFFF", "#FEFAE0"] },
+        "onDark": { "text": "#FFFFFF", "suffix": "#40916C", "surfaces": ["#1A1A2E", "#1B4332"] }
+      }
+    },
+    "futureConsiderations": {
+      "svgLogo": "Consider creating an SVG wordmark for consistent rendering across marketing, email, and print",
+      "appIcon": "Create apple-touch-icon (180x180) and Android icon (192x192, 512x512) for PWA support",
+      "faviconSizes": "Add 16x16 PNG, 32x32 PNG, and SVG favicon for modern browser support"
+    }
+  },
+
+  "openGraph": {
+    "description": "Open Graph and social sharing image specifications for link previews across platforms (Twitter/X, Facebook, LinkedIn, Slack, Discord, iMessage)",
+    "image": {
+      "dimensions": {
+        "width": 1200,
+        "height": 630,
+        "aspectRatio": "1.91:1",
+        "note": "Standard OG ratio — works across all major platforms"
+      },
+      "format": "PNG or JPG (PNG preferred for text-heavy images, JPG for photo-heavy)",
+      "maxFileSize": "< 1MB recommended for fast loading",
+      "safeZone": "Keep key content within the center 1080x540 area — edges may be cropped on some platforms"
+    },
+    "designSpec": {
+      "background": {
+        "primary": "linear-gradient(135deg, #1B4332 0%, #2D6A4F 50%, #40916C 100%)",
+        "alternative": "#FEFAE0 (cream surface for lighter variant)"
+      },
+      "logo": {
+        "text": "PrepFlow",
+        "font": "DM Serif Display",
+        "color": "#FFFFFF (on gradient) or #1B4332 (on cream)",
+        "size": "48–64px equivalent",
+        "position": "Top-left or centered depending on layout"
+      },
+      "tagline": {
+        "text": "Your Kitchen, Simplified",
+        "font": "DM Sans",
+        "weight": 500,
+        "color": "rgba(255,255,255,0.85) (on gradient) or #6B7280 (on cream)",
+        "size": "20–24px equivalent"
+      },
+      "description": {
+        "text": "Order & Subscription Management for meal prep businesses",
+        "font": "DM Sans",
+        "weight": 400,
+        "color": "rgba(255,255,255,0.7) (on gradient) or #9CA3AF (on cream)",
+        "size": "16–18px equivalent"
+      },
+      "decorativeElements": {
+        "style": "Subtle opacity circles or organic shapes matching the hero section aesthetic",
+        "opacity": "0.1–0.15",
+        "placement": "Corners and edges, outside the safe zone"
+      },
+      "layouts": {
+        "default": {
+          "description": "Brand-focused — gradient background, centered wordmark, tagline below, description at bottom",
+          "usage": "Homepage, generic link shares"
+        },
+        "feature": {
+          "description": "Split layout — left side has logo + text, right side has UI screenshot or illustration",
+          "usage": "Feature pages, blog posts, marketing"
+        },
+        "admin": {
+          "description": "Dark variant — #1A1A2E background, white wordmark with green 'Admin' suffix",
+          "usage": "Admin-specific pages if shared externally"
+        }
+      }
+    },
+    "nextjsImplementation": {
+      "staticFile": {
+        "path": "src/app/opengraph-image.png",
+        "note": "Place a static PNG at this path — Next.js auto-serves it as the default OG image"
+      },
+      "dynamicGeneration": {
+        "path": "src/app/opengraph-image.tsx",
+        "note": "Use next/og ImageResponse for dynamic text rendering with brand fonts",
+        "example": {
+          "runtime": "edge",
+          "size": { "width": 1200, "height": 630 },
+          "contentType": "image/png",
+          "fonts": ["DM Serif Display (logo)", "DM Sans (body text)"]
+        }
+      },
+      "twitterCard": {
+        "path": "src/app/twitter-image.png (or .tsx for dynamic)",
+        "cardType": "summary_large_image",
+        "dimensions": "Same as OG — 1200x630"
+      }
+    }
+  },
+
+  "seo": {
+    "description": "SEO configuration guide for PrepFlow, built on the Next.js App Router Metadata API",
+    "currentState": {
+      "title": "PrepFlow — Your Kitchen, Simplified",
+      "description": "Order & Subscription Management for meal prep businesses",
+      "location": "src/app/layout.tsx (root metadata export)"
+    },
+    "metadata": {
+      "root": {
+        "file": "src/app/layout.tsx",
+        "export": "export const metadata: Metadata",
+        "spec": {
+          "metadataBase": "new URL('https://your-domain.com') — required for resolving relative OG image URLs",
+          "title": {
+            "default": "PrepFlow — Your Kitchen, Simplified",
+            "template": "%s | PrepFlow"
+          },
+          "description": "Order & Subscription Management for meal prep businesses",
+          "keywords": ["meal prep", "order management", "subscription", "food delivery", "kitchen management", "PrepFlow"],
+          "authors": [{ "name": "PrepFlow" }],
+          "creator": "PrepFlow",
+          "openGraph": {
+            "type": "website",
+            "siteName": "PrepFlow",
+            "title": "PrepFlow — Your Kitchen, Simplified",
+            "description": "Order & Subscription Management for meal prep businesses",
+            "locale": "en_PH",
+            "images": [{ "url": "/opengraph-image.png", "width": 1200, "height": 630, "alt": "PrepFlow — Your Kitchen, Simplified" }]
+          },
+          "twitter": {
+            "card": "summary_large_image",
+            "title": "PrepFlow — Your Kitchen, Simplified",
+            "description": "Order & Subscription Management for meal prep businesses",
+            "images": ["/twitter-image.png"]
+          },
+          "icons": {
+            "icon": "/favicon.ico",
+            "apple": "/apple-icon.png"
+          }
+        }
+      },
+      "perPage": {
+        "description": "Override root metadata in nested layouts or pages using the same Metadata export or generateMetadata for dynamic content",
+        "examples": {
+          "menuPage": {
+            "title": "Menu",
+            "description": "Browse our weekly meal prep menu — fresh, healthy meals delivered to your door",
+            "note": "With title.template, renders as 'Menu | PrepFlow'"
+          },
+          "adminDashboard": {
+            "title": "Dashboard",
+            "description": "Admin dashboard — monitor orders, revenue, and production",
+            "robots": { "index": false, "follow": false },
+            "note": "Admin pages should be noindex to prevent search engine crawling"
+          },
+          "dynamicMeal": {
+            "approach": "export async function generateMetadata({ params }): Promise<Metadata>",
+            "note": "Fetch meal data and return dynamic title, description, and OG image per meal"
+          }
+        }
+      }
+    },
+    "staticFiles": {
+      "robots": {
+        "path": "src/app/robots.ts",
+        "spec": {
+          "rules": {
+            "userAgent": "*",
+            "allow": "/",
+            "disallow": ["/admin/", "/api/"]
+          },
+          "sitemap": "https://your-domain.com/sitemap.xml"
+        }
+      },
+      "sitemap": {
+        "path": "src/app/sitemap.ts",
+        "spec": {
+          "staticRoutes": ["/", "/menu", "/meal-plans"],
+          "dynamicRoutes": "Fetch meal slugs and generate entries with lastModified dates",
+          "excludeRoutes": ["All /admin/* routes", "All /api/* routes"],
+          "changeFrequency": { "home": "weekly", "menu": "daily", "mealPlans": "weekly" },
+          "priority": { "home": 1.0, "menu": 0.9, "mealPlans": 0.8, "meals": 0.7 }
+        }
+      },
+      "manifest": {
+        "path": "src/app/manifest.ts",
+        "spec": {
+          "name": "PrepFlow — Your Kitchen, Simplified",
+          "shortName": "PrepFlow",
+          "description": "Order & Subscription Management for meal prep businesses",
+          "startUrl": "/",
+          "display": "standalone",
+          "backgroundColor": "#FEFAE0",
+          "themeColor": "#1B4332",
+          "icons": [
+            { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+            { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
+          ]
+        }
+      }
+    },
+    "structuredData": {
+      "description": "JSON-LD structured data for rich search results",
+      "schemas": {
+        "organization": {
+          "type": "Organization",
+          "fields": ["name", "url", "logo", "description", "contactPoint"],
+          "placement": "Root layout via <script type='application/ld+json'>"
+        },
+        "product": {
+          "type": "Product",
+          "fields": ["name", "description", "image", "offers.price", "offers.priceCurrency (PHP)", "nutrition"],
+          "placement": "Individual meal pages"
+        },
+        "breadcrumb": {
+          "type": "BreadcrumbList",
+          "placement": "Pages with breadcrumb navigation"
+        }
+      }
+    },
+    "guidelines": {
+      "titles": {
+        "maxLength": "55–60 characters",
+        "format": "Page Name | PrepFlow (via template)",
+        "tone": "Clear, benefit-oriented — match the warm, professional brand voice"
+      },
+      "descriptions": {
+        "maxLength": "150–160 characters",
+        "tone": "Action-oriented, include value proposition",
+        "avoid": "Keyword stuffing, generic phrases"
+      },
+      "adminPages": "Always set robots: { index: false, follow: false } — admin content must never be indexed",
+      "images": "Every public-facing page should have an OG image — use the default for generic pages, dynamic generation for meal/product pages",
+      "locale": "en_PH — Philippine English, currency in PHP (₱)"
+    }
   }
 }
