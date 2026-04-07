@@ -89,7 +89,11 @@ function buildHeaders(options: RequestInit = {}): Record<string, string> {
 async function handleResponse<T>(res: Response): Promise<T> {
   if (!res.ok) {
     const body = await res.json().catch(() => ({ detail: res.statusText }));
-    throw new ApiError(res.status, body.detail ?? res.statusText);
+    const detail = body.detail ?? res.statusText;
+    const message = Array.isArray(detail)
+      ? detail.map((e: { msg?: string }) => e.msg ?? JSON.stringify(e)).join("; ")
+      : String(detail);
+    throw new ApiError(res.status, message);
   }
   if (res.status === 204) return undefined as T;
   return res.json();

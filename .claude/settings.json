@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cmd //C \"tasklist /FI \\\\\"PID eq 59972\\\\\" /FO TABLE\")"
+    ]
+  }
+}
