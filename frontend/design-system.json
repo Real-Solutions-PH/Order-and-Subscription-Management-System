@@ -567,32 +567,80 @@
       "structure": "flex min-h-screen bg-gray-50",
       "sidebar": {
         "component": "AdminSidebar",
-        "width": "w-64",
-        "background": "bg-surface-dark",
-        "position": "lg:sticky lg:top-0 lg:h-screen",
-        "logo": {
-          "text": "PrepFlow",
-          "suffix": "Admin",
-          "classes": "font-display text-xl text-white"
+        "description": "Dark full-height sidebar with branded logo, vertical navigation, and responsive mobile drawer",
+        "structure": {
+          "container": "flex h-full flex-col",
+          "background": "#1A1A2E (surface-dark)",
+          "width": "w-64",
+          "flexShrink": "flex-shrink-0"
         },
-        "navigationItems": [
-          { "label": "Dashboard", "icon": "LayoutDashboard", "path": "/admin" },
-          { "label": "Orders", "icon": "ClipboardList", "path": "/admin/orders" },
-          { "label": "Production", "icon": "ChefHat", "path": "/admin/production" },
-          { "label": "Menu", "icon": "UtensilsCrossed", "path": "/admin/menu" },
-          { "label": "Customers", "icon": "Users", "path": "/admin/customers" },
-          { "label": "Settings", "icon": "Settings", "path": "/admin/settings" }
-        ],
+        "desktop": {
+          "position": "sticky top-0 h-screen",
+          "visibility": "hidden below lg, block at lg+",
+          "classes": "hidden h-screen w-64 flex-shrink-0 sticky top-0 lg:block"
+        },
+        "logo": {
+          "container": "flex h-16 items-center px-6",
+          "borderBottom": "1px solid rgba(255,255,255,0.1)",
+          "text": "PrepFlow",
+          "textClasses": "text-xl font-bold tracking-tight text-white",
+          "fontFamily": "'DM Serif Display', serif",
+          "suffix": "Admin",
+          "suffixClasses": "text-sm font-normal",
+          "suffixColor": "#40916C"
+        },
+        "navigation": {
+          "container": "flex-1 space-y-1 px-3 py-4",
+          "items": [
+            { "label": "Dashboard", "icon": "LayoutDashboard", "path": "/admin", "matchStrategy": "exact" },
+            { "label": "Orders", "icon": "ClipboardList", "path": "/admin/orders", "matchStrategy": "startsWith" },
+            { "label": "Production", "icon": "ChefHat", "path": "/admin/production", "matchStrategy": "startsWith" },
+            { "label": "Menu", "icon": "UtensilsCrossed", "path": "/admin/menu", "matchStrategy": "startsWith" },
+            { "label": "Customers", "icon": "Users", "path": "/admin/customers", "matchStrategy": "startsWith" },
+            { "label": "Settings", "icon": "Settings", "path": "/admin/settings", "matchStrategy": "startsWith" }
+          ],
+          "iconSize": 20,
+          "activeRouteDetection": "Exact match for /admin (dashboard), startsWith for all nested routes"
+        },
         "navItem": {
-          "base": "gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-          "active": "text-white bg-primary-lighter",
-          "inactive": "text-white/60 bg-transparent hover:bg-white/8"
+          "base": "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors duration-150",
+          "active": {
+            "color": "#FFFFFF",
+            "backgroundColor": "#40916C (primary-lighter)"
+          },
+          "inactive": {
+            "color": "rgba(255,255,255,0.6)",
+            "backgroundColor": "transparent"
+          },
+          "hover": {
+            "color": "#FFFFFF",
+            "backgroundColor": "rgba(255,255,255,0.08)",
+            "note": "Applied via onMouseEnter/Leave handlers, only when not active"
+          },
+          "transitionDuration": "150ms"
         },
         "mobile": {
-          "trigger": "Hamburger toggle in header",
-          "overlay": "fixed inset-0 z-40 bg-black/50",
-          "panel": "fixed inset-y-0 left-0 z-50 w-64",
-          "animation": "CSS transform slide-in"
+          "trigger": {
+            "position": "fixed left-4 top-4 z-50",
+            "classes": "rounded-lg p-2 shadow-md",
+            "background": "#1A1A2E",
+            "visibility": "lg:hidden",
+            "icons": { "open": "Menu", "close": "X" },
+            "iconSize": 20,
+            "ariaLabel": "Open sidebar / Close sidebar"
+          },
+          "backdrop": {
+            "classes": "fixed inset-0 z-40 bg-black/50 lg:hidden",
+            "clickToDismiss": true
+          },
+          "panel": {
+            "classes": "fixed inset-y-0 left-0 z-40 w-64 transform transition-transform duration-200 lg:hidden",
+            "openTransform": "translateX(0)",
+            "closedTransform": "translateX(-100%)",
+            "animationDuration": "200ms"
+          },
+          "autoCloseOnNavigate": true,
+          "stateManagement": "React useState (mobileOpen boolean)"
         }
       },
       "header": {
