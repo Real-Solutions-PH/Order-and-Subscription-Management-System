@@ -1,4 +1,3 @@
-import logging
 from contextlib import asynccontextmanager
 
 import boto3
@@ -9,9 +8,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
 from app.config import get_settings
+from app.logger import get_logger, setup_logging
 
 settings = get_settings()
-logger = logging.getLogger(__name__)
+setup_logging()
+logger = get_logger(__name__)
 
 
 async def _ping_database() -> None:

@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     app_name: str = "Order & Subscription Management System"
     app_version: str = "1.0.0"
     debug: bool = False
+    log_level: str = "INFO"
 
     # Database — single database for everything
     database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/osms_app"
