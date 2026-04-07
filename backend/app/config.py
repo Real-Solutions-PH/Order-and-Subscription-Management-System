@@ -35,6 +35,17 @@ class Settings(BaseSettings):
     paymongo_public_key: str = ""
     paymongo_webhook_secret: str = ""
 
+    # Seed / Default Tenant & Admin
+    seed_tenant_id: str = "00000000-0000-0000-0000-000000000001"
+    seed_tenant_name: str = "Default Tenant"
+    seed_tenant_slug: str = "default"
+    seed_business_name: str = "Default Business"
+    seed_timezone: str = "Asia/Manila"
+    seed_admin_email: str = "admin@example.com"
+    seed_admin_password: str = "changeme123"
+    seed_admin_first_name: str = "Admin"
+    seed_admin_last_name: str = "User"
+
     model_config = {
         "env_file": ("../.env", ".env"),
         "env_file_encoding": "utf-8",

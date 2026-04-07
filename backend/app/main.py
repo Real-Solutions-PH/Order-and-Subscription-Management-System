@@ -68,6 +68,12 @@ async def _warmup() -> None:
 async def lifespan(app: FastAPI):
     # Startup
     await _warmup()
+    # Prepopulate seed data (skips if data already exists)
+    try:
+        from app.seed import seed_database
+        await seed_database()
+    except Exception:
+        logger.warning("Database seeding skipped (DB may be unavailable)", exc_info=True)
     yield
     # Shutdown
     from app.database import engine
