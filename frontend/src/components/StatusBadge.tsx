@@ -32,7 +32,7 @@ export default function StatusBadge({ status, size = 'md' }: StatusBadgeProps) {
 
   return (
     <span
-      className={`inline-flex items-center rounded-full font-medium capitalize ${sizeClasses} ${colorClasses}`}
+      className={`inline-flex items-center rounded-full font-medium capitalize ${sizeClasses} ${colors}`}
     >
       {status}
     </span>

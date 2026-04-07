@@ -56,7 +56,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [auth.user]);
 
-  const isAdmin = roles.includes("admin");
+  const isAdmin = roles.includes("admin") || auth.user?.is_superuser === true;
 
   const openAuthModal = useCallback((tab: AuthTab = "login") => {
     setAuthModalTab(tab);

@@ -236,6 +236,8 @@ export interface UserResponse {
   last_name: string;
   phone: string | null;
   avatar_url: string | null;
+  is_active: boolean;
+  is_superuser: boolean;
   status: string;
   email_verified_at: string | null;
   last_login_at: string | null;

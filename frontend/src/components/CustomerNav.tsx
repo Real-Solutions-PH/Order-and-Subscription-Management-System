@@ -20,7 +20,7 @@ import {
 
 export default function CustomerNav() {
   const { itemCount } = useCart();
-  const { isAuthenticated, user, logout, openAuthModal } = useAuthContext();
+  const { isAuthenticated, isAdmin, user, logout, openAuthModal } = useAuthContext();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const navLinks = [
@@ -86,12 +86,22 @@ export default function CustomerNav() {
                 className="w-48 rounded-xl border bg-white p-2 shadow-lg"
                 style={{ borderColor: "#E5E7EB" }}
               >
+                {isAdmin && (
+                  <Link
+                    href="/admin"
+                    className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-gray-50"
+                    style={{ color: "#1A1A2E" }}
+                  >
+                    <LayoutDashboard size={16} style={{ color: "#1B4332" }} />
+                    Admin Dashboard
+                  </Link>
+                )}
                 <Link
                   href="/dashboard"
                   className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-gray-50"
                   style={{ color: "#1A1A2E" }}
                 >
-                  <LayoutDashboard size={16} style={{ color: "#6B7280" }} />
+                  <User size={16} style={{ color: "#6B7280" }} />
                   My Account
                 </Link>
                 <button
@@ -161,6 +171,17 @@ export default function CustomerNav() {
           ))}
           {isAuthenticated ? (
             <>
+              {isAdmin && (
+                <Link
+                  href="/admin"
+                  onClick={() => setMobileOpen(false)}
+                  className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors hover:bg-gray-50"
+                  style={{ color: "#1A1A2E" }}
+                >
+                  <LayoutDashboard size={16} style={{ color: "#1B4332" }} />
+                  Admin Dashboard
+                </Link>
+              )}
               <Link
                 href="/dashboard"
                 onClick={() => setMobileOpen(false)}
