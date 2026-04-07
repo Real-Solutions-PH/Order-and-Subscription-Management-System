@@ -216,7 +216,8 @@ export default function MealPlanPage() {
                   className="flex items-center gap-2"
                 >
                   <div
-                    className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold transition-colors ${
+                    className="flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold transition-colors"
+                    style={
                       currentStep >= step.num
                         ? { backgroundColor: '#1B4332', color: '#FFFFFF' }
                         : { backgroundColor: '#E5E7EB', color: '#6B7280' }
@@ -699,7 +700,8 @@ export default function MealPlanPage() {
                       <button
                         key={freq}
                         onClick={() => setFrequency(freq)}
-                        className={`px-6 py-2.5 text-sm font-medium transition-colors ${
+                        className="px-6 py-2.5 text-sm font-medium transition-colors"
+                        style={
                           frequency === freq
                             ? { backgroundColor: '#1B4332', color: '#FFFFFF' }
                             : { backgroundColor: '#FFFFFF', color: '#1A1A2E' }
@@ -726,7 +728,8 @@ export default function MealPlanPage() {
                         <button
                           key={day}
                           onClick={() => toggleDay(day)}
-                          className={`flex h-14 w-14 items-center justify-center rounded-xl text-sm font-semibold transition-all duration-150 ${
+                          className="flex h-14 w-14 items-center justify-center rounded-xl text-sm font-semibold transition-all duration-150"
+                          style={
                             isSelected
                               ? { backgroundColor: '#1B4332', color: '#FFFFFF' }
                               : {
@@ -758,7 +761,8 @@ export default function MealPlanPage() {
                         <button
                           key={slot}
                           onClick={() => setSelectedTimeSlot(slot)}
-                          className={`flex items-center justify-center gap-2 rounded-xl px-3 py-3 text-sm font-medium transition-all duration-150 ${
+                          className="flex items-center justify-center gap-2 rounded-xl px-3 py-3 text-sm font-medium transition-all duration-150"
+                          style={
                             isSelected
                               ? { backgroundColor: '#1B4332', color: '#FFFFFF' }
                               : {

@@ -563,7 +563,8 @@ export default function CheckoutPage() {
                     <button
                       key={slot}
                       onClick={() => setDeliveryTimeSlot(slot)}
-                      className={`rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150 ${
+                      className="rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150"
+                      style={
                         isSelected
                           ? { backgroundColor: '#1B4332', color: '#FFFFFF' }
                           : {

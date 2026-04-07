@@ -188,7 +188,8 @@ export default function LandingPage() {
                 <button
                   key={filter}
                   onClick={() => toggleFilter(filter)}
-                  className={`shrink-0 rounded-full px-3.5 py-1.5 text-sm font-medium transition-all duration-150 ${
+                  className="shrink-0 rounded-full px-3.5 py-1.5 text-sm font-medium transition-all duration-150"
+                  style={
                     isActive
                       ? { backgroundColor: '#1B4332', color: '#FFFFFF' }
                       : { backgroundColor: 'transparent', color: '#1A1A2E', border: '1px solid #E5E7EB' }
