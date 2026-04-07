@@ -82,7 +82,9 @@ async def get_optional_user(
         return None
 
 
-def get_current_active_superuser(current_user=Depends(get_current_user)):
+def get_current_active_superuser(
+    current_user: Annotated[object, Depends(get_current_user)],
+):
     """Dependency that requires the current user to be a superuser."""
     if not current_user.is_superuser:
         raise ForbiddenError("Not enough privileges")

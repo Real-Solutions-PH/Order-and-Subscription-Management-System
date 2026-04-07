@@ -1,5 +1,7 @@
 """Analytics & Reporting API routes."""
 
+from typing import Annotated
+
 from fastapi import APIRouter, Depends, Query
 
 from app.dependencies import get_analytics_service
@@ -22,7 +24,7 @@ router = APIRouter(tags=["Analytics"])
 @router.get("/analytics/dashboard", response_model=DashboardResponse)
 async def get_dashboard(
     current_user: SuperUser,
-    analytics_service: AnalyticsService = Depends(get_analytics_service),
+    analytics_service: Annotated[AnalyticsService, Depends(get_analytics_service)],
 ):
     """Get high-level dashboard KPIs for the current tenant."""
     return await analytics_service.get_dashboard(current_user.tenant_id)
@@ -34,7 +36,7 @@ async def get_dashboard(
 @router.get("/analytics/mrr", response_model=MRRBreakdownResponse)
 async def get_mrr_breakdown(
     current_user: SuperUser,
-    analytics_service: AnalyticsService = Depends(get_analytics_service),
+    analytics_service: Annotated[AnalyticsService, Depends(get_analytics_service)],
 ):
     """Get MRR broken down by subscription plan."""
     return await analytics_service.get_mrr_breakdown(current_user.tenant_id)
@@ -46,7 +48,7 @@ async def get_mrr_breakdown(
 @router.get("/analytics/churn", response_model=ChurnResponse)
 async def get_churn_data(
     current_user: SuperUser,
-    analytics_service: AnalyticsService = Depends(get_analytics_service),
+    analytics_service: Annotated[AnalyticsService, Depends(get_analytics_service)],
 ):
     """Get churn rate and cancellation reasons."""
     return await analytics_service.get_churn_data(current_user.tenant_id)
@@ -58,8 +60,8 @@ async def get_churn_data(
 @router.get("/analytics/popular-items", response_model=PopularItemResponse)
 async def get_popular_items(
     current_user: SuperUser,
+    analytics_service: Annotated[AnalyticsService, Depends(get_analytics_service)],
     limit: int = Query(default=10, ge=1, le=100),
-    analytics_service: AnalyticsService = Depends(get_analytics_service),
 ):
     """Get most popular items by order count."""
     return await analytics_service.get_popular_items(current_user.tenant_id, limit)
@@ -71,7 +73,7 @@ async def get_popular_items(
 @router.get("/analytics/cohorts", response_model=CohortResponse)
 async def get_cohort_data(
     current_user: SuperUser,
-    analytics_service: AnalyticsService = Depends(get_analytics_service),
+    analytics_service: Annotated[AnalyticsService, Depends(get_analytics_service)],
 ):
     """Get cohort retention and revenue data."""
     return await analytics_service.get_cohort_data(current_user.tenant_id)

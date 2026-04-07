@@ -1,5 +1,6 @@
 """Subscription Engine API routes."""
 
+from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query
@@ -17,6 +18,10 @@ from app.modules.subscription_engine.schemas import (
     SubscriptionPlanResponse,
     SubscriptionResponse,
 )
+from app.modules.subscription_engine.services import (
+    SubscriptionPlanService,
+    SubscriptionService,
+)
 from app.shared.auth import CurrentUser, SuperUser
 
 router = APIRouter(tags=["Subscriptions"])
@@ -29,7 +34,7 @@ router = APIRouter(tags=["Subscriptions"])
 async def create_plan(
     data: SubscriptionPlanCreate,
     current_user: SuperUser,
-    plan_service=Depends(get_subscription_plan_service),
+    plan_service: Annotated[SubscriptionPlanService, Depends(get_subscription_plan_service)],
 ):
     plan = await plan_service.create_plan(current_user.tenant_id, data)
     return plan
@@ -37,9 +42,9 @@ async def create_plan(
 
 @router.get("/subscription-plans", response_model=list[SubscriptionPlanResponse])
 async def list_plans(
+    plan_service: Annotated[SubscriptionPlanService, Depends(get_subscription_plan_service)],
     tenant_id: UUID = Query(..., description="Tenant to list plans for"),
     active_only: bool = Query(True),
-    plan_service=Depends(get_subscription_plan_service),
 ):
     return await plan_service.list_plans(tenant_id, active_only=active_only)
 
@@ -51,7 +56,7 @@ async def list_plans(
 async def create_subscription(
     data: SubscriptionCreate,
     current_user: CurrentUser,
-    sub_service=Depends(get_subscription_service),
+    sub_service: Annotated[SubscriptionService, Depends(get_subscription_service)],
 ):
     sub = await sub_service.create_subscription(
         user_id=current_user.id,
@@ -65,7 +70,7 @@ async def create_subscription(
 async def get_subscription(
     sub_id: UUID,
     current_user: CurrentUser,
-    sub_service=Depends(get_subscription_service),
+    sub_service: Annotated[SubscriptionService, Depends(get_subscription_service)],
 ):
     return await sub_service.get_subscription(sub_id)
 
@@ -75,7 +80,7 @@ async def pause_subscription(
     sub_id: UUID,
     data: SubscriptionPauseRequest,
     current_user: CurrentUser,
-    sub_service=Depends(get_subscription_service),
+    sub_service: Annotated[SubscriptionService, Depends(get_subscription_service)],
 ):
     return await sub_service.pause_subscription(
         sub_id, actor_id=current_user.id, data=data
@@ -86,7 +91,7 @@ async def pause_subscription(
 async def resume_subscription(
     sub_id: UUID,
     current_user: CurrentUser,
-    sub_service=Depends(get_subscription_service),
+    sub_service: Annotated[SubscriptionService, Depends(get_subscription_service)],
 ):
     return await sub_service.resume_subscription(
         sub_id, actor_id=current_user.id
@@ -98,7 +103,7 @@ async def cancel_subscription(
     sub_id: UUID,
     data: SubscriptionCancelRequest,
     current_user: CurrentUser,
-    sub_service=Depends(get_subscription_service),
+    sub_service: Annotated[SubscriptionService, Depends(get_subscription_service)],
 ):
     return await sub_service.cancel_subscription(
         sub_id, actor_id=current_user.id, data=data
@@ -110,7 +115,7 @@ async def modify_plan(
     sub_id: UUID,
     data: PlanModifyRequest,
     current_user: CurrentUser,
-    sub_service=Depends(get_subscription_service),
+    sub_service: Annotated[SubscriptionService, Depends(get_subscription_service)],
 ):
     return await sub_service.modify_plan(
         sub_id, actor_id=current_user.id, new_plan_tier_id=data.new_plan_tier_id
@@ -124,7 +129,7 @@ async def modify_plan(
 async def list_cycles(
     sub_id: UUID,
     current_user: CurrentUser,
-    sub_service=Depends(get_subscription_service),
+    sub_service: Annotated[SubscriptionService, Depends(get_subscription_service)],
 ):
     return await sub_service.list_cycles(sub_id)
 
@@ -138,7 +143,7 @@ async def set_selections(
     cycle_id: UUID,
     data: SelectionCreate,
     current_user: CurrentUser,
-    sub_service=Depends(get_subscription_service),
+    sub_service: Annotated[SubscriptionService, Depends(get_subscription_service)],
 ):
     return await sub_service.set_selections(sub_id, cycle_id, data)
 
@@ -151,7 +156,7 @@ async def skip_cycle(
     sub_id: UUID,
     cycle_id: UUID,
     current_user: CurrentUser,
-    sub_service=Depends(get_subscription_service),
+    sub_service: Annotated[SubscriptionService, Depends(get_subscription_service)],
 ):
     return await sub_service.skip_cycle(
         sub_id, cycle_id, actor_id=current_user.id

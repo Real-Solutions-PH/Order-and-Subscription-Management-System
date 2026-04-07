@@ -1,5 +1,6 @@
 """Payment Processing API routes."""
 
+from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query
@@ -37,7 +38,7 @@ router = APIRouter(tags=["Payments"])
 async def create_payment_intent(
     body: PaymentIntentCreate,
     user: CurrentUser,
-    payment_service: PaymentService = Depends(get_payment_service),
+    payment_service: Annotated[PaymentService, Depends(get_payment_service)],
 ):
     """Create a new payment intent via PayMongo."""
     payment = await payment_service.create_intent(
@@ -57,7 +58,7 @@ async def attach_payment_method(
     payment_id: UUID,
     body: AttachMethodRequest,
     user: CurrentUser,
-    payment_service: PaymentService = Depends(get_payment_service),
+    payment_service: Annotated[PaymentService, Depends(get_payment_service)],
 ):
     """Attach a payment method to an existing payment intent."""
     return await payment_service.attach_method(
@@ -72,7 +73,7 @@ async def attach_payment_method(
 async def confirm_payment(
     payment_id: UUID,
     user: CurrentUser,
-    payment_service: PaymentService = Depends(get_payment_service),
+    payment_service: Annotated[PaymentService, Depends(get_payment_service)],
 ):
     """Confirm / finalize a payment."""
     return await payment_service.confirm_payment(payment_id)
@@ -82,7 +83,7 @@ async def confirm_payment(
 async def get_payment(
     payment_id: UUID,
     user: CurrentUser,
-    payment_service: PaymentService = Depends(get_payment_service),
+    payment_service: Annotated[PaymentService, Depends(get_payment_service)],
 ):
     """Get payment details by ID."""
     return await payment_service.get_payment(payment_id)
@@ -93,7 +94,7 @@ async def refund_payment(
     payment_id: UUID,
     body: RefundRequest,
     current_user: SuperUser,
-    payment_service: PaymentService = Depends(get_payment_service),
+    payment_service: Annotated[PaymentService, Depends(get_payment_service)],
 ):
     """Issue a full or partial refund (admin/manager only)."""
     return await payment_service.refund_payment(
@@ -109,7 +110,7 @@ async def refund_payment(
 async def create_cod_payment(
     body: CODCreateRequest,
     user: CurrentUser,
-    payment_service: PaymentService = Depends(get_payment_service),
+    payment_service: Annotated[PaymentService, Depends(get_payment_service)],
 ):
     """Create a cash-on-delivery payment record."""
     return await payment_service.create_cod_payment(
@@ -126,7 +127,7 @@ async def collect_cod_payment(
     payment_id: UUID,
     body: CODCollectRequest,
     current_user: SuperUser,
-    payment_service: PaymentService = Depends(get_payment_service),
+    payment_service: Annotated[PaymentService, Depends(get_payment_service)],
 ):
     """Mark a COD payment as collected (admin/manager/driver only)."""
     return await payment_service.collect_cod(
@@ -141,7 +142,7 @@ async def collect_cod_payment(
 @router.get("/payment-methods", response_model=list[PaymentMethodResponse])
 async def list_payment_methods(
     user: CurrentUser,
-    payment_service: PaymentService = Depends(get_payment_service),
+    payment_service: Annotated[PaymentService, Depends(get_payment_service)],
 ):
     """List saved payment methods for the current user."""
     return await payment_service.list_payment_methods(
@@ -154,7 +155,7 @@ async def list_payment_methods(
 async def create_payment_method(
     body: PaymentMethodCreate,
     user: CurrentUser,
-    payment_service: PaymentService = Depends(get_payment_service),
+    payment_service: Annotated[PaymentService, Depends(get_payment_service)],
 ):
     """Save a new payment method."""
     return await payment_service.save_payment_method(
@@ -177,7 +178,7 @@ async def create_payment_method(
 async def validate_promo_code(
     body: PromoValidateRequest,
     user: CurrentUser,
-    promo_service: PromoCodeService = Depends(get_promo_code_service),
+    promo_service: Annotated[PromoCodeService, Depends(get_promo_code_service)],
 ):
     """Validate a promo code and calculate discount."""
     result = await promo_service.validate_promo(
@@ -192,9 +193,9 @@ async def validate_promo_code(
 @router.get("/promo-codes", response_model=PromoCodeListResponse)
 async def list_promo_codes(
     current_user: SuperUser,
+    promo_service: Annotated[PromoCodeService, Depends(get_promo_code_service)],
     page: int = Query(1, ge=1),
     per_page: int = Query(20, ge=1, le=100),
-    promo_service: PromoCodeService = Depends(get_promo_code_service),
 ):
     """List all promo codes for the tenant (admin/manager only)."""
     promos, total = await promo_service.list_promos(
@@ -210,9 +211,9 @@ async def list_promo_codes(
 @router.get("/invoices", response_model=InvoiceListResponse)
 async def list_invoices(
     user: CurrentUser,
+    invoice_service: Annotated[InvoiceService, Depends(get_invoice_service)],
     page: int = Query(1, ge=1),
     per_page: int = Query(20, ge=1, le=100),
-    invoice_service: InvoiceService = Depends(get_invoice_service),
 ):
     """List invoices for the current user's tenant."""
     invoices, total = await invoice_service.list_invoices(
@@ -227,7 +228,7 @@ async def list_invoices(
 async def get_invoice(
     invoice_id: UUID,
     user: CurrentUser,
-    invoice_service: InvoiceService = Depends(get_invoice_service),
+    invoice_service: Annotated[InvoiceService, Depends(get_invoice_service)],
 ):
     """Get a single invoice by ID."""
     return await invoice_service.get_invoice(invoice_id)

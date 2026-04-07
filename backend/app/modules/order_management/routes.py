@@ -1,5 +1,6 @@
 """Order Management API routes."""
 
+from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query, Request
@@ -36,7 +37,7 @@ def _extract_session_id(request: Request) -> str | None:
 async def get_cart(
     request: Request,
     user: OptionalUser,
-    cart_service: CartService = Depends(get_cart_service),
+    cart_service: Annotated[CartService, Depends(get_cart_service)],
 ):
     """Get the current user/guest cart."""
     user_id = user.id if user else None
@@ -59,7 +60,7 @@ async def add_cart_item(
     request: Request,
     body: CartItemAdd,
     user: OptionalUser,
-    cart_service: CartService = Depends(get_cart_service),
+    cart_service: Annotated[CartService, Depends(get_cart_service)],
 ):
     """Add an item to the cart."""
     user_id = user.id if user else None
@@ -91,7 +92,7 @@ async def update_cart_item(
     item_id: UUID,
     body: CartItemUpdate,
     user: OptionalUser,
-    cart_service: CartService = Depends(get_cart_service),
+    cart_service: Annotated[CartService, Depends(get_cart_service)],
 ):
     """Update a cart item's quantity or customizations."""
     customizations = (
@@ -109,7 +110,7 @@ async def update_cart_item(
 async def remove_cart_item(
     item_id: UUID,
     user: OptionalUser,
-    cart_service: CartService = Depends(get_cart_service),
+    cart_service: Annotated[CartService, Depends(get_cart_service)],
 ):
     """Remove an item from the cart."""
     await cart_service.remove_item(item_id)
@@ -119,7 +120,7 @@ async def remove_cart_item(
 async def clear_cart(
     request: Request,
     user: OptionalUser,
-    cart_service: CartService = Depends(get_cart_service),
+    cart_service: Annotated[CartService, Depends(get_cart_service)],
 ):
     """Clear all items from the cart."""
     user_id = user.id if user else None
@@ -140,7 +141,7 @@ async def apply_promo(
     request: Request,
     body: PromoApplyRequest,
     user: OptionalUser,
-    cart_service: CartService = Depends(get_cart_service),
+    cart_service: Annotated[CartService, Depends(get_cart_service)],
 ):
     """Apply a promo code to the cart."""
     user_id = user.id if user else None
@@ -166,7 +167,7 @@ async def apply_promo(
 async def checkout(
     body: CheckoutRequest,
     user: CurrentUser,
-    order_service: OrderService = Depends(get_order_service),
+    order_service: Annotated[OrderService, Depends(get_order_service)],
 ):
     """Checkout the current cart and create an order."""
     order = await order_service.checkout(
@@ -183,10 +184,10 @@ async def checkout(
 @router.get("/orders", response_model=OrderListResponse)
 async def list_orders(
     user: CurrentUser,
+    order_service: Annotated[OrderService, Depends(get_order_service)],
     page: int = Query(1, ge=1),
     per_page: int = Query(20, ge=1, le=100),
     status: str | None = Query(None),
-    order_service: OrderService = Depends(get_order_service),
 ):
     """List orders for the current user."""
     orders, total = await order_service.list_orders(
@@ -203,7 +204,7 @@ async def list_orders(
 async def get_order(
     order_id: UUID,
     user: CurrentUser,
-    order_service: OrderService = Depends(get_order_service),
+    order_service: Annotated[OrderService, Depends(get_order_service)],
 ):
     """Get a single order by ID."""
     return await order_service.get_order(order_id)
@@ -214,7 +215,7 @@ async def update_order_status(
     order_id: UUID,
     body: OrderStatusUpdateRequest,
     current_user: SuperUser,
-    order_service: OrderService = Depends(get_order_service),
+    order_service: Annotated[OrderService, Depends(get_order_service)],
 ):
     """Update order status (admin/manager only)."""
     return await order_service.update_status(
@@ -230,7 +231,7 @@ async def cancel_order(
     order_id: UUID,
     body: OrderCancelRequest,
     user: CurrentUser,
-    order_service: OrderService = Depends(get_order_service),
+    order_service: Annotated[OrderService, Depends(get_order_service)],
 ):
     """Cancel an order."""
     return await order_service.cancel_order(

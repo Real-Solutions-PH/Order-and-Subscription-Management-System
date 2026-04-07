@@ -1,5 +1,6 @@
 """API routes for the Product Catalog module."""
 
+from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query
@@ -22,6 +23,7 @@ from app.modules.product_catalog.schemas import (
     ProductVariantCreate,
     ProductVariantResponse,
 )
+from app.modules.product_catalog.services import CatalogService, ProductService
 from app.shared.auth import CurrentUser, OptionalUser, SuperUser
 
 router = APIRouter(tags=["Product Catalog"])
@@ -34,7 +36,7 @@ router = APIRouter(tags=["Product Catalog"])
 async def create_product(
     data: ProductCreate,
     current_user: SuperUser,
-    product_service=Depends(get_product_service),
+    product_service: Annotated[ProductService, Depends(get_product_service)],
 ):
     product = await product_service.create_product(current_user.tenant_id, data)
     return product
@@ -42,8 +44,8 @@ async def create_product(
 
 @router.get("/products", response_model=ProductListResponse)
 async def list_products(
+    product_service: Annotated[ProductService, Depends(get_product_service)],
     current_user: OptionalUser = None,
-    product_service=Depends(get_product_service),
     page: int = Query(1, ge=1),
     per_page: int = Query(20, ge=1, le=100),
     status: ProductStatus | None = None,
@@ -68,8 +70,8 @@ async def list_products(
 @router.get("/products/{product_id}", response_model=ProductResponse)
 async def get_product(
     product_id: UUID,
+    product_service: Annotated[ProductService, Depends(get_product_service)],
     current_user: OptionalUser = None,
-    product_service=Depends(get_product_service),
 ):
     return await product_service.get_product(product_id)
 
@@ -79,7 +81,7 @@ async def update_product(
     product_id: UUID,
     data: ProductUpdate,
     current_user: SuperUser,
-    product_service=Depends(get_product_service),
+    product_service: Annotated[ProductService, Depends(get_product_service)],
 ):
     return await product_service.update_product(product_id, data)
 
@@ -88,7 +90,7 @@ async def update_product(
 async def delete_product(
     product_id: UUID,
     current_user: SuperUser,
-    product_service=Depends(get_product_service),
+    product_service: Annotated[ProductService, Depends(get_product_service)],
 ):
     return await product_service.delete_product(product_id)
 
@@ -102,7 +104,7 @@ async def add_variant(
     product_id: UUID,
     data: ProductVariantCreate,
     current_user: SuperUser,
-    product_service=Depends(get_product_service),
+    product_service: Annotated[ProductService, Depends(get_product_service)],
 ):
     return await product_service.add_variant(product_id, data)
 
@@ -116,7 +118,7 @@ async def add_image(
     product_id: UUID,
     data: ProductImageCreate,
     current_user: SuperUser,
-    product_service=Depends(get_product_service),
+    product_service: Annotated[ProductService, Depends(get_product_service)],
 ):
     return await product_service.add_image(product_id, data)
 
@@ -128,15 +130,15 @@ async def add_image(
 async def create_catalog(
     data: CatalogCreate,
     current_user: SuperUser,
-    catalog_service=Depends(get_catalog_service),
+    catalog_service: Annotated[CatalogService, Depends(get_catalog_service)],
 ):
     return await catalog_service.create_catalog(current_user.tenant_id, data)
 
 
 @router.get("/catalogs/active", response_model=CatalogResponse)
 async def get_active_catalog(
+    catalog_service: Annotated[CatalogService, Depends(get_catalog_service)],
     current_user: OptionalUser = None,
-    catalog_service=Depends(get_catalog_service),
     tenant_id: UUID | None = None,
 ):
     resolved_tenant_id = (
@@ -152,7 +154,7 @@ async def get_active_catalog(
 async def get_catalog(
     catalog_id: UUID,
     current_user: SuperUser,
-    catalog_service=Depends(get_catalog_service),
+    catalog_service: Annotated[CatalogService, Depends(get_catalog_service)],
 ):
     return await catalog_service.get_catalog(catalog_id)
 
@@ -161,7 +163,7 @@ async def get_catalog(
 async def list_catalog_items(
     catalog_id: UUID,
     current_user: SuperUser,
-    catalog_service=Depends(get_catalog_service),
+    catalog_service: Annotated[CatalogService, Depends(get_catalog_service)],
 ):
     catalog = await catalog_service.get_catalog(catalog_id)
     return catalog.items
@@ -176,7 +178,7 @@ async def add_catalog_item(
     catalog_id: UUID,
     data: CatalogItemAdd,
     current_user: SuperUser,
-    catalog_service=Depends(get_catalog_service),
+    catalog_service: Annotated[CatalogService, Depends(get_catalog_service)],
 ):
     return await catalog_service.add_catalog_item(catalog_id, data)
 
@@ -185,7 +187,7 @@ async def add_catalog_item(
 async def publish_catalog(
     catalog_id: UUID,
     current_user: SuperUser,
-    catalog_service=Depends(get_catalog_service),
+    catalog_service: Annotated[CatalogService, Depends(get_catalog_service)],
 ):
     return await catalog_service.publish_catalog(catalog_id)
 
@@ -199,6 +201,6 @@ async def schedule_catalog(
     catalog_id: UUID,
     data: CatalogScheduleCreate,
     current_user: SuperUser,
-    catalog_service=Depends(get_catalog_service),
+    catalog_service: Annotated[CatalogService, Depends(get_catalog_service)],
 ):
     return await catalog_service.schedule_catalog(catalog_id, data)
