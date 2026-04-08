@@ -150,7 +150,8 @@ export default function NotificationBell({
                     }}
                   >
                     <div
-                      className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${style.iconColorClass} ${style.iconBgClass}`}
+                      className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full"
+                      style={{ color: style.iconColor, backgroundColor: style.bg }}
                     >
                       <Icon size={14} />
                     </div>
@@ -173,7 +174,8 @@ export default function NotificationBell({
                         e.stopPropagation();
                         onActionClick?.(alert);
                       }}
-                      className={`mt-0.5 shrink-0 rounded-md px-2.5 py-1 text-[11px] font-medium text-white transition-opacity hover:opacity-80 ${style.actionBgClass}`}
+                      className="mt-0.5 shrink-0 rounded-md px-2.5 py-1 text-[11px] font-medium text-white transition-opacity hover:opacity-80"
+                      style={{ backgroundColor: style.actionBg }}
                     >
                       {alert.action}
                     </button>

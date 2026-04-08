@@ -122,6 +122,20 @@ function getCohortTextClass(value: number | undefined): string {
   return "text-surface-white";
 }
 
+function getCohortColor(value: number): string {
+  if (value >= 90) return "#059669";
+  if (value >= 75) return "#10B981";
+  if (value >= 60) return "#34D399";
+  if (value >= 45) return "#F4A261";
+  if (value >= 30) return "#E76F51";
+  return "#DC2626";
+}
+
+function getCohortTextColor(value: number): string {
+  if (value >= 60) return "#FFFFFF";
+  return "#FFFFFF";
+}
+
 const cohortColumns = ["m1", "m2", "m3", "m4", "m5", "m6"] as const;
 
 const renderCustomLabel = ({ cx, cy }: { cx: number; cy: number }) => {
