@@ -47,6 +47,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
 import StatusBadge from "@/components/StatusBadge";
 import Modal from "@/components/Modal";
 
@@ -155,13 +159,14 @@ export default function DashboardPage() {
                   >
                     Profile & Preferences
                   </h2>
-                  <button
+                  <Button
                     onClick={() => setProfileModalOpen(true)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:shadow-md"
+                    size="sm"
+                    className="flex items-center gap-1.5 hover:shadow-md"
                     style={{ backgroundColor: "#1B4332", color: "#FFFFFF" }}
                   >
                     <Pencil size={12} /> Edit Profile
-                  </button>
+                  </Button>
                 </div>
 
                 {/* User Info Summary */}
@@ -346,16 +351,9 @@ export default function DashboardPage() {
                       {userDietary.length > 0 ? (
                         <div className="flex flex-wrap gap-1.5">
                           {userDietary.map((pref) => (
-                            <span
-                              key={pref}
-                              className="px-2.5 py-0.5 rounded-full text-xs font-medium"
-                              style={{
-                                backgroundColor: "#D1FAE5",
-                                color: "#065F46",
-                              }}
-                            >
+                            <Badge key={pref} variant="success">
                               {pref}
-                            </span>
+                            </Badge>
                           ))}
                         </div>
                       ) : (
@@ -380,16 +378,9 @@ export default function DashboardPage() {
                       {userAllergens.length > 0 ? (
                         <div className="flex flex-wrap gap-1.5">
                           {userAllergens.map((allergen) => (
-                            <span
-                              key={allergen}
-                              className="px-2.5 py-0.5 rounded-full text-xs font-medium"
-                              style={{
-                                backgroundColor: "#FEF3C7",
-                                color: "#92400E",
-                              }}
-                            >
+                            <Badge key={allergen} variant="warning">
                               {allergen}
-                            </span>
+                            </Badge>
                           ))}
                         </div>
                       ) : (
@@ -474,15 +465,15 @@ export default function DashboardPage() {
                             {row.label}
                           </td>
                           <td className="py-2 text-center">
-                            <ToggleSwitch
+                            <Switch
                               checked={notifications[row.emailKey]}
-                              onChange={() => toggleNotification(row.emailKey)}
+                              onCheckedChange={() => toggleNotification(row.emailKey)}
                             />
                           </td>
                           <td className="py-2 text-center">
-                            <ToggleSwitch
+                            <Switch
                               checked={notifications[row.smsKey]}
-                              onChange={() => toggleNotification(row.smsKey)}
+                              onCheckedChange={() => toggleNotification(row.smsKey)}
                             />
                           </td>
                         </tr>
@@ -746,13 +737,15 @@ export default function DashboardPage() {
                 >
                   Meals for Next Delivery
                 </h2>
-                <button
+                <Button
                   onClick={() => setEditMealsModalOpen(true)}
-                  className="text-sm font-medium flex items-center gap-1"
+                  variant="ghost"
+                  size="sm"
+                  className="flex items-center gap-1 px-0"
                   style={{ color: "#1B4332" }}
                 >
                   Edit Selection <ChevronRight size={16} />
-                </button>
+                </Button>
               </div>
               <div
                 className="flex gap-3 overflow-x-auto pb-1"
@@ -884,15 +877,17 @@ export default function DashboardPage() {
                                 <StatusBadge status={order.status} size="sm" />
                               </td>
                               <td className="py-2 px-2">
-                                <button
+                                <Button
                                   onClick={() =>
                                     showToast("Items added to cart", "success")
                                   }
-                                  className="flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-lg transition-colors hover:bg-gray-100"
+                                  variant="ghost"
+                                  size="sm"
+                                  className="flex items-center gap-1"
                                   style={{ color: "#1B4332" }}
                                 >
                                   <RefreshCw size={12} /> Reorder
-                                </button>
+                                </Button>
                               </td>
                             </tr>
                           ),
@@ -921,23 +916,23 @@ export default function DashboardPage() {
               applied to your next active week.
             </p>
             <div className="flex gap-3 pt-2">
-              <button
+              <Button
                 onClick={() => setSkipModalOpen(false)}
-                className="flex-1 px-4 py-2.5 rounded-xl font-medium transition-colors hover:bg-gray-100"
-                style={{ border: "1px solid #E5E7EB", color: "#1A1A2E" }}
+                variant="outline"
+                className="flex-1"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={() => {
                   setSkipModalOpen(false);
                   showToast("Week of April 7 skipped successfully", "success");
                 }}
-                className="flex-1 px-4 py-2.5 rounded-xl font-medium text-white transition-colors hover:opacity-90"
-                style={{ backgroundColor: "#D97706" }}
+                variant="warning"
+                className="flex-1"
               >
                 Skip Week
-              </button>
+              </Button>
             </div>
           </div>
         </Modal>
@@ -1012,26 +1007,6 @@ export default function DashboardPage() {
   );
 }
 
-/* Toggle Switch Component */
-function ToggleSwitch({
-  checked,
-  onChange,
-}: {
-  checked: boolean;
-  onChange: () => void;
-}) {
-  return (
-    <button
-      onClick={onChange}
-      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${checked ? "bg-success" : "bg-gray-300"}`}
-    >
-      <span
-        className="inline-block h-4 w-4 rounded-full bg-white transition-transform"
-        style={{ transform: checked ? "translateX(24px)" : "translateX(4px)" }}
-      />
-    </button>
-  );
-}
 
 /* Pause Subscription Content */
 function PauseSubscriptionContent({
@@ -1078,17 +1053,18 @@ function PauseSubscriptionContent({
       {/* Preset buttons */}
       <div className="flex gap-2">
         {presets.map((preset) => (
-          <button
+          <Button
             key={preset.days}
             onClick={() => setPauseDays(preset.days)}
-            className={`flex-1 px-3 py-2.5 rounded-xl text-sm font-medium transition-all border-2 ${
+            variant="outline"
+            className={`flex-1 border-2 ${
               pauseDays === preset.days
                 ? "border-primary bg-green-50 text-primary"
-                : "border-border bg-surface-white text-text-secondary"
+                : "border-border"
             }`}
           >
             {preset.label}
-          </button>
+          </Button>
         ))}
       </div>
 
@@ -1098,26 +1074,29 @@ function PauseSubscriptionContent({
           Or enter a custom number of days
         </label>
         <div className="flex items-center gap-3">
-          <button
+          <Button
             onClick={() => setPauseDays(Math.max(1, pauseDays - 1))}
-            className="w-9 h-9 rounded-lg flex items-center justify-center font-bold text-lg transition-all hover:opacity-80 bg-border text-gray-700"
+            size="icon"
+            variant="outline"
+            className="font-bold text-lg"
           >
             −
-          </button>
-          <input
+          </Button>
+          <Input
             type="number"
             min={1}
             max={90}
             value={pauseDays}
             onChange={(e) => handleDaysChange(e.target.value)}
-            className="w-20 text-center text-lg font-semibold rounded-lg py-1.5 outline-none transition-colors border-2 border-primary text-primary bg-surface-white"
+            className="w-20 text-center text-lg font-semibold py-1.5 border-2 border-primary text-primary"
           />
-          <button
+          <Button
             onClick={() => setPauseDays(Math.min(90, pauseDays + 1))}
-            className="w-9 h-9 rounded-lg flex items-center justify-center font-bold text-lg transition-all hover:opacity-80 bg-primary text-surface-white"
+            size="icon"
+            className="font-bold text-lg"
           >
             +
-          </button>
+          </Button>
           <span className="text-sm font-medium text-text-secondary">
             day{pauseDays !== 1 ? "s" : ""}
           </span>
@@ -1134,13 +1113,10 @@ function PauseSubscriptionContent({
         </p>
       </div>
       <div className="flex gap-3 pt-2">
-        <button
-          onClick={onClose}
-          className="flex-1 px-4 py-2.5 rounded-xl font-medium transition-colors hover:bg-gray-100 border border-border text-text-primary"
-        >
+        <Button onClick={onClose} variant="outline" className="flex-1">
           Cancel
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={() => {
             onClose();
             showToast(
@@ -1148,10 +1124,11 @@ function PauseSubscriptionContent({
               "success",
             );
           }}
-          className="flex-1 px-4 py-2.5 rounded-xl font-medium text-white transition-colors hover:opacity-90 bg-warning"
+          variant="warning"
+          className="flex-1"
         >
           Pause Subscription
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -1187,19 +1164,20 @@ function ChangePlanContent({
             const isCurrent = tier.id === 10;
             const diff = tier.price - 4500;
             return (
-              <button
+              <Button
                 key={tier.id}
                 onClick={() => setSelectedPlan(tier.id)}
-                className={`relative rounded-xl p-4 text-left transition-all border-2 ${
+                variant="outline"
+                className={`relative h-auto p-4 text-left flex-col items-start border-2 ${
                   isSelected
                     ? "border-primary bg-green-50"
-                    : "border-border bg-surface-white"
+                    : "border-border"
                 }`}
               >
                 {isCurrent && (
-                  <span className="absolute -top-2.5 left-3 px-2 py-0.5 text-xs font-semibold rounded-full bg-primary text-surface-white">
+                  <Badge className="absolute -top-2.5 left-3 bg-primary text-white">
                     Current
-                  </span>
+                  </Badge>
                 )}
                 <p className="font-bold text-lg text-text-primary">
                   {tier.meals} meals
@@ -1216,7 +1194,7 @@ function ChangePlanContent({
                     {formatPeso(Math.abs(diff))}/mo
                   </p>
                 )}
-              </button>
+              </Button>
             );
           },
         )}
@@ -1230,13 +1208,10 @@ function ChangePlanContent({
         </div>
       )}
       <div className="flex gap-3 pt-2">
-        <button
-          onClick={onClose}
-          className="flex-1 px-4 py-2.5 rounded-xl font-medium transition-colors hover:bg-gray-100 border border-border text-text-primary"
-        >
+        <Button onClick={onClose} variant="outline" className="flex-1">
           Cancel
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={() => {
             onClose();
             if (selectedPlan !== 10) {
@@ -1246,10 +1221,10 @@ function ChangePlanContent({
               );
             }
           }}
-          className="flex-1 px-4 py-2.5 rounded-xl font-medium text-white transition-colors hover:opacity-90 bg-primary"
+          className="flex-1"
         >
           Confirm Change
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -1329,11 +1304,10 @@ function EditProfileModalContent({
             <label className="block text-xs font-medium mb-1 text-text-secondary">
               Full Name
             </label>
-            <input
+            <Input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-3 py-2 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-600 transition-shadow bg-surface-white border border-border text-text-primary"
             />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -1341,22 +1315,20 @@ function EditProfileModalContent({
               <label className="block text-xs font-medium mb-1 flex items-center gap-1 text-text-secondary">
                 <Mail size={12} /> Email
               </label>
-              <input
+              <Input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-600 transition-shadow bg-surface-white border border-border text-text-primary"
               />
             </div>
             <div>
               <label className="block text-xs font-medium mb-1 flex items-center gap-1 text-text-secondary">
                 <Phone size={12} /> Phone
               </label>
-              <input
+              <Input
                 type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-600 transition-shadow bg-surface-white border border-border text-text-primary"
               />
             </div>
           </div>
@@ -1371,12 +1343,7 @@ function EditProfileModalContent({
             <Lock size={10} /> Coming Soon
           </span>
         </h3>
-        <input
-          type="text"
-          value={customers[0].address}
-          disabled
-          className="w-full px-3 py-2 rounded-xl text-sm bg-gray-50 border border-border text-text-tertiary cursor-not-allowed"
-        />
+        <Input type="text" value={customers[0].address} disabled />
         <p className="text-[10px] mt-1.5 italic text-text-tertiary">
           Address editing will be available in a future update.
         </p>
@@ -1390,12 +1357,7 @@ function EditProfileModalContent({
             <Lock size={10} /> Coming Soon
           </span>
         </h3>
-        <input
-          type="text"
-          value="GCash ending in ****4567"
-          disabled
-          className="w-full px-3 py-2 rounded-xl text-sm bg-gray-50 border border-border text-text-tertiary cursor-not-allowed"
-        />
+        <Input type="text" value="GCash ending in ****4567" disabled />
         <p className="text-[10px] mt-1.5 italic text-text-tertiary">
           Payment method management will be available in a future update.
         </p>
@@ -1432,17 +1394,19 @@ function EditProfileModalContent({
           {dietaryFilters.map((pref) => {
             const isSelected = dietary.includes(pref);
             return (
-              <button
+              <Button
                 key={pref}
                 onClick={() => toggleDietary(pref)}
-                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors border ${
+                variant="outline"
+                size="sm"
+                className={`rounded-full border ${
                   isSelected
                     ? "bg-success-light text-emerald-800 border-emerald-500"
-                    : "bg-surface-white text-text-secondary border-border"
+                    : "border-border"
                 }`}
               >
                 {pref}
-              </button>
+              </Button>
             );
           })}
         </div>
@@ -1457,17 +1421,19 @@ function EditProfileModalContent({
           {ALL_ALLERGENS.map((allergen) => {
             const isSelected = allergens.includes(allergen);
             return (
-              <button
+              <Button
                 key={allergen}
                 onClick={() => toggleAllergen(allergen)}
-                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors border ${
+                variant="outline"
+                size="sm"
+                className={`rounded-full border ${
                   isSelected
                     ? "bg-warning-light text-warning-dark border-amber-400"
-                    : "bg-surface-white text-text-secondary border-border"
+                    : "border-border"
                 }`}
               >
                 {allergen}
-              </button>
+              </Button>
             );
           })}
         </div>
@@ -1475,20 +1441,17 @@ function EditProfileModalContent({
 
       {/* Action Buttons */}
       <div className="flex gap-3 pt-4 border-t border-gray-200">
-        <button
-          onClick={onClose}
-          className="flex-1 px-4 py-2.5 rounded-xl font-medium transition-colors hover:bg-gray-100 border border-border text-text-primary"
-        >
+        <Button onClick={onClose} variant="outline" className="flex-1">
           Cancel
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={() =>
             onSave({ name, email, phone, dietary, allergens, favoriteMeal })
           }
-          className="flex-1 px-4 py-2.5 rounded-xl font-medium text-white transition-colors hover:opacity-90 bg-primary"
+          className="flex-1"
         >
           Save Changes
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -1626,27 +1589,29 @@ function EditMealsModalContent({
                   </p>
 
                   <div className="flex items-center gap-2 mt-2">
-                    <button
+                    <Button
                       onClick={() => updateMealQuantity(meal, -1)}
                       disabled={qty === 0}
-                      className={`flex h-7 w-7 items-center justify-center rounded-full transition-colors disabled:opacity-30 ${
+                      size="icon"
+                      className={`h-7 w-7 rounded-full ${
                         qty > 0
-                          ? "bg-primary text-surface-white"
+                          ? "bg-primary text-white"
                           : "bg-border text-text-secondary"
                       }`}
                     >
                       <Minus size={14} />
-                    </button>
+                    </Button>
                     <span className="w-6 text-center text-sm font-bold text-text-primary">
                       {qty}
                     </span>
-                    <button
+                    <Button
                       onClick={() => updateMealQuantity(meal, 1)}
                       disabled={totalMealsSelected >= planMealsLimit}
-                      className="flex h-7 w-7 items-center justify-center rounded-full text-white transition-colors disabled:opacity-30 bg-accent"
+                      size="icon"
+                      className="h-7 w-7 rounded-full bg-accent text-white"
                     >
                       <Plus size={14} />
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -1656,13 +1621,10 @@ function EditMealsModalContent({
       </div>
 
       <div className="flex gap-3 pt-4 border-t border-gray-200 sticky bottom-0 bg-white pb-2 z-10">
-        <button
-          onClick={onClose}
-          className="flex-1 px-4 py-2.5 rounded-xl font-medium transition-colors hover:bg-gray-100 border border-border text-text-primary"
-        >
+        <Button onClick={onClose} variant="outline" className="flex-1">
           Cancel
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={() => {
             if (totalMealsSelected !== planMealsLimit) {
               showToast(
@@ -1675,10 +1637,10 @@ function EditMealsModalContent({
             showToast("Next delivery meals updated successfully", "success");
           }}
           disabled={totalMealsSelected !== planMealsLimit}
-          className="flex-1 px-4 py-2.5 rounded-xl font-medium text-white transition-colors hover:opacity-90 disabled:opacity-50 bg-primary"
+          className="flex-1"
         >
           Save Meals
-        </button>
+        </Button>
       </div>
     </div>
   );
