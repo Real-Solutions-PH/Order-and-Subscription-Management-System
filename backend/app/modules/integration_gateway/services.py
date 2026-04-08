@@ -5,15 +5,10 @@ This module operates entirely backend-to-backend. No frontend-facing API.
 It handles webhook dispatch, audit logging, and integration with external RSPH systems.
 """
 
-import hashlib
-import hmac
-import json
-from datetime import datetime, timezone
 from uuid import UUID
 
 from app.modules.integration_gateway.models import AuditLog, WebhookEvent
 from app.modules.integration_gateway.repo import AuditLogRepo, WebhookRepo
-from app.shared.events import Event, event_bus
 
 
 class WebhookDispatchService:

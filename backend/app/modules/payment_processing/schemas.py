@@ -8,7 +8,6 @@ from pydantic import BaseModel, Field
 
 from app.shared.schemas import BaseSchema, IDTimestampSchema
 
-
 # ── Payment Intent ──────────────────────────────────────────────────────
 
 class PaymentIntentCreate(BaseModel):

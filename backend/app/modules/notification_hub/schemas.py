@@ -11,7 +11,6 @@ from app.modules.notification_hub.models import (
     NotificationStatus,
 )
 
-
 # ── Notification Template ──────────────────────────────────────────────
 
 class NotificationTemplateCreate(BaseModel):

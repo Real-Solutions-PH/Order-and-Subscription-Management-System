@@ -1,16 +1,14 @@
 """Analytics & Reporting domain models."""
 
 import enum
-import uuid
 from datetime import date, datetime
 from decimal import Decimal
 
 from sqlalchemy import Date, DateTime, Enum, Integer, Numeric, String, func
-from sqlalchemy.dialects.postgresql import JSONB, UUID
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.shared.models import Base, TimestampMixin, TenantMixin, UUIDPrimaryKeyMixin
-
+from app.shared.models import Base, TenantMixin, UUIDPrimaryKeyMixin
 
 # ── Enums ───────────────────────────────────────────────────────────────
 

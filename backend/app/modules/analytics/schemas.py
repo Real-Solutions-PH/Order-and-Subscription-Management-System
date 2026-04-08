@@ -3,10 +3,9 @@
 from datetime import date
 from decimal import Decimal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict
 
 from app.shared.schemas import BaseSchema
-
 
 # ── Dashboard ───────────────────────────────────────────────────────────
 

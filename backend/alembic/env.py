@@ -1,24 +1,24 @@
 import asyncio
 from logging.config import fileConfig
 
-from alembic import context
 from sqlalchemy import pool
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
+from alembic import context
 from app.config import get_settings
+from app.modules.analytics.models import *  # noqa: F403
+from app.modules.fulfillment.models import *  # noqa: F403
+from app.modules.iam.models import *  # noqa: F403
+from app.modules.integration_gateway.models import *  # noqa: F403
+from app.modules.notification_hub.models import *  # noqa: F403
+from app.modules.order_management.models import *  # noqa: F403
+from app.modules.payment_processing.models import *  # noqa: F403
+from app.modules.product_catalog.models import *  # noqa: F403
+from app.modules.subscription_engine.models import *  # noqa: F403
+from app.modules.tenant_config.models import *  # noqa: F403
 
 # Import all models so Alembic can detect them
 from app.shared.models import Base
-from app.modules.iam.models import *  # noqa: F403
-from app.modules.tenant_config.models import *  # noqa: F403
-from app.modules.product_catalog.models import *  # noqa: F403
-from app.modules.subscription_engine.models import *  # noqa: F403
-from app.modules.order_management.models import *  # noqa: F403
-from app.modules.payment_processing.models import *  # noqa: F403
-from app.modules.fulfillment.models import *  # noqa: F403
-from app.modules.notification_hub.models import *  # noqa: F403
-from app.modules.analytics.models import *  # noqa: F403
-from app.modules.integration_gateway.models import *  # noqa: F403
 
 config = context.config
 settings = get_settings()

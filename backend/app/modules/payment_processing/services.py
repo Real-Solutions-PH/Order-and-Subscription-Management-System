@@ -16,7 +16,6 @@ from app.modules.payment_processing.models import (
     PaymentMethodType,
     PaymentStatus,
     PaymentTransaction,
-    PromoCodeUsage,
     TransactionStatus,
     TransactionType,
 )

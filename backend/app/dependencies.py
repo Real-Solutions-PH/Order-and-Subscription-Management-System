@@ -32,14 +32,14 @@ def get_user_repo(db: SessionDep):
 # ── IAM Services ─────────────────────────────────────────────────────
 
 def get_auth_service(
-    user_repo: Annotated["UserRepo", Depends(get_user_repo)],
+    user_repo: Annotated[object, Depends(get_user_repo)],
 ):
     from app.modules.iam.services import AuthService
     return AuthService(user_repo)
 
 
 def get_user_service(
-    user_repo: Annotated["UserRepo", Depends(get_user_repo)],
+    user_repo: Annotated[object, Depends(get_user_repo)],
 ):
     from app.modules.iam.services import UserService
     return UserService(user_repo)
@@ -58,14 +58,14 @@ def get_feature_flag_repo(db: SessionDep):
 
 
 def get_config_service(
-    config_repo: Annotated["TenantConfigRepo", Depends(get_tenant_config_repo)],
+    config_repo: Annotated[object, Depends(get_tenant_config_repo)],
 ):
     from app.modules.tenant_config.services import ConfigService
     return ConfigService(config_repo)
 
 
 def get_feature_flag_service(
-    flag_repo: Annotated["FeatureFlagRepo", Depends(get_feature_flag_repo)],
+    flag_repo: Annotated[object, Depends(get_feature_flag_repo)],
 ):
     from app.modules.tenant_config.services import FeatureFlagService
     return FeatureFlagService(flag_repo)
@@ -84,14 +84,14 @@ def get_catalog_repo(db: SessionDep):
 
 
 def get_product_service(
-    product_repo: Annotated["ProductRepo", Depends(get_product_repo)],
+    product_repo: Annotated[object, Depends(get_product_repo)],
 ):
     from app.modules.product_catalog.services import ProductService
     return ProductService(product_repo)
 
 
 def get_catalog_service(
-    catalog_repo: Annotated["CatalogRepo", Depends(get_catalog_repo)],
+    catalog_repo: Annotated[object, Depends(get_catalog_repo)],
 ):
     from app.modules.product_catalog.services import CatalogService
     return CatalogService(catalog_repo)
@@ -110,15 +110,15 @@ def get_subscription_repo(db: SessionDep):
 
 
 def get_subscription_plan_service(
-    plan_repo: Annotated["SubscriptionPlanRepo", Depends(get_subscription_plan_repo)],
+    plan_repo: Annotated[object, Depends(get_subscription_plan_repo)],
 ):
     from app.modules.subscription_engine.services import SubscriptionPlanService
     return SubscriptionPlanService(plan_repo)
 
 
 def get_subscription_service(
-    sub_repo: Annotated["SubscriptionRepo", Depends(get_subscription_repo)],
-    plan_repo: Annotated["SubscriptionPlanRepo", Depends(get_subscription_plan_repo)],
+    sub_repo: Annotated[object, Depends(get_subscription_repo)],
+    plan_repo: Annotated[object, Depends(get_subscription_plan_repo)],
 ):
     from app.modules.subscription_engine.services import SubscriptionService
     return SubscriptionService(sub_repo, plan_repo)
@@ -137,15 +137,15 @@ def get_order_repo(db: SessionDep):
 
 
 def get_cart_service(
-    cart_repo: Annotated["CartRepo", Depends(get_cart_repo)],
+    cart_repo: Annotated[object, Depends(get_cart_repo)],
 ):
     from app.modules.order_management.services import CartService
     return CartService(cart_repo)
 
 
 def get_order_service(
-    order_repo: Annotated["OrderRepo", Depends(get_order_repo)],
-    cart_repo: Annotated["CartRepo", Depends(get_cart_repo)],
+    order_repo: Annotated[object, Depends(get_order_repo)],
+    cart_repo: Annotated[object, Depends(get_cart_repo)],
 ):
     from app.modules.order_management.services import OrderService
     return OrderService(order_repo, cart_repo)
@@ -169,21 +169,21 @@ def get_invoice_repo(db: SessionDep):
 
 
 def get_payment_service(
-    payment_repo: Annotated["PaymentRepo", Depends(get_payment_repo)],
+    payment_repo: Annotated[object, Depends(get_payment_repo)],
 ):
     from app.modules.payment_processing.services import PaymentService
     return PaymentService(payment_repo)
 
 
 def get_promo_code_service(
-    promo_repo: Annotated["PromoCodeRepo", Depends(get_promo_code_repo)],
+    promo_repo: Annotated[object, Depends(get_promo_code_repo)],
 ):
     from app.modules.payment_processing.services import PromoCodeService
     return PromoCodeService(promo_repo)
 
 
 def get_invoice_service(
-    invoice_repo: Annotated["InvoiceRepo", Depends(get_invoice_repo)],
+    invoice_repo: Annotated[object, Depends(get_invoice_repo)],
 ):
     from app.modules.payment_processing.services import InvoiceService
     return InvoiceService(invoice_repo)
@@ -207,21 +207,21 @@ def get_address_repo(db: SessionDep):
 
 
 def get_delivery_zone_service(
-    zone_repo: Annotated["DeliveryZoneRepo", Depends(get_delivery_zone_repo)],
+    zone_repo: Annotated[object, Depends(get_delivery_zone_repo)],
 ):
     from app.modules.fulfillment.services import DeliveryZoneService
     return DeliveryZoneService(zone_repo)
 
 
 def get_fulfillment_service(
-    fulfillment_repo: Annotated["FulfillmentRepo", Depends(get_fulfillment_repo)],
+    fulfillment_repo: Annotated[object, Depends(get_fulfillment_repo)],
 ):
     from app.modules.fulfillment.services import FulfillmentService
     return FulfillmentService(fulfillment_repo)
 
 
 def get_address_service(
-    address_repo: Annotated["AddressRepo", Depends(get_address_repo)],
+    address_repo: Annotated[object, Depends(get_address_repo)],
 ):
     from app.modules.fulfillment.services import AddressService
     return AddressService(address_repo)
@@ -240,8 +240,8 @@ def get_notification_repo(db: SessionDep):
 
 
 def get_notification_service(
-    template_repo: Annotated["NotificationTemplateRepo", Depends(get_notification_template_repo)],
-    notification_repo: Annotated["NotificationRepo", Depends(get_notification_repo)],
+    template_repo: Annotated[object, Depends(get_notification_template_repo)],
+    notification_repo: Annotated[object, Depends(get_notification_repo)],
 ):
     from app.modules.notification_hub.services import NotificationService
     return NotificationService(template_repo, notification_repo)
@@ -255,7 +255,7 @@ def get_analytics_repo(db: SessionDep):
 
 
 def get_analytics_service(
-    analytics_repo: Annotated["AnalyticsRepo", Depends(get_analytics_repo)],
+    analytics_repo: Annotated[object, Depends(get_analytics_repo)],
 ):
     from app.modules.analytics.services import AnalyticsService
     return AnalyticsService(analytics_repo)

@@ -1,10 +1,10 @@
 """Analytics & Reporting repository layer (SQLAlchemy 2.0 async)."""
 
 import uuid
-from datetime import date, datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 
-from sqlalchemy import case, cast, func, select, Date
+from sqlalchemy import Date, cast, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.analytics.models import CohortData, MetricSnapshot

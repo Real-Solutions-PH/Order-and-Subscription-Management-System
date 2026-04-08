@@ -1,14 +1,15 @@
 """init tables
 
 Revision ID: f1fa59f56af0
-Revises: 
+Revises:
 Create Date: 2026-04-07 18:31:55.593581
 """
 from typing import Sequence, Union
 
-from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
+
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = 'f1fa59f56af0'
@@ -110,7 +111,10 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_delivery_zones_tenant_id'), 'delivery_zones', ['tenant_id'], unique=False)
     op.create_table('integration_configs',
-    sa.Column('system_type', sa.Enum('inventory', 'food_costing', 'menu_recipe', 'crm', 'accounting', name='integration_system_type'), nullable=False),
+    sa.Column('system_type', sa.Enum(
+        'inventory', 'food_costing', 'menu_recipe', 'crm', 'accounting',
+        name='integration_system_type',
+    ), nullable=False),
     sa.Column('base_url', sa.String(length=500), nullable=False),
     sa.Column('api_key', sa.String(length=500), nullable=False),
     sa.Column('settings', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
@@ -176,7 +180,11 @@ def upgrade() -> None:
     sa.Column('subscription_id', sa.UUID(), nullable=True),
     sa.Column('subscription_cycle_id', sa.UUID(), nullable=True),
     sa.Column('order_number', sa.String(length=20), nullable=False),
-    sa.Column('status', sa.Enum('pending', 'confirmed', 'processing', 'ready', 'out_for_delivery', 'delivered', 'picked_up', 'cancelled', 'refunded', name='order_status'), nullable=False),
+    sa.Column('status', sa.Enum(
+        'pending', 'confirmed', 'processing', 'ready', 'out_for_delivery',
+        'delivered', 'picked_up', 'cancelled', 'refunded',
+        name='order_status',
+    ), nullable=False),
     sa.Column('order_type', sa.Enum('one_time', 'subscription', 'reorder', name='order_type'), nullable=False),
     sa.Column('subtotal', sa.Numeric(precision=12, scale=2), nullable=False),
     sa.Column('discount_amount', sa.Numeric(precision=12, scale=2), nullable=False),
@@ -205,7 +213,10 @@ def upgrade() -> None:
     op.create_index(op.f('ix_orders_user_id'), 'orders', ['user_id'], unique=False)
     op.create_table('payment_methods',
     sa.Column('user_id', sa.UUID(), nullable=False),
-    sa.Column('type', sa.Enum('card', 'gcash', 'maya', 'grabpay', 'qr_ph', 'otc', 'cod', 'wallet', name='payment_method_type'), nullable=False),
+    sa.Column('type', sa.Enum(
+        'card', 'gcash', 'maya', 'grabpay', 'qr_ph', 'otc', 'cod', 'wallet',
+        name='payment_method_type',
+    ), nullable=False),
     sa.Column('paymongo_method_id', sa.String(length=255), nullable=True),
     sa.Column('last_four', sa.String(length=4), nullable=True),
     sa.Column('display_name', sa.String(length=100), nullable=False),
@@ -227,7 +238,11 @@ def upgrade() -> None:
     sa.Column('payment_method_id', sa.UUID(), nullable=True),
     sa.Column('amount', sa.Numeric(precision=12, scale=2), nullable=False),
     sa.Column('currency', sa.String(length=3), nullable=False),
-    sa.Column('status', sa.Enum('pending', 'awaiting_method', 'awaiting_action', 'processing', 'paid', 'failed', 'refunded', 'partially_refunded', 'pending_collection', name='payment_status'), nullable=False),
+    sa.Column('status', sa.Enum(
+        'pending', 'awaiting_method', 'awaiting_action', 'processing', 'paid',
+        'failed', 'refunded', 'partially_refunded', 'pending_collection',
+        name='payment_status',
+    ), nullable=False),
     sa.Column('payment_channel', sa.Enum('paymongo', 'cod', 'wallet', name='payment_channel'), nullable=False),
     sa.Column('paymongo_intent_id', sa.String(length=255), nullable=True),
     sa.Column('paymongo_payment_id', sa.String(length=255), nullable=True),
@@ -248,7 +263,10 @@ def upgrade() -> None:
     op.create_table('product_attributes',
     sa.Column('name', sa.String(length=100), nullable=False),
     sa.Column('slug', sa.String(length=100), nullable=False),
-    sa.Column('type', sa.Enum('text', 'number', 'boolean', 'select', 'multi_select', name='attributetype'), nullable=False),
+    sa.Column('type', sa.Enum(
+        'text', 'number', 'boolean', 'select', 'multi_select',
+        name='attributetype',
+    ), nullable=False),
     sa.Column('is_filterable', sa.Boolean(), nullable=False),
     sa.Column('is_visible', sa.Boolean(), nullable=False),
     sa.Column('sort_order', sa.Integer(), nullable=False),
@@ -315,7 +333,9 @@ def upgrade() -> None:
     sa.Column('name', sa.String(length=255), nullable=False),
     sa.Column('slug', sa.String(length=255), nullable=False),
     sa.Column('description', sa.Text(), nullable=True),
-    sa.Column('billing_interval', sa.Enum('weekly', 'biweekly', 'monthly', name='billing_interval_enum'), nullable=False),
+    sa.Column('billing_interval', sa.Enum(
+        'weekly', 'biweekly', 'monthly', name='billing_interval_enum',
+    ), nullable=False),
     sa.Column('is_active', sa.Boolean(), nullable=False),
     sa.Column('sort_order', sa.Integer(), nullable=False),
     sa.Column('metadata', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
@@ -410,7 +430,10 @@ def upgrade() -> None:
     sa.Column('recipient', sa.String(length=255), nullable=False),
     sa.Column('subject', sa.String(length=255), nullable=True),
     sa.Column('body', sa.Text(), nullable=False),
-    sa.Column('status', sa.Enum('queued', 'sent', 'delivered', 'failed', 'bounced', name='notificationstatus'), nullable=False),
+    sa.Column('status', sa.Enum(
+        'queued', 'sent', 'delivered', 'failed', 'bounced',
+        name='notificationstatus',
+    ), nullable=False),
     sa.Column('scheduled_for', sa.DateTime(timezone=True), nullable=True),
     sa.Column('sent_at', sa.DateTime(timezone=True), nullable=True),
     sa.Column('id', sa.UUID(), nullable=False),
@@ -447,7 +470,11 @@ def upgrade() -> None:
     )
     op.create_table('payment_transactions',
     sa.Column('payment_id', sa.UUID(), nullable=False),
-    sa.Column('type', sa.Enum('intent_created', 'method_attached', 'awaiting_action', 'paid', 'failed', 'refunded', 'refund_updated', 'cod_collected', name='transaction_type'), nullable=False),
+    sa.Column('type', sa.Enum(
+        'intent_created', 'method_attached', 'awaiting_action', 'paid',
+        'failed', 'refunded', 'refund_updated', 'cod_collected',
+        name='transaction_type',
+    ), nullable=False),
     sa.Column('amount', sa.Numeric(precision=12, scale=2), nullable=False),
     sa.Column('status', sa.Enum('success', 'failed', 'pending', name='transaction_status'), nullable=False),
     sa.Column('paymongo_event_id', sa.String(length=255), nullable=True),
@@ -606,7 +633,10 @@ def upgrade() -> None:
     sa.Column('address_id', sa.UUID(), nullable=True),
     sa.Column('delivery_slot_id', sa.UUID(), nullable=True),
     sa.Column('fulfillment_type', sa.Enum('delivery', 'pickup', name='fulfillment_type'), nullable=False),
-    sa.Column('status', sa.Enum('created', 'in_production', 'packed', 'shipped', 'out_for_delivery', 'delivered', 'picked_up', 'failed', name='fulfillment_status'), nullable=False),
+    sa.Column('status', sa.Enum(
+        'created', 'in_production', 'packed', 'shipped', 'out_for_delivery',
+        'delivered', 'picked_up', 'failed', name='fulfillment_status',
+    ), nullable=False),
     sa.Column('scheduled_date', sa.Date(), nullable=False),
     sa.Column('shipped_at', sa.DateTime(timezone=True), nullable=True),
     sa.Column('delivered_at', sa.DateTime(timezone=True), nullable=True),
@@ -646,7 +676,10 @@ def upgrade() -> None:
     op.create_table('subscriptions',
     sa.Column('user_id', sa.UUID(), nullable=False),
     sa.Column('plan_tier_id', sa.UUID(), nullable=False),
-    sa.Column('status', sa.Enum('created', 'active', 'paused', 'pending_cancel', 'cancelled', name='subscription_status_enum'), nullable=False),
+    sa.Column('status', sa.Enum(
+        'created', 'active', 'paused', 'pending_cancel', 'cancelled',
+        name='subscription_status_enum',
+    ), nullable=False),
     sa.Column('current_cycle_start', sa.DateTime(timezone=True), nullable=False),
     sa.Column('current_cycle_end', sa.DateTime(timezone=True), nullable=False),
     sa.Column('next_billing_date', sa.DateTime(timezone=True), nullable=False),
@@ -671,7 +704,10 @@ def upgrade() -> None:
     sa.Column('starts_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('ends_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('selection_deadline', sa.DateTime(timezone=True), nullable=False),
-    sa.Column('status', sa.Enum('upcoming', 'selection_open', 'selections_locked', 'order_created', 'completed', 'skipped', name='cycle_status_enum'), nullable=False),
+    sa.Column('status', sa.Enum(
+        'upcoming', 'selection_open', 'selections_locked', 'order_created',
+        'completed', 'skipped', name='cycle_status_enum',
+    ), nullable=False),
     sa.Column('order_id', sa.UUID(), nullable=True),
     sa.Column('billed_amount', sa.Numeric(precision=12, scale=2), nullable=True),
     sa.Column('id', sa.UUID(), nullable=False),
@@ -682,7 +718,11 @@ def upgrade() -> None:
     )
     op.create_table('subscription_events',
     sa.Column('subscription_id', sa.UUID(), nullable=False),
-    sa.Column('event_type', sa.Enum('created', 'activated', 'paused', 'resumed', 'modified', 'cancelled', 'renewed', 'skipped', name='subscription_event_type_enum'), nullable=False),
+    sa.Column('event_type', sa.Enum(
+        'created', 'activated', 'paused', 'resumed', 'modified',
+        'cancelled', 'renewed', 'skipped',
+        name='subscription_event_type_enum',
+    ), nullable=False),
     sa.Column('event_data', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
     sa.Column('actor_id', sa.UUID(), nullable=True),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),

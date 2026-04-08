@@ -1,8 +1,7 @@
 from uuid import UUID
 
-from sqlalchemy import func, select, update
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
 
 from app.modules.integration_gateway.models import AuditLog, IntegrationConfig, Webhook, WebhookEvent
 

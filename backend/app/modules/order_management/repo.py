@@ -12,7 +12,6 @@ from app.modules.order_management.models import (
     CartItemCustomization,
     Order,
     OrderItem,
-    OrderItemCustomization,
     OrderStatus,
     OrderStatusHistory,
 )

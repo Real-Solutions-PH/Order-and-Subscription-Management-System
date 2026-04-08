@@ -6,8 +6,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from app.modules.product_catalog.models import AttributeType, CatalogStatus, ProductStatus
-
+from app.modules.product_catalog.models import CatalogStatus, ProductStatus
 
 # ── Product Image ───────────────────────────────────────────────────────
 

@@ -14,7 +14,6 @@ from app.modules.fulfillment.models import (
 )
 from app.modules.fulfillment.repo import AddressRepo, DeliveryZoneRepo, FulfillmentRepo
 
-
 # Valid status transitions
 _STATUS_TRANSITIONS: dict[FulfillmentStatus, set[FulfillmentStatus]] = {
     FulfillmentStatus.CREATED: {FulfillmentStatus.IN_PRODUCTION, FulfillmentStatus.FAILED},

@@ -24,7 +24,7 @@ from app.modules.product_catalog.schemas import (
     ProductVariantResponse,
 )
 from app.modules.product_catalog.services import CatalogService, ProductService
-from app.shared.auth import CurrentUser, OptionalUser, SuperUser
+from app.shared.auth import OptionalUser, SuperUser
 
 router = APIRouter(tags=["Product Catalog"])
 

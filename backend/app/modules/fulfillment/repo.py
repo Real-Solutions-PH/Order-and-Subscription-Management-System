@@ -14,7 +14,7 @@ from app.modules.fulfillment.models import (
     FulfillmentOrder,
     FulfillmentStatus,
 )
-from app.modules.order_management.models import Order, OrderItem
+from app.modules.order_management.models import OrderItem
 
 
 class AddressRepo:
@@ -89,7 +89,6 @@ class DeliveryZoneRepo:
         Expected boundaries format: {"postal_codes": ["1000", "1001", ...]}
         Uses the Postgres @> containment operator.
         """
-        from sqlalchemy import cast, type_coerce
         from sqlalchemy.dialects.postgresql import JSONB as JSONB_TYPE
 
         target = {"postal_codes": [postal_code]}

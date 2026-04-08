@@ -8,8 +8,7 @@ from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, Integer, String, Tex
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.shared.models import Base, TimestampMixin, TenantMixin, UUIDPrimaryKeyMixin
-
+from app.shared.models import Base, TenantMixin, TimestampMixin, UUIDPrimaryKeyMixin
 
 # ── Enums ───────────────────────────────────────────────────────────────
 

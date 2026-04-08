@@ -7,11 +7,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.modules.subscription_engine.models import (
+    Subscription,
     SubscriptionCycle,
     SubscriptionEvent,
     SubscriptionPlan,
     SubscriptionPlanTier,
-    Subscription,
     SubscriptionSelection,
 )
 

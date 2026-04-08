@@ -6,7 +6,6 @@ from pydantic import BaseModel, Field
 
 from app.shared.schemas import BaseSchema
 
-
 # ── Tenant Config ───────────────────────────────────────────────────
 
 

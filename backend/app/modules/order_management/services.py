@@ -18,7 +18,6 @@ from app.modules.order_management.models import (
 )
 from app.modules.order_management.repo import CartRepo, OrderRepo
 
-
 # Valid status transitions: from_status -> set of allowed to_statuses
 _STATUS_TRANSITIONS: dict[OrderStatus, set[OrderStatus]] = {
     OrderStatus.PENDING: {OrderStatus.CONFIRMED, OrderStatus.CANCELLED},

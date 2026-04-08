@@ -18,7 +18,9 @@ class ForbiddenError(HTTPException):
 
 class UnauthorizedError(HTTPException):
     def __init__(self, detail: str = "Not authenticated"):
-        super().__init__(status_code=status.HTTP_401_UNAUTHORIZED, detail=detail, headers={"WWW-Authenticate": "Bearer"})
+        super().__init__(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail=detail, headers={"WWW-Authenticate": "Bearer"}
+        )
 
 
 class BadRequestError(HTTPException):

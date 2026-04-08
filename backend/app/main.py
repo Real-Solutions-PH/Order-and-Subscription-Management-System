@@ -96,15 +96,15 @@ app.add_middleware(
 
 # ── Register module routers ──────────────────────────────────────────
 
+from app.modules.analytics.routes import router as analytics_router  # noqa: E402
+from app.modules.fulfillment.routes import router as fulfillment_router  # noqa: E402
 from app.modules.iam.routes import router as iam_router  # noqa: E402
-from app.modules.tenant_config.routes import router as tenant_config_router  # noqa: E402
-from app.modules.product_catalog.routes import router as product_catalog_router  # noqa: E402
-from app.modules.subscription_engine.routes import router as subscription_router  # noqa: E402
+from app.modules.notification_hub.routes import router as notification_router  # noqa: E402
 from app.modules.order_management.routes import router as order_router  # noqa: E402
 from app.modules.payment_processing.routes import router as payment_router  # noqa: E402
-from app.modules.fulfillment.routes import router as fulfillment_router  # noqa: E402
-from app.modules.notification_hub.routes import router as notification_router  # noqa: E402
-from app.modules.analytics.routes import router as analytics_router  # noqa: E402
+from app.modules.product_catalog.routes import router as product_catalog_router  # noqa: E402
+from app.modules.subscription_engine.routes import router as subscription_router  # noqa: E402
+from app.modules.tenant_config.routes import router as tenant_config_router  # noqa: E402
 
 api_prefix = "/api/v1"
 

@@ -5,7 +5,6 @@ from pydantic import BaseModel, EmailStr
 
 from app.shared.schemas import BaseSchema
 
-
 # ── Auth ─────────────────────────────────────────────────────────────
 
 class RegisterRequest(BaseModel):

@@ -4,10 +4,9 @@ from datetime import datetime
 from decimal import Decimal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, Field
 
 from app.shared.schemas import BaseSchema, IDTimestampSchema
-
 
 # ── Cart Schemas ────────────────────────────────────────────────────────
 
