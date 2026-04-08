@@ -4,7 +4,7 @@ from datetime import datetime
 from decimal import Decimal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app.modules.product_catalog.models import AttributeType, CatalogStatus, ProductStatus
 
@@ -61,6 +61,11 @@ class ProductVariantResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
+    @field_validator("metadata_", mode="before")
+    @classmethod
+    def coerce_metadata(cls, v: object) -> dict | None:
+        return v if isinstance(v, dict) else None
+
 
 # ── Product ─────────────────────────────────────────────────────────────
 
@@ -104,6 +109,11 @@ class ProductResponse(BaseModel):
     images: list[ProductImageResponse] = []
     created_at: datetime
     updated_at: datetime
+
+    @field_validator("metadata_", mode="before")
+    @classmethod
+    def coerce_metadata(cls, v: object) -> dict | None:
+        return v if isinstance(v, dict) else None
 
 
 class ProductListResponse(BaseModel):
