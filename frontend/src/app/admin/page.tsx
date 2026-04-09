@@ -47,11 +47,14 @@ import {
   Line,
 } from "recharts";
 import {
-  orders,
-  analyticsData,
+  orders as mockOrders,
+  analyticsData as mockAnalyticsData,
   formatPeso,
-  customerBehaviorData,
-  demandPlanningData,
+  customerBehaviorData as mockCustomerBehaviorData,
+  demandPlanningData as mockDemandPlanningData,
+  emptyAnalyticsData,
+  emptyCustomerBehaviorData,
+  emptyDemandPlanningData,
 } from "@/lib/mock-data";
 import {
   Tooltip,
@@ -65,6 +68,7 @@ import {
   usePopularItems,
   useCohorts,
   useOrders,
+  useDevMode,
 } from "@/hooks";
 import { SkeletonKPI, SkeletonChart } from "@/components/ui/skeleton";
 
@@ -100,10 +104,7 @@ const retentionMetrics = [
   { label: "Win-back Rate", value: "62%", bar: 62 },
 ];
 
-const totalSubscribers = analyticsData.planDistribution.reduce(
-  (s, p) => s + p.value,
-  0,
-);
+// totalSubscribers is computed inside AdminDashboard using displayAnalytics
 
 function getCohortBgClass(value: number | undefined): string {
   if (value === undefined) return "bg-transparent";
@@ -138,20 +139,7 @@ function getCohortTextColor(value: number): string {
 
 const cohortColumns = ["m1", "m2", "m3", "m4", "m5", "m6"] as const;
 
-const renderCustomLabel = ({ cx, cy }: { cx: number; cy: number }) => {
-  return (
-    <text
-      x={cx}
-      y={cy}
-      textAnchor="middle"
-      dominantBaseline="central"
-      className="fill-text-primary"
-      style={{ fontSize: 20, fontWeight: 700 }}
-    >
-      {totalSubscribers}
-    </text>
-  );
-};
+// renderCustomLabel moved inside AdminDashboard to use displayAnalytics
 
 type Tab = "overview" | "subscriptions" | "operations";
 
@@ -182,6 +170,7 @@ function SortIcon({
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<Tab>("overview");
+  const devMode = useDevMode();
 
   // ─── TanStack Query hooks ───
   const dashboardQuery = useDashboardMetrics();
@@ -190,10 +179,14 @@ export default function AdminDashboard() {
   const cohortsQuery = useCohorts();
   const ordersQuery = useOrders();
 
-  // Merge API data with mock fallback
+  // Base data: use mock data only when dev mode is on, otherwise empty defaults
+  const baseAnalytics = devMode ? mockAnalyticsData : emptyAnalyticsData;
+  const baseOrders = devMode ? mockOrders : [];
+
+  // Merge API data over base (mock or empty)
   const dashMetrics = dashboardQuery.data;
   const displayAnalytics = {
-    ...analyticsData,
+    ...baseAnalytics,
     // Override with API data when available
     ...(dashMetrics
       ? {
@@ -206,8 +199,30 @@ export default function AdminDashboard() {
       : {}),
   };
 
-  // Use API orders when available, fall back to mock
-  const displayOrders = ordersQuery.data?.items ?? orders;
+  // Use API orders when available, fall back to base
+  const displayOrders = ordersQuery.data?.items ?? baseOrders;
+
+  // Behavior & planning data: only show mock when dev mode is on
+  const customerBehaviorData = devMode ? mockCustomerBehaviorData : emptyCustomerBehaviorData;
+  const demandPlanningData = devMode ? mockDemandPlanningData : emptyDemandPlanningData;
+
+  const totalSubscribers = displayAnalytics.planDistribution.reduce(
+    (s: number, p: { value: number }) => s + p.value,
+    0,
+  );
+
+  const renderCustomLabel = ({ cx, cy }: { cx: number; cy: number }) => (
+    <text
+      x={cx}
+      y={cy}
+      textAnchor="middle"
+      dominantBaseline="central"
+      className="fill-text-primary"
+      style={{ fontSize: 20, fontWeight: 700 }}
+    >
+      {totalSubscribers}
+    </text>
+  );
 
   // ─── KPI card definitions (use displayAnalytics) ───
   const overviewKpis = [

@@ -15,7 +15,6 @@ import {
   ShoppingBag,
   ArrowLeft,
   LogIn,
-  User,
   UserPlus,
 } from "lucide-react";
 import {
@@ -33,6 +32,7 @@ import {
   useOrderMutations,
 } from "@/hooks";
 import { Skeleton } from "@/components/ui/skeleton";
+import MealImage from "@/components/MealImage";
 import Link from "next/link";
 import {
   Select,
@@ -69,9 +69,6 @@ export default function CheckoutPage() {
 
   // Auth
   const { isAuthenticated, user, openAuthModal } = useAuthContext();
-
-  // Checkout mode
-  const [checkoutMode, setCheckoutMode] = useState<'guest' | 'account'>('guest');
 
   // Address fields
   const [street, setStreet] = useState("");
@@ -235,103 +232,6 @@ export default function CheckoutPage() {
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:flex lg:gap-8 lg:px-8">
         {/* Left Column: Form Sections */}
         <div className="flex-1 space-y-6">
-          {/* Guest / Account Toggle */}
-          <div
-            className="overflow-hidden rounded-2xl bg-white"
-            style={{ border: '1px solid #E5E7EB' }}
-          >
-            <div className="flex">
-              <button
-                onClick={() => setCheckoutMode('guest')}
-                className="flex flex-1 items-center justify-center gap-2 py-3.5 text-sm font-semibold transition-colors"
-                style={
-                  checkoutMode === 'guest'
-                    ? { backgroundColor: '#1B4332', color: '#FFFFFF' }
-                    : { backgroundColor: '#FFFFFF', color: '#6B7280' }
-                }
-              >
-                <User size={16} />
-                Continue as Guest
-              </button>
-              <button
-                onClick={() => setCheckoutMode('account')}
-                className="flex flex-1 items-center justify-center gap-2 py-3.5 text-sm font-semibold transition-colors"
-                style={
-                  checkoutMode === 'account'
-                    ? { backgroundColor: '#1B4332', color: '#FFFFFF' }
-                    : { backgroundColor: '#FFFFFF', color: '#6B7280' }
-                }
-              >
-                <UserPlus size={16} />
-                Create Account
-              </button>
-            </div>
-          </div>
-
-          {/* Account fields if creating account */}
-          {checkoutMode === 'account' && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              className="rounded-2xl bg-white p-6"
-              style={{ border: '1px solid #E5E7EB' }}
-            >
-              <h2
-                className="mb-4 flex items-center gap-2 text-base font-bold"
-                style={{ color: '#1A1A2E' }}
-              >
-                <UserPlus size={18} style={{ color: '#1B4332' }} />
-                Account Details
-              </h2>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div>
-                  <label className="mb-1 block text-sm font-medium" style={{ color: '#1A1A2E' }}>
-                    Full Name
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Juan dela Cruz"
-                    className="w-full rounded-lg px-4 py-2.5 text-sm outline-none transition-colors focus:ring-2"
-                    style={{ border: '1px solid #E5E7EB', color: '#1A1A2E' }}
-                  />
-                </div>
-                <div>
-                  <label className="mb-1 block text-sm font-medium" style={{ color: '#1A1A2E' }}>
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    placeholder="juan@email.com"
-                    className="w-full rounded-lg px-4 py-2.5 text-sm outline-none transition-colors focus:ring-2"
-                    style={{ border: '1px solid #E5E7EB', color: '#1A1A2E' }}
-                  />
-                </div>
-                <div>
-                  <label className="mb-1 block text-sm font-medium" style={{ color: '#1A1A2E' }}>
-                    Phone
-                  </label>
-                  <input
-                    type="tel"
-                    placeholder="+63 917 123 4567"
-                    className="w-full rounded-lg px-4 py-2.5 text-sm outline-none transition-colors focus:ring-2"
-                    style={{ border: '1px solid #E5E7EB', color: '#1A1A2E' }}
-                  />
-                </div>
-                <div>
-                  <label className="mb-1 block text-sm font-medium" style={{ color: '#1A1A2E' }}>
-                    Password
-                  </label>
-                  <input
-                    type="password"
-                    placeholder="Create a password"
-                    className="w-full rounded-lg px-4 py-2.5 text-sm outline-none transition-colors focus:ring-2"
-                    style={{ border: '1px solid #E5E7EB', color: '#1A1A2E' }}
-                  />
-                </div>
-              </div>
-            </motion.div>
-          )}
-
           {/* A) Order Summary */}
           <div
             className="rounded-2xl bg-white p-6"
@@ -350,8 +250,7 @@ export default function CheckoutPage() {
                   key={item.meal.id}
                   className="flex items-center gap-4 rounded-xl p-3 transition-colors hover:bg-gray-50"
                 >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
+                  <MealImage
                     src={item.meal.image}
                     alt={item.meal.name}
                     className="h-16 w-16 shrink-0 rounded-lg object-cover"
@@ -770,20 +669,48 @@ export default function CheckoutPage() {
             </div>
 
             {/* Place Order CTA */}
-            <motion.button
-              whileHover={{ scale: 1.01 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={handlePlaceOrder}
-              className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-base font-bold text-white transition-opacity hover:opacity-90"
-              style={{ backgroundColor: '#E76F51' }}
-            >
-              <ShoppingBag size={18} />
-              Place Order &middot; {formatPeso(grandTotal)}
-            </motion.button>
+            {isAuthenticated ? (
+              <>
+                <motion.button
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handlePlaceOrder}
+                  className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-base font-bold text-white transition-opacity hover:opacity-90"
+                  style={{ backgroundColor: '#E76F51' }}
+                >
+                  <ShoppingBag size={18} />
+                  Place Order &middot; {formatPeso(grandTotal)}
+                </motion.button>
 
-            <p className="mt-3 text-center text-xs" style={{ color: '#6B7280' }}>
-              By placing your order, you agree to our Terms of Service and Privacy Policy.
-            </p>
+                <p className="mt-3 text-center text-xs" style={{ color: '#6B7280' }}>
+                  By placing your order, you agree to our Terms of Service and Privacy Policy.
+                </p>
+              </>
+            ) : (
+              <div className="mt-6 space-y-3">
+                <p className="text-center text-sm" style={{ color: '#6B7280' }}>
+                  Sign in or create an account to place your order.
+                </p>
+                <motion.button
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => openAuthModal("login")}
+                  className="flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-base font-bold text-white transition-opacity hover:opacity-90"
+                  style={{ backgroundColor: '#E76F51' }}
+                >
+                  <LogIn size={18} />
+                  Sign In to Place Order
+                </motion.button>
+                <button
+                  onClick={() => openAuthModal("register")}
+                  className="flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold transition-colors hover:bg-gray-50"
+                  style={{ color: '#1B4332', border: '2px solid #1B4332' }}
+                >
+                  <UserPlus size={16} />
+                  Create Account
+                </button>
+              </div>
+            )}
 
             {/* Back to menu */}
             <Link

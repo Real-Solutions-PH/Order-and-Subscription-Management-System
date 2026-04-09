@@ -4,6 +4,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { Plus } from "lucide-react";
 import { Meal, formatPeso } from "@/lib/mock-data";
+import MealImage from "@/components/MealImage";
 
 interface MealCardProps {
   meal: Meal;
@@ -24,8 +25,7 @@ export default function MealCard({
     >
       {/* Image */}
       <div className="relative" style={{ aspectRatio: "16/9" }}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <MealImage
           src={meal.image}
           alt={meal.name}
           className="h-full w-full object-cover"

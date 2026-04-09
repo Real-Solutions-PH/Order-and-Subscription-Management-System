@@ -10,8 +10,9 @@ import {
   Package,
   AlertTriangle,
 } from "lucide-react";
-import { orders, meals } from "@/lib/mock-data";
-import { useProductionReport } from "@/hooks";
+import { orders as mockOrders, meals as mockMeals } from "@/lib/mock-data";
+import type { Order, Meal } from "@/lib/mock-data";
+import { useProductionReport, useDevMode } from "@/hooks";
 import { Skeleton, SkeletonRow } from "@/components/ui/skeleton";
 
 const ingredientData = [
@@ -30,8 +31,8 @@ const ingredientData = [
 ];
 
 // Build meal breakdown from today's orders
-function getMealBreakdown(selectedDate: string) {
-  const todayOrders = orders.filter(
+function getMealBreakdown(selectedDate: string, ordersData: Order[], mealsData: Meal[]) {
+  const todayOrders = ordersData.filter(
     (o) => o.deliveryDate === selectedDate && o.status !== "cancelled",
   );
   const mealMap: Record<
@@ -58,7 +59,7 @@ function getMealBreakdown(selectedDate: string) {
   });
 
   return Object.entries(mealMap).map(([mealId, data]) => {
-    const meal = meals.find((m) => m.id === Number(mealId));
+    const meal = mealsData.find((m) => m.id === Number(mealId));
     return {
       ...data,
       mealId: Number(mealId),
@@ -68,8 +69,8 @@ function getMealBreakdown(selectedDate: string) {
   });
 }
 
-function getPackingSlips(selectedDate: string) {
-  return orders.filter(
+function getPackingSlips(selectedDate: string, ordersData: Order[]) {
+  return ordersData.filter(
     (o) => o.deliveryDate === selectedDate && o.status !== "cancelled",
   );
 }
@@ -77,6 +78,10 @@ function getPackingSlips(selectedDate: string) {
 export default function ProductionPage() {
   const [selectedDate, setSelectedDate] = useState("2026-04-01");
   const [expandedMeals, setExpandedMeals] = useState<Set<number>>(new Set());
+  const devMode = useDevMode();
+
+  const orders = devMode ? mockOrders : [];
+  const meals = devMode ? mockMeals : [];
 
   const productionQuery = useProductionReport(selectedDate);
   const isLoadingProduction = productionQuery.isLoading;
@@ -84,8 +89,8 @@ export default function ProductionPage() {
   // If API data is available, use it; otherwise fall back to mock-derived data
   const apiProductionItems = productionQuery.data?.items;
 
-  const mealBreakdown = getMealBreakdown(selectedDate);
-  const packingSlips = getPackingSlips(selectedDate);
+  const mealBreakdown = getMealBreakdown(selectedDate, orders, meals);
+  const packingSlips = getPackingSlips(selectedDate, orders);
 
   const totalMeals = apiProductionItems
     ? apiProductionItems.reduce((s, m) => s + m.quantity, 0)

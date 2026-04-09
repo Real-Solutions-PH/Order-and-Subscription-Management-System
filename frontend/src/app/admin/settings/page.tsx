@@ -15,8 +15,8 @@ import {
   Eye,
 } from "lucide-react";
 import {
-  deliveryZones as initialZones,
-  paymentMethods as initialPaymentMethods,
+  deliveryZones as mockZones,
+  paymentMethods as mockPaymentMethods,
 } from "@/lib/mock-data";
 import Modal from "@/components/Modal";
 import { useToast } from "@/context/ToastContext";
@@ -33,6 +33,7 @@ import {
   useDeliveryZones,
   useNotificationTemplates,
   useNotificationMutations,
+  useDevMode,
 } from "@/hooks";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -157,6 +158,10 @@ const roleOptions = ["Owner", "Kitchen Manager", "Delivery", "Support"];
 export default function SettingsPage() {
   const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState<TabKey>("general");
+  const devMode = useDevMode();
+
+  const initialZones = devMode ? mockZones : [];
+  const initialPaymentMethods = devMode ? mockPaymentMethods : [];
 
   // API hooks
   const tenantQuery = useTenantConfig();

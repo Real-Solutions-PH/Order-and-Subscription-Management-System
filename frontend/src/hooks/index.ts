@@ -43,4 +43,5 @@ export {
   useTenantMutations,
 } from "./useTenant";
 export { useUsers, useUser, useUserMutations } from "./useUsers";
+export { useDevMode } from "./useDevMode";
 export { queryKeys } from "./query-keys";

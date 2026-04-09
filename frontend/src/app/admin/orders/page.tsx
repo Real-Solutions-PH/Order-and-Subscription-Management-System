@@ -20,11 +20,11 @@ import {
   Package,
 } from "lucide-react";
 import Link from "next/link";
-import { orders, customers, formatPeso } from "@/lib/mock-data";
+import { orders as mockOrders, customers as mockCustomers, formatPeso } from "@/lib/mock-data";
 import type { Order } from "@/lib/mock-data";
 import type { OrderResponse } from "@/lib/api-client";
 import StatusBadge from "@/components/StatusBadge";
-import { useOrders, useOrderMutations } from "@/hooks";
+import { useOrders, useOrderMutations, useDevMode } from "@/hooks";
 import { SkeletonRow } from "@/components/ui/skeleton";
 
 type StatusTab =
@@ -98,10 +98,13 @@ export default function OrdersPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [internalNote, setInternalNote] = useState("");
   const [orderNotes, setOrderNotes] = useState<Record<string, string[]>>({});
+  const devMode = useDevMode();
 
   const ordersQuery = useOrders();
   const { updateStatus, isUpdatingStatus } = useOrderMutations();
   const isLoadingOrders = ordersQuery.isLoading;
+  const orders = devMode ? mockOrders : [];
+  const customers = devMode ? mockCustomers : [];
 
   const displayOrders = ordersQuery.data?.items?.map((o: OrderResponse) => ({
     id: o.order_number,

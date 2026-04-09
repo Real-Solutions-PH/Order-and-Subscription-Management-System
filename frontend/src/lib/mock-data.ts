@@ -11,7 +11,7 @@ import seedData from "./seed-data.json";
 // Type definitions (unchanged)
 // ---------------------------------------------------------------------------
 export interface Meal {
-  id: number;
+  id: number | string;
   name: string;
   price: number;
   calories: number;
@@ -113,3 +113,82 @@ export const demandPlanningData = seedData.demandPlanningData;
 export function formatPeso(amount: number): string {
   return `₱${amount.toLocaleString()}`;
 }
+
+// ---------------------------------------------------------------------------
+// Empty defaults — used when dev mode is off and API returns no data.
+// Typed to match the shape of the mock data so components work without errors.
+// ---------------------------------------------------------------------------
+type AnalyticsShape = typeof analyticsData;
+type CustomerBehaviorShape = typeof customerBehaviorData;
+type DemandPlanningShape = typeof demandPlanningData;
+
+export const emptyAnalyticsData: AnalyticsShape = {
+  mrr: 0,
+  mrrLastMonth: 0,
+  activeSubscribers: 0,
+  activeSubscribersLastMonth: 0,
+  churnRate: 0,
+  churnRateLastMonth: 0,
+  avgOrderValue: 0,
+  todayRevenue: 0,
+  todayGrossSales: 0,
+  todayGrossSalesLastMonth: 0,
+  todayNetSales: 0,
+  todayNetSalesLastMonth: 0,
+  todayTotalMeals: 0,
+  todayTotalMealsLastMonth: 0,
+  mostPopularMeal: "—",
+  mostPopularCount: 0,
+  weeklyMealPopularity: [],
+  menuContribution: [],
+  planDistribution: [],
+  cohortRetention: [],
+  avgLTV: 0,
+  cac: 0,
+  cacLastMonth: 0,
+  cacPaybackMonths: 0,
+  cacPaybackMonthsLastMonth: 0,
+  orderFulfillmentRate: 0,
+  orderFulfillmentRateLastMonth: 0,
+  avgPrepTimeMinutes: 0,
+  avgPrepTimeMinutesLastMonth: 0,
+  foodWastePercent: 0,
+  foodWastePercentLastMonth: 0,
+  deliverySuccessRate: 0,
+  deliverySuccessRateLastMonth: 0,
+  fulfillmentTrend: [],
+  revenueData: [],
+  subscriberTrend: [],
+  dailyPrepBreakdown: [],
+  deliveryBreakdown: { onTime: 0, late: 0, failed: 0, returned: 0 },
+};
+
+export const emptyCustomerBehaviorData: CustomerBehaviorShape = {
+  upgradeRate: 0,
+  upgradeRateLastMonth: 0,
+  downgradeRate: 0,
+  downgradeRateLastMonth: 0,
+  pauseRate: 0,
+  pauseRateLastMonth: 0,
+  reactivationRate: 0,
+  reactivationRateLastMonth: 0,
+  npsScore: 0,
+  npsLastMonth: 0,
+  npsPromoters: 0,
+  npsPassives: 0,
+  npsDetractors: 0,
+  planMovement: [],
+  cancelRate: 0,
+  cancelRateLastMonth: 0,
+  subscriberFlow: { pausedRecoverable: 0, cancelledChurned: 0, reactivated: 0 },
+  mealPopularityBySubscribers: [],
+};
+
+export const emptyDemandPlanningData: DemandPlanningShape = {
+  mealsByPlanType: [],
+  forecastAccuracy: 0,
+  demandForecast: [],
+  peakOrderDays: [],
+  peakOrderHours: [],
+  wasteReduction: 0,
+};

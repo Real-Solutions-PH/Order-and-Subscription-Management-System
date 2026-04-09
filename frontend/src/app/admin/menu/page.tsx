@@ -13,12 +13,13 @@ import {
   ChevronUp,
   GripVertical,
 } from "lucide-react";
-import { meals, formatPeso } from "@/lib/mock-data";
+import { meals as mockMeals, formatPeso } from "@/lib/mock-data";
 import type { Meal } from "@/lib/mock-data";
 import Modal from "@/components/Modal";
 import { useToast } from "@/context/ToastContext";
-import { useProducts, useProductMutations } from "@/hooks";
+import { useProducts, useProductMutations, useDevMode } from "@/hooks";
 import { SkeletonMealCard } from "@/components/ui/skeleton";
+import MealImage from "@/components/MealImage";
 import type { ProductResponse } from "@/lib/api-client";
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -57,7 +58,7 @@ const ALL_TAGS = [
   "Halal",
 ];
 
-const initialCalendar: Record<string, number[]> = {
+const initialCalendar: Record<string, (number | string)[]> = {
   Mon: [1, 4, 7],
   Tue: [2, 5, 8],
   Wed: [3, 6, 9],
@@ -145,7 +146,7 @@ function mapProductToMeal(p: ProductResponse): Meal {
   const defaultVariant = p.variants.find((v) => v.is_default) ?? p.variants[0];
   const primaryImage = p.images.find((img) => img.is_primary) ?? p.images[0];
   return {
-    id: typeof meta.legacy_id === "number" ? meta.legacy_id : Number(p.id) || 0,
+    id: typeof meta.legacy_id === "number" ? meta.legacy_id : p.id,
     name: p.name,
     price: defaultVariant ? Number(defaultVariant.price) : 0,
     calories: (meta.calories as number) ?? 0,
@@ -161,23 +162,25 @@ function mapProductToMeal(p: ProductResponse): Meal {
 }
 
 interface DragData {
-  mealId: number;
+  mealId: number | string;
   sourceDay?: string; // undefined if from library
 }
 
 export default function MenuManagementPage() {
   const { showToast } = useToast();
+  const devMode = useDevMode();
 
   const productsQuery = useProducts();
   const { updateProduct, isUpdating } = useProductMutations();
   const isLoadingProducts = productsQuery.isLoading;
 
+  const meals = devMode ? mockMeals : [];
   const apiMeals = productsQuery.data?.items.map(mapProductToMeal);
   const mealsData = apiMeals && apiMeals.length > 0 ? apiMeals : meals;
 
   const [weekOffset, setWeekOffset] = useState(0);
   const [calendar, setCalendar] =
-    useState<Record<string, number[]>>(initialCalendar);
+    useState<Record<string, (number | string)[]>>(initialCalendar);
   const [searchQuery, setSearchQuery] = useState("");
   const [publishModalOpen, setPublishModalOpen] = useState(false);
   const [editingMeal, setEditingMeal] = useState<Meal | null>(null);
@@ -209,13 +212,13 @@ export default function MenuManagementPage() {
   }, [searchQuery, mealsData]);
 
   const getMealById = useCallback(
-    (id: number) => mealsData.find((m) => m.id === id),
+    (id: number | string) => mealsData.find((m) => m.id === id),
     [mealsData],
   );
 
   // --- Drag and Drop ---
   const handleDragStart = useCallback(
-    (e: DragEvent, mealId: number, sourceDay?: string) => {
+    (e: DragEvent, mealId: number | string, sourceDay?: string) => {
       const data: DragData = { mealId, sourceDay };
       e.dataTransfer.setData("application/json", JSON.stringify(data));
       e.dataTransfer.effectAllowed = "move";
@@ -281,7 +284,7 @@ export default function MenuManagementPage() {
   );
 
   // Remove meal from day
-  function handleRemoveFromDay(day: string, mealId: number) {
+  function handleRemoveFromDay(day: string, mealId: number | string) {
     setCalendar((prev) => ({
       ...prev,
       [day]: (prev[day] || []).filter((id) => id !== mealId),
@@ -450,12 +453,10 @@ export default function MenuManagementPage() {
                               onClick={() => openMealEditor(meal)}
                               className="w-full text-left"
                             >
-                              {/* eslint-disable-next-line @next/next/no-img-element */}
-                              <img
+                              <MealImage
                                 src={meal.image}
                                 alt={meal.name}
                                 className="mb-1 h-12 w-full rounded object-cover pointer-events-none"
-                                draggable={false}
                               />
                               <p className="text-xs font-medium leading-tight" style={{ color: '#1A1A2E' }}>
                                 {meal.name.length > 28 ? meal.name.substring(0, 28) + '...' : meal.name}
@@ -530,14 +531,13 @@ export default function MenuManagementPage() {
                   <div className="flex flex-shrink-0 items-center self-center">
                     <GripVertical size={14} style={{ color: '#D1D5DB' }} />
                   </div>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={meal.image}
-                    alt={meal.name}
-                    className="h-12 w-12 flex-shrink-0 rounded object-cover pointer-events-none"
-                    draggable={false}
-                    onClick={() => openMealEditor(meal)}
-                  />
+                  <div onClick={() => openMealEditor(meal)} className="cursor-pointer">
+                    <MealImage
+                      src={meal.image}
+                      alt={meal.name}
+                      className="h-12 w-12 flex-shrink-0 rounded object-cover pointer-events-none"
+                    />
+                  </div>
                   <div className="min-w-0 flex-1">
                     <p
                       className="cursor-pointer truncate text-sm font-medium hover:underline"

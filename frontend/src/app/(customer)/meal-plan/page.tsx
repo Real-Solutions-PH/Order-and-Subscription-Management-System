@@ -7,9 +7,11 @@ import {
   Check,
   ChevronLeft,
   ChevronRight,
+  LogIn,
   Minus,
   Plus,
   Star,
+  UserPlus,
   Zap,
   Clock,
   ShoppingBag,
@@ -17,8 +19,10 @@ import {
 import { meals, planTiers, timeSlots, formatPeso, Meal } from "@/lib/mock-data";
 import { useCart } from "@/context/CartContext";
 import { useToast } from "@/context/ToastContext";
+import { useAuthContext } from "@/context/AuthContext";
 import { useProducts, useSubscriptionPlans } from "@/hooks";
 import { SkeletonMealCard, Skeleton } from "@/components/ui/skeleton";
+import MealImage from "@/components/MealImage";
 import type { ProductResponse } from "@/lib/api-client";
 
 interface SelectedMeal {
@@ -32,7 +36,7 @@ function mapProductToMeal(p: ProductResponse): Meal {
   const defaultVariant = p.variants.find((v) => v.is_default) ?? p.variants[0];
   const primaryImage = p.images.find((img) => img.is_primary) ?? p.images[0];
   return {
-    id: typeof meta.legacy_id === "number" ? meta.legacy_id : 0,
+    id: typeof meta.legacy_id === "number" ? meta.legacy_id : p.id,
     name: p.name,
     price: defaultVariant ? Number(defaultVariant.price) : 0,
     calories: (meta.calories as number) ?? 0,
@@ -60,9 +64,10 @@ export default function MealPlanPage() {
   const [frequency, setFrequency] = useState<"weekly" | "biweekly">("weekly");
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string>("");
-  const [expandedMealId, setExpandedMealId] = useState<number | null>(null);
+  const [expandedMealId, setExpandedMealId] = useState<number | string | null>(null);
   const { addItem } = useCart();
   const { showToast } = useToast();
+  const { isAuthenticated, openAuthModal } = useAuthContext();
 
   const productsQuery = useProducts({ status: "active" });
   const plansQuery = useSubscriptionPlans();
@@ -115,7 +120,7 @@ export default function MealPlanPage() {
     { num: 4, label: "Delivery" },
   ];
 
-  function getMealQuantity(mealId: number) {
+  function getMealQuantity(mealId: number | string) {
     return selectedMeals.find((m) => m.meal.id === mealId)?.quantity || 0;
   }
 
@@ -143,7 +148,7 @@ export default function MealPlanPage() {
     }
   }
 
-  function toggleAddOn(mealId: number, addOn: { name: string; price: number }) {
+  function toggleAddOn(mealId: number | string, addOn: { name: string; price: number }) {
     setSelectedMeals((prev) =>
       prev.map((m) => {
         if (m.meal.id !== mealId) return m;
@@ -452,8 +457,7 @@ export default function MealPlanPage() {
                         )}
 
                         <div className="relative" style={{ aspectRatio: '16/10' }}>
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
+                          <MealImage
                             src={meal.image}
                             alt={meal.name}
                             className="h-full w-full object-cover"
@@ -567,8 +571,7 @@ export default function MealPlanPage() {
                             className="flex w-full items-center justify-between p-4 text-left"
                           >
                             <div className="flex items-center gap-3">
-                              {/* eslint-disable-next-line @next/next/no-img-element */}
-                              <img
+                              <MealImage
                                 src={sm.meal.image}
                                 alt={sm.meal.name}
                                 className="h-12 w-12 rounded-lg object-cover"
@@ -884,18 +887,44 @@ export default function MealPlanPage() {
             {/* Navigation buttons */}
             <div className="mt-6 space-y-3">
               {currentStep === 4 ? (
-                <Link
-                  href="/checkout"
-                  onClick={handleProceedToCheckout}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl py-3 text-base font-semibold text-white transition-opacity hover:opacity-90"
-                  style={{
-                    backgroundColor: canProceed() ? '#E76F51' : '#d1d5db',
-                    pointerEvents: canProceed() ? 'auto' : 'none',
-                  }}
-                >
-                  <ShoppingBag size={18} />
-                  Proceed to Checkout
-                </Link>
+                isAuthenticated ? (
+                  <Link
+                    href="/checkout"
+                    onClick={handleProceedToCheckout}
+                    className="flex w-full items-center justify-center gap-2 rounded-xl py-3 text-base font-semibold text-white transition-opacity hover:opacity-90"
+                    style={{
+                      backgroundColor: canProceed() ? '#E76F51' : '#d1d5db',
+                      pointerEvents: canProceed() ? 'auto' : 'none',
+                    }}
+                  >
+                    <ShoppingBag size={18} />
+                    Proceed to Checkout
+                  </Link>
+                ) : (
+                  <>
+                    <p className="text-center text-sm" style={{ color: '#6B7280' }}>
+                      Sign in or create an account to proceed.
+                    </p>
+                    <button
+                      onClick={() => openAuthModal("login")}
+                      disabled={!canProceed()}
+                      className="flex w-full items-center justify-center gap-2 rounded-xl py-3 text-base font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-40"
+                      style={{ backgroundColor: '#E76F51' }}
+                    >
+                      <LogIn size={18} />
+                      Sign In to Proceed
+                    </button>
+                    <button
+                      onClick={() => openAuthModal("register")}
+                      disabled={!canProceed()}
+                      className="flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold transition-colors hover:bg-gray-50 disabled:opacity-40"
+                      style={{ color: '#1B4332', border: '2px solid #1B4332' }}
+                    >
+                      <UserPlus size={16} />
+                      Create Account
+                    </button>
+                  </>
+                )
               ) : (
                 <button
                   onClick={() => setCurrentStep((prev) => prev + 1)}

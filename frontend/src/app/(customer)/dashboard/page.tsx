@@ -53,6 +53,7 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import StatusBadge from "@/components/StatusBadge";
 import Modal from "@/components/Modal";
+import MealImage from "@/components/MealImage";
 
 // Next delivery meals (first 5 from meals array)
 const nextDeliveryMeals = meals.slice(0, 5);
@@ -757,10 +758,13 @@ export default function DashboardPage() {
                     className="flex-shrink-0 w-32 sm:w-36 rounded-xl overflow-hidden"
                     style={{ border: "1px solid #E5E7EB" }}
                   >
-                    <div
-                      className="h-20 bg-cover bg-center"
-                      style={{ backgroundImage: `url(${meal.image})` }}
-                    />
+                    <div className="h-20 overflow-hidden">
+                      <MealImage
+                        src={meal.image}
+                        alt={meal.name}
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
                     <div className="p-2">
                       <p
                         className="text-xs font-medium leading-tight mb-0.5"
@@ -1574,8 +1578,7 @@ function EditMealsModalContent({
                     : "border-border bg-surface-white"
                 }`}
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <MealImage
                   src={meal.image}
                   alt={meal.name}
                   className="w-16 h-16 rounded-lg object-cover flex-shrink-0"

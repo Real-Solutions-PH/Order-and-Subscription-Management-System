@@ -19,8 +19,8 @@ export interface CartItem {
 interface CartContextType {
   items: CartItem[];
   addItem: (meal: Meal, quantity?: number) => void;
-  removeItem: (mealId: number) => void;
-  updateQuantity: (mealId: number, quantity: number) => void;
+  removeItem: (mealId: number | string) => void;
+  updateQuantity: (mealId: number | string, quantity: number) => void;
   clearCart: () => void;
   total: number;
   itemCount: number;
@@ -60,7 +60,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   );
 
   const removeItem = useCallback(
-    (mealId: number) => {
+    (mealId: number | string) => {
       const item = items.find((i) => i.meal.id === mealId);
       setItems((prev) => prev.filter((i) => i.meal.id !== mealId));
       if (item) {
@@ -71,7 +71,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   );
 
   const updateQuantity = useCallback(
-    (mealId: number, quantity: number) => {
+    (mealId: number | string, quantity: number) => {
       if (quantity <= 0) {
         setItems((prev) => prev.filter((i) => i.meal.id !== mealId));
         serverCart.removeItem(String(mealId)).catch(() => {});

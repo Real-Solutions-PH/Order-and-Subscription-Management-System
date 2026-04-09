@@ -17,7 +17,7 @@ function mapProductToMeal(p: ProductResponse): Meal {
   const defaultVariant = p.variants.find((v) => v.is_default) ?? p.variants[0];
   const primaryImage = p.images.find((img) => img.is_primary) ?? p.images[0];
   return {
-    id: typeof meta.legacy_id === "number" ? meta.legacy_id : Number(p.id) || 0,
+    id: typeof meta.legacy_id === "number" ? meta.legacy_id : p.id,
     name: p.name,
     price: defaultVariant ? Number(defaultVariant.price) : 0,
     calories: (meta.calories as number) ?? 0,
