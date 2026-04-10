@@ -160,7 +160,7 @@ export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<TabKey>("general");
   const devMode = useDevMode();
 
-  const initialZones = devMode ? mockZones : [];
+  const initialZones = useMemo(() => (devMode ? mockZones : []), [devMode]);
   const initialPaymentMethods = devMode ? mockPaymentMethods : [];
 
   // API hooks
@@ -212,7 +212,7 @@ export default function SettingsPage() {
       }));
     }
     return initialZones.map((z, i) => ({ ...z, id: i }));
-  }, [zonesQuery.data]);
+  }, [zonesQuery.data, initialZones]);
   const [zonesOverride, setZonesOverride] = useState<
     typeof initialZonesData | null
   >(null);

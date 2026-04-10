@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import {
   TrendingUp,
@@ -389,7 +389,7 @@ export default function AdminDashboard() {
     direction: "desc",
   });
 
-  const sortedContribution = useMemo(() => {
+  const sortedContribution = (() => {
     const sortableData = [...displayAnalytics.menuContribution];
     sortableData.sort(
       (
@@ -406,7 +406,7 @@ export default function AdminDashboard() {
       },
     );
     return sortableData;
-  }, [sortConfig, displayAnalytics.menuContribution]);
+  })();
 
   const handleSort = (key: SortKey) => {
     setSortConfig((prev) => ({
