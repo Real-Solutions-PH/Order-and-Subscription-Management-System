@@ -20,9 +20,15 @@ security = HTTPBearer(auto_error=False)
 
 # ── Token helpers ────────────────────────────────────────────────────
 
-def create_access_token(subject: str | UUID, expires_delta: timedelta | None = None) -> str:
+def create_access_token(subject: str | UUID, role: str | None = None, expires_delta: timedelta | None = None) -> str:
     expire = datetime.now(timezone.utc) + (expires_delta or timedelta(minutes=settings.access_token_expire_minutes))
-    payload = {"sub": str(subject), "exp": expire, "type": "access"}
+    payload = {
+        "sub": str(subject),
+        "exp": expire,
+        "type": "access",
+        "roles": [role] if role else [],
+        "permissions": [],
+    }
     return jwt.encode(payload, settings.jwt_secret_key, algorithm=settings.jwt_algorithm)
 
 
@@ -85,9 +91,18 @@ async def get_optional_user(
 def get_current_active_superuser(
     current_user: Annotated[object, Depends(get_current_user)],
 ):
-    """Dependency that requires the current user to be a superuser."""
-    if not current_user.is_superuser:
+    """Dependency that requires the current user to be an admin or superadmin."""
+    if current_user.role not in ("admin", "superadmin"):
         raise ForbiddenError("Not enough privileges")
+    return current_user
+
+
+def get_superadmin_user(
+    current_user: Annotated[object, Depends(get_current_user)],
+):
+    """Dependency that requires the current user to be a superadmin."""
+    if current_user.role != "superadmin":
+        raise ForbiddenError("Superadmin access required")
     return current_user
 
 
@@ -95,3 +110,4 @@ def get_current_active_superuser(
 CurrentUser = Annotated[object, Depends(get_current_user)]  # actual User model
 OptionalUser = Annotated[object | None, Depends(get_optional_user)]
 SuperUser = Annotated[object, Depends(get_current_active_superuser)]
+SuperAdminUser = Annotated[object, Depends(get_superadmin_user)]

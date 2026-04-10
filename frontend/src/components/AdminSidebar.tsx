@@ -9,23 +9,29 @@ import {
   ChefHat,
   UtensilsCrossed,
   Users,
+  Shield,
   Settings,
   Menu,
   X,
 } from "lucide-react";
-
-const navItems = [
-  { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
-  { label: "Orders", href: "/admin/orders", icon: ClipboardList },
-  { label: "Production", href: "/admin/production", icon: ChefHat },
-  { label: "Menu", href: "/admin/menu", icon: UtensilsCrossed },
-  { label: "Customers", href: "/admin/customers", icon: Users },
-  { label: "Settings", href: "/admin/settings", icon: Settings },
-];
+import { useAuthContext } from "@/context/AuthContext";
 
 export default function AdminSidebar() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { isSuperAdmin } = useAuthContext();
+
+  const navItems = [
+    { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+    { label: "Orders", href: "/admin/orders", icon: ClipboardList },
+    { label: "Production", href: "/admin/production", icon: ChefHat },
+    { label: "Menu", href: "/admin/menu", icon: UtensilsCrossed },
+    { label: "Customers", href: "/admin/customers", icon: Users },
+    ...(isSuperAdmin
+      ? [{ label: "User Management", href: "/admin/user-management", icon: Shield }]
+      : []),
+    { label: "Settings", href: "/admin/settings", icon: Settings },
+  ];
 
   function isActive(href: string) {
     if (href === "/admin") return pathname === "/admin";

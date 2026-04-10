@@ -43,6 +43,7 @@ class UserResponse(BaseSchema):
     last_name: str
     avatar_url: str | None
     is_active: bool
+    role: str
     is_superuser: bool
     email_verified_at: datetime | None
     last_login_at: datetime | None
@@ -59,8 +60,17 @@ class UserUpdateRequest(BaseModel):
 
 class AdminUserUpdateRequest(UserUpdateRequest):
     is_active: bool | None = None
-    is_superuser: bool | None = None
+    role: str | None = None
     email: EmailStr | None = None
+
+
+class AdminCreateUserRequest(BaseModel):
+    email: EmailStr
+    first_name: str
+    last_name: str
+    phone: str | None = None
+    password: str
+    role: str = "admin"
 
 
 class UserListResponse(BaseSchema):

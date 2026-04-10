@@ -47,8 +47,17 @@ class UserRepo:
         await self.db.execute(update(User).where(User.id == user_id).values(**kwargs))
         return await self.get_by_id(user_id)
 
+    async def delete(self, user_id: UUID) -> bool:
+        user = await self.get_by_id(user_id)
+        if user:
+            await self.db.delete(user)
+            await self.db.flush()
+            return True
+        return False
+
     async def list_by_tenant(
-        self, tenant_id: UUID, offset: int = 0, limit: int = 20, is_active: bool | None = None
+        self, tenant_id: UUID, offset: int = 0, limit: int = 20,
+        is_active: bool | None = None, role: str | None = None,
     ) -> tuple[list[User], int]:
         query = select(User).where(User.tenant_id == tenant_id)
         count_query = select(func.count()).select_from(User).where(User.tenant_id == tenant_id)
@@ -56,6 +65,10 @@ class UserRepo:
         if is_active is not None:
             query = query.where(User.is_active == is_active)
             count_query = count_query.where(User.is_active == is_active)
+
+        if role is not None:
+            query = query.where(User.role == role)
+            count_query = count_query.where(User.role == role)
 
         query = query.offset(offset).limit(limit).order_by(User.created_at.desc())
 

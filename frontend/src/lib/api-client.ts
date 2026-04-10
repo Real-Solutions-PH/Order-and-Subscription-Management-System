@@ -238,6 +238,7 @@ export interface UserResponse {
   avatar_url: string | null;
   is_active: boolean;
   is_superuser: boolean;
+  role: string;
   status: string;
   email_verified_at: string | null;
   last_login_at: string | null;
@@ -249,6 +250,19 @@ export interface UserUpdate {
   last_name?: string;
   phone?: string;
   avatar_url?: string;
+}
+export interface AdminUserUpdate extends UserUpdate {
+  is_active?: boolean;
+  role?: string;
+  email?: string;
+}
+export interface AdminCreateUserRequest {
+  email: string;
+  first_name: string;
+  last_name: string;
+  phone?: string;
+  password: string;
+  role?: string;
 }
 
 // Products
@@ -634,15 +648,21 @@ export const api = {
 
   // Users (admin)
   users: {
-    list: (params?: { page?: number; page_size?: number }) =>
+    list: (params?: { page?: number; page_size?: number; role?: string }) =>
       get<UserListResponse>(
         "/users",
         params as Record<string, string | number>,
       ),
     get: (id: string) => get<UserResponse>(`/users/${id}`),
-    update: (id: string, data: UserUpdate) =>
+    create: (data: AdminCreateUserRequest) =>
+      post<UserResponse>("/users", data),
+    update: (id: string, data: AdminUserUpdate) =>
       patch<UserResponse>(`/users/${id}`, data),
-    deactivate: (id: string) => del<{ message: string }>(`/users/${id}`),
+    activate: (id: string) =>
+      patch<UserResponse>(`/users/${id}`, { is_active: true }),
+    deactivate: (id: string) =>
+      patch<UserResponse>(`/users/${id}`, { is_active: false }),
+    delete: (id: string) => del<{ message: string }>(`/users/${id}`),
   },
 
   // Products

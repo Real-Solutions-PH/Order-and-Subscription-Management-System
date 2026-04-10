@@ -90,7 +90,7 @@ export default function CustomersPage() {
   const devMode = useDevMode();
 
   // TanStack Query hooks
-  const usersQuery = useUsers();
+  const usersQuery = useUsers({ role: "customer" });
   const isLoadingCustomers = usersQuery.isLoading;
   const { sendNotification } = useNotificationMutations();
 

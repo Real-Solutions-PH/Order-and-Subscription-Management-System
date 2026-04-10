@@ -108,7 +108,7 @@ async def _seed_admin_user(session: AsyncSession, tenant_id: uuid.UUID) -> uuid.
             first_name=settings.seed_admin_first_name,
             last_name=settings.seed_admin_last_name,
             is_active=True,
-            is_superuser=True,
+            role="superadmin",
         )
     )
     await session.flush()
@@ -363,18 +363,50 @@ async def _seed_delivery_zones_and_slots(session: AsyncSession, tenant_id: uuid.
 
 
 async def _seed_notification_templates(session: AsyncSession, tenant_id: uuid.UUID) -> None:
-    """Seed email and SMS notification templates from template data."""
-    from app.seed_template_data import NOTIFICATION_TEMPLATES
-
-    channel_map = {
-        "email": NotificationChannel.email,
-        "sms": NotificationChannel.sms,
-        "push": NotificationChannel.push,
-        "whatsapp": NotificationChannel.whatsapp,
-    }
-
-    for t in NOTIFICATION_TEMPLATES:
-        channel = channel_map[t["channel"]]
+    templates = [
+        {
+            "event_type": "order_confirmed",
+            "channel": NotificationChannel.email,
+            "subject": "Order Confirmed — #{{order_number}}",
+            "body_template": (
+                "Hi {{first_name}}, your order #{{order_number}} has been confirmed."
+                " Total: {{currency}} {{total}}."
+            ),
+        },
+        {
+            "event_type": "order_delivered",
+            "channel": NotificationChannel.email,
+            "subject": "Order Delivered — #{{order_number}}",
+            "body_template": "Hi {{first_name}}, your order #{{order_number}} has been delivered. Enjoy your meal!",
+        },
+        {
+            "event_type": "payment_received",
+            "channel": NotificationChannel.email,
+            "subject": "Payment Received",
+            "body_template": "Hi {{first_name}}, we received your payment of {{currency}} {{amount}}. Thank you!",
+        },
+        {
+            "event_type": "subscription_activated",
+            "channel": NotificationChannel.email,
+            "subject": "Subscription Activated",
+            "body_template": (
+                "Hi {{first_name}}, your {{plan_name}} subscription is now activeNext billing: {{next_billing_date}}."
+            ),
+        },
+        {
+            "event_type": "subscription_cancelled",
+            "channel": NotificationChannel.email,
+            "subject": "Subscription Cancelled",
+            "body_template": "Hi {{first_name}}, your subscription has been cancelled. You can resubscribe anytime.",
+        },
+        {
+            "event_type": "order_confirmed",
+            "channel": NotificationChannel.sms,
+            "subject": None,
+            "body_template": "Order #{{order_number}} confirmed. Total: {{currency}} {{total}}.",
+        },
+    ]
+    for t in templates:
         if await _exists(
             session, NotificationTemplate, tenant_id=tenant_id, event_type=t["event_type"], channel=channel
         ):

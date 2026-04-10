@@ -23,6 +23,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   isAdmin: boolean;
+  isSuperAdmin: boolean;
 
   login: ReturnType<typeof useAuth>["login"];
   isLoggingIn: boolean;
@@ -56,7 +57,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [auth.user]);
 
-  const isAdmin = roles.includes("admin") || auth.user?.is_superuser === true;
+  const isAdmin = roles.includes("admin") || roles.includes("superadmin") || auth.user?.is_superuser === true;
+  const isSuperAdmin = roles.includes("superadmin") || auth.user?.role === "superadmin";
 
   const openAuthModal = useCallback((tab: AuthTab = "login") => {
     setAuthModalTab(tab);
@@ -81,6 +83,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isAuthenticated: auth.isAuthenticated,
     isLoading: auth.isLoading,
     isAdmin,
+    isSuperAdmin,
     login: auth.login,
     isLoggingIn: auth.isLoggingIn,
     register: auth.register,

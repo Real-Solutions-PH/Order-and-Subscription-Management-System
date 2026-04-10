@@ -7,6 +7,7 @@ from app.dependencies import get_auth_service, get_tenant_repo, get_user_service
 from app.exceptions import NotFoundError
 from app.modules.iam.repo import TenantRepo
 from app.modules.iam.schemas import (
+    AdminCreateUserRequest,
     AdminUserUpdateRequest,
     LoginRequest,
     RefreshRequest,
@@ -17,7 +18,7 @@ from app.modules.iam.schemas import (
     UserUpdateRequest,
 )
 from app.modules.iam.services import AuthService, UserService
-from app.shared.auth import CurrentUser, SuperUser
+from app.shared.auth import CurrentUser, SuperAdminUser, SuperUser
 
 router = APIRouter(tags=["IAM"])
 
@@ -77,7 +78,7 @@ async def update_me(
     return user
 
 
-# ── Admin Endpoints (superuser only) ────────────────────────────────
+# ── Admin Endpoints (admin or superadmin) ─────────────────────────────
 
 @router.get("/users", response_model=UserListResponse)
 async def list_users(
@@ -86,10 +87,28 @@ async def list_users(
     page: int = Query(1, ge=1),
     per_page: int = Query(20, ge=1, le=100),
     is_active: bool | None = None,
+    role: str | None = None,
 ):
     offset = (page - 1) * per_page
-    users, total = await user_service.list_users(current_user.tenant_id, offset, per_page, is_active)
+    users, total = await user_service.list_users(current_user.tenant_id, offset, per_page, is_active, role)
     return UserListResponse(total=total, page=page, per_page=per_page, items=users)
+
+
+@router.post("/users", response_model=UserResponse, status_code=201)
+async def create_user(
+    data: AdminCreateUserRequest,
+    current_user: SuperAdminUser,
+    user_service: Annotated[UserService, Depends(get_user_service)],
+):
+    return await user_service.create_user(
+        tenant_id=current_user.tenant_id,
+        email=data.email,
+        first_name=data.first_name,
+        last_name=data.last_name,
+        password=data.password,
+        role=data.role,
+        phone=data.phone,
+    )
 
 
 @router.get("/users/{user_id}", response_model=UserResponse)
@@ -111,10 +130,11 @@ async def update_user(
     return await user_service.update_profile(user_id, **data.model_dump(exclude_unset=True))
 
 
-@router.delete("/users/{user_id}", response_model=UserResponse)
-async def deactivate_user(
+@router.delete("/users/{user_id}")
+async def delete_user(
     user_id: UUID,
-    current_user: SuperUser,
+    current_user: SuperAdminUser,
     user_service: Annotated[UserService, Depends(get_user_service)],
 ):
-    return await user_service.deactivate(user_id)
+    await user_service.delete_user(user_id)
+    return {"message": "User permanently deleted"}
