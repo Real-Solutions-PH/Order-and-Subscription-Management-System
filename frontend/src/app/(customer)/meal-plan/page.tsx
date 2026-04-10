@@ -20,7 +20,7 @@ import { meals, planTiers, timeSlots, formatPeso, Meal } from "@/lib/mock-data";
 import { useCart } from "@/context/CartContext";
 import { useToast } from "@/context/ToastContext";
 import { useAuthContext } from "@/context/AuthContext";
-import { useProducts, useSubscriptionPlans } from "@/hooks";
+import { useProducts, useSubscriptionPlans, useDevMode } from "@/hooks";
 import { SkeletonMealCard, Skeleton } from "@/components/ui/skeleton";
 import MealImage from "@/components/MealImage";
 import type { ProductResponse } from "@/lib/api-client";
@@ -69,12 +69,14 @@ export default function MealPlanPage() {
   const { showToast } = useToast();
   const { isAuthenticated, openAuthModal } = useAuthContext();
 
+  const devMode = useDevMode();
   const productsQuery = useProducts({ status: "active" });
   const plansQuery = useSubscriptionPlans();
 
   const apiMeals = productsQuery.data?.items.map(mapProductToMeal);
-  const mealsData = apiMeals && apiMeals.length > 0 ? apiMeals : meals;
+  const mealsData = apiMeals && apiMeals.length > 0 ? apiMeals : (devMode ? meals : []);
   const isLoadingMeals = productsQuery.isLoading;
+  const displayTimeSlots = devMode ? timeSlots : [];
 
   const displayPlans = plansQuery.data?.length
     ? plansQuery.data.flatMap((plan) =>
@@ -87,7 +89,7 @@ export default function MealPlanPage() {
           label: tier.name,
         })),
       )
-    : planTiers;
+    : (devMode ? planTiers : []);
 
   const selectedPlan = displayPlans.find((p) => p.id === selectedPlanId);
   const totalMealsSelected = selectedMeals.reduce(
@@ -758,7 +760,7 @@ export default function MealPlanPage() {
                     Preferred Time Slot
                   </p>
                   <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                    {timeSlots.map((slot) => {
+                    {displayTimeSlots.map((slot) => {
                       const isSelected = selectedTimeSlot === slot;
                       return (
                         <button

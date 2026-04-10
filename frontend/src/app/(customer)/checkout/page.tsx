@@ -30,6 +30,7 @@ import {
   useDeliveryZones,
   usePaymentMutations,
   useOrderMutations,
+  useDevMode,
 } from "@/hooks";
 import { Skeleton } from "@/components/ui/skeleton";
 import MealImage from "@/components/MealImage";
@@ -48,12 +49,14 @@ export default function CheckoutPage() {
     useCart();
   const { showToast } = useToast();
 
+  const devMode = useDevMode();
+
   // API hooks
   const { data: apiZones, isLoading: isLoadingZones } = useDeliveryZones();
   const { validatePromo } = usePaymentMutations();
   const { checkout } = useOrderMutations();
 
-  // Map API zones to the existing format, fall back to mock data on error/loading
+  // Map API zones to the existing format; only fall back to mock data when DEV_MODE is on
   const deliveryZones = useMemo(() => {
     if (apiZones && Array.isArray(apiZones) && apiZones.length > 0) {
       return apiZones
@@ -64,8 +67,11 @@ export default function CheckoutPage() {
           estimatedTime: z.description ?? "Contact for ETA",
         }));
     }
-    return mockDeliveryZones;
-  }, [apiZones]);
+    return devMode ? mockDeliveryZones : [];
+  }, [apiZones, devMode]);
+
+  const displayTimeSlots = devMode ? timeSlots : [];
+  const displayPaymentMethods = devMode ? paymentMethods : [];
 
   // Auth
   const { isAuthenticated, user, openAuthModal } = useAuthContext();
@@ -460,7 +466,7 @@ export default function CheckoutPage() {
                 Time Slot
               </label>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                {timeSlots.map((slot) => {
+                {displayTimeSlots.map((slot) => {
                   const isSelected = deliveryTimeSlot === slot;
                   return (
                     <button
@@ -505,7 +511,7 @@ export default function CheckoutPage() {
                   <Skeleton className="h-12 w-full rounded-xl" />
                 </>
               ) : (
-                paymentMethods.map((pm) => {
+                displayPaymentMethods.map((pm) => {
                   const isSelected = selectedPayment === pm.id;
                   return (
                     <label

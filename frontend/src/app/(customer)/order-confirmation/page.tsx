@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { orders, formatPeso } from "@/lib/mock-data";
 import { useToast } from "@/context/ToastContext";
-import { useOrders } from "@/hooks";
+import { useOrders, useDevMode } from "@/hooks";
 import { Skeleton } from "@/components/ui/skeleton";
 import RequireAuth from "@/components/RequireAuth";
 
@@ -32,6 +32,7 @@ const timelineSteps = [
 
 export default function OrderConfirmationPage() {
   const { showToast } = useToast();
+  const devMode = useDevMode();
   const [showContent, setShowContent] = useState(false);
 
   const ordersQuery = useOrders({ limit: 1 });
@@ -53,7 +54,7 @@ export default function OrderConfirmationPage() {
         paymentMethod: "",
         address: "",
       }
-    : orders[0];
+    : (devMode ? orders[0] : null);
 
   const order = displayOrder;
 
@@ -82,6 +83,20 @@ export default function OrderConfirmationPage() {
             <Skeleton className="h-8 w-48" />
             <Skeleton className="h-64 w-full rounded-2xl" />
             <Skeleton className="h-32 w-full rounded-2xl" />
+          </div>
+        ) : !order ? (
+          <div className="py-20 text-center">
+            <Package size={64} style={{ color: '#E5E7EB', margin: '0 auto' }} />
+            <p className="mt-4 text-lg font-medium" style={{ color: '#6B7280' }}>
+              No order to display.
+            </p>
+            <Link
+              href="/"
+              className="mt-4 inline-block text-sm font-semibold underline"
+              style={{ color: '#1B4332' }}
+            >
+              Browse Menu
+            </Link>
           </div>
         ) : (
         <>
