@@ -1,3 +1,4 @@
+import enum
 import uuid
 from datetime import datetime
 
@@ -6,6 +7,12 @@ from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.shared.models import Base, TimestampMixin, UUIDPrimaryKeyMixin
+
+
+class UserRole(str, enum.Enum):
+    customer = "customer"
+    admin = "admin"
+    superadmin = "superadmin"
 
 
 class Tenant(UUIDPrimaryKeyMixin, TimestampMixin, Base):
@@ -34,9 +41,18 @@ class User(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     last_name: Mapped[str] = mapped_column(String(100), nullable=False)
     avatar_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
-    is_superuser: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    role: Mapped[str] = mapped_column(
+        Enum("customer", "admin", "superadmin", name="user_role"),
+        default="customer",
+        nullable=False,
+        index=True,
+    )
     email_verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     metadata_: Mapped[dict | None] = mapped_column("metadata", JSONB, nullable=True)
 
     tenant: Mapped["Tenant"] = relationship(back_populates="users", lazy="selectin")
+
+    @property
+    def is_superuser(self) -> bool:
+        return self.role == UserRole.superadmin

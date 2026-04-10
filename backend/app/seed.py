@@ -80,7 +80,7 @@ async def _seed_admin_user(session: AsyncSession, tenant_id: uuid.UUID) -> uuid.
             first_name=settings.seed_admin_first_name,
             last_name=settings.seed_admin_last_name,
             is_active=True,
-            is_superuser=True,
+            role="superadmin",
         )
     )
     await session.flush()
@@ -388,7 +388,10 @@ async def _seed_notification_templates(session: AsyncSession, tenant_id: uuid.UU
             "event_type": "order_confirmed",
             "channel": NotificationChannel.email,
             "subject": "Order Confirmed — #{{order_number}}",
-            "body_template": "Hi {{first_name}}, your order #{{order_number}} has been confirmed. Total: {{currency}} {{total}}.",
+            "body_template": (
+                "Hi {{first_name}}, your order #{{order_number}} has been confirmed."
+                " Total: {{currency}} {{total}}."
+            ),
         },
         {
             "event_type": "order_delivered",
