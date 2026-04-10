@@ -93,8 +93,8 @@ export default function CustomersPage() {
   const { sendNotification } = useNotificationMutations();
 
   // Map API users to Customer format, falling back to mock data
-  const displayCustomers: Customer[] = usersQuery.data?.items?.map((u: UserResponse) => ({
-    id: 0,
+  const displayCustomers: Customer[] = usersQuery.data?.items?.map((u: UserResponse, index: number) => ({
+    id: index + 1,
     name: `${u.first_name} ${u.last_name}`,
     email: u.email,
     phone: u.phone ?? '',
