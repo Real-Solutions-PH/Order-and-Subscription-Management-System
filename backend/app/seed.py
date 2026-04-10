@@ -1,7 +1,30 @@
-"""Prepopulate the database with required seed data if it doesn't already exist."""
+"""
+Database seeding module.
+
+This module provides idempotent database seeding that runs on every application
+startup via the FastAPI lifespan hook in ``main.py``.
+
+Seed data is split into two categories:
+
+**Essential seeds** (always run):
+  - Tenant -- the default tenant record
+  - Admin user -- the superuser account for first login
+  - Tenant config -- business settings (timezone, currency, tax, hours)
+
+**Template seeds** (only when ``SEED_TEMPLATE_DATA=true``):
+  - Product categories, products with variants, and a default catalog
+  - Subscription plans with tiered pricing
+  - Delivery zones with delivery time slots
+  - Notification templates for transactional emails/SMS
+
+Template data definitions live in ``seed_template_data.py`` -- a plain Python
+data file that business owners can customise before their first deployment.
+
+Each seed function checks whether data already exists before inserting,
+making the entire module safe to call repeatedly (idempotent).
+"""
 
 import uuid
-from datetime import time
 from decimal import Decimal
 
 from sqlalchemy import select
@@ -10,9 +33,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.config import get_settings
 from app.database import SessionLocal
 from app.logger import get_logger
-from app.modules.fulfillment.models import DeliverySlot, DeliveryZone
 
-# ── Models ───────────────────────────────────────────────────────────────
+# -- Models ------------------------------------------------------------------
+from app.modules.fulfillment.models import DeliverySlot, DeliveryZone
 from app.modules.iam.models import Tenant, User
 from app.modules.iam.services import get_password_hash
 from app.modules.notification_hub.models import NotificationChannel, NotificationTemplate
@@ -22,6 +45,7 @@ from app.modules.product_catalog.models import (
     CatalogStatus,
     Product,
     ProductCategory,
+    ProductImage,
     ProductStatus,
     ProductVariant,
 )
@@ -36,7 +60,7 @@ logger = get_logger(__name__)
 settings = get_settings()
 
 
-# ── Helpers ──────────────────────────────────────────────────────────────
+# -- Helpers -----------------------------------------------------------------
 
 
 async def _exists(session: AsyncSession, model, **filters) -> bool:
@@ -45,10 +69,13 @@ async def _exists(session: AsyncSession, model, **filters) -> bool:
     return (await session.execute(stmt)).scalar_one_or_none() is not None
 
 
-# ── Seed functions (one per table) ───────────────────────────────────────
+# ============================================================================
+# Essential Seeds (always run)
+# ============================================================================
 
 
 async def _seed_tenant(session: AsyncSession) -> uuid.UUID:
+    """Create the default tenant if it does not exist."""
     tenant_id = uuid.UUID(settings.seed_tenant_id)
     if await _exists(session, Tenant, id=tenant_id):
         return tenant_id
@@ -66,6 +93,7 @@ async def _seed_tenant(session: AsyncSession) -> uuid.UUID:
 
 
 async def _seed_admin_user(session: AsyncSession, tenant_id: uuid.UUID) -> uuid.UUID:
+    """Create the admin superuser for first-time login."""
     if await _exists(session, User, tenant_id=tenant_id, email=settings.seed_admin_email):
         return (
             await session.execute(select(User.id).filter_by(tenant_id=tenant_id, email=settings.seed_admin_email))
@@ -89,6 +117,7 @@ async def _seed_admin_user(session: AsyncSession, tenant_id: uuid.UUID) -> uuid.
 
 
 async def _seed_tenant_config(session: AsyncSession, tenant_id: uuid.UUID) -> None:
+    """Set default business configuration (hours, currency, tax rate)."""
     if await _exists(session, TenantConfig, tenant_id=tenant_id):
         return
     session.add(
@@ -120,14 +149,18 @@ async def _seed_tenant_config(session: AsyncSession, tenant_id: uuid.UUID) -> No
     logger.info("Seeded tenant config for tenant %s", tenant_id)
 
 
+# ============================================================================
+# Template Seeds (gated by SEED_TEMPLATE_DATA env var)
+# ============================================================================
+
+
 async def _seed_product_categories(session: AsyncSession, tenant_id: uuid.UUID) -> dict[str, uuid.UUID]:
-    categories = {
-        "Meals": ("meals", "Prepared meal options"),
-        "Snacks": ("snacks", "Healthy snack options"),
-        "Beverages": ("beverages", "Drinks and smoothies"),
-    }
+    """Seed product categories from template data."""
+    from app.seed_template_data import PRODUCT_CATEGORIES
+
     ids: dict[str, uuid.UUID] = {}
-    for name, (slug, desc) in categories.items():
+    for cat in PRODUCT_CATEGORIES:
+        slug = cat["slug"]
         if await _exists(session, ProductCategory, tenant_id=tenant_id, slug=slug):
             row = await session.execute(select(ProductCategory.id).filter_by(tenant_id=tenant_id, slug=slug))
             ids[slug] = row.scalar_one()
@@ -137,60 +170,30 @@ async def _seed_product_categories(session: AsyncSession, tenant_id: uuid.UUID) 
             ProductCategory(
                 id=cat_id,
                 tenant_id=tenant_id,
-                name=name,
+                name=cat["name"],
                 slug=slug,
-                description=desc,
+                description=cat["description"],
             )
         )
         ids[slug] = cat_id
     await session.flush()
-    logger.info("Seeded product categories")
+    logger.info("Seeded %d product categories", len(PRODUCT_CATEGORIES))
     return ids
 
 
 async def _seed_products_and_variants(session: AsyncSession, tenant_id: uuid.UUID) -> list[uuid.UUID]:
-    """Seed sample products with one default variant each. Returns variant IDs."""
-    products = [
-        {
-            "name": "Classic Chicken Bowl",
-            "slug": "classic-chicken-bowl",
-            "description": "Grilled chicken with rice and vegetables",
-            "sku": "MEAL-001",
-            "status": ProductStatus.active,
-            "is_subscribable": True,
-            "is_standalone": True,
-            "variant_name": "Regular",
-            "variant_sku": "MEAL-001-REG",
-            "price": Decimal("250.00"),
-        },
-        {
-            "name": "Beef Steak Plate",
-            "slug": "beef-steak-plate",
-            "description": "Premium beef steak with mashed potatoes",
-            "sku": "MEAL-002",
-            "status": ProductStatus.active,
-            "is_subscribable": True,
-            "is_standalone": True,
-            "variant_name": "Regular",
-            "variant_sku": "MEAL-002-REG",
-            "price": Decimal("350.00"),
-        },
-        {
-            "name": "Green Smoothie",
-            "slug": "green-smoothie",
-            "description": "Spinach, banana, and almond milk blend",
-            "sku": "BEV-001",
-            "status": ProductStatus.active,
-            "is_subscribable": False,
-            "is_standalone": True,
-            "variant_name": "500ml",
-            "variant_sku": "BEV-001-500",
-            "price": Decimal("120.00"),
-        },
-    ]
+    """Seed products with default variants and nutritional metadata.
+
+    The ``metadata`` field stores nutritional info, dietary tags, allergens,
+    and ingredients. The frontend reads this via the product API to populate
+    meal cards without needing mock data fallback.
+
+    Returns the list of variant IDs for catalog creation.
+    """
+    from app.seed_template_data import PRODUCTS
 
     variant_ids: list[uuid.UUID] = []
-    for p in products:
+    for p in PRODUCTS:
         if await _exists(session, Product, tenant_id=tenant_id, slug=p["slug"]):
             row = await session.execute(select(Product.id).filter_by(tenant_id=tenant_id, slug=p["slug"]))
             product_id = row.scalar_one()
@@ -202,6 +205,10 @@ async def _seed_products_and_variants(session: AsyncSession, tenant_id: uuid.UUI
 
         product_id = uuid.uuid4()
         variant_id = uuid.uuid4()
+
+        # Map string status to enum
+        status = ProductStatus.active if p["status"] == "active" else ProductStatus.draft
+
         session.add(
             Product(
                 id=product_id,
@@ -210,9 +217,10 @@ async def _seed_products_and_variants(session: AsyncSession, tenant_id: uuid.UUI
                 slug=p["slug"],
                 description=p["description"],
                 sku=p["sku"],
-                status=p["status"],
+                status=status,
                 is_subscribable=p["is_subscribable"],
                 is_standalone=p["is_standalone"],
+                metadata_=p.get("metadata"),
             )
         )
         session.add(
@@ -226,14 +234,30 @@ async def _seed_products_and_variants(session: AsyncSession, tenant_id: uuid.UUI
                 is_active=True,
             )
         )
+
+        # Seed product image if provided
+        image_url = p.get("image_url")
+        if image_url:
+            session.add(
+                ProductImage(
+                    id=uuid.uuid4(),
+                    product_id=product_id,
+                    url=image_url,
+                    alt_text=p["name"],
+                    sort_order=0,
+                    is_primary=True,
+                )
+            )
+
         variant_ids.append(variant_id)
 
     await session.flush()
-    logger.info("Seeded products and variants")
+    logger.info("Seeded %d products with variants", len(PRODUCTS))
     return variant_ids
 
 
 async def _seed_catalog(session: AsyncSession, tenant_id: uuid.UUID, variant_ids: list[uuid.UUID]) -> None:
+    """Create a default published catalog containing all seeded products."""
     slug = "default-menu"
     if await _exists(session, Catalog, tenant_id=tenant_id, slug=slug):
         return
@@ -262,29 +286,16 @@ async def _seed_catalog(session: AsyncSession, tenant_id: uuid.UUID, variant_ids
 
 
 async def _seed_subscription_plans(session: AsyncSession, tenant_id: uuid.UUID) -> None:
-    plans = [
-        {
-            "name": "Weekly Plan",
-            "slug": "weekly-plan",
-            "description": "Fresh meals delivered every week",
-            "billing_interval": BillingInterval.weekly,
-            "tiers": [
-                {"name": "5 Meals", "items_per_cycle": 5, "price": Decimal("1150.00")},
-                {"name": "10 Meals", "items_per_cycle": 10, "price": Decimal("2100.00")},
-            ],
-        },
-        {
-            "name": "Monthly Plan",
-            "slug": "monthly-plan",
-            "description": "Monthly meal subscription with savings",
-            "billing_interval": BillingInterval.monthly,
-            "tiers": [
-                {"name": "20 Meals", "items_per_cycle": 20, "price": Decimal("3800.00")},
-                {"name": "30 Meals", "items_per_cycle": 30, "price": Decimal("5400.00")},
-            ],
-        },
-    ]
-    for plan_data in plans:
+    """Seed subscription plans with tiered pricing from template data."""
+    from app.seed_template_data import SUBSCRIPTION_PLANS
+
+    interval_map = {
+        "weekly": BillingInterval.weekly,
+        "biweekly": BillingInterval.biweekly,
+        "monthly": BillingInterval.monthly,
+    }
+
+    for plan_data in SUBSCRIPTION_PLANS:
         if await _exists(session, SubscriptionPlan, tenant_id=tenant_id, slug=plan_data["slug"]):
             continue
         plan_id = uuid.uuid4()
@@ -295,7 +306,7 @@ async def _seed_subscription_plans(session: AsyncSession, tenant_id: uuid.UUID) 
                 name=plan_data["name"],
                 slug=plan_data["slug"],
                 description=plan_data["description"],
-                billing_interval=plan_data["billing_interval"],
+                billing_interval=interval_map[plan_data["billing_interval"]],
                 is_active=True,
             )
         )
@@ -316,41 +327,10 @@ async def _seed_subscription_plans(session: AsyncSession, tenant_id: uuid.UUID) 
 
 
 async def _seed_delivery_zones_and_slots(session: AsyncSession, tenant_id: uuid.UUID) -> None:
-    zones = [
-        {
-            "name": "Metro Manila",
-            "description": "Greater Metro Manila area",
-            "delivery_fee": Decimal("50.00"),
-            "min_order_amount": Decimal("500.00"),
-            "boundaries": {
-                "postal_codes": [
-                    "1000",
-                    "1001",
-                    "1002",
-                    "1003",
-                    "1004",
-                    "1005",
-                    "1006",
-                    "1007",
-                    "1008",
-                    "1009",
-                    "1010",
-                ]
-            },
-            "slots": [
-                {"day": d, "start": time(8, 0), "end": time(12, 0), "capacity": 50}
-                for d in range(5)  # Mon-Fri morning
-            ]
-            + [
-                {"day": d, "start": time(13, 0), "end": time(18, 0), "capacity": 50}
-                for d in range(5)  # Mon-Fri afternoon
-            ]
-            + [
-                {"day": 5, "start": time(9, 0), "end": time(14, 0), "capacity": 30},  # Sat
-            ],
-        },
-    ]
-    for z in zones:
+    """Seed delivery zones and their time slots from template data."""
+    from app.seed_template_data import DELIVERY_ZONES
+
+    for z in DELIVERY_ZONES:
         if await _exists(session, DeliveryZone, tenant_id=tenant_id, name=z["name"]):
             continue
         zone_id = uuid.uuid4()
@@ -383,49 +363,20 @@ async def _seed_delivery_zones_and_slots(session: AsyncSession, tenant_id: uuid.
 
 
 async def _seed_notification_templates(session: AsyncSession, tenant_id: uuid.UUID) -> None:
-    templates = [
-        {
-            "event_type": "order_confirmed",
-            "channel": NotificationChannel.email,
-            "subject": "Order Confirmed — #{{order_number}}",
-            "body_template": "Hi {{first_name}}, your order #{{order_number}} has been confirmed. Total: {{currency}} {{total}}.",
-        },
-        {
-            "event_type": "order_delivered",
-            "channel": NotificationChannel.email,
-            "subject": "Order Delivered — #{{order_number}}",
-            "body_template": "Hi {{first_name}}, your order #{{order_number}} has been delivered. Enjoy your meal!",
-        },
-        {
-            "event_type": "payment_received",
-            "channel": NotificationChannel.email,
-            "subject": "Payment Received",
-            "body_template": "Hi {{first_name}}, we received your payment of {{currency}} {{amount}}. Thank you!",
-        },
-        {
-            "event_type": "subscription_activated",
-            "channel": NotificationChannel.email,
-            "subject": "Subscription Activated",
-            "body_template": (
-                "Hi {{first_name}}, your {{plan_name}} subscription is now activeNext billing: {{next_billing_date}}."
-            ),
-        },
-        {
-            "event_type": "subscription_cancelled",
-            "channel": NotificationChannel.email,
-            "subject": "Subscription Cancelled",
-            "body_template": "Hi {{first_name}}, your subscription has been cancelled. You can resubscribe anytime.",
-        },
-        {
-            "event_type": "order_confirmed",
-            "channel": NotificationChannel.sms,
-            "subject": None,
-            "body_template": "Order #{{order_number}} confirmed. Total: {{currency}} {{total}}.",
-        },
-    ]
-    for t in templates:
+    """Seed email and SMS notification templates from template data."""
+    from app.seed_template_data import NOTIFICATION_TEMPLATES
+
+    channel_map = {
+        "email": NotificationChannel.email,
+        "sms": NotificationChannel.sms,
+        "push": NotificationChannel.push,
+        "whatsapp": NotificationChannel.whatsapp,
+    }
+
+    for t in NOTIFICATION_TEMPLATES:
+        channel = channel_map[t["channel"]]
         if await _exists(
-            session, NotificationTemplate, tenant_id=tenant_id, event_type=t["event_type"], channel=t["channel"]
+            session, NotificationTemplate, tenant_id=tenant_id, event_type=t["event_type"], channel=channel
         ):
             continue
         session.add(
@@ -433,7 +384,7 @@ async def _seed_notification_templates(session: AsyncSession, tenant_id: uuid.UU
                 id=uuid.uuid4(),
                 tenant_id=tenant_id,
                 event_type=t["event_type"],
-                channel=t["channel"],
+                channel=channel,
                 subject=t["subject"],
                 body_template=t["body_template"],
                 is_active=True,
@@ -443,26 +394,40 @@ async def _seed_notification_templates(session: AsyncSession, tenant_id: uuid.UU
     logger.info("Seeded notification templates")
 
 
-# ── Main entry point ─────────────────────────────────────────────────────
+# ============================================================================
+# Main entry point
+# ============================================================================
 
 
 async def seed_database() -> None:
     """Run all seed functions inside a single transaction.
 
-    Safe to call on every startup — each seeder checks for existing data
-    before inserting.
+    Essential seeds (tenant, admin, config) always run.
+    Template seeds (products, plans, zones, notifications) only run
+    when ``SEED_TEMPLATE_DATA=true`` (the default).
+
+    Safe to call on every startup -- each seeder checks for existing
+    data before inserting.
     """
     async with SessionLocal() as session:
         try:
+            # -- Essential seeds (always) ------------------------------------
             tenant_id = await _seed_tenant(session)
             await _seed_admin_user(session, tenant_id)
             await _seed_tenant_config(session, tenant_id)
-            await _seed_product_categories(session, tenant_id)
-            variant_ids = await _seed_products_and_variants(session, tenant_id)
-            await _seed_catalog(session, tenant_id, variant_ids)
-            await _seed_subscription_plans(session, tenant_id)
-            await _seed_delivery_zones_and_slots(session, tenant_id)
-            await _seed_notification_templates(session, tenant_id)
+
+            # -- Template seeds (conditional) --------------------------------
+            if settings.seed_template_data:
+                logger.info("SEED_TEMPLATE_DATA=true -- seeding template data")
+                await _seed_product_categories(session, tenant_id)
+                variant_ids = await _seed_products_and_variants(session, tenant_id)
+                await _seed_catalog(session, tenant_id, variant_ids)
+                await _seed_subscription_plans(session, tenant_id)
+                await _seed_delivery_zones_and_slots(session, tenant_id)
+                await _seed_notification_templates(session, tenant_id)
+            else:
+                logger.info("SEED_TEMPLATE_DATA=false -- skipping template data")
+
             await session.commit()
             logger.info("Database seed completed successfully")
         except Exception:

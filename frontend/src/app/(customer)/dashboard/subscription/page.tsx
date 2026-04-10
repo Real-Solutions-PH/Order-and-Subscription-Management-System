@@ -15,13 +15,14 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { planTiers, formatPeso } from "@/lib/mock-data";
-import { useSubscriptionPlans, useSubscriptionMutations } from "@/hooks";
+import { useSubscriptionPlans, useSubscriptionMutations, useDevMode } from "@/hooks";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/context/ToastContext";
 import RequireAuth from "@/components/RequireAuth";
 
 export default function SubscriptionPage() {
   const { showToast } = useToast();
+  const devMode = useDevMode();
   const plansQuery = useSubscriptionPlans();
   const {
     pauseSubscription,
@@ -114,7 +115,7 @@ export default function SubscriptionPage() {
           tierId: tier.id, // keep the UUID for API calls
         })),
       )
-    : planTiers;
+    : (devMode ? planTiers : []);
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#FEFAE0' }}>

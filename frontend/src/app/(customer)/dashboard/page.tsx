@@ -38,7 +38,7 @@ import {
   Meal,
 } from "@/lib/mock-data";
 import { useToast } from "@/context/ToastContext";
-import { useAuth, useOrders } from "@/hooks";
+import { useAuth, useOrders, useDevMode } from "@/hooks";
 import { SkeletonCard } from "@/components/ui/skeleton";
 import {
   Select,
@@ -55,28 +55,29 @@ import StatusBadge from "@/components/StatusBadge";
 import Modal from "@/components/Modal";
 import MealImage from "@/components/MealImage";
 
-// Next delivery meals (first 5 from meals array)
-const nextDeliveryMeals = meals.slice(0, 5);
-
 export default function DashboardPage() {
   const { showToast } = useToast();
+  const devMode = useDevMode();
 
-  // --- API hooks with mock-data fallback ---
+  // --- API hooks; only fall back to mock data when DEV_MODE is on ---
   const { user, isLoading: isLoadingUser } = useAuth();
   const ordersQuery = useOrders();
 
-  const customer = customers[0]; // fallback source
+  const customer = devMode ? customers[0] : null;
+  const nextDeliveryMeals = devMode ? meals.slice(0, 5) : [];
 
-  // Map API user to display format, fall back to customers[0]
+  // Map API user to display format
   const displayUser = user
     ? {
         name: `${user.first_name} ${user.last_name}`,
         email: user.email,
         phone: user.phone ?? "",
       }
-    : { name: customer.name, email: customer.email, phone: customer.phone };
+    : customer
+      ? { name: customer?.name ?? "", email: customer?.email ?? "", phone: customer?.phone ?? "" }
+      : { name: "", email: "", phone: "" };
 
-  // Map API orders to display format, fall back to mock orders
+  // Map API orders to display format
   const displayOrders =
     ordersQuery.data?.items?.map((o) => ({
       id: o.id,
@@ -85,7 +86,7 @@ export default function DashboardPage() {
       items: o.items,
       total: o.total,
       deliveryDate: o.delivered_at ?? o.placed_at ?? o.created_at,
-    })) ?? orders;
+    })) ?? (devMode ? orders : []);
   const isLoadingOrders = ordersQuery.isLoading;
 
   const [skipModalOpen, setSkipModalOpen] = useState(false);
@@ -99,7 +100,7 @@ export default function DashboardPage() {
   const [userEmail, setUserEmail] = useState(displayUser.email);
   const [userPhone, setUserPhone] = useState(displayUser.phone);
   const [userDietary, setUserDietary] = useState<string[]>(
-    customer.dietaryPreferences,
+    customer?.dietaryPreferences ?? [],
   );
   const [userAllergens, setUserAllergens] = useState<string[]>(["Shellfish"]);
   const [favoriteMeal, setFavoriteMeal] = useState("Garlic Butter Chicken");
@@ -304,7 +305,7 @@ export default function DashboardPage() {
                         className="text-sm font-medium"
                         style={{ color: "#1A1A2E" }}
                       >
-                        {customer.address}
+                        {customer?.address ?? ""}
                       </p>
                     </div>
                   </div>
@@ -523,7 +524,7 @@ export default function DashboardPage() {
                       className="text-xl font-bold text-white mb-4"
                       style={{ fontFamily: "'DM Serif Display', serif" }}
                     >
-                      {customer.planType}
+                      {customer?.planType ?? "No Plan"}
                     </h2>
                     <div className="flex flex-wrap gap-3 sm:gap-4 lg:gap-5">
                       <div
@@ -1472,9 +1473,9 @@ function EditMealsModalContent({
     msg: string,
     type?: "success" | "error" | "info" | "warning",
   ) => void;
-  customer: (typeof customers)[0];
+  customer: (typeof customers)[0] | null;
 }) {
-  const match = customer.planType.match(/(\d+)/);
+  const match = customer?.planType?.match(/(\d+)/);
   const planMealsLimit = match ? parseInt(match[1], 10) : 0;
 
   const [selectedMeals, setSelectedMeals] = useState<
@@ -1531,7 +1532,7 @@ function EditMealsModalContent({
     >
       <div className="rounded-xl p-4 sticky top-0 z-10 bg-green-50 border border-green-200">
         <h3 className="text-sm font-semibold mb-1 text-primary">
-          Current Plan: {customer.planType}
+          Current Plan: {customer?.planType ?? "No Plan"}
         </h3>
         <div className="flex items-center justify-between">
           <p className="text-xs text-emerald-800">

@@ -20,7 +20,7 @@ import type { UserResponse } from '@/lib/api-client';
 import StatusBadge from '@/components/StatusBadge';
 import Modal from '@/components/Modal';
 import { useToast } from '@/context/ToastContext';
-import { useUsers, useNotificationMutations } from '@/hooks';
+import { useUsers, useNotificationMutations, useDevMode } from '@/hooks';
 import { SkeletonRow } from '@/components/ui/skeleton';
 
 type Segment = "all" | "active" | "paused" | "at_risk" | "churned" | "vip";
@@ -87,12 +87,14 @@ export default function CustomersPage() {
   const [emailForm, setEmailForm] = useState({ to: "", subject: "", body: "" });
   const [smsForm, setSmsForm] = useState({ phone: "", message: "" });
 
+  const devMode = useDevMode();
+
   // TanStack Query hooks
   const usersQuery = useUsers();
   const isLoadingCustomers = usersQuery.isLoading;
   const { sendNotification } = useNotificationMutations();
 
-  // Map API users to Customer format, falling back to mock data
+  // Map API users to Customer format; only fall back to mock data when DEV_MODE is on
   const displayCustomers: Customer[] = usersQuery.data?.items?.map((u: UserResponse) => ({
     id: 0,
     name: `${u.first_name} ${u.last_name}`,
@@ -107,7 +109,7 @@ export default function CustomersPage() {
     notes: [] as string[],
     address: '',
     dietaryPreferences: [] as string[],
-  })) ?? customers;
+  })) ?? (devMode ? customers : []);
 
   // Filter by segment
   const segmentFiltered = useMemo(() => {

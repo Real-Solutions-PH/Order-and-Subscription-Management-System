@@ -8,7 +8,7 @@ import { meals, dietaryFilters, formatPeso, type Meal } from "@/lib/mock-data";
 import { useCart } from "@/context/CartContext";
 import { useToast } from "@/context/ToastContext";
 import MealCard from "@/components/MealCard";
-import { useProducts } from "@/hooks";
+import { useProducts, useDevMode } from "@/hooks";
 import { SkeletonMealCard } from "@/components/ui/skeleton";
 import type { ProductResponse } from "@/lib/api-client";
 
@@ -40,11 +40,15 @@ export default function LandingPage() {
   const { addItem, itemCount, total } = useCart();
   const { showToast } = useToast();
 
-  // Fetch products from API, fall back to mock data
+  const devMode = useDevMode();
+
+  // Fetch products from API; only fall back to mock data when DEV_MODE is on
   const productsQuery = useProducts({ status: "active" });
   const apiMeals = productsQuery.data?.items.map(mapProductToMeal);
-  const mealsData = apiMeals && apiMeals.length > 0 ? apiMeals : meals;
+  const mealsData = apiMeals && apiMeals.length > 0 ? apiMeals : (devMode ? meals : []);
   const isLoadingMeals = productsQuery.isLoading;
+  // Show filters when there are meals to filter (from API or dev mode mock data)
+  const displayFilters = mealsData.length > 0 ? dietaryFilters : [];
 
   // Sticky filter bar detection
   useEffect(() => {
@@ -182,7 +186,7 @@ export default function LandingPage() {
             <span className="mr-1 shrink-0 text-sm font-medium" style={{ color: '#6B7280' }}>
               Filter:
             </span>
-            {dietaryFilters.map((filter) => {
+            {displayFilters.map((filter) => {
               const isActive = activeFilters.includes(filter);
               return (
                 <button

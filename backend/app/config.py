@@ -46,6 +46,9 @@ class Settings(BaseSettings):
     seed_admin_first_name: str = "Admin"
     seed_admin_last_name: str = "User"
 
+    # Template data seeding — set to false to skip sample meals, plans, zones, etc.
+    seed_template_data: bool = True
+
     model_config = {
         "env_file": ("../.env", ".env"),
         "env_file_encoding": "utf-8",
