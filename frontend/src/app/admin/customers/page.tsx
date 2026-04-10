@@ -88,7 +88,7 @@ export default function CustomersPage() {
   const [smsForm, setSmsForm] = useState({ phone: "", message: "" });
 
   // TanStack Query hooks
-  const usersQuery = useUsers();
+  const usersQuery = useUsers({ role: "customer" });
   const isLoadingCustomers = usersQuery.isLoading;
   const { sendNotification } = useNotificationMutations();
 
