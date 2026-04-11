@@ -1,8 +1,13 @@
+from datetime import datetime, timezone
+from decimal import Decimal
 from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query
+from sqlalchemy import func, select
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.database import get_db
 from app.dependencies import get_auth_service, get_tenant_repo, get_user_service
 from app.exceptions import NotFoundError
 from app.modules.iam.repo import TenantRepo
@@ -14,6 +19,7 @@ from app.modules.iam.schemas import (
     RegisterRequest,
     TokenResponse,
     UserListResponse,
+    UserMetricsResponse,
     UserResponse,
     UserUpdateRequest,
 )
@@ -74,8 +80,73 @@ async def update_me(
     current_user: CurrentUser,
     user_service: Annotated[UserService, Depends(get_user_service)],
 ):
-    user = await user_service.update_profile(current_user.id, **data.model_dump(exclude_unset=True))
+    update_data = data.model_dump(exclude_unset=True)
+    # Handle dietary_preferences and allergens via metadata_
+    meta_updates = {}
+    if "dietary_preferences" in update_data:
+        meta_updates["dietary_preferences"] = update_data.pop("dietary_preferences")
+    if "allergens" in update_data:
+        meta_updates["allergens"] = update_data.pop("allergens")
+    if meta_updates:
+        current_meta = current_user.metadata_ or {}
+        current_meta.update(meta_updates)
+        update_data["metadata_"] = current_meta
+    user = await user_service.update_profile(current_user.id, **update_data)
     return user
+
+
+@router.get("/users/me/metrics", response_model=UserMetricsResponse)
+async def get_my_metrics(
+    current_user: CurrentUser,
+    db: Annotated[AsyncSession, Depends(get_db)],
+):
+    from app.modules.order_management.models import Order, OrderItem
+
+    now = datetime.now(timezone.utc)
+    month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+
+    # This month's total spend
+    month_total_result = await db.execute(
+        select(func.coalesce(func.sum(Order.total), Decimal("0.00")))
+        .where(
+            Order.user_id == current_user.id,
+            Order.tenant_id == current_user.tenant_id,
+            Order.placed_at >= month_start,
+        )
+    )
+    this_month_total = month_total_result.scalar_one() or Decimal("0.00")
+
+    # Total savings (sum of discount_amount across all orders)
+    savings_result = await db.execute(
+        select(func.coalesce(func.sum(Order.discount_amount), Decimal("0.00")))
+        .where(
+            Order.user_id == current_user.id,
+            Order.tenant_id == current_user.tenant_id,
+        )
+    )
+    total_savings = savings_result.scalar_one() or Decimal("0.00")
+
+    # Favorite meal: most frequent product_name across all order items
+    fav_result = await db.execute(
+        select(OrderItem.product_name, func.count(OrderItem.id).label("cnt"))
+        .join(Order, Order.id == OrderItem.order_id)
+        .where(
+            Order.user_id == current_user.id,
+            Order.tenant_id == current_user.tenant_id,
+            OrderItem.product_name != "",
+        )
+        .group_by(OrderItem.product_name)
+        .order_by(func.count(OrderItem.id).desc())
+        .limit(1)
+    )
+    row = fav_result.first()
+    favorite_meal = row[0] if row else ""
+
+    return UserMetricsResponse(
+        this_month_total=Decimal(str(this_month_total)),
+        total_savings=Decimal(str(total_savings)),
+        favorite_meal=favorite_meal,
+    )
 
 
 # ── Admin Endpoints (admin or superadmin) ─────────────────────────────

@@ -3,7 +3,7 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Response
 
 from app.dependencies import get_invoice_service, get_payment_service, get_promo_code_service
 from app.modules.payment_processing.schemas import (
@@ -16,6 +16,7 @@ from app.modules.payment_processing.schemas import (
     PaymentIntentResponse,
     PaymentMethodCreate,
     PaymentMethodResponse,
+    PaymentMethodUpdate,
     PaymentResponse,
     PromoCodeListResponse,
     PromoValidateRequest,
@@ -170,6 +171,34 @@ async def create_payment_method(
         expires_at=body.expires_at,
         metadata=body.metadata,
     )
+
+
+@router.patch("/payment-methods/{method_id}", response_model=PaymentMethodResponse)
+async def update_payment_method(
+    method_id: UUID,
+    body: PaymentMethodUpdate,
+    user: CurrentUser,
+    payment_service: Annotated[PaymentService, Depends(get_payment_service)],
+):
+    """Update a payment method (display name or set as default)."""
+    return await payment_service.update_payment_method(
+        method_id=method_id,
+        user_id=user.id,
+        tenant_id=user.tenant_id,
+        display_name=body.display_name,
+        is_default=body.is_default,
+    )
+
+
+@router.delete("/payment-methods/{method_id}", status_code=204)
+async def delete_payment_method(
+    method_id: UUID,
+    user: CurrentUser,
+    payment_service: Annotated[PaymentService, Depends(get_payment_service)],
+):
+    """Delete a saved payment method."""
+    await payment_service.delete_payment_method(method_id=method_id, user_id=user.id)
+    return Response(status_code=204)
 
 
 # ── Promo Codes ─────────────────────────────────────────────────────────

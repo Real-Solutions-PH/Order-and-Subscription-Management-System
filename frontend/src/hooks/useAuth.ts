@@ -11,6 +11,15 @@ import {
 } from "@/lib/api-client";
 import { queryKeys } from "./query-keys";
 
+/** Current user metrics (this month's spend, total savings, favorite meal). */
+export function useUserMetrics() {
+  return useQuery({
+    queryKey: queryKeys.userMetrics,
+    queryFn: () => api.auth.getMetrics(),
+    retry: false,
+  });
+}
+
 /** Current user profile query + auth mutations. */
 export function useAuth() {
   const qc = useQueryClient();

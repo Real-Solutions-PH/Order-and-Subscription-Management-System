@@ -61,6 +61,32 @@ class PaymentRepo:
         await self.db.flush()
         return method
 
+    async def get_method_by_id(self, method_id: uuid.UUID) -> PaymentMethod | None:
+        stmt = select(PaymentMethod).where(PaymentMethod.id == method_id)
+        result = await self.db.execute(stmt)
+        return result.scalar_one_or_none()
+
+    async def update_method(self, method_id: uuid.UUID, **kwargs) -> PaymentMethod | None:
+        await self.db.execute(
+            update(PaymentMethod).where(PaymentMethod.id == method_id).values(**kwargs)
+        )
+        await self.db.flush()
+        return await self.get_method_by_id(method_id)
+
+    async def clear_default_methods(self, user_id: uuid.UUID, tenant_id: uuid.UUID) -> None:
+        await self.db.execute(
+            update(PaymentMethod)
+            .where(PaymentMethod.user_id == user_id, PaymentMethod.tenant_id == tenant_id)
+            .values(is_default=False)
+        )
+        await self.db.flush()
+
+    async def delete_method(self, method_id: uuid.UUID) -> None:
+        method = await self.get_method_by_id(method_id)
+        if method:
+            await self.db.delete(method)
+            await self.db.flush()
+
 
 class PromoCodeRepo:
     def __init__(self, db: AsyncSession) -> None:

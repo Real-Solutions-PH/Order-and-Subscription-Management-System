@@ -146,6 +146,11 @@ class SubscriptionService:
 
     # ── Read ────────────────────────────────────────────────────────────
 
+    async def list_user_subscriptions(
+        self, user_id: UUID, tenant_id: UUID
+    ) -> list[Subscription]:
+        return await self.sub_repo.get_by_user(user_id, tenant_id)
+
     async def get_subscription(self, sub_id: UUID) -> Subscription:
         sub = await self.sub_repo.get_by_id(sub_id)
         if not sub:

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Check,
@@ -20,23 +20,25 @@ import { meals, planTiers, timeSlots, formatPeso, Meal } from "@/lib/mock-data";
 import { useCart } from "@/context/CartContext";
 import { useToast } from "@/context/ToastContext";
 import { useAuthContext } from "@/context/AuthContext";
-import { useProducts, useSubscriptionPlans, useDevMode } from "@/hooks";
+import { useProducts, useSubscriptionPlans, useSubscriptionMutations, useDevMode } from "@/hooks";
 import { SkeletonMealCard, Skeleton } from "@/components/ui/skeleton";
 import MealImage from "@/components/MealImage";
+import { api } from "@/lib/api-client";
 import type { ProductResponse } from "@/lib/api-client";
 
 interface SelectedMeal {
-  meal: Meal;
+  meal: Meal & { variantId?: string };
   quantity: number;
   addOns: { name: string; price: number }[];
 }
 
-function mapProductToMeal(p: ProductResponse): Meal {
+function mapProductToMeal(p: ProductResponse): Meal & { variantId?: string } {
   const meta = (p.metadata ?? {}) as Record<string, unknown>;
   const defaultVariant = p.variants.find((v) => v.is_default) ?? p.variants[0];
   const primaryImage = p.images.find((img) => img.is_primary) ?? p.images[0];
   return {
     id: typeof meta.legacy_id === "number" ? meta.legacy_id : p.id,
+    variantId: defaultVariant?.id,
     name: p.name,
     price: defaultVariant ? Number(defaultVariant.price) : 0,
     calories: (meta.calories as number) ?? 0,
@@ -58,6 +60,7 @@ const ADD_ON_OPTIONS = [
 ];
 
 export default function MealPlanPage() {
+  const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedPlanId, setSelectedPlanId] = useState<number | null>(null);
   const [selectedMeals, setSelectedMeals] = useState<SelectedMeal[]>([]);
@@ -65,6 +68,7 @@ export default function MealPlanPage() {
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string>("");
   const [expandedMealId, setExpandedMealId] = useState<number | string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { addItem } = useCart();
   const { showToast } = useToast();
   const { isAuthenticated, openAuthModal } = useAuthContext();
@@ -72,6 +76,7 @@ export default function MealPlanPage() {
   const devMode = useDevMode();
   const productsQuery = useProducts({ status: "active" });
   const plansQuery = useSubscriptionPlans();
+  const { createSubscription, setSelections } = useSubscriptionMutations();
 
   const apiMeals = productsQuery.data?.items.map(mapProductToMeal);
   const mealsData = apiMeals && apiMeals.length > 0 ? apiMeals : (devMode ? meals : []);
@@ -82,6 +87,7 @@ export default function MealPlanPage() {
     ? plansQuery.data.flatMap((plan) =>
         plan.tiers.map((tier) => ({
           id: tier.items_per_cycle,
+          tierId: tier.id,
           meals: tier.items_per_cycle,
           price: Number(tier.price),
           perMeal: Math.round(Number(tier.price) / tier.items_per_cycle),
@@ -89,7 +95,7 @@ export default function MealPlanPage() {
           label: tier.name,
         })),
       )
-    : (devMode ? planTiers : []);
+    : (devMode ? planTiers.map(t => ({ ...t, tierId: undefined as string | undefined })) : []);
 
   const selectedPlan = displayPlans.find((p) => p.id === selectedPlanId);
   const totalMealsSelected = selectedMeals.reduce(
@@ -186,11 +192,47 @@ export default function MealPlanPage() {
     }
   }
 
-  function handleProceedToCheckout() {
-    selectedMeals.forEach((sm) => {
-      addItem(sm.meal, sm.quantity);
-    });
-    showToast("Meal plan added to cart!", "success");
+  async function handleProceedToCheckout() {
+    if (!selectedPlan || isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      // Create the subscription if we have a real tier ID from the API
+      if (selectedPlan.tierId) {
+        const sub = await createSubscription({ plan_tier_id: selectedPlan.tierId });
+        // Set meal selections for the first cycle
+        const validSelections = selectedMeals
+          .filter((sm) => sm.meal.variantId)
+          .map((sm) => ({
+            product_variant_id: sm.meal.variantId!,
+            quantity: sm.quantity,
+          }));
+        if (validSelections.length > 0) {
+          const cycles = await api.subscriptions.listCycles(sub.id);
+          const openCycle = cycles.find(
+            (c) => c.status === "selection_open" || c.status === "upcoming",
+          );
+          if (openCycle) {
+            await setSelections({
+              subId: sub.id,
+              cycleId: openCycle.id,
+              selections: validSelections,
+            });
+          }
+        }
+      }
+
+      // Add items to cart for checkout payment
+      selectedMeals.forEach((sm) => {
+        addItem(sm.meal, sm.quantity);
+      });
+      showToast("Meal plan created! Proceeding to checkout...", "success");
+      router.push("/checkout");
+    } catch (err) {
+      console.error("Failed to create subscription:", err);
+      showToast("Failed to create subscription. Please try again.", "error");
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -890,18 +932,17 @@ export default function MealPlanPage() {
             <div className="mt-6 space-y-3">
               {currentStep === 4 ? (
                 isAuthenticated ? (
-                  <Link
-                    href="/checkout"
+                  <button
                     onClick={handleProceedToCheckout}
-                    className="flex w-full items-center justify-center gap-2 rounded-xl py-3 text-base font-semibold text-white transition-opacity hover:opacity-90"
+                    disabled={!canProceed() || isSubmitting}
+                    className="flex w-full items-center justify-center gap-2 rounded-xl py-3 text-base font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
                     style={{
-                      backgroundColor: canProceed() ? '#E76F51' : '#d1d5db',
-                      pointerEvents: canProceed() ? 'auto' : 'none',
+                      backgroundColor: '#E76F51',
                     }}
                   >
                     <ShoppingBag size={18} />
-                    Proceed to Checkout
-                  </Link>
+                    {isSubmitting ? "Creating plan..." : "Proceed to Checkout"}
+                  </button>
                 ) : (
                   <>
                     <p className="text-center text-sm" style={{ color: '#6B7280' }}>

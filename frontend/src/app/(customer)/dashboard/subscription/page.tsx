@@ -15,7 +15,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { planTiers, formatPeso } from "@/lib/mock-data";
-import { useSubscriptionPlans, useSubscriptionMutations, useDevMode } from "@/hooks";
+import { useSubscriptionPlans, useSubscriptionMutations, useUserSubscriptions, useSubscriptionCycles, useUserMetrics, useDevMode } from "@/hooks";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/context/ToastContext";
 import RequireAuth from "@/components/RequireAuth";
@@ -24,23 +24,37 @@ export default function SubscriptionPage() {
   const { showToast } = useToast();
   const devMode = useDevMode();
   const plansQuery = useSubscriptionPlans();
+  const subscriptionsQuery = useUserSubscriptions();
+  const metricsQuery = useUserMetrics();
   const {
     pauseSubscription,
     cancelSubscription,
     modifyPlan,
+    skipCycle,
     isPausing,
     isCancelling,
   } = useSubscriptionMutations();
+
+  // Get active subscription
+  const activeSub = subscriptionsQuery.data?.find(
+    (s) => s.status === "active" || s.status === "paused",
+  ) ?? subscriptionsQuery.data?.[0] ?? null;
+  const subId = activeSub?.id;
+
+  const cyclesQuery = useSubscriptionCycles(subId);
+  const upcomingCycles = cyclesQuery.data?.filter(
+    (c) => c.status === "upcoming" || c.status === "selection_open",
+  ) ?? [];
 
   // Pause state
   const [pauseDays, setPauseDays] = useState(7);
   const [pauseConfirmed, setPauseConfirmed] = useState(false);
 
-  // Plan change state
-  const [selectedPlan, setSelectedPlan] = useState(10);
+  // Plan change state — use tier UUID
+  const [selectedPlanTierId, setSelectedPlanTierId] = useState<string | null>(null);
 
-  // Skip weeks state
-  const [skippedWeeks, setSkippedWeeks] = useState<number[]>([]);
+  // Skip weeks state — use cycle IDs
+  const [skippedCycleIds, setSkippedCycleIds] = useState<string[]>([]);
 
   // Cancel flow state
   const [cancelStep, setCancelStep] = useState(0); // 0=hidden, 1=reason, 2=winback, 3=confirm
@@ -69,12 +83,19 @@ export default function SubscriptionPage() {
     }
   };
 
-  const upcomingWeeks = [
-    { id: 1, label: "Apr 7 - 13", date: "Week 1" },
-    { id: 2, label: "Apr 14 - 20", date: "Week 2" },
-    { id: 3, label: "Apr 21 - 27", date: "Week 3" },
-    { id: 4, label: "Apr 28 - May 4", date: "Week 4" },
-  ];
+  // Build upcoming weeks from real cycles or fallback to mock
+  const upcomingWeeks = upcomingCycles.length > 0
+    ? upcomingCycles.map((c, i) => ({
+        id: c.id,
+        label: `${new Date(c.starts_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })} - ${new Date(c.ends_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}`,
+        date: `Cycle ${c.cycle_number}`,
+      }))
+    : [
+        { id: "1", label: "Apr 7 - 13", date: "Week 1" },
+        { id: "2", label: "Apr 14 - 20", date: "Week 2" },
+        { id: "3", label: "Apr 21 - 27", date: "Week 3" },
+        { id: "4", label: "Apr 28 - May 4", date: "Week 4" },
+      ];
 
   const cancelReasonOptions = [
     "Too expensive",
@@ -85,8 +106,8 @@ export default function SubscriptionPage() {
     "Other",
   ];
 
-  const toggleSkipWeek = (weekId: number) => {
-    setSkippedWeeks((prev) =>
+  const toggleSkipWeek = (weekId: string) => {
+    setSkippedCycleIds((prev) =>
       prev.includes(weekId)
         ? prev.filter((w) => w !== weekId)
         : [...prev, weekId],
@@ -101,7 +122,7 @@ export default function SubscriptionPage() {
     );
   };
 
-  const creditPerWeek = 1125; // 4500 / 4 weeks
+  const creditPerWeek = activeSub?.plan_tier ? Math.round(Number(activeSub.plan_tier.price) / 4) : 0;
 
   const displayPlans = plansQuery.data?.length
     ? plansQuery.data.flatMap((plan) =>
@@ -157,33 +178,44 @@ export default function SubscriptionPage() {
             className="text-2xl font-bold text-white mb-1"
             style={{ fontFamily: "'DM Serif Display', serif" }}
           >
-            10 Meals / Week
+            {activeSub?.plan_tier?.name ?? "No Active Plan"}
+            {activeSub?.plan_tier && ` — ${activeSub.plan_tier.items_per_cycle} Meals / Cycle`}
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4">
             <div>
               <p className="text-xs" style={{ color: '#A7F3D0' }}>
-                Monthly Cost
+                Plan Cost
               </p>
-              <p className="text-white font-semibold">{formatPeso(4500)}</p>
+              <p className="text-white font-semibold">
+                {activeSub?.plan_tier ? formatPeso(Number(activeSub.plan_tier.price)) : formatPeso(0)}
+              </p>
             </div>
             <div>
               <p className="text-xs" style={{ color: '#A7F3D0' }}>
                 Next Billing
               </p>
-              <p className="text-white font-semibold">Apr 5, 2026</p>
+              <p className="text-white font-semibold">
+                {activeSub?.next_billing_date
+                  ? new Date(activeSub.next_billing_date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+                  : "—"}
+              </p>
             </div>
             <div>
               <p className="text-xs" style={{ color: '#A7F3D0' }}>
                 Member Since
               </p>
-              <p className="text-white font-semibold">Jan 5, 2026</p>
+              <p className="text-white font-semibold">
+                {activeSub?.created_at
+                  ? new Date(activeSub.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+                  : "—"}
+              </p>
             </div>
             <div>
               <p className="text-xs" style={{ color: '#A7F3D0' }}>
                 Total Savings
               </p>
               <p className="font-semibold" style={{ color: '#34D399' }}>
-                {formatPeso(2040)}
+                {metricsQuery.data ? formatPeso(Number(metricsQuery.data.total_savings)) : formatPeso(0)}
               </p>
             </div>
           </div>
@@ -316,7 +348,9 @@ export default function SubscriptionPage() {
                   disabled={isPausing}
                   onClick={async () => {
                     try {
-                      await pauseSubscription({ id: 'current', resume_date: pauseResumeDate.toISOString().split('T')[0] });
+                      if (subId) {
+                        await pauseSubscription({ id: subId, resume_date: pauseResumeDate.toISOString().split('T')[0] });
+                      }
                     } catch {
                       // backend unavailable — continue with UI-only flow
                     }
@@ -355,13 +389,15 @@ export default function SubscriptionPage() {
           ) : (
           <div className="grid grid-cols-2 gap-3 mb-4">
             {displayPlans.map((tier) => {
-              const isSelected = selectedPlan === tier.id;
-              const isCurrent = tier.id === 10;
-              const diff = tier.price - 4500;
+              const tierId = 'tierId' in tier ? tier.tierId as string : String(tier.id);
+              const isSelected = (selectedPlanTierId ?? activeSub?.plan_tier_id) === tierId;
+              const isCurrent = activeSub?.plan_tier_id === tierId;
+              const currentPrice = activeSub?.plan_tier ? Number(activeSub.plan_tier.price) : 0;
+              const diff = tier.price - currentPrice;
               return (
                 <button
-                  key={tier.id}
-                  onClick={() => setSelectedPlan(tier.id)}
+                  key={tierId}
+                  onClick={() => setSelectedPlanTierId(tierId)}
                   className="relative rounded-xl p-4 text-left transition-all"
                   style={{
                     border: `2px solid ${isSelected ? '#1B4332' : isCurrent ? '#40916C' : '#E5E7EB'}`,
@@ -376,43 +412,22 @@ export default function SubscriptionPage() {
                       Current
                     </span>
                   )}
-                  {tier.label === 'Popular' && !isCurrent && (
-                    <span
-                      className="absolute -top-2.5 right-3 px-2 py-0.5 text-xs font-semibold rounded-full"
-                      style={{ backgroundColor: '#E76F51', color: '#FFFFFF' }}
-                    >
-                      Popular
-                    </span>
-                  )}
-                  {tier.label === 'Best Value' && (
-                    <span
-                      className="absolute -top-2.5 right-3 px-2 py-0.5 text-xs font-semibold rounded-full"
-                      style={{ backgroundColor: '#059669', color: '#FFFFFF' }}
-                    >
-                      Best Value
-                    </span>
-                  )}
                   <p className="font-bold text-lg" style={{ color: '#1A1A2E' }}>
                     {tier.meals} meals
                   </p>
                   <p className="text-sm" style={{ color: '#6B7280' }}>
-                    {tier.label} &middot; {formatPeso(tier.perMeal)}/meal
+                    {tier.label}
                   </p>
                   <p className="font-semibold mt-1" style={{ color: '#1B4332' }}>
-                    {formatPeso(tier.price)}/mo
+                    {formatPeso(tier.price)}/wk
                   </p>
-                  {!isCurrent && (
+                  {!isCurrent && currentPrice > 0 && (
                     <p
                       className="text-xs mt-1 font-semibold"
                       style={{ color: diff > 0 ? '#D97706' : '#059669' }}
                     >
                       {diff > 0 ? '+' : ''}
-                      {formatPeso(Math.abs(diff))}/mo
-                    </p>
-                  )}
-                  {tier.savings > 0 && (
-                    <p className="text-xs mt-1" style={{ color: '#059669' }}>
-                      Save {tier.savings}%
+                      {formatPeso(Math.abs(diff))}/wk
                     </p>
                   )}
                 </button>
@@ -420,7 +435,7 @@ export default function SubscriptionPage() {
             })}
           </div>
           )}
-          {selectedPlan !== 10 && (
+          {selectedPlanTierId && selectedPlanTierId !== activeSub?.plan_tier_id && (
             <div
               className="rounded-xl p-3 mb-4"
               style={{ backgroundColor: '#EFF6FF', border: '1px solid #BFDBFE' }}
@@ -433,16 +448,15 @@ export default function SubscriptionPage() {
           )}
           <button
             onClick={async () => {
-              if (selectedPlan !== 10) {
-                const selectedTier = displayPlans.find(t => t.id === selectedPlan);
-                if (selectedTier && 'tierId' in selectedTier && selectedTier.tierId) {
-                  try {
-                    await modifyPlan({ id: 'current', new_plan_tier_id: selectedTier.tierId as string });
-                  } catch {
-                    // backend unavailable — continue with UI-only flow
-                  }
+              const tierId = selectedPlanTierId ?? activeSub?.plan_tier_id;
+              if (tierId && tierId !== activeSub?.plan_tier_id && subId) {
+                try {
+                  await modifyPlan({ id: subId, new_plan_tier_id: tierId });
+                } catch {
+                  // backend unavailable — continue with UI-only flow
                 }
-                showToast(`Plan changed to ${selectedPlan} meals/week`, 'success');
+                const selectedTier = displayPlans.find(t => ('tierId' in t ? t.tierId : String(t.id)) === tierId);
+                showToast(`Plan changed to ${selectedTier?.meals ?? ''} meals/week`, 'success');
               } else {
                 showToast('You are already on this plan', 'info');
               }
@@ -474,7 +488,7 @@ export default function SubscriptionPage() {
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
             {upcomingWeeks.map((week) => {
-              const isSkipped = skippedWeeks.includes(week.id);
+              const isSkipped = skippedCycleIds.includes(week.id);
               return (
                 <button
                   key={week.id}
@@ -511,25 +525,38 @@ export default function SubscriptionPage() {
               );
             })}
           </div>
-          {skippedWeeks.length > 0 && (
+          {skippedCycleIds.length > 0 && (
             <div
               className="rounded-xl p-3 mb-4"
               style={{ backgroundColor: '#FFF7ED', border: '1px solid #FED7AA' }}
             >
               <p className="text-sm" style={{ color: '#92400E' }}>
-                Credit for {skippedWeeks.length} skipped week{skippedWeeks.length > 1 ? 's' : ''}:{' '}
-                <strong>{formatPeso(skippedWeeks.length * creditPerWeek)}</strong>
+                {skippedCycleIds.length} week{skippedCycleIds.length > 1 ? 's' : ''} selected to skip
               </p>
             </div>
           )}
           <button
-            onClick={() => {
-              if (skippedWeeks.length > 0) {
+            onClick={async () => {
+              if (skippedCycleIds.length > 0 && subId) {
+                let skipped = 0;
+                for (const cycleId of skippedCycleIds) {
+                  // Only skip real cycle IDs (not fallback mock IDs "1"–"4")
+                  if (cycleId.length > 5) {
+                    try {
+                      await skipCycle({ subId, cycleId });
+                      skipped++;
+                    } catch {
+                      // continue
+                    }
+                  } else {
+                    skipped++;
+                  }
+                }
                 showToast(
-                  `${skippedWeeks.length} week${skippedWeeks.length > 1 ? 's' : ''} skipped. Credit: ${formatPeso(skippedWeeks.length * creditPerWeek)}`,
+                  `${skipped} week${skipped > 1 ? 's' : ''} skipped successfully`,
                   'success'
                 );
-                setSkippedWeeks([]);
+                setSkippedCycleIds([]);
               } else {
                 showToast('No weeks selected to skip', 'info');
               }
@@ -746,7 +773,9 @@ export default function SubscriptionPage() {
                     disabled={isCancelling}
                     onClick={async () => {
                       try {
-                        await cancelSubscription({ id: 'current', reason: cancelReasons.join(', ') });
+                        if (subId) {
+                          await cancelSubscription({ id: subId, reason: cancelReasons.join(', ') });
+                        }
                       } catch {
                         // backend unavailable — continue with UI-only flow
                       }

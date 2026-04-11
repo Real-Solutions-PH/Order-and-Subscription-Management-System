@@ -112,6 +112,11 @@ class PaymentMethodCreate(BaseModel):
     metadata: dict | None = None
 
 
+class PaymentMethodUpdate(BaseModel):
+    display_name: str | None = Field(default=None, max_length=100)
+    is_default: bool | None = None
+
+
 class PaymentMethodResponse(BaseSchema):
     id: UUID
     tenant_id: UUID
