@@ -7,6 +7,7 @@ from app.shared.schemas import BaseSchema
 
 # ── Auth ─────────────────────────────────────────────────────────────
 
+
 class RegisterRequest(BaseModel):
     email: EmailStr
     password: str
@@ -33,6 +34,7 @@ class TokenResponse(BaseSchema):
 
 
 # ── Users ────────────────────────────────────────────────────────────
+
 
 class UserResponse(BaseSchema):
     id: UUID

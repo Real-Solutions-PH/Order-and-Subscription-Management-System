@@ -25,9 +25,21 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-function SortIcon({ field, sortBy, sortDir }: { field: SortBy; sortBy: SortBy; sortDir: SortDir }) {
+function SortIcon({
+  field,
+  sortBy,
+  sortDir,
+}: {
+  field: SortBy;
+  sortBy: SortBy;
+  sortDir: SortDir;
+}) {
   if (field !== sortBy) return null;
-  return sortDir === "asc" ? <ChevronUp size={13} /> : <ChevronDown size={13} />;
+  return sortDir === "asc" ? (
+    <ChevronUp size={13} />
+  ) : (
+    <ChevronDown size={13} />
+  );
 }
 
 export default function IngredientsPage() {
@@ -37,7 +49,13 @@ export default function IngredientsPage() {
   const [page, setPage] = useState(1);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
-  const query = useIngredients({ page, per_page: 50, search: search || undefined, sort_by: sortBy, sort_dir: sortDir });
+  const query = useIngredients({
+    page,
+    per_page: 50,
+    search: search || undefined,
+    sort_by: sortBy,
+    sort_dir: sortDir,
+  });
   const items = query.data?.items ?? [];
   const total = query.data?.total ?? 0;
   const totalPages = Math.ceil(total / 50);
@@ -56,7 +74,10 @@ export default function IngredientsPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold" style={{ fontFamily: "'DM Serif Display', serif", color: "#1A1A2E" }}>
+        <h1
+          className="text-2xl font-bold"
+          style={{ fontFamily: "'DM Serif Display', serif", color: "#1A1A2E" }}
+        >
           Ingredient Inventory
         </h1>
         <p className="mt-0.5 text-sm" style={{ color: "#6B7280" }}>
@@ -65,20 +86,38 @@ export default function IngredientsPage() {
       </div>
 
       {/* Search + sort controls */}
-      <div className="rounded-xl bg-white p-4 shadow-sm" style={{ border: "1px solid #E5E7EB" }}>
+      <div
+        className="rounded-xl bg-white p-4 shadow-sm"
+        style={{ border: "1px solid #E5E7EB" }}
+      >
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="relative flex-1">
-            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "#9CA3AF" }} />
+            <Search
+              size={15}
+              className="absolute left-3 top-1/2 -translate-y-1/2"
+              style={{ color: "#9CA3AF" }}
+            />
             <input
               type="text"
               placeholder="Search ingredients..."
               value={search}
-              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
               className="w-full rounded-lg py-2 pl-9 pr-3 text-sm focus:outline-none focus:ring-2"
-              style={{ border: "1px solid #E5E7EB", color: "#1A1A2E" } as React.CSSProperties}
+              style={
+                {
+                  border: "1px solid #E5E7EB",
+                  color: "#1A1A2E",
+                } as React.CSSProperties
+              }
             />
           </div>
-          <div className="flex items-center gap-2 text-sm" style={{ color: "#6B7280" }}>
+          <div
+            className="flex items-center gap-2 text-sm"
+            style={{ color: "#6B7280" }}
+          >
             <span className="font-medium">Sort by:</span>
             <button
               onClick={() => toggleSort("name")}
@@ -100,19 +139,31 @@ export default function IngredientsPage() {
                   : { backgroundColor: "#F3F4F6", color: "#6B7280" }
               }
             >
-              Usage <SortIcon field="usage_count" sortBy={sortBy} sortDir={sortDir} />
+              Usage{" "}
+              <SortIcon field="usage_count" sortBy={sortBy} sortDir={sortDir} />
             </button>
           </div>
         </div>
       </div>
 
       {/* Table */}
-      <div className="overflow-hidden rounded-xl bg-white shadow-sm" style={{ border: "1px solid #E5E7EB" }}>
+      <div
+        className="overflow-hidden rounded-xl bg-white shadow-sm"
+        style={{ border: "1px solid #E5E7EB" }}
+      >
         <div className="overflow-x-auto">
           <table className="min-w-full text-sm">
-            <thead style={{ backgroundColor: "#F9FAFB", borderBottom: "1px solid #E5E7EB" }}>
+            <thead
+              style={{
+                backgroundColor: "#F9FAFB",
+                borderBottom: "1px solid #E5E7EB",
+              }}
+            >
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide" style={{ color: "#6B7280" }}>
+                <th
+                  className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide"
+                  style={{ color: "#6B7280" }}
+                >
                   Ingredient
                 </th>
                 <th
@@ -121,13 +172,24 @@ export default function IngredientsPage() {
                   onClick={() => toggleSort("usage_count")}
                 >
                   <span className="inline-flex items-center gap-1">
-                    Used In <SortIcon field="usage_count" sortBy={sortBy} sortDir={sortDir} />
+                    Used In{" "}
+                    <SortIcon
+                      field="usage_count"
+                      sortBy={sortBy}
+                      sortDir={sortDir}
+                    />
                   </span>
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide" style={{ color: "#6B7280" }}>
+                <th
+                  className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide"
+                  style={{ color: "#6B7280" }}
+                >
                   Default Unit
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide" style={{ color: "#6B7280" }}>
+                <th
+                  className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide"
+                  style={{ color: "#6B7280" }}
+                >
                   Description
                 </th>
                 <th className="px-4 py-3 w-8" />
@@ -138,7 +200,10 @@ export default function IngredientsPage() {
                 ? Array.from({ length: 8 }).map((_, i) => (
                     <tr key={i}>
                       <td colSpan={5} className="px-4 py-3">
-                        <div className="h-5 animate-pulse rounded" style={{ backgroundColor: "#F3F4F6" }} />
+                        <div
+                          className="h-5 animate-pulse rounded"
+                          style={{ backgroundColor: "#F3F4F6" }}
+                        />
                       </td>
                     </tr>
                   ))
@@ -150,34 +215,62 @@ export default function IngredientsPage() {
                         <motion.tr
                           layout
                           className={`transition-colors ${usageCount > 0 ? "cursor-pointer hover:bg-gray-50" : ""}`}
-                          onClick={() => usageCount > 0 && setExpandedId(isExpanded ? null : ingredient.id)}
+                          onClick={() =>
+                            usageCount > 0 &&
+                            setExpandedId(isExpanded ? null : ingredient.id)
+                          }
                         >
                           {/* Name */}
                           <td className="px-4 py-3">
-                            <span className="font-medium" style={{ color: "#1A1A2E" }}>{ingredient.name}</span>
+                            <span
+                              className="font-medium"
+                              style={{ color: "#1A1A2E" }}
+                            >
+                              {ingredient.name}
+                            </span>
                           </td>
                           {/* Usage count */}
                           <td className="px-4 py-3">
                             {usageCount > 0 ? (
                               <span
                                 className="rounded-full px-2.5 py-0.5 text-xs font-semibold"
-                                style={{ backgroundColor: "#DBEAFE", color: "#1E40AF" }}
+                                style={{
+                                  backgroundColor: "#DBEAFE",
+                                  color: "#1E40AF",
+                                }}
                               >
                                 {usageCount} item{usageCount !== 1 ? "s" : ""}
                               </span>
                             ) : (
-                              <span className="text-xs" style={{ color: "#9CA3AF" }}>Unused</span>
+                              <span
+                                className="text-xs"
+                                style={{ color: "#9CA3AF" }}
+                              >
+                                Unused
+                              </span>
                             )}
                           </td>
                           {/* Unit */}
-                          <td className="px-4 py-3 text-sm" style={{ color: "#6B7280" }}>
-                            {ingredient.default_unit ?? <span style={{ color: "#D1D5DB" }}>—</span>}
+                          <td
+                            className="px-4 py-3 text-sm"
+                            style={{ color: "#6B7280" }}
+                          >
+                            {ingredient.default_unit ?? (
+                              <span style={{ color: "#D1D5DB" }}>—</span>
+                            )}
                           </td>
                           {/* Description */}
-                          <td className="px-4 py-3 text-sm" style={{ color: "#6B7280" }}>
-                            {ingredient.description
-                              ? <span className="max-w-xs truncate block">{ingredient.description}</span>
-                              : <span style={{ color: "#D1D5DB" }}>—</span>}
+                          <td
+                            className="px-4 py-3 text-sm"
+                            style={{ color: "#6B7280" }}
+                          >
+                            {ingredient.description ? (
+                              <span className="max-w-xs truncate block">
+                                {ingredient.description}
+                              </span>
+                            ) : (
+                              <span style={{ color: "#D1D5DB" }}>—</span>
+                            )}
                           </td>
                           {/* Expand toggle */}
                           <td className="px-4 py-3 text-right">
@@ -187,7 +280,9 @@ export default function IngredientsPage() {
                                 className="ml-auto transition-transform"
                                 style={{
                                   color: "#9CA3AF",
-                                  transform: isExpanded ? "rotate(90deg)" : "rotate(0deg)",
+                                  transform: isExpanded
+                                    ? "rotate(90deg)"
+                                    : "rotate(0deg)",
                                 }}
                               />
                             )}
@@ -208,13 +303,27 @@ export default function IngredientsPage() {
                                 >
                                   <div
                                     className="flex flex-wrap gap-2 px-4 py-3"
-                                    style={{ backgroundColor: "#F9FAFB", borderTop: "1px solid #F3F4F6" }}
+                                    style={{
+                                      backgroundColor: "#F9FAFB",
+                                      borderTop: "1px solid #F3F4F6",
+                                    }}
                                   >
-                                    <span className="mr-1 self-center text-xs font-medium" style={{ color: "#9CA3AF" }}>
+                                    <span
+                                      className="mr-1 self-center text-xs font-medium"
+                                      style={{ color: "#9CA3AF" }}
+                                    >
                                       Used in:
                                     </span>
                                     {ingredient.used_in_products.map((prod) => (
-                                      <div key={prod.id} className="flex items-center gap-1.5 rounded-lg px-3 py-1 text-xs font-medium" style={{ backgroundColor: "#FFFFFF", border: "1px solid #E5E7EB", color: "#1A1A2E" }}>
+                                      <div
+                                        key={prod.id}
+                                        className="flex items-center gap-1.5 rounded-lg px-3 py-1 text-xs font-medium"
+                                        style={{
+                                          backgroundColor: "#FFFFFF",
+                                          border: "1px solid #E5E7EB",
+                                          color: "#1A1A2E",
+                                        }}
+                                      >
                                         {prod.name}
                                         <StatusBadge status={prod.status} />
                                       </div>
@@ -235,7 +344,9 @@ export default function IngredientsPage() {
         {/* Empty state */}
         {!query.isLoading && items.length === 0 && (
           <div className="py-16 text-center">
-            <p className="text-base font-medium" style={{ color: "#6B7280" }}>No ingredients found.</p>
+            <p className="text-base font-medium" style={{ color: "#6B7280" }}>
+              No ingredients found.
+            </p>
             <p className="mt-1 text-sm" style={{ color: "#9CA3AF" }}>
               Ingredients are added when creating or editing menu items.
             </p>
@@ -244,7 +355,10 @@ export default function IngredientsPage() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between px-4 py-3" style={{ borderTop: "1px solid #E5E7EB" }}>
+          <div
+            className="flex items-center justify-between px-4 py-3"
+            style={{ borderTop: "1px solid #E5E7EB" }}
+          >
             <p className="text-sm" style={{ color: "#6B7280" }}>
               Page {page} of {totalPages}
             </p>

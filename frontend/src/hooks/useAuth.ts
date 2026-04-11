@@ -35,7 +35,11 @@ export function useAuth() {
       // Backend register returns UserResponse, not tokens.
       // Chain a login call to get tokens after successful registration.
       await api.auth.register(data);
-      return api.auth.login({ email: data.email, password: data.password, tenant_slug: data.tenant_slug });
+      return api.auth.login({
+        email: data.email,
+        password: data.password,
+        tenant_slug: data.tenant_slug,
+      });
     },
     onSuccess: (res) => {
       setAccessToken(res.access_token);

@@ -57,9 +57,7 @@ class ProductService:
         search: str | None = None,
         category_id: UUID | None = None,
     ) -> tuple[list[Product], int]:
-        return await self.product_repo.list_by_tenant(
-            tenant_id, offset, limit, status, search, category_id
-        )
+        return await self.product_repo.list_by_tenant(tenant_id, offset, limit, status, search, category_id)
 
     async def get_product(self, product_id: UUID) -> Product:
         product = await self.product_repo.get_by_id(product_id)
@@ -165,9 +163,7 @@ class ProductService:
                 await ingredient_repo.update(ingredient.id, default_unit=data.default_unit)
 
         # Check for duplicate ingredient in this product's recipe
-        existing = await self.product_ingredient_repo.get_by_product_and_ingredient(
-            product_id, ingredient.id
-        )
+        existing = await self.product_ingredient_repo.get_by_product_and_ingredient(product_id, ingredient.id)
         if existing:
             raise ConflictError(f"Ingredient '{data.name}' is already in this recipe")
 
@@ -180,9 +176,7 @@ class ProductService:
         )
         return await self.product_ingredient_repo.add(item)
 
-    async def update_recipe_ingredient(
-        self, item_id: UUID, data: ProductIngredientUpdate
-    ) -> ProductIngredient:
+    async def update_recipe_ingredient(self, item_id: UUID, data: ProductIngredientUpdate) -> ProductIngredient:
         update_data = data.model_dump(exclude_unset=True)
         item = await self.product_ingredient_repo.update(item_id, **update_data)
         if not item:
@@ -213,9 +207,7 @@ class IngredientService:
         sort_by: str = "name",
         sort_dir: str = "asc",
     ) -> tuple[list[Ingredient], int]:
-        return await self.ingredient_repo.list_by_tenant(
-            tenant_id, offset, limit, search, sort_by, sort_dir
-        )
+        return await self.ingredient_repo.list_by_tenant(tenant_id, offset, limit, search, sort_by, sort_dir)
 
     async def get_ingredient(self, ingredient_id: UUID) -> Ingredient:
         ingredient = await self.ingredient_repo.get_by_id(ingredient_id)
@@ -268,9 +260,7 @@ class CatalogService:
             raise NotFoundError("Catalog not found")
         return catalog
 
-    async def schedule_catalog(
-        self, catalog_id: UUID, data: CatalogScheduleCreate
-    ) -> CatalogSchedule:
+    async def schedule_catalog(self, catalog_id: UUID, data: CatalogScheduleCreate) -> CatalogSchedule:
         await self.get_catalog(catalog_id)
         schedule = CatalogSchedule(
             catalog_id=catalog_id,

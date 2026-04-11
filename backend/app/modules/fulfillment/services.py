@@ -31,20 +31,14 @@ class AddressService:
     def __init__(self, address_repo: AddressRepo) -> None:
         self.address_repo = address_repo
 
-    async def list_addresses(
-        self, user_id: uuid.UUID, tenant_id: uuid.UUID
-    ) -> list[Address]:
+    async def list_addresses(self, user_id: uuid.UUID, tenant_id: uuid.UUID) -> list[Address]:
         return await self.address_repo.list_by_user(user_id, tenant_id)
 
-    async def create_address(
-        self, tenant_id: uuid.UUID, user_id: uuid.UUID, data: dict
-    ) -> Address:
+    async def create_address(self, tenant_id: uuid.UUID, user_id: uuid.UUID, data: dict) -> Address:
         address = Address(tenant_id=tenant_id, user_id=user_id, **data)
         return await self.address_repo.create(address)
 
-    async def update_address(
-        self, address_id: uuid.UUID, data: dict
-    ) -> Address:
+    async def update_address(self, address_id: uuid.UUID, data: dict) -> Address:
         address = await self.address_repo.get_by_id(address_id)
         if address is None:
             raise NotFoundError("Address not found")
@@ -68,9 +62,7 @@ class DeliveryZoneService:
     async def list_zones(self, tenant_id: uuid.UUID) -> list[DeliveryZone]:
         return await self.zone_repo.list_by_tenant(tenant_id)
 
-    async def create_zone(
-        self, tenant_id: uuid.UUID, data: dict
-    ) -> DeliveryZone:
+    async def create_zone(self, tenant_id: uuid.UUID, data: dict) -> DeliveryZone:
         slots_data = data.pop("slots", None)
         zone = DeliveryZone(tenant_id=tenant_id, **data)
         if slots_data:
@@ -79,9 +71,7 @@ class DeliveryZoneService:
                 zone.slots.append(slot)
         return await self.zone_repo.create(zone)
 
-    async def lookup_zone(
-        self, postal_code: str, tenant_id: uuid.UUID
-    ) -> DeliveryZone | None:
+    async def lookup_zone(self, postal_code: str, tenant_id: uuid.UUID) -> DeliveryZone | None:
         return await self.zone_repo.lookup_by_postal_code(postal_code, tenant_id)
 
 
@@ -89,9 +79,7 @@ class FulfillmentService:
     def __init__(self, fulfillment_repo: FulfillmentRepo) -> None:
         self.fulfillment_repo = fulfillment_repo
 
-    async def create_fulfillment(
-        self, tenant_id: uuid.UUID, data: dict
-    ) -> FulfillmentOrder:
+    async def create_fulfillment(self, tenant_id: uuid.UUID, data: dict) -> FulfillmentOrder:
         fulfillment = FulfillmentOrder(
             tenant_id=tenant_id,
             order_id=data["order_id"],
@@ -131,9 +119,7 @@ class FulfillmentService:
 
         allowed = _STATUS_TRANSITIONS.get(fulfillment.status, set())
         if target not in allowed:
-            raise BadRequestError(
-                f"Cannot transition from '{fulfillment.status.value}' to '{target.value}'"
-            )
+            raise BadRequestError(f"Cannot transition from '{fulfillment.status.value}' to '{target.value}'")
 
         update_fields: dict = {"status": target}
         now = datetime.now(timezone.utc)
@@ -149,12 +135,8 @@ class FulfillmentService:
         await self.fulfillment_repo.update(fulfillment_id, **update_fields)
         return await self.fulfillment_repo.get_by_id(fulfillment_id)  # type: ignore[return-value]
 
-    async def get_available_slots(
-        self, zone_id: uuid.UUID, target_date: date
-    ) -> list[dict]:
+    async def get_available_slots(self, zone_id: uuid.UUID, target_date: date) -> list[dict]:
         return await self.fulfillment_repo.list_slots_by_zone_and_date(zone_id, target_date)
 
-    async def get_production_report(
-        self, tenant_id: uuid.UUID, target_date: date
-    ) -> dict:
+    async def get_production_report(self, tenant_id: uuid.UUID, target_date: date) -> dict:
         return await self.fulfillment_repo.get_production_report(tenant_id, target_date)

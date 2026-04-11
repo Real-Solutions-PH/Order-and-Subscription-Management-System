@@ -48,14 +48,10 @@ class SubscriptionPlanService:
     def __init__(self, plan_repo: SubscriptionPlanRepo):
         self.plan_repo = plan_repo
 
-    async def list_plans(
-        self, tenant_id: UUID, active_only: bool = True
-    ) -> list[SubscriptionPlan]:
+    async def list_plans(self, tenant_id: UUID, active_only: bool = True) -> list[SubscriptionPlan]:
         return await self.plan_repo.list_by_tenant(tenant_id, active_only=active_only)
 
-    async def create_plan(
-        self, tenant_id: UUID, data: SubscriptionPlanCreate
-    ) -> SubscriptionPlan:
+    async def create_plan(self, tenant_id: UUID, data: SubscriptionPlanCreate) -> SubscriptionPlan:
         plan = SubscriptionPlan(
             tenant_id=tenant_id,
             name=data.name,
@@ -95,9 +91,7 @@ class SubscriptionService:
 
     # ── Create ──────────────────────────────────────────────────────────
 
-    async def create_subscription(
-        self, user_id: UUID, tenant_id: UUID, data: SubscriptionCreate
-    ) -> Subscription:
+    async def create_subscription(self, user_id: UUID, tenant_id: UUID, data: SubscriptionCreate) -> Subscription:
         tier = await self.plan_repo.get_tier_by_id(data.plan_tier_id)
         if not tier or not tier.is_active:
             raise NotFoundError("Subscription plan tier not found or inactive")
@@ -154,9 +148,7 @@ class SubscriptionService:
 
     # ── Pause ───────────────────────────────────────────────────────────
 
-    async def pause_subscription(
-        self, sub_id: UUID, actor_id: UUID, data: SubscriptionPauseRequest
-    ) -> Subscription:
+    async def pause_subscription(self, sub_id: UUID, actor_id: UUID, data: SubscriptionPauseRequest) -> Subscription:
         sub = await self.sub_repo.get_by_id(sub_id)
         if not sub:
             raise NotFoundError("Subscription not found")
@@ -168,9 +160,7 @@ class SubscriptionService:
         if pause_expires_at:
             max_allowed = now + timedelta(days=MAX_PAUSE_DAYS)
             if pause_expires_at > max_allowed:
-                raise BadRequestError(
-                    f"Pause cannot exceed {MAX_PAUSE_DAYS} days"
-                )
+                raise BadRequestError(f"Pause cannot exceed {MAX_PAUSE_DAYS} days")
         else:
             pause_expires_at = now + timedelta(days=MAX_PAUSE_DAYS)
 
@@ -197,9 +187,7 @@ class SubscriptionService:
 
     # ── Resume ──────────────────────────────────────────────────────────
 
-    async def resume_subscription(
-        self, sub_id: UUID, actor_id: UUID
-    ) -> Subscription:
+    async def resume_subscription(self, sub_id: UUID, actor_id: UUID) -> Subscription:
         sub = await self.sub_repo.get_by_id(sub_id)
         if not sub:
             raise NotFoundError("Subscription not found")
@@ -227,9 +215,7 @@ class SubscriptionService:
 
     # ── Cancel ──────────────────────────────────────────────────────────
 
-    async def cancel_subscription(
-        self, sub_id: UUID, actor_id: UUID, data: SubscriptionCancelRequest
-    ) -> Subscription:
+    async def cancel_subscription(self, sub_id: UUID, actor_id: UUID, data: SubscriptionCancelRequest) -> Subscription:
         sub = await self.sub_repo.get_by_id(sub_id)
         if not sub:
             raise NotFoundError("Subscription not found")
@@ -260,9 +246,7 @@ class SubscriptionService:
 
     # ── Modify Plan ─────────────────────────────────────────────────────
 
-    async def modify_plan(
-        self, sub_id: UUID, actor_id: UUID, new_plan_tier_id: UUID
-    ) -> Subscription:
+    async def modify_plan(self, sub_id: UUID, actor_id: UUID, new_plan_tier_id: UUID) -> Subscription:
         sub = await self.sub_repo.get_by_id(sub_id)
         if not sub:
             raise NotFoundError("Subscription not found")
@@ -300,9 +284,7 @@ class SubscriptionService:
 
     # ── Selections ──────────────────────────────────────────────────────
 
-    async def set_selections(
-        self, sub_id: UUID, cycle_id: UUID, data: SelectionCreate
-    ) -> list[SubscriptionSelection]:
+    async def set_selections(self, sub_id: UUID, cycle_id: UUID, data: SelectionCreate) -> list[SubscriptionSelection]:
         sub = await self.sub_repo.get_by_id(sub_id)
         if not sub:
             raise NotFoundError("Subscription not found")
@@ -322,9 +304,7 @@ class SubscriptionService:
         tier = await self.plan_repo.get_tier_by_id(sub.plan_tier_id)
         total_items = sum(item.quantity for item in data.items)
         if total_items > tier.items_per_cycle:
-            raise BadRequestError(
-                f"Total items ({total_items}) exceeds tier limit ({tier.items_per_cycle})"
-            )
+            raise BadRequestError(f"Total items ({total_items}) exceeds tier limit ({tier.items_per_cycle})")
 
         # Replace existing selections
         await self.sub_repo.delete_selections_for_cycle(cycle_id)
@@ -347,9 +327,7 @@ class SubscriptionService:
 
     # ── Skip Cycle ──────────────────────────────────────────────────────
 
-    async def skip_cycle(
-        self, sub_id: UUID, cycle_id: UUID, actor_id: UUID
-    ) -> SubscriptionCycle:
+    async def skip_cycle(self, sub_id: UUID, cycle_id: UUID, actor_id: UUID) -> SubscriptionCycle:
         sub = await self.sub_repo.get_by_id(sub_id)
         if not sub:
             raise NotFoundError("Subscription not found")

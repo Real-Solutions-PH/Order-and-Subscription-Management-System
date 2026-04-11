@@ -59,11 +59,7 @@ class CartRepo:
         return item
 
     async def get_item_by_id(self, item_id: uuid.UUID) -> CartItem | None:
-        stmt = (
-            select(CartItem)
-            .options(selectinload(CartItem.customizations))
-            .where(CartItem.id == item_id)
-        )
+        stmt = select(CartItem).options(selectinload(CartItem.customizations)).where(CartItem.id == item_id)
         result = await self.db.execute(stmt)
         return result.scalar_one_or_none()
 
@@ -88,9 +84,7 @@ class CartRepo:
         return customization
 
     async def delete_customizations_for_item(self, cart_item_id: uuid.UUID) -> None:
-        stmt = delete(CartItemCustomization).where(
-            CartItemCustomization.cart_item_id == cart_item_id
-        )
+        stmt = delete(CartItemCustomization).where(CartItemCustomization.cart_item_id == cart_item_id)
         await self.db.execute(stmt)
         await self.db.flush()
 
@@ -189,11 +183,7 @@ class OrderRepo:
         return history
 
     async def get_next_order_number(self, tenant_id: uuid.UUID) -> str:
-        stmt = (
-            select(func.count())
-            .select_from(Order)
-            .where(Order.tenant_id == tenant_id)
-        )
+        stmt = select(func.count()).select_from(Order).where(Order.tenant_id == tenant_id)
         result = await self.db.execute(stmt)
         count = result.scalar_one()
         return f"ORD-{count + 1:05d}"

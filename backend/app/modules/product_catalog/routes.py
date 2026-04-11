@@ -64,9 +64,7 @@ async def list_products(
     category_id: UUID | None = None,
     tenant_id: UUID | None = None,
 ):
-    resolved_tenant_id = (
-        current_user.tenant_id if current_user else tenant_id
-    )
+    resolved_tenant_id = current_user.tenant_id if current_user else tenant_id
     if not resolved_tenant_id:
         return ProductListResponse(total=0, page=page, per_page=per_page, items=[])
 
@@ -179,9 +177,7 @@ async def add_recipe_ingredient(
     product_service: Annotated[ProductService, Depends(get_product_service)],
     ingredient_repo: Annotated[object, Depends(get_ingredient_repo)],
 ):
-    return await product_service.add_recipe_ingredient(
-        product_id, current_user.tenant_id, data, ingredient_repo
-    )
+    return await product_service.add_recipe_ingredient(product_id, current_user.tenant_id, data, ingredient_repo)
 
 
 @router.patch(
@@ -291,11 +287,10 @@ async def get_active_catalog(
     current_user: OptionalUser = None,
     tenant_id: UUID | None = None,
 ):
-    resolved_tenant_id = (
-        current_user.tenant_id if current_user else tenant_id
-    )
+    resolved_tenant_id = current_user.tenant_id if current_user else tenant_id
     if not resolved_tenant_id:
         from app.exceptions import BadRequestError
+
         raise BadRequestError("tenant_id is required")
     return await catalog_service.get_active_catalog(resolved_tenant_id)
 

@@ -31,12 +31,28 @@ import type {
 // ── Constants ────────────────────────────────────────────────────────
 
 const ALL_TAGS = [
-  "High Protein", "Keto-Friendly", "Vegan", "Vegetarian", "Gluten-Free",
-  "Filipino Classic", "Dairy-Free", "Low Carb", "Diabetic-Friendly", "Spicy",
-  "Filipino Fusion", "Halal",
+  "High Protein",
+  "Keto-Friendly",
+  "Vegan",
+  "Vegetarian",
+  "Gluten-Free",
+  "Filipino Classic",
+  "Dairy-Free",
+  "Low Carb",
+  "Diabetic-Friendly",
+  "Spicy",
+  "Filipino Fusion",
+  "Halal",
 ];
 const ALL_ALLERGENS = [
-  "Dairy", "Eggs", "Gluten", "Soy", "Peanuts", "Fish", "Shellfish", "Sesame",
+  "Dairy",
+  "Eggs",
+  "Gluten",
+  "Soy",
+  "Peanuts",
+  "Fish",
+  "Shellfish",
+  "Sesame",
 ];
 
 type StatusFilter = "all" | "active" | "draft" | "archived";
@@ -64,9 +80,21 @@ function StatusBadge({ status }: { status: string }) {
 
 // ── Sort icon ─────────────────────────────────────────────────────────
 
-function SortIcon({ field, sortField, sortDir }: { field: SortField; sortField: SortField; sortDir: SortDir }) {
+function SortIcon({
+  field,
+  sortField,
+  sortDir,
+}: {
+  field: SortField;
+  sortField: SortField;
+  sortDir: SortDir;
+}) {
   if (field !== sortField) return null;
-  return sortDir === "asc" ? <ChevronUp size={13} /> : <ChevronDown size={13} />;
+  return sortDir === "asc" ? (
+    <ChevronUp size={13} />
+  ) : (
+    <ChevronDown size={13} />
+  );
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────
@@ -130,8 +158,12 @@ export default function MenuItemsPage() {
 
   // ── Modal state ──────────────────────────────────────────────────
   const [modalOpen, setModalOpen] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<ProductResponse | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<ProductResponse | null>(null);
+  const [editingProduct, setEditingProduct] = useState<ProductResponse | null>(
+    null,
+  );
+  const [deleteTarget, setDeleteTarget] = useState<ProductResponse | null>(
+    null,
+  );
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
   // ── Form state ───────────────────────────────────────────────────
@@ -155,16 +187,30 @@ export default function MenuItemsPage() {
   });
   const [ingredients, setIngredients] = useState<IngredientRow[]>([]);
   const [newIngredient, setNewIngredient] = useState<IngredientRow>({
-    name: "", quantity: "", unit: "", notes: "",
+    name: "",
+    quantity: "",
+    unit: "",
+    notes: "",
   });
 
   function resetForm() {
     setForm({
-      name: "", description: "", short_description: "", sku: "",
-      status: "draft", is_subscribable: false, is_standalone: true,
-      price: "", compare_at_price: "", imageUrl: "",
-      calories: "", protein: "", carbs: "", fat: "",
-      tags: [], allergens: [],
+      name: "",
+      description: "",
+      short_description: "",
+      sku: "",
+      status: "draft",
+      is_subscribable: false,
+      is_standalone: true,
+      price: "",
+      compare_at_price: "",
+      imageUrl: "",
+      calories: "",
+      protein: "",
+      carbs: "",
+      fat: "",
+      tags: [],
+      allergens: [],
     });
     setIngredients([]);
     setNewIngredient({ name: "", quantity: "", unit: "", notes: "" });
@@ -178,8 +224,10 @@ export default function MenuItemsPage() {
 
   function openEdit(product: ProductResponse) {
     const meta = getMeta(product);
-    const defaultVariant = product.variants.find((v) => v.is_default) ?? product.variants[0];
-    const primaryImage = product.images.find((img) => img.is_primary) ?? product.images[0];
+    const defaultVariant =
+      product.variants.find((v) => v.is_default) ?? product.variants[0];
+    const primaryImage =
+      product.images.find((img) => img.is_primary) ?? product.images[0];
     setForm({
       name: product.name,
       description: product.description ?? "",
@@ -189,7 +237,9 @@ export default function MenuItemsPage() {
       is_subscribable: product.is_subscribable,
       is_standalone: product.is_standalone,
       price: defaultVariant ? String(defaultVariant.price) : "",
-      compare_at_price: defaultVariant?.compare_at_price ? String(defaultVariant.compare_at_price) : "",
+      compare_at_price: defaultVariant?.compare_at_price
+        ? String(defaultVariant.compare_at_price)
+        : "",
       imageUrl: primaryImage?.url ?? "",
       calories: String((meta.calories as number) ?? ""),
       protein: String((meta.protein as number) ?? ""),
@@ -205,7 +255,7 @@ export default function MenuItemsPage() {
         quantity: pi.quantity != null ? String(pi.quantity) : "",
         unit: pi.unit ?? "",
         notes: pi.notes ?? "",
-      }))
+      })),
     );
     setNewIngredient({ name: "", quantity: "", unit: "", notes: "" });
     setEditingProduct(product);
@@ -241,14 +291,24 @@ export default function MenuItemsPage() {
           is_standalone: form.is_standalone,
           metadata: Object.keys(metadata).length ? metadata : undefined,
         };
-        savedProduct = await updateProduct({ id: editingProduct.id, data: updateData });
+        savedProduct = await updateProduct({
+          id: editingProduct.id,
+          data: updateData,
+        });
 
         // Sync ingredients: remove deleted ones
-        const existingIds = new Set(ingredients.filter((i) => i.id).map((i) => i.id!));
-        const originalIds = new Set((editingProduct.ingredients ?? []).map((pi) => pi.id));
+        const existingIds = new Set(
+          ingredients.filter((i) => i.id).map((i) => i.id!),
+        );
+        const originalIds = new Set(
+          (editingProduct.ingredients ?? []).map((pi) => pi.id),
+        );
         for (const origId of originalIds) {
           if (!existingIds.has(origId)) {
-            await removeIngredient({ productId: editingProduct.id, itemId: origId });
+            await removeIngredient({
+              productId: editingProduct.id,
+              itemId: origId,
+            });
           }
         }
         // Update existing ingredient quantities/units/notes
@@ -349,7 +409,8 @@ export default function MenuItemsPage() {
         showToast(`"${product.name}" activated`);
       }
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Failed to update status";
+      const msg =
+        err instanceof Error ? err.message : "Failed to update status";
       showToast(msg, "error");
     }
   }
@@ -365,9 +426,13 @@ export default function MenuItemsPage() {
     setIngredients((prev) => prev.filter((_, i) => i !== idx));
   }
 
-  function updateIngredientRow(idx: number, field: keyof IngredientRow, value: string) {
+  function updateIngredientRow(
+    idx: number,
+    field: keyof IngredientRow,
+    value: string,
+  ) {
     setIngredients((prev) =>
-      prev.map((row, i) => (i === idx ? { ...row, [field]: value } : row))
+      prev.map((row, i) => (i === idx ? { ...row, [field]: value } : row)),
     );
   }
 
@@ -375,13 +440,17 @@ export default function MenuItemsPage() {
   function toggleTag(tag: string) {
     setForm((f) => ({
       ...f,
-      tags: f.tags.includes(tag) ? f.tags.filter((t) => t !== tag) : [...f.tags, tag],
+      tags: f.tags.includes(tag)
+        ? f.tags.filter((t) => t !== tag)
+        : [...f.tags, tag],
     }));
   }
   function toggleAllergen(a: string) {
     setForm((f) => ({
       ...f,
-      allergens: f.allergens.includes(a) ? f.allergens.filter((x) => x !== a) : [...f.allergens, a],
+      allergens: f.allergens.includes(a)
+        ? f.allergens.filter((x) => x !== a)
+        : [...f.allergens, a],
     }));
   }
 
@@ -407,7 +476,8 @@ export default function MenuItemsPage() {
     if (sortField === "name") cmp = a.name.localeCompare(b.name);
     else if (sortField === "price") cmp = getPrice(a) - getPrice(b);
     else if (sortField === "status") cmp = a.status.localeCompare(b.status);
-    else cmp = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+    else
+      cmp = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
     return sortDir === "asc" ? cmp : -cmp;
   });
 
@@ -428,7 +498,13 @@ export default function MenuItemsPage() {
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold" style={{ fontFamily: "'DM Serif Display', serif", color: "#1A1A2E" }}>
+          <h1
+            className="text-2xl font-bold"
+            style={{
+              fontFamily: "'DM Serif Display', serif",
+              color: "#1A1A2E",
+            }}
+          >
             Menu Items
           </h1>
           <p className="mt-0.5 text-sm" style={{ color: "#6B7280" }}>
@@ -448,29 +524,52 @@ export default function MenuItemsPage() {
       </div>
 
       {/* Filters */}
-      <div className="rounded-xl bg-white p-4 shadow-sm" style={{ border: "1px solid #E5E7EB" }}>
+      <div
+        className="rounded-xl bg-white p-4 shadow-sm"
+        style={{ border: "1px solid #E5E7EB" }}
+      >
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           {/* Search */}
           <div className="relative flex-1">
-            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "#9CA3AF" }} />
+            <Search
+              size={15}
+              className="absolute left-3 top-1/2 -translate-y-1/2"
+              style={{ color: "#9CA3AF" }}
+            />
             <input
               type="text"
               placeholder="Search menu items..."
               value={search}
-              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
               className="w-full rounded-lg py-2 pl-9 pr-3 text-sm focus:outline-none focus:ring-2"
-              style={{ border: "1px solid #E5E7EB", color: "#1A1A2E", "--tw-ring-color": "#40916C" } as React.CSSProperties}
+              style={
+                {
+                  border: "1px solid #E5E7EB",
+                  color: "#1A1A2E",
+                  "--tw-ring-color": "#40916C",
+                } as React.CSSProperties
+              }
             />
           </div>
           {/* Tag filter */}
           <select
             value={tagFilter ?? ""}
-            onChange={(e) => { setTagFilter(e.target.value || null); setPage(1); }}
+            onChange={(e) => {
+              setTagFilter(e.target.value || null);
+              setPage(1);
+            }}
             className="rounded-lg py-2 pl-3 pr-8 text-sm focus:outline-none focus:ring-2"
             style={{ border: "1px solid #E5E7EB", color: "#1A1A2E" }}
           >
             <option value="">All Tags</option>
-            {ALL_TAGS.map((t) => <option key={t} value={t}>{t}</option>)}
+            {ALL_TAGS.map((t) => (
+              <option key={t} value={t}>
+                {t}
+              </option>
+            ))}
           </select>
         </div>
         {/* Status tabs */}
@@ -478,7 +577,10 @@ export default function MenuItemsPage() {
           {statusTabs.map((tab) => (
             <button
               key={tab.value}
-              onClick={() => { setStatusFilter(tab.value); setPage(1); }}
+              onClick={() => {
+                setStatusFilter(tab.value);
+                setPage(1);
+              }}
               className="rounded-full px-3 py-1 text-sm font-medium transition-colors"
               style={
                 statusFilter === tab.value
@@ -493,12 +595,23 @@ export default function MenuItemsPage() {
       </div>
 
       {/* Table */}
-      <div className="overflow-hidden rounded-xl bg-white shadow-sm" style={{ border: "1px solid #E5E7EB" }}>
+      <div
+        className="overflow-hidden rounded-xl bg-white shadow-sm"
+        style={{ border: "1px solid #E5E7EB" }}
+      >
         <div className="overflow-x-auto">
           <table className="min-w-full text-sm">
-            <thead style={{ backgroundColor: "#F9FAFB", borderBottom: "1px solid #E5E7EB" }}>
+            <thead
+              style={{
+                backgroundColor: "#F9FAFB",
+                borderBottom: "1px solid #E5E7EB",
+              }}
+            >
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide" style={{ color: "#6B7280" }}>
+                <th
+                  className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide"
+                  style={{ color: "#6B7280" }}
+                >
                   Item
                 </th>
                 <th
@@ -507,7 +620,12 @@ export default function MenuItemsPage() {
                   onClick={() => toggleSort("status")}
                 >
                   <span className="inline-flex items-center gap-1">
-                    Status <SortIcon field="status" sortField={sortField} sortDir={sortDir} />
+                    Status{" "}
+                    <SortIcon
+                      field="status"
+                      sortField={sortField}
+                      sortDir={sortDir}
+                    />
                   </span>
                 </th>
                 <th
@@ -516,13 +634,24 @@ export default function MenuItemsPage() {
                   onClick={() => toggleSort("price")}
                 >
                   <span className="inline-flex items-center gap-1">
-                    Price <SortIcon field="price" sortField={sortField} sortDir={sortDir} />
+                    Price{" "}
+                    <SortIcon
+                      field="price"
+                      sortField={sortField}
+                      sortDir={sortDir}
+                    />
                   </span>
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide" style={{ color: "#6B7280" }}>
+                <th
+                  className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide"
+                  style={{ color: "#6B7280" }}
+                >
                   Tags
                 </th>
-                <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide" style={{ color: "#6B7280" }}>
+                <th
+                  className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide"
+                  style={{ color: "#6B7280" }}
+                >
                   Actions
                 </th>
               </tr>
@@ -539,7 +668,9 @@ export default function MenuItemsPage() {
                 : sortedItems.map((product) => {
                     const meta = getMeta(product);
                     const tags = (meta.tags as string[]) ?? [];
-                    const primaryImage = product.images.find((img) => img.is_primary) ?? product.images[0];
+                    const primaryImage =
+                      product.images.find((img) => img.is_primary) ??
+                      product.images[0];
                     return (
                       <motion.tr
                         key={product.id}
@@ -551,17 +682,31 @@ export default function MenuItemsPage() {
                         {/* Item */}
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-3">
-                            <div className="h-10 w-14 flex-shrink-0 overflow-hidden rounded-md" style={{ border: "1px solid #E5E7EB" }}>
+                            <div
+                              className="h-10 w-14 flex-shrink-0 overflow-hidden rounded-md"
+                              style={{ border: "1px solid #E5E7EB" }}
+                            >
                               <MealImage
-                                src={primaryImage?.url ?? "/images/meals/placeholder.png"}
+                                src={
+                                  primaryImage?.url ??
+                                  "/images/meals/placeholder.png"
+                                }
                                 alt={product.name}
                                 className="h-full w-full object-cover"
                               />
                             </div>
                             <div>
-                              <p className="font-medium" style={{ color: "#1A1A2E" }}>{product.name}</p>
+                              <p
+                                className="font-medium"
+                                style={{ color: "#1A1A2E" }}
+                              >
+                                {product.name}
+                              </p>
                               {product.short_description && (
-                                <p className="mt-0.5 max-w-xs truncate text-xs" style={{ color: "#9CA3AF" }}>
+                                <p
+                                  className="mt-0.5 max-w-xs truncate text-xs"
+                                  style={{ color: "#9CA3AF" }}
+                                >
                                   {product.short_description}
                                 </p>
                               )}
@@ -573,19 +718,39 @@ export default function MenuItemsPage() {
                           <StatusBadge status={product.status} />
                         </td>
                         {/* Price */}
-                        <td className="px-4 py-3 font-medium" style={{ color: "#1A1A2E" }}>
-                          {getPrice(product) > 0 ? formatPeso(getPrice(product)) : <span style={{ color: "#9CA3AF" }}>—</span>}
+                        <td
+                          className="px-4 py-3 font-medium"
+                          style={{ color: "#1A1A2E" }}
+                        >
+                          {getPrice(product) > 0 ? (
+                            formatPeso(getPrice(product))
+                          ) : (
+                            <span style={{ color: "#9CA3AF" }}>—</span>
+                          )}
                         </td>
                         {/* Tags */}
                         <td className="px-4 py-3">
                           <div className="flex flex-wrap gap-1">
                             {tags.slice(0, 3).map((tag) => (
-                              <span key={tag} className="rounded-full px-2 py-0.5 text-[10px] font-medium" style={{ backgroundColor: "#D1FAE5", color: "#065F46" }}>
+                              <span
+                                key={tag}
+                                className="rounded-full px-2 py-0.5 text-[10px] font-medium"
+                                style={{
+                                  backgroundColor: "#D1FAE5",
+                                  color: "#065F46",
+                                }}
+                              >
                                 {tag}
                               </span>
                             ))}
                             {tags.length > 3 && (
-                              <span className="rounded-full px-2 py-0.5 text-[10px]" style={{ backgroundColor: "#F3F4F6", color: "#6B7280" }}>
+                              <span
+                                className="rounded-full px-2 py-0.5 text-[10px]"
+                                style={{
+                                  backgroundColor: "#F3F4F6",
+                                  color: "#6B7280",
+                                }}
+                              >
                                 +{tags.length - 3}
                               </span>
                             )}
@@ -607,16 +772,30 @@ export default function MenuItemsPage() {
                                 <button
                                   onClick={() => handleToggleStatus(product)}
                                   disabled={isTogglingStatus}
-                                  title={product.status === "active" ? "Deactivate" : "Activate"}
+                                  title={
+                                    product.status === "active"
+                                      ? "Deactivate"
+                                      : "Activate"
+                                  }
                                   className="rounded-lg p-1.5 transition-colors hover:bg-gray-100 disabled:opacity-40"
-                                  style={{ color: product.status === "active" ? "#40916C" : "#9CA3AF" }}
+                                  style={{
+                                    color:
+                                      product.status === "active"
+                                        ? "#40916C"
+                                        : "#9CA3AF",
+                                  }}
                                 >
-                                  {product.status === "active"
-                                    ? <ToggleRight size={18} />
-                                    : <ToggleLeft size={18} />}
+                                  {product.status === "active" ? (
+                                    <ToggleRight size={18} />
+                                  ) : (
+                                    <ToggleLeft size={18} />
+                                  )}
                                 </button>
                                 <button
-                                  onClick={() => { setDeleteTarget(product); setDeleteModalOpen(true); }}
+                                  onClick={() => {
+                                    setDeleteTarget(product);
+                                    setDeleteModalOpen(true);
+                                  }}
                                   title="Delete"
                                   className="rounded-lg p-1.5 transition-colors hover:bg-red-50"
                                   style={{ color: "#EF4444" }}
@@ -637,9 +816,15 @@ export default function MenuItemsPage() {
         {/* Empty state */}
         {!productsQuery.isLoading && sortedItems.length === 0 && (
           <div className="py-16 text-center">
-            <p className="text-base font-medium" style={{ color: "#6B7280" }}>No menu items found.</p>
+            <p className="text-base font-medium" style={{ color: "#6B7280" }}>
+              No menu items found.
+            </p>
             {isSuperAdmin && (
-              <button onClick={openCreate} className="mt-3 text-sm font-semibold underline" style={{ color: "#40916C" }}>
+              <button
+                onClick={openCreate}
+                className="mt-3 text-sm font-semibold underline"
+                style={{ color: "#40916C" }}
+              >
                 Add your first item
               </button>
             )}
@@ -648,7 +833,10 @@ export default function MenuItemsPage() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between px-4 py-3" style={{ borderTop: "1px solid #E5E7EB" }}>
+          <div
+            className="flex items-center justify-between px-4 py-3"
+            style={{ borderTop: "1px solid #E5E7EB" }}
+          >
             <p className="text-sm" style={{ color: "#6B7280" }}>
               Page {page} of {totalPages}
             </p>
@@ -677,68 +865,120 @@ export default function MenuItemsPage() {
       {/* ── Create / Edit Modal ─────────────────────────────────────────── */}
       <Modal
         isOpen={modalOpen}
-        onClose={() => { setModalOpen(false); resetForm(); }}
-        title={editingProduct ? (isSuperAdmin ? "Edit Menu Item" : "View Menu Item") : "Add Menu Item"}
+        onClose={() => {
+          setModalOpen(false);
+          resetForm();
+        }}
+        title={
+          editingProduct
+            ? isSuperAdmin
+              ? "Edit Menu Item"
+              : "View Menu Item"
+            : "Add Menu Item"
+        }
         size="lg"
       >
         <div className="max-h-[75vh] space-y-5 overflow-y-auto pr-1">
           {/* Basic info */}
           <section>
-            <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide" style={{ color: "#6B7280" }}>Basic Info</h3>
+            <h3
+              className="mb-3 text-sm font-semibold uppercase tracking-wide"
+              style={{ color: "#6B7280" }}
+            >
+              Basic Info
+            </h3>
             <div className="space-y-3">
               <div>
-                <label className="mb-1 block text-sm font-medium" style={{ color: "#1A1A2E" }}>Name *</label>
+                <label
+                  className="mb-1 block text-sm font-medium"
+                  style={{ color: "#1A1A2E" }}
+                >
+                  Name *
+                </label>
                 <input
                   type="text"
                   value={form.name}
                   disabled={!isSuperAdmin}
-                  onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, name: e.target.value }))
+                  }
                   className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 disabled:bg-gray-50"
                   style={{ border: "1px solid #E5E7EB", color: "#1A1A2E" }}
                 />
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium" style={{ color: "#1A1A2E" }}>Description</label>
+                <label
+                  className="mb-1 block text-sm font-medium"
+                  style={{ color: "#1A1A2E" }}
+                >
+                  Description
+                </label>
                 <textarea
                   rows={3}
                   value={form.description}
                   disabled={!isSuperAdmin}
-                  onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, description: e.target.value }))
+                  }
                   className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 disabled:bg-gray-50"
                   style={{ border: "1px solid #E5E7EB", color: "#1A1A2E" }}
                 />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="mb-1 block text-sm font-medium" style={{ color: "#1A1A2E" }}>Short Description</label>
+                  <label
+                    className="mb-1 block text-sm font-medium"
+                    style={{ color: "#1A1A2E" }}
+                  >
+                    Short Description
+                  </label>
                   <input
                     type="text"
                     value={form.short_description}
                     disabled={!isSuperAdmin}
-                    onChange={(e) => setForm((f) => ({ ...f, short_description: e.target.value }))}
+                    onChange={(e) =>
+                      setForm((f) => ({
+                        ...f,
+                        short_description: e.target.value,
+                      }))
+                    }
                     className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none disabled:bg-gray-50"
                     style={{ border: "1px solid #E5E7EB", color: "#1A1A2E" }}
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-sm font-medium" style={{ color: "#1A1A2E" }}>SKU</label>
+                  <label
+                    className="mb-1 block text-sm font-medium"
+                    style={{ color: "#1A1A2E" }}
+                  >
+                    SKU
+                  </label>
                   <input
                     type="text"
                     value={form.sku}
                     disabled={!isSuperAdmin}
-                    onChange={(e) => setForm((f) => ({ ...f, sku: e.target.value }))}
+                    onChange={(e) =>
+                      setForm((f) => ({ ...f, sku: e.target.value }))
+                    }
                     className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none disabled:bg-gray-50"
                     style={{ border: "1px solid #E5E7EB", color: "#1A1A2E" }}
                   />
                 </div>
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium" style={{ color: "#1A1A2E" }}>Image URL</label>
+                <label
+                  className="mb-1 block text-sm font-medium"
+                  style={{ color: "#1A1A2E" }}
+                >
+                  Image URL
+                </label>
                 <input
                   type="text"
                   value={form.imageUrl}
                   disabled={!isSuperAdmin}
-                  onChange={(e) => setForm((f) => ({ ...f, imageUrl: e.target.value }))}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, imageUrl: e.target.value }))
+                  }
                   placeholder="https://..."
                   className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none disabled:bg-gray-50"
                   style={{ border: "1px solid #E5E7EB", color: "#1A1A2E" }}
@@ -749,14 +989,26 @@ export default function MenuItemsPage() {
 
           {/* Settings + Status */}
           <section>
-            <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide" style={{ color: "#6B7280" }}>Settings</h3>
+            <h3
+              className="mb-3 text-sm font-semibold uppercase tracking-wide"
+              style={{ color: "#6B7280" }}
+            >
+              Settings
+            </h3>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="mb-1 block text-sm font-medium" style={{ color: "#1A1A2E" }}>Status</label>
+                <label
+                  className="mb-1 block text-sm font-medium"
+                  style={{ color: "#1A1A2E" }}
+                >
+                  Status
+                </label>
                 <select
                   value={form.status}
                   disabled={!isSuperAdmin}
-                  onChange={(e) => setForm((f) => ({ ...f, status: e.target.value }))}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, status: e.target.value }))
+                  }
                   className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none disabled:bg-gray-50"
                   style={{ border: "1px solid #E5E7EB", color: "#1A1A2E" }}
                 >
@@ -766,22 +1018,38 @@ export default function MenuItemsPage() {
                 </select>
               </div>
               <div className="flex flex-col gap-2 pt-1">
-                <label className="flex cursor-pointer items-center gap-2 text-sm" style={{ color: "#1A1A2E" }}>
+                <label
+                  className="flex cursor-pointer items-center gap-2 text-sm"
+                  style={{ color: "#1A1A2E" }}
+                >
                   <input
                     type="checkbox"
                     checked={form.is_subscribable}
                     disabled={!isSuperAdmin}
-                    onChange={(e) => setForm((f) => ({ ...f, is_subscribable: e.target.checked }))}
+                    onChange={(e) =>
+                      setForm((f) => ({
+                        ...f,
+                        is_subscribable: e.target.checked,
+                      }))
+                    }
                     className="h-4 w-4 rounded"
                   />
                   Subscribable
                 </label>
-                <label className="flex cursor-pointer items-center gap-2 text-sm" style={{ color: "#1A1A2E" }}>
+                <label
+                  className="flex cursor-pointer items-center gap-2 text-sm"
+                  style={{ color: "#1A1A2E" }}
+                >
                   <input
                     type="checkbox"
                     checked={form.is_standalone}
                     disabled={!isSuperAdmin}
-                    onChange={(e) => setForm((f) => ({ ...f, is_standalone: e.target.checked }))}
+                    onChange={(e) =>
+                      setForm((f) => ({
+                        ...f,
+                        is_standalone: e.target.checked,
+                      }))
+                    }
                     className="h-4 w-4 rounded"
                   />
                   Standalone (Ala Carte)
@@ -792,38 +1060,68 @@ export default function MenuItemsPage() {
 
           {/* Nutritional info */}
           <section>
-            <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide" style={{ color: "#6B7280" }}>Nutritional Info</h3>
+            <h3
+              className="mb-3 text-sm font-semibold uppercase tracking-wide"
+              style={{ color: "#6B7280" }}
+            >
+              Nutritional Info
+            </h3>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-              {(["calories", "protein", "carbs", "fat"] as const).map((field) => (
-                <div key={field}>
-                  <label className="mb-1 block text-xs capitalize" style={{ color: "#6B7280" }}>
-                    {field} {field === "calories" ? "(kcal)" : "(g)"}
-                  </label>
-                  <input
-                    type="number"
-                    value={form[field]}
-                    disabled={!isSuperAdmin}
-                    onChange={(e) => setForm((f) => ({ ...f, [field]: e.target.value }))}
-                    className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none disabled:bg-gray-50"
-                    style={{ border: "1px solid #E5E7EB", color: "#1A1A2E" }}
-                  />
-                </div>
-              ))}
+              {(["calories", "protein", "carbs", "fat"] as const).map(
+                (field) => (
+                  <div key={field}>
+                    <label
+                      className="mb-1 block text-xs capitalize"
+                      style={{ color: "#6B7280" }}
+                    >
+                      {field} {field === "calories" ? "(kcal)" : "(g)"}
+                    </label>
+                    <input
+                      type="number"
+                      value={form[field]}
+                      disabled={!isSuperAdmin}
+                      onChange={(e) =>
+                        setForm((f) => ({ ...f, [field]: e.target.value }))
+                      }
+                      className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none disabled:bg-gray-50"
+                      style={{ border: "1px solid #E5E7EB", color: "#1A1A2E" }}
+                    />
+                  </div>
+                ),
+              )}
             </div>
           </section>
 
           {/* Dietary Tags */}
           <section>
-            <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide" style={{ color: "#6B7280" }}>Dietary Tags</h3>
+            <h3
+              className="mb-3 text-sm font-semibold uppercase tracking-wide"
+              style={{ color: "#6B7280" }}
+            >
+              Dietary Tags
+            </h3>
             <div className="flex flex-wrap gap-2">
               {ALL_TAGS.map((tag) => (
-                <label key={tag} className="flex cursor-pointer items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors" style={{
-                  backgroundColor: form.tags.includes(tag) ? "#D1FAE5" : "#F3F4F6",
-                  color: form.tags.includes(tag) ? "#065F46" : "#6B7280",
-                  border: form.tags.includes(tag) ? "1px solid #6EE7B7" : "1px solid #E5E7EB",
-                  opacity: isSuperAdmin ? 1 : 0.7,
-                }}>
-                  <input type="checkbox" checked={form.tags.includes(tag)} onChange={() => isSuperAdmin && toggleTag(tag)} className="sr-only" />
+                <label
+                  key={tag}
+                  className="flex cursor-pointer items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors"
+                  style={{
+                    backgroundColor: form.tags.includes(tag)
+                      ? "#D1FAE5"
+                      : "#F3F4F6",
+                    color: form.tags.includes(tag) ? "#065F46" : "#6B7280",
+                    border: form.tags.includes(tag)
+                      ? "1px solid #6EE7B7"
+                      : "1px solid #E5E7EB",
+                    opacity: isSuperAdmin ? 1 : 0.7,
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={form.tags.includes(tag)}
+                    onChange={() => isSuperAdmin && toggleTag(tag)}
+                    className="sr-only"
+                  />
                   {tag}
                 </label>
               ))}
@@ -832,16 +1130,34 @@ export default function MenuItemsPage() {
 
           {/* Allergens */}
           <section>
-            <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide" style={{ color: "#6B7280" }}>Allergens</h3>
+            <h3
+              className="mb-3 text-sm font-semibold uppercase tracking-wide"
+              style={{ color: "#6B7280" }}
+            >
+              Allergens
+            </h3>
             <div className="flex flex-wrap gap-2">
               {ALL_ALLERGENS.map((a) => (
-                <label key={a} className="flex cursor-pointer items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors" style={{
-                  backgroundColor: form.allergens.includes(a) ? "#FEE2E2" : "#F3F4F6",
-                  color: form.allergens.includes(a) ? "#991B1B" : "#6B7280",
-                  border: form.allergens.includes(a) ? "1px solid #FCA5A5" : "1px solid #E5E7EB",
-                  opacity: isSuperAdmin ? 1 : 0.7,
-                }}>
-                  <input type="checkbox" checked={form.allergens.includes(a)} onChange={() => isSuperAdmin && toggleAllergen(a)} className="sr-only" />
+                <label
+                  key={a}
+                  className="flex cursor-pointer items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors"
+                  style={{
+                    backgroundColor: form.allergens.includes(a)
+                      ? "#FEE2E2"
+                      : "#F3F4F6",
+                    color: form.allergens.includes(a) ? "#991B1B" : "#6B7280",
+                    border: form.allergens.includes(a)
+                      ? "1px solid #FCA5A5"
+                      : "1px solid #E5E7EB",
+                    opacity: isSuperAdmin ? 1 : 0.7,
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={form.allergens.includes(a)}
+                    onChange={() => isSuperAdmin && toggleAllergen(a)}
+                    className="sr-only"
+                  />
                   {a}
                 </label>
               ))}
@@ -850,22 +1166,53 @@ export default function MenuItemsPage() {
 
           {/* Recipe / Ingredients */}
           <section>
-            <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide" style={{ color: "#6B7280" }}>Recipe / Ingredients</h3>
+            <h3
+              className="mb-3 text-sm font-semibold uppercase tracking-wide"
+              style={{ color: "#6B7280" }}
+            >
+              Recipe / Ingredients
+            </h3>
 
             {/* Existing ingredient rows */}
             {ingredients.length > 0 && (
-              <div className="mb-3 overflow-hidden rounded-lg" style={{ border: "1px solid #E5E7EB" }}>
+              <div
+                className="mb-3 overflow-hidden rounded-lg"
+                style={{ border: "1px solid #E5E7EB" }}
+              >
                 <table className="min-w-full text-xs">
                   <thead style={{ backgroundColor: "#F9FAFB" }}>
                     <tr>
-                      <th className="px-3 py-2 text-left font-semibold" style={{ color: "#6B7280" }}>Ingredient</th>
-                      <th className="px-3 py-2 text-left font-semibold" style={{ color: "#6B7280" }}>Qty</th>
-                      <th className="px-3 py-2 text-left font-semibold" style={{ color: "#6B7280" }}>Unit</th>
-                      <th className="px-3 py-2 text-left font-semibold" style={{ color: "#6B7280" }}>Notes</th>
+                      <th
+                        className="px-3 py-2 text-left font-semibold"
+                        style={{ color: "#6B7280" }}
+                      >
+                        Ingredient
+                      </th>
+                      <th
+                        className="px-3 py-2 text-left font-semibold"
+                        style={{ color: "#6B7280" }}
+                      >
+                        Qty
+                      </th>
+                      <th
+                        className="px-3 py-2 text-left font-semibold"
+                        style={{ color: "#6B7280" }}
+                      >
+                        Unit
+                      </th>
+                      <th
+                        className="px-3 py-2 text-left font-semibold"
+                        style={{ color: "#6B7280" }}
+                      >
+                        Notes
+                      </th>
                       {isSuperAdmin && <th className="px-3 py-2" />}
                     </tr>
                   </thead>
-                  <tbody className="divide-y" style={{ borderColor: "#F3F4F6" }}>
+                  <tbody
+                    className="divide-y"
+                    style={{ borderColor: "#F3F4F6" }}
+                  >
                     {ingredients.map((row, idx) => (
                       <tr key={idx}>
                         <td className="px-3 py-2">
@@ -873,7 +1220,9 @@ export default function MenuItemsPage() {
                             <input
                               type="text"
                               value={row.name}
-                              onChange={(e) => updateIngredientRow(idx, "name", e.target.value)}
+                              onChange={(e) =>
+                                updateIngredientRow(idx, "name", e.target.value)
+                              }
                               className="w-full rounded px-2 py-1 text-xs focus:outline-none"
                               style={{ border: "1px solid #E5E7EB" }}
                             />
@@ -886,7 +1235,13 @@ export default function MenuItemsPage() {
                             <input
                               type="number"
                               value={row.quantity}
-                              onChange={(e) => updateIngredientRow(idx, "quantity", e.target.value)}
+                              onChange={(e) =>
+                                updateIngredientRow(
+                                  idx,
+                                  "quantity",
+                                  e.target.value,
+                                )
+                              }
                               className="w-20 rounded px-2 py-1 text-xs focus:outline-none"
                               style={{ border: "1px solid #E5E7EB" }}
                             />
@@ -899,7 +1254,9 @@ export default function MenuItemsPage() {
                             <input
                               type="text"
                               value={row.unit}
-                              onChange={(e) => updateIngredientRow(idx, "unit", e.target.value)}
+                              onChange={(e) =>
+                                updateIngredientRow(idx, "unit", e.target.value)
+                              }
                               placeholder="g, ml..."
                               className="w-20 rounded px-2 py-1 text-xs focus:outline-none"
                               style={{ border: "1px solid #E5E7EB" }}
@@ -913,7 +1270,13 @@ export default function MenuItemsPage() {
                             <input
                               type="text"
                               value={row.notes}
-                              onChange={(e) => updateIngredientRow(idx, "notes", e.target.value)}
+                              onChange={(e) =>
+                                updateIngredientRow(
+                                  idx,
+                                  "notes",
+                                  e.target.value,
+                                )
+                              }
                               className="w-full rounded px-2 py-1 text-xs focus:outline-none"
                               style={{ border: "1px solid #E5E7EB" }}
                             />
@@ -923,7 +1286,10 @@ export default function MenuItemsPage() {
                         </td>
                         {isSuperAdmin && (
                           <td className="px-3 py-2">
-                            <button onClick={() => removeIngredientRow(idx)} className="text-red-400 hover:text-red-600">
+                            <button
+                              onClick={() => removeIngredientRow(idx)}
+                              className="text-red-400 hover:text-red-600"
+                            >
                               <X size={13} />
                             </button>
                           </td>
@@ -939,11 +1305,18 @@ export default function MenuItemsPage() {
             {isSuperAdmin && (
               <div className="flex flex-wrap items-end gap-2">
                 <div className="flex-1 min-w-[120px]">
-                  <label className="mb-1 block text-xs" style={{ color: "#6B7280" }}>Ingredient name</label>
+                  <label
+                    className="mb-1 block text-xs"
+                    style={{ color: "#6B7280" }}
+                  >
+                    Ingredient name
+                  </label>
                   <input
                     type="text"
                     value={newIngredient.name}
-                    onChange={(e) => setNewIngredient((n) => ({ ...n, name: e.target.value }))}
+                    onChange={(e) =>
+                      setNewIngredient((n) => ({ ...n, name: e.target.value }))
+                    }
                     onKeyDown={(e) => e.key === "Enter" && addIngredientRow()}
                     placeholder="e.g. Chicken breast"
                     className="w-full rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-1"
@@ -951,32 +1324,56 @@ export default function MenuItemsPage() {
                   />
                 </div>
                 <div className="w-20">
-                  <label className="mb-1 block text-xs" style={{ color: "#6B7280" }}>Qty</label>
+                  <label
+                    className="mb-1 block text-xs"
+                    style={{ color: "#6B7280" }}
+                  >
+                    Qty
+                  </label>
                   <input
                     type="number"
                     value={newIngredient.quantity}
-                    onChange={(e) => setNewIngredient((n) => ({ ...n, quantity: e.target.value }))}
+                    onChange={(e) =>
+                      setNewIngredient((n) => ({
+                        ...n,
+                        quantity: e.target.value,
+                      }))
+                    }
                     className="w-full rounded-lg px-3 py-1.5 text-sm focus:outline-none"
                     style={{ border: "1px solid #E5E7EB" }}
                   />
                 </div>
                 <div className="w-20">
-                  <label className="mb-1 block text-xs" style={{ color: "#6B7280" }}>Unit</label>
+                  <label
+                    className="mb-1 block text-xs"
+                    style={{ color: "#6B7280" }}
+                  >
+                    Unit
+                  </label>
                   <input
                     type="text"
                     value={newIngredient.unit}
-                    onChange={(e) => setNewIngredient((n) => ({ ...n, unit: e.target.value }))}
+                    onChange={(e) =>
+                      setNewIngredient((n) => ({ ...n, unit: e.target.value }))
+                    }
                     placeholder="g, ml..."
                     className="w-full rounded-lg px-3 py-1.5 text-sm focus:outline-none"
                     style={{ border: "1px solid #E5E7EB" }}
                   />
                 </div>
                 <div className="flex-1 min-w-[100px]">
-                  <label className="mb-1 block text-xs" style={{ color: "#6B7280" }}>Notes</label>
+                  <label
+                    className="mb-1 block text-xs"
+                    style={{ color: "#6B7280" }}
+                  >
+                    Notes
+                  </label>
                   <input
                     type="text"
                     value={newIngredient.notes}
-                    onChange={(e) => setNewIngredient((n) => ({ ...n, notes: e.target.value }))}
+                    onChange={(e) =>
+                      setNewIngredient((n) => ({ ...n, notes: e.target.value }))
+                    }
                     className="w-full rounded-lg px-3 py-1.5 text-sm focus:outline-none"
                     style={{ border: "1px solid #E5E7EB" }}
                   />
@@ -995,9 +1392,15 @@ export default function MenuItemsPage() {
         </div>
 
         {/* Footer */}
-        <div className="mt-4 flex justify-end gap-3 pt-4" style={{ borderTop: "1px solid #E5E7EB" }}>
+        <div
+          className="mt-4 flex justify-end gap-3 pt-4"
+          style={{ borderTop: "1px solid #E5E7EB" }}
+        >
           <button
-            onClick={() => { setModalOpen(false); resetForm(); }}
+            onClick={() => {
+              setModalOpen(false);
+              resetForm();
+            }}
             className="rounded-lg px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-100"
             style={{ color: "#6B7280", border: "1px solid #E5E7EB" }}
           >
@@ -1020,18 +1423,25 @@ export default function MenuItemsPage() {
       {/* ── Delete Confirmation Modal ───────────────────────────────────── */}
       <Modal
         isOpen={deleteModalOpen}
-        onClose={() => { setDeleteModalOpen(false); setDeleteTarget(null); }}
+        onClose={() => {
+          setDeleteModalOpen(false);
+          setDeleteTarget(null);
+        }}
         title="Delete Menu Item"
         size="sm"
       >
         <div className="space-y-4">
           <p className="text-sm" style={{ color: "#6B7280" }}>
             Are you sure you want to permanently delete{" "}
-            <strong>&ldquo;{deleteTarget?.name}&rdquo;</strong>? This action cannot be undone.
+            <strong>&ldquo;{deleteTarget?.name}&rdquo;</strong>? This action
+            cannot be undone.
           </p>
           <div className="flex justify-end gap-3">
             <button
-              onClick={() => { setDeleteModalOpen(false); setDeleteTarget(null); }}
+              onClick={() => {
+                setDeleteModalOpen(false);
+                setDeleteTarget(null);
+              }}
               className="rounded-lg px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-100"
               style={{ color: "#6B7280", border: "1px solid #E5E7EB" }}
             >

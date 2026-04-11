@@ -24,6 +24,7 @@ from app.shared.models import Base, TenantMixin, TimestampMixin, UUIDPrimaryKeyM
 
 # ── Enums ───────────────────────────────────────────────────────────────
 
+
 class FulfillmentType(str, enum.Enum):
     DELIVERY = "delivery"
     PICKUP = "pickup"
@@ -41,6 +42,7 @@ class FulfillmentStatus(str, enum.Enum):
 
 
 # ── Address ─────────────────────────────────────────────────────────────
+
 
 class Address(UUIDPrimaryKeyMixin, TenantMixin, TimestampMixin, Base):
     __tablename__ = "addresses"
@@ -61,6 +63,7 @@ class Address(UUIDPrimaryKeyMixin, TenantMixin, TimestampMixin, Base):
 
 # ── Delivery Zone ───────────────────────────────────────────────────────
 
+
 class DeliveryZone(UUIDPrimaryKeyMixin, TenantMixin, TimestampMixin, Base):
     __tablename__ = "delivery_zones"
 
@@ -80,6 +83,7 @@ class DeliveryZone(UUIDPrimaryKeyMixin, TenantMixin, TimestampMixin, Base):
 
 # ── Delivery Slot ───────────────────────────────────────────────────────
 
+
 class DeliverySlot(UUIDPrimaryKeyMixin, Base):
     __tablename__ = "delivery_slots"
 
@@ -98,13 +102,12 @@ class DeliverySlot(UUIDPrimaryKeyMixin, Base):
 
 # ── Fulfillment Order ──────────────────────────────────────────────────
 
+
 class FulfillmentOrder(UUIDPrimaryKeyMixin, TenantMixin, TimestampMixin, Base):
     __tablename__ = "fulfillment_orders"
 
     order_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False, index=True)
-    address_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("addresses.id"), nullable=True
-    )
+    address_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("addresses.id"), nullable=True)
     delivery_slot_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("delivery_slots.id"), nullable=True
     )

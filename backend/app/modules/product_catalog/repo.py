@@ -50,9 +50,7 @@ class ProductRepo:
             query.options(
                 selectinload(Product.variants),
                 selectinload(Product.images),
-                selectinload(Product.product_ingredients).selectinload(
-                    ProductIngredient.ingredient
-                ),
+                selectinload(Product.product_ingredients).selectinload(ProductIngredient.ingredient),
             )
             .offset(offset)
             .limit(limit)
@@ -70,9 +68,7 @@ class ProductRepo:
                 selectinload(Product.variants),
                 selectinload(Product.images),
                 selectinload(Product.attribute_values),
-                selectinload(Product.product_ingredients).selectinload(
-                    ProductIngredient.ingredient
-                ),
+                selectinload(Product.product_ingredients).selectinload(ProductIngredient.ingredient),
             )
             .where(Product.id == product_id)
         )
@@ -84,9 +80,7 @@ class ProductRepo:
         return product
 
     async def update(self, product_id: UUID, **kwargs) -> Product | None:
-        await self.db.execute(
-            update(Product).where(Product.id == product_id).values(**kwargs)
-        )
+        await self.db.execute(update(Product).where(Product.id == product_id).values(**kwargs))
         return await self.get_by_id(product_id)
 
     async def soft_delete(self, product_id: UUID) -> Product | None:
@@ -126,9 +120,7 @@ class ProductIngredientRepo:
         )
         return result.scalar_one_or_none()
 
-    async def get_by_product_and_ingredient(
-        self, product_id: UUID, ingredient_id: UUID
-    ) -> ProductIngredient | None:
+    async def get_by_product_and_ingredient(self, product_id: UUID, ingredient_id: UUID) -> ProductIngredient | None:
         result = await self.db.execute(
             select(ProductIngredient).where(
                 ProductIngredient.product_id == product_id,
@@ -143,17 +135,11 @@ class ProductIngredientRepo:
         return await self.get_by_id(item.id)  # type: ignore[return-value]
 
     async def update(self, item_id: UUID, **kwargs) -> ProductIngredient | None:
-        await self.db.execute(
-            update(ProductIngredient)
-            .where(ProductIngredient.id == item_id)
-            .values(**kwargs)
-        )
+        await self.db.execute(update(ProductIngredient).where(ProductIngredient.id == item_id).values(**kwargs))
         return await self.get_by_id(item_id)
 
     async def delete(self, item_id: UUID) -> None:
-        await self.db.execute(
-            delete(ProductIngredient).where(ProductIngredient.id == item_id)
-        )
+        await self.db.execute(delete(ProductIngredient).where(ProductIngredient.id == item_id))
 
 
 class IngredientRepo:
@@ -170,20 +156,14 @@ class IngredientRepo:
         sort_dir: str = "asc",
     ) -> tuple[list[Ingredient], int]:
         query = select(Ingredient).where(Ingredient.tenant_id == tenant_id)
-        count_query = (
-            select(func.count()).select_from(Ingredient).where(Ingredient.tenant_id == tenant_id)
-        )
+        count_query = select(func.count()).select_from(Ingredient).where(Ingredient.tenant_id == tenant_id)
 
         if search:
             pattern = f"%{search}%"
             query = query.where(Ingredient.name.ilike(pattern))
             count_query = count_query.where(Ingredient.name.ilike(pattern))
 
-        query = query.options(
-            selectinload(Ingredient.product_ingredients).selectinload(
-                ProductIngredient.product
-            )
-        )
+        query = query.options(selectinload(Ingredient.product_ingredients).selectinload(ProductIngredient.product))
 
         # Sorting
         if sort_by == "name":
@@ -201,29 +181,21 @@ class IngredientRepo:
 
         if sort_by == "usage_count":
             reverse = sort_dir == "desc"
-            items = sorted(
-                items, key=lambda i: len(i.product_ingredients), reverse=reverse
-            )
+            items = sorted(items, key=lambda i: len(i.product_ingredients), reverse=reverse)
 
         return items, count_result.scalar_one()
 
     async def get_by_id(self, ingredient_id: UUID) -> Ingredient | None:
         result = await self.db.execute(
             select(Ingredient)
-            .options(
-                selectinload(Ingredient.product_ingredients).selectinload(
-                    ProductIngredient.product
-                )
-            )
+            .options(selectinload(Ingredient.product_ingredients).selectinload(ProductIngredient.product))
             .where(Ingredient.id == ingredient_id)
         )
         return result.scalar_one_or_none()
 
     async def get_by_name_and_tenant(self, name: str, tenant_id: UUID) -> Ingredient | None:
         result = await self.db.execute(
-            select(Ingredient).where(
-                Ingredient.name == name, Ingredient.tenant_id == tenant_id
-            )
+            select(Ingredient).where(Ingredient.name == name, Ingredient.tenant_id == tenant_id)
         )
         return result.scalar_one_or_none()
 
@@ -233,9 +205,7 @@ class IngredientRepo:
         return ingredient
 
     async def update(self, ingredient_id: UUID, **kwargs) -> Ingredient | None:
-        await self.db.execute(
-            update(Ingredient).where(Ingredient.id == ingredient_id).values(**kwargs)
-        )
+        await self.db.execute(update(Ingredient).where(Ingredient.id == ingredient_id).values(**kwargs))
         return await self.get_by_id(ingredient_id)
 
     async def delete(self, ingredient_id: UUID) -> None:
@@ -296,9 +266,7 @@ class CatalogRepo:
     async def publish(self, catalog_id: UUID) -> Catalog | None:
         now = datetime.now(timezone.utc)
         await self.db.execute(
-            update(Catalog)
-            .where(Catalog.id == catalog_id)
-            .values(status=CatalogStatus.published, published_at=now)
+            update(Catalog).where(Catalog.id == catalog_id).values(status=CatalogStatus.published, published_at=now)
         )
         return await self.get_by_id(catalog_id)
 

@@ -21,9 +21,7 @@ class AddressRepo:
     def __init__(self, db: AsyncSession) -> None:
         self.db = db
 
-    async def list_by_user(
-        self, user_id: uuid.UUID, tenant_id: uuid.UUID
-    ) -> list[Address]:
+    async def list_by_user(self, user_id: uuid.UUID, tenant_id: uuid.UUID) -> list[Address]:
         stmt = (
             select(Address)
             .where(Address.user_id == user_id, Address.tenant_id == tenant_id)
@@ -68,11 +66,7 @@ class DeliveryZoneRepo:
         return list(result.scalars().all())
 
     async def get_by_id(self, zone_id: uuid.UUID) -> DeliveryZone | None:
-        stmt = (
-            select(DeliveryZone)
-            .options(selectinload(DeliveryZone.slots))
-            .where(DeliveryZone.id == zone_id)
-        )
+        stmt = select(DeliveryZone).options(selectinload(DeliveryZone.slots)).where(DeliveryZone.id == zone_id)
         result = await self.db.execute(stmt)
         return result.scalar_one_or_none()
 
@@ -81,9 +75,7 @@ class DeliveryZoneRepo:
         await self.db.flush()
         return zone
 
-    async def lookup_by_postal_code(
-        self, postal_code: str, tenant_id: uuid.UUID
-    ) -> DeliveryZone | None:
+    async def lookup_by_postal_code(self, postal_code: str, tenant_id: uuid.UUID) -> DeliveryZone | None:
         """Search boundaries JSONB for a matching postal code.
 
         Expected boundaries format: {"postal_codes": ["1000", "1001", ...]}
@@ -140,17 +132,11 @@ class FulfillmentRepo:
         return result.scalar_one_or_none()
 
     async def update(self, fulfillment_id: uuid.UUID, **kwargs) -> None:
-        stmt = (
-            update(FulfillmentOrder)
-            .where(FulfillmentOrder.id == fulfillment_id)
-            .values(**kwargs)
-        )
+        stmt = update(FulfillmentOrder).where(FulfillmentOrder.id == fulfillment_id).values(**kwargs)
         await self.db.execute(stmt)
         await self.db.flush()
 
-    async def list_slots_by_zone_and_date(
-        self, zone_id: uuid.UUID, target_date: date
-    ) -> list[dict]:
+    async def list_slots_by_zone_and_date(self, zone_id: uuid.UUID, target_date: date) -> list[dict]:
         """Return slots for a zone on a given date with availability info.
 
         Matches slots by day_of_week and counts existing fulfillment orders
@@ -158,13 +144,10 @@ class FulfillmentRepo:
         """
         day_of_week = target_date.weekday()  # 0=Mon
 
-        slots_stmt = (
-            select(DeliverySlot)
-            .where(
-                DeliverySlot.zone_id == zone_id,
-                DeliverySlot.day_of_week == day_of_week,
-                DeliverySlot.is_active.is_(True),
-            )
+        slots_stmt = select(DeliverySlot).where(
+            DeliverySlot.zone_id == zone_id,
+            DeliverySlot.day_of_week == day_of_week,
+            DeliverySlot.is_active.is_(True),
         )
         slots_result = await self.db.execute(slots_stmt)
         slots = list(slots_result.scalars().all())
@@ -183,35 +166,32 @@ class FulfillmentRepo:
             count_result = await self.db.execute(count_stmt)
             booked = count_result.scalar_one()
 
-            availability.append({
-                "id": slot.id,
-                "zone_id": slot.zone_id,
-                "day_of_week": slot.day_of_week,
-                "start_time": slot.start_time,
-                "end_time": slot.end_time,
-                "capacity": slot.capacity,
-                "booked": booked,
-                "available": max(0, slot.capacity - booked),
-            })
+            availability.append(
+                {
+                    "id": slot.id,
+                    "zone_id": slot.zone_id,
+                    "day_of_week": slot.day_of_week,
+                    "start_time": slot.start_time,
+                    "end_time": slot.end_time,
+                    "capacity": slot.capacity,
+                    "booked": booked,
+                    "available": max(0, slot.capacity - booked),
+                }
+            )
 
         return availability
 
-    async def get_production_report(
-        self, tenant_id: uuid.UUID, target_date: date
-    ) -> dict:
+    async def get_production_report(self, tenant_id: uuid.UUID, target_date: date) -> dict:
         """Aggregate order items for all fulfillment orders on a given date.
 
         Joins fulfillment_orders -> orders -> order_items to build a
         production summary.
         """
         # Count total orders for the date
-        order_count_stmt = (
-            select(func.count(func.distinct(FulfillmentOrder.order_id)))
-            .where(
-                FulfillmentOrder.tenant_id == tenant_id,
-                FulfillmentOrder.scheduled_date == target_date,
-                FulfillmentOrder.status != FulfillmentStatus.FAILED,
-            )
+        order_count_stmt = select(func.count(func.distinct(FulfillmentOrder.order_id))).where(
+            FulfillmentOrder.tenant_id == tenant_id,
+            FulfillmentOrder.scheduled_date == target_date,
+            FulfillmentOrder.status != FulfillmentStatus.FAILED,
         )
         order_count_result = await self.db.execute(order_count_stmt)
         total_orders = order_count_result.scalar_one()
@@ -243,11 +223,13 @@ class FulfillmentRepo:
         for row in rows:
             qty = int(row.total_quantity)
             total_meals += qty
-            items.append({
-                "product_name": row.product_name,
-                "variant_name": row.variant_name,
-                "total_quantity": qty,
-            })
+            items.append(
+                {
+                    "product_name": row.product_name,
+                    "variant_name": row.variant_name,
+                    "total_quantity": qty,
+                }
+            )
 
         return {
             "date": target_date,

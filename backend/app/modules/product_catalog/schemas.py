@@ -11,6 +11,7 @@ from app.modules.product_catalog.models import CatalogStatus, ProductStatus
 
 # ── Ingredient ───────────────────────────────────────────────────────────
 
+
 class IngredientResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -46,6 +47,7 @@ class IngredientListResponse(BaseModel):
 
 # ── Product Ingredient (Recipe) ──────────────────────────────────────────
 
+
 class ProductIngredientAdd(BaseModel):
     name: str = Field(..., max_length=255)
     default_unit: str | None = Field(None, max_length=50)
@@ -74,6 +76,7 @@ class ProductIngredientResponse(BaseModel):
 
 # ── Product Image ───────────────────────────────────────────────────────
 
+
 class ProductImageCreate(BaseModel):
     url: str = Field(..., max_length=500)
     alt_text: str | None = Field(None, max_length=255)
@@ -92,6 +95,7 @@ class ProductImageResponse(BaseModel):
 
 
 # ── Product Variant ─────────────────────────────────────────────────────
+
 
 class ProductVariantCreate(BaseModel):
     name: str = Field(..., max_length=100)
@@ -131,6 +135,7 @@ class ProductVariantResponse(BaseModel):
 
 
 # ── Product ─────────────────────────────────────────────────────────────
+
 
 class ProductCreate(BaseModel):
     name: str = Field(..., max_length=255)
@@ -191,6 +196,7 @@ class ProductListResponse(BaseModel):
 
 # ── Catalog Schedule ────────────────────────────────────────────────────
 
+
 class CatalogScheduleCreate(BaseModel):
     starts_at: datetime
     ends_at: datetime
@@ -208,6 +214,7 @@ class CatalogScheduleResponse(BaseModel):
 
 
 # ── Catalog Item ────────────────────────────────────────────────────────
+
 
 class CatalogItemAdd(BaseModel):
     product_variant_id: UUID
@@ -229,6 +236,7 @@ class CatalogItemResponse(BaseModel):
 
 
 # ── Catalog ─────────────────────────────────────────────────────────────
+
 
 class CatalogCreate(BaseModel):
     name: str = Field(..., max_length=255)

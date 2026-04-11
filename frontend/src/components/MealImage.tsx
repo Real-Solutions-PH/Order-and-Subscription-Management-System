@@ -9,7 +9,11 @@ interface MealImageProps {
   className?: string;
 }
 
-export default function MealImage({ src, alt, className = "" }: MealImageProps) {
+export default function MealImage({
+  src,
+  alt,
+  className = "",
+}: MealImageProps) {
   const [hasError, setHasError] = useState(false);
 
   if (!src || hasError) {
