@@ -376,7 +376,10 @@ function UserManagementContent() {
                     key={user.id}
                     className="transition-colors hover:bg-gray-50"
                   >
-                    <td className="px-4 py-3 font-medium" style={{ color: "#1A1A2E" }}>
+                    <td
+                      className="px-4 py-3 font-medium"
+                      style={{ color: "#1A1A2E" }}
+                    >
                       {user.first_name} {user.last_name}
                     </td>
                     <td className="px-4 py-3" style={{ color: "#6B7280" }}>
@@ -440,9 +443,7 @@ function UserManagementContent() {
                           disabled={isUpdating}
                           className="rounded-lg p-1.5 transition-colors hover:bg-gray-100"
                           title={
-                            user.is_active
-                              ? "Deactivate user"
-                              : "Activate user"
+                            user.is_active ? "Deactivate user" : "Activate user"
                           }
                         >
                           {user.is_active ? (
@@ -655,7 +656,9 @@ function UserManagementContent() {
               Cancel
             </button>
             <button
-              onClick={() => showDeleteConfirm && handleDelete(showDeleteConfirm)}
+              onClick={() =>
+                showDeleteConfirm && handleDelete(showDeleteConfirm)
+              }
               disabled={isDeleting}
               className="rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors disabled:opacity-50"
               style={{ backgroundColor: "#EF4444" }}

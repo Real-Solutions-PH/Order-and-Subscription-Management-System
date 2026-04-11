@@ -10,6 +10,7 @@ from app.shared.schemas import BaseSchema, IDTimestampSchema
 
 # ── Payment Intent ──────────────────────────────────────────────────────
 
+
 class PaymentIntentCreate(BaseModel):
     amount: Decimal = Field(..., gt=0, decimal_places=2)
     currency: str = Field(default="PHP", max_length=3)
@@ -36,6 +37,7 @@ class PaymentIntentResponse(BaseSchema):
 
 # ── Attach Method ───────────────────────────────────────────────────────
 
+
 class AttachMethodRequest(BaseModel):
     payment_method_id: str | None = Field(
         default=None,
@@ -52,6 +54,7 @@ class AttachMethodRequest(BaseModel):
 
 
 # ── Payment Response ────────────────────────────────────────────────────
+
 
 class PaymentTransactionResponse(BaseSchema):
     id: UUID
@@ -89,6 +92,7 @@ class PaymentResponse(BaseSchema):
 
 # ── Refund ──────────────────────────────────────────────────────────────
 
+
 class RefundRequest(BaseModel):
     amount: Decimal | None = Field(
         default=None,
@@ -100,6 +104,7 @@ class RefundRequest(BaseModel):
 
 
 # ── Payment Method CRUD ─────────────────────────────────────────────────
+
 
 class PaymentMethodCreate(BaseModel):
     type: str = Field(..., description="Payment method type (card, gcash, etc.)")
@@ -134,6 +139,7 @@ class PaymentMethodResponse(BaseSchema):
 
 # ── COD ─────────────────────────────────────────────────────────────────
 
+
 class CODCreateRequest(BaseModel):
     order_id: UUID
     amount: Decimal = Field(..., gt=0, decimal_places=2)
@@ -152,6 +158,7 @@ class CODCollectRequest(BaseModel):
 
 
 # ── Promo Code ──────────────────────────────────────────────────────────
+
 
 class PromoValidateRequest(BaseModel):
     code: str = Field(..., min_length=1, max_length=50)
@@ -189,6 +196,7 @@ class PromoCodeListResponse(BaseSchema):
 
 
 # ── Invoice ─────────────────────────────────────────────────────────────
+
 
 class InvoiceLineItemResponse(BaseSchema):
     id: UUID

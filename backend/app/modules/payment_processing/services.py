@@ -78,9 +78,7 @@ class PaymentService:
         if payment is None:
             raise NotFoundError("Payment not found")
         if payment.status != PaymentStatus.AWAITING_METHOD:
-            raise BadRequestError(
-                f"Cannot attach method to payment in '{payment.status.value}' status"
-            )
+            raise BadRequestError(f"Cannot attach method to payment in '{payment.status.value}' status")
 
         # TODO: Call PayMongo API to attach method to intent
         # result = await paymongo_client.attach_method(payment.paymongo_intent_id, ...)
@@ -115,15 +113,11 @@ class PaymentService:
             PaymentStatus.PROCESSING,
             PaymentStatus.AWAITING_METHOD,
         ):
-            raise BadRequestError(
-                f"Cannot confirm payment in '{payment.status.value}' status"
-            )
+            raise BadRequestError(f"Cannot confirm payment in '{payment.status.value}' status")
 
         # TODO: Verify with PayMongo API that payment is actually paid
         now = datetime.now(timezone.utc)
-        await self.payment_repo.update(
-            payment_id, status=PaymentStatus.PAID, paid_at=now
-        )
+        await self.payment_repo.update(payment_id, status=PaymentStatus.PAID, paid_at=now)
 
         txn = PaymentTransaction(
             payment_id=payment_id,
@@ -152,20 +146,14 @@ class PaymentService:
         if payment is None:
             raise NotFoundError("Payment not found")
         if payment.status not in (PaymentStatus.PAID, PaymentStatus.PARTIALLY_REFUNDED):
-            raise BadRequestError(
-                f"Cannot refund payment in '{payment.status.value}' status"
-            )
+            raise BadRequestError(f"Cannot refund payment in '{payment.status.value}' status")
 
         refund_amount = amount if amount is not None else payment.amount
         if refund_amount > payment.amount:
             raise BadRequestError("Refund amount exceeds payment amount")
 
         # TODO: Call PayMongo API to create refund
-        new_status = (
-            PaymentStatus.REFUNDED
-            if refund_amount == payment.amount
-            else PaymentStatus.PARTIALLY_REFUNDED
-        )
+        new_status = PaymentStatus.REFUNDED if refund_amount == payment.amount else PaymentStatus.PARTIALLY_REFUNDED
         await self.payment_repo.update(payment_id, status=new_status)
 
         txn = PaymentTransaction(
@@ -220,15 +208,11 @@ class PaymentService:
         if payment is None:
             raise NotFoundError("Payment not found")
         if payment.status != PaymentStatus.PENDING_COLLECTION:
-            raise BadRequestError(
-                f"Cannot collect COD payment in '{payment.status.value}' status"
-            )
+            raise BadRequestError(f"Cannot collect COD payment in '{payment.status.value}' status")
 
         actual_amount = collected_amount if collected_amount is not None else payment.amount
         now = datetime.now(timezone.utc)
-        await self.payment_repo.update(
-            payment_id, status=PaymentStatus.PAID, paid_at=now
-        )
+        await self.payment_repo.update(payment_id, status=PaymentStatus.PAID, paid_at=now)
 
         txn = PaymentTransaction(
             payment_id=payment_id,
@@ -241,9 +225,7 @@ class PaymentService:
 
         return await self.payment_repo.get_by_id(payment_id)  # type: ignore[return-value]
 
-    async def list_payment_methods(
-        self, user_id: uuid.UUID, tenant_id: uuid.UUID
-    ) -> list[PaymentMethod]:
+    async def list_payment_methods(self, user_id: uuid.UUID, tenant_id: uuid.UUID) -> list[PaymentMethod]:
         return await self.payment_repo.list_methods_by_user(user_id, tenant_id)
 
     async def save_payment_method(
@@ -326,51 +308,88 @@ class PromoCodeService:
         promo = await self.promo_repo.get_by_code(code, tenant_id)
 
         if promo is None:
-            return {"valid": False, "code": code, "discount_amount": Decimal("0.00"),
-                    "discount_type": None, "message": "Promo code not found"}
+            return {
+                "valid": False,
+                "code": code,
+                "discount_amount": Decimal("0.00"),
+                "discount_type": None,
+                "message": "Promo code not found",
+            }
 
         now = datetime.now(timezone.utc)
 
         if not promo.is_active:
-            return {"valid": False, "code": code, "discount_amount": Decimal("0.00"),
-                    "discount_type": None, "message": "Promo code is inactive"}
+            return {
+                "valid": False,
+                "code": code,
+                "discount_amount": Decimal("0.00"),
+                "discount_type": None,
+                "message": "Promo code is inactive",
+            }
 
         if now < promo.starts_at:
-            return {"valid": False, "code": code, "discount_amount": Decimal("0.00"),
-                    "discount_type": None, "message": "Promo code is not yet active"}
+            return {
+                "valid": False,
+                "code": code,
+                "discount_amount": Decimal("0.00"),
+                "discount_type": None,
+                "message": "Promo code is not yet active",
+            }
 
         if now > promo.expires_at:
-            return {"valid": False, "code": code, "discount_amount": Decimal("0.00"),
-                    "discount_type": None, "message": "Promo code has expired"}
+            return {
+                "valid": False,
+                "code": code,
+                "discount_amount": Decimal("0.00"),
+                "discount_type": None,
+                "message": "Promo code has expired",
+            }
 
         if promo.min_order_amount is not None and order_amount < promo.min_order_amount:
-            return {"valid": False, "code": code, "discount_amount": Decimal("0.00"),
-                    "discount_type": None,
-                    "message": f"Minimum order amount is {promo.min_order_amount}"}
+            return {
+                "valid": False,
+                "code": code,
+                "discount_amount": Decimal("0.00"),
+                "discount_type": None,
+                "message": f"Minimum order amount is {promo.min_order_amount}",
+            }
 
         # Check global usage limit
         if promo.usage_limit is not None:
             usage_count = await self.promo_repo.get_usage_count(promo.id)
             if usage_count >= promo.usage_limit:
-                return {"valid": False, "code": code, "discount_amount": Decimal("0.00"),
-                        "discount_type": None, "message": "Promo code usage limit reached"}
+                return {
+                    "valid": False,
+                    "code": code,
+                    "discount_amount": Decimal("0.00"),
+                    "discount_type": None,
+                    "message": "Promo code usage limit reached",
+                }
 
         # Check per-user usage limit
         if promo.per_user_limit is not None:
             user_usage = await self.promo_repo.get_user_usage_count(promo.id, user_id)
             if user_usage >= promo.per_user_limit:
-                return {"valid": False, "code": code, "discount_amount": Decimal("0.00"),
-                        "discount_type": None,
-                        "message": "You have reached the usage limit for this promo code"}
+                return {
+                    "valid": False,
+                    "code": code,
+                    "discount_amount": Decimal("0.00"),
+                    "discount_type": None,
+                    "message": "You have reached the usage limit for this promo code",
+                }
 
         # Check first_order_only
         if promo.first_order_only:
             # Any prior usage by this user means they are not a first-time user of this promo
             user_usage = await self.promo_repo.get_user_usage_count(promo.id, user_id)
             if user_usage > 0:
-                return {"valid": False, "code": code, "discount_amount": Decimal("0.00"),
-                        "discount_type": None,
-                        "message": "Promo code is valid for first order only"}
+                return {
+                    "valid": False,
+                    "code": code,
+                    "discount_amount": Decimal("0.00"),
+                    "discount_type": None,
+                    "message": "Promo code is valid for first order only",
+                }
 
         # Calculate discount
         if promo.discount_type == DiscountType.PERCENTAGE:

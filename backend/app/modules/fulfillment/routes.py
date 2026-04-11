@@ -34,6 +34,7 @@ router = APIRouter(tags=["Fulfillment"])
 
 # ── Address Endpoints ──────────────────────────────────────────────────
 
+
 @router.post("/addresses", response_model=AddressResponse, status_code=201)
 async def create_address(
     body: AddressCreate,
@@ -86,6 +87,7 @@ async def delete_address(
 
 # ── Delivery Zone Endpoints ────────────────────────────────────────────
 
+
 @router.get("/delivery-zones", response_model=list[DeliveryZoneResponse])
 async def list_delivery_zones(
     user: CurrentUser,
@@ -127,6 +129,7 @@ async def lookup_delivery_zone(
 
 # ── Delivery Slot Endpoints ────────────────────────────────────────────
 
+
 @router.get("/delivery-slots", response_model=list[DeliverySlotAvailability])
 async def list_delivery_slots(
     user: CurrentUser,
@@ -135,12 +138,11 @@ async def list_delivery_slots(
     target_date: date = Query(..., alias="date"),
 ):
     """Get available delivery slots for a zone on a specific date."""
-    return await fulfillment_service.get_available_slots(
-        zone_id=zone_id, target_date=target_date
-    )
+    return await fulfillment_service.get_available_slots(zone_id=zone_id, target_date=target_date)
 
 
 # ── Fulfillment Order Endpoints ────────────────────────────────────────
+
 
 @router.get("/fulfillment/{fulfillment_id}", response_model=FulfillmentResponse)
 async def get_fulfillment(
@@ -172,6 +174,7 @@ async def update_fulfillment_status(
 
 
 # ── Production Report Endpoints ────────────────────────────────────────
+
 
 @router.get(
     "/production-reports/{report_date}",

@@ -47,9 +47,7 @@ class ProductService:
         search: str | None = None,
         category_id: UUID | None = None,
     ) -> tuple[list[Product], int]:
-        return await self.product_repo.list_by_tenant(
-            tenant_id, offset, limit, status, search, category_id
-        )
+        return await self.product_repo.list_by_tenant(tenant_id, offset, limit, status, search, category_id)
 
     async def get_product(self, product_id: UUID) -> Product:
         product = await self.product_repo.get_by_id(product_id)
@@ -167,9 +165,7 @@ class CatalogService:
             raise NotFoundError("Catalog not found")
         return catalog
 
-    async def schedule_catalog(
-        self, catalog_id: UUID, data: CatalogScheduleCreate
-    ) -> CatalogSchedule:
+    async def schedule_catalog(self, catalog_id: UUID, data: CatalogScheduleCreate) -> CatalogSchedule:
         # Ensure catalog exists
         await self.get_catalog(catalog_id)
         schedule = CatalogSchedule(

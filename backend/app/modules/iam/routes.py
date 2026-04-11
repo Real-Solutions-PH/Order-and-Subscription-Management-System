@@ -107,8 +107,7 @@ async def get_my_metrics(
 
     # This month's total spend
     month_total_result = await db.execute(
-        select(func.coalesce(func.sum(Order.total), Decimal("0.00")))
-        .where(
+        select(func.coalesce(func.sum(Order.total), Decimal("0.00"))).where(
             Order.user_id == current_user.id,
             Order.tenant_id == current_user.tenant_id,
             Order.placed_at >= month_start,
@@ -118,8 +117,7 @@ async def get_my_metrics(
 
     # Total savings (sum of discount_amount across all orders)
     savings_result = await db.execute(
-        select(func.coalesce(func.sum(Order.discount_amount), Decimal("0.00")))
-        .where(
+        select(func.coalesce(func.sum(Order.discount_amount), Decimal("0.00"))).where(
             Order.user_id == current_user.id,
             Order.tenant_id == current_user.tenant_id,
         )
@@ -150,6 +148,7 @@ async def get_my_metrics(
 
 
 # ── Admin Endpoints (admin or superadmin) ─────────────────────────────
+
 
 @router.get("/users", response_model=UserListResponse)
 async def list_users(

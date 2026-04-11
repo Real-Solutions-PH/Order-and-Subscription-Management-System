@@ -97,9 +97,7 @@ class SubscriptionPlanTier(Base, UUIDPrimaryKeyMixin):
     sort_order: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
 
     # Relationships
-    plan: Mapped["SubscriptionPlan"] = relationship(
-        "SubscriptionPlan", back_populates="tiers"
-    )
+    plan: Mapped["SubscriptionPlan"] = relationship("SubscriptionPlan", back_populates="tiers")
 
 
 class Subscription(Base, UUIDPrimaryKeyMixin, TimestampMixin, TenantMixin):
@@ -127,9 +125,7 @@ class Subscription(Base, UUIDPrimaryKeyMixin, TimestampMixin, TenantMixin):
     metadata_: Mapped[dict | None] = mapped_column("metadata", JSONB, nullable=True)
 
     # Relationships
-    plan_tier: Mapped["SubscriptionPlanTier"] = relationship(
-        "SubscriptionPlanTier", lazy="selectin"
-    )
+    plan_tier: Mapped["SubscriptionPlanTier"] = relationship("SubscriptionPlanTier", lazy="selectin")
     cycles: Mapped[list["SubscriptionCycle"]] = relationship(
         "SubscriptionCycle",
         back_populates="subscription",
@@ -165,9 +161,7 @@ class SubscriptionCycle(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     billed_amount: Mapped[Decimal | None] = mapped_column(Numeric(12, 2), nullable=True)
 
     # Relationships
-    subscription: Mapped["Subscription"] = relationship(
-        "Subscription", back_populates="cycles"
-    )
+    subscription: Mapped["Subscription"] = relationship("Subscription", back_populates="cycles")
     selections: Mapped[list["SubscriptionSelection"]] = relationship(
         "SubscriptionSelection",
         back_populates="cycle",
@@ -188,9 +182,7 @@ class SubscriptionSelection(Base, UUIDPrimaryKeyMixin):
     customization: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
 
     # Relationships
-    cycle: Mapped["SubscriptionCycle"] = relationship(
-        "SubscriptionCycle", back_populates="selections"
-    )
+    cycle: Mapped["SubscriptionCycle"] = relationship("SubscriptionCycle", back_populates="selections")
 
 
 class SubscriptionEvent(Base, UUIDPrimaryKeyMixin):
@@ -206,11 +198,7 @@ class SubscriptionEvent(Base, UUIDPrimaryKeyMixin):
     )
     event_data: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
     actor_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), nullable=False
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
     # Relationships
-    subscription: Mapped["Subscription"] = relationship(
-        "Subscription", back_populates="events"
-    )
+    subscription: Mapped["Subscription"] = relationship("Subscription", back_populates="events")

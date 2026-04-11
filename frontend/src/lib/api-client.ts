@@ -91,7 +91,9 @@ async function handleResponse<T>(res: Response): Promise<T> {
     const body = await res.json().catch(() => ({ detail: res.statusText }));
     const detail = body.detail ?? res.statusText;
     const message = Array.isArray(detail)
-      ? detail.map((e: { msg?: string }) => e.msg ?? JSON.stringify(e)).join("; ")
+      ? detail
+          .map((e: { msg?: string }) => e.msg ?? JSON.stringify(e))
+          .join("; ")
       : String(detail);
     throw new ApiError(res.status, message);
   }
@@ -846,8 +848,10 @@ export const api = {
       card_brand?: string;
       is_default?: boolean;
     }) => post<PaymentMethodResponse>("/payment-methods", data),
-    updateMethod: (id: string, data: { display_name?: string; is_default?: boolean }) =>
-      patch<PaymentMethodResponse>(`/payment-methods/${id}`, data),
+    updateMethod: (
+      id: string,
+      data: { display_name?: string; is_default?: boolean },
+    ) => patch<PaymentMethodResponse>(`/payment-methods/${id}`, data),
     deleteMethod: (id: string) => del<void>(`/payment-methods/${id}`),
     validatePromo: (data: { code: string; order_amount: number }) =>
       post<PromoCodeResponse>("/promo-codes/validate", data),

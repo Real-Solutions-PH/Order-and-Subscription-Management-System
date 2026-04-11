@@ -93,9 +93,7 @@ async def pause_subscription(
     current_user: CurrentUser,
     sub_service: Annotated[SubscriptionService, Depends(get_subscription_service)],
 ):
-    return await sub_service.pause_subscription(
-        sub_id, actor_id=current_user.id, data=data
-    )
+    return await sub_service.pause_subscription(sub_id, actor_id=current_user.id, data=data)
 
 
 @router.post("/subscriptions/{sub_id}/resume", response_model=SubscriptionResponse)
@@ -104,9 +102,7 @@ async def resume_subscription(
     current_user: CurrentUser,
     sub_service: Annotated[SubscriptionService, Depends(get_subscription_service)],
 ):
-    return await sub_service.resume_subscription(
-        sub_id, actor_id=current_user.id
-    )
+    return await sub_service.resume_subscription(sub_id, actor_id=current_user.id)
 
 
 @router.post("/subscriptions/{sub_id}/cancel", response_model=SubscriptionResponse)
@@ -116,9 +112,7 @@ async def cancel_subscription(
     current_user: CurrentUser,
     sub_service: Annotated[SubscriptionService, Depends(get_subscription_service)],
 ):
-    return await sub_service.cancel_subscription(
-        sub_id, actor_id=current_user.id, data=data
-    )
+    return await sub_service.cancel_subscription(sub_id, actor_id=current_user.id, data=data)
 
 
 @router.patch("/subscriptions/{sub_id}/plan", response_model=SubscriptionResponse)
@@ -128,9 +122,7 @@ async def modify_plan(
     current_user: CurrentUser,
     sub_service: Annotated[SubscriptionService, Depends(get_subscription_service)],
 ):
-    return await sub_service.modify_plan(
-        sub_id, actor_id=current_user.id, new_plan_tier_id=data.new_plan_tier_id
-    )
+    return await sub_service.modify_plan(sub_id, actor_id=current_user.id, new_plan_tier_id=data.new_plan_tier_id)
 
 
 # ── Cycle Endpoints ────────────────────────────────────────────────────
@@ -169,6 +161,4 @@ async def skip_cycle(
     current_user: CurrentUser,
     sub_service: Annotated[SubscriptionService, Depends(get_subscription_service)],
 ):
-    return await sub_service.skip_cycle(
-        sub_id, cycle_id, actor_id=current_user.id
-    )
+    return await sub_service.skip_cycle(sub_id, cycle_id, actor_id=current_user.id)

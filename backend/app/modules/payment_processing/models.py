@@ -24,6 +24,7 @@ from app.shared.models import Base, TenantMixin, TimestampMixin, UUIDPrimaryKeyM
 
 # ── Enums ───────────────────────────────────────────────────────────────
 
+
 class PaymentMethodType(str, enum.Enum):
     CARD = "card"
     GCASH = "gcash"
@@ -84,6 +85,7 @@ class DiscountType(str, enum.Enum):
 
 # ── Payment Method ──────────────────────────────────────────────────────
 
+
 class PaymentMethod(UUIDPrimaryKeyMixin, TenantMixin, TimestampMixin, Base):
     __tablename__ = "payment_methods"
 
@@ -102,6 +104,7 @@ class PaymentMethod(UUIDPrimaryKeyMixin, TenantMixin, TimestampMixin, Base):
 
 
 # ── Payment ─────────────────────────────────────────────────────────────
+
 
 class Payment(UUIDPrimaryKeyMixin, TenantMixin, TimestampMixin, Base):
     __tablename__ = "payments"
@@ -131,12 +134,15 @@ class Payment(UUIDPrimaryKeyMixin, TenantMixin, TimestampMixin, Base):
 
     # relationships
     transactions: Mapped[list["PaymentTransaction"]] = relationship(
-        back_populates="payment", cascade="all, delete-orphan", lazy="selectin",
+        back_populates="payment",
+        cascade="all, delete-orphan",
+        lazy="selectin",
         order_by="PaymentTransaction.created_at",
     )
 
 
 # ── Payment Transaction ─────────────────────────────────────────────────
+
 
 class PaymentTransaction(UUIDPrimaryKeyMixin, Base):
     __tablename__ = "payment_transactions"
@@ -161,15 +167,14 @@ class PaymentTransaction(UUIDPrimaryKeyMixin, Base):
     net_amount: Mapped[Decimal | None] = mapped_column(Numeric(12, 2), nullable=True)
     error_code: Mapped[str | None] = mapped_column(String(50), nullable=True)
     error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), nullable=False
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
     # relationships
     payment: Mapped["Payment"] = relationship(back_populates="transactions")
 
 
 # ── Invoice ─────────────────────────────────────────────────────────────
+
 
 class Invoice(UUIDPrimaryKeyMixin, TenantMixin, TimestampMixin, Base):
     __tablename__ = "invoices"
@@ -187,9 +192,7 @@ class Invoice(UUIDPrimaryKeyMixin, TenantMixin, TimestampMixin, Base):
     discount_amount: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False, default=0)
     total: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False, default=0)
     currency: Mapped[str] = mapped_column(String(3), nullable=False, default="PHP")
-    issued_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, server_default=func.now()
-    )
+    issued_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
     paid_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     pdf_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
 
@@ -216,11 +219,10 @@ class InvoiceLineItem(UUIDPrimaryKeyMixin, Base):
 
 # ── Promo Code ──────────────────────────────────────────────────────────
 
+
 class PromoCode(UUIDPrimaryKeyMixin, TenantMixin, TimestampMixin, Base):
     __tablename__ = "promo_codes"
-    __table_args__ = (
-        UniqueConstraint("tenant_id", "code", name="uq_promo_codes_tenant_code"),
-    )
+    __table_args__ = (UniqueConstraint("tenant_id", "code", name="uq_promo_codes_tenant_code"),)
 
     code: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
     discount_type: Mapped[DiscountType] = mapped_column(
@@ -252,9 +254,7 @@ class PromoCodeUsage(UUIDPrimaryKeyMixin, Base):
     user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False, index=True)
     order_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
     discount_applied: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), nullable=False
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
     # relationships
     promo_code: Mapped["PromoCode"] = relationship(back_populates="usages")

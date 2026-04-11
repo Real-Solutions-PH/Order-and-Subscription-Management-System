@@ -20,7 +20,12 @@ import { meals, planTiers, timeSlots, formatPeso, Meal } from "@/lib/mock-data";
 import { useCart } from "@/context/CartContext";
 import { useToast } from "@/context/ToastContext";
 import { useAuthContext } from "@/context/AuthContext";
-import { useProducts, useSubscriptionPlans, useSubscriptionMutations, useDevMode } from "@/hooks";
+import {
+  useProducts,
+  useSubscriptionPlans,
+  useSubscriptionMutations,
+  useDevMode,
+} from "@/hooks";
 import { SkeletonMealCard, Skeleton } from "@/components/ui/skeleton";
 import MealImage from "@/components/MealImage";
 import { api } from "@/lib/api-client";
@@ -67,7 +72,9 @@ export default function MealPlanPage() {
   const [frequency, setFrequency] = useState<"weekly" | "biweekly">("weekly");
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string>("");
-  const [expandedMealId, setExpandedMealId] = useState<number | string | null>(null);
+  const [expandedMealId, setExpandedMealId] = useState<number | string | null>(
+    null,
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { addItem } = useCart();
   const { showToast } = useToast();
@@ -79,7 +86,8 @@ export default function MealPlanPage() {
   const { createSubscription, setSelections } = useSubscriptionMutations();
 
   const apiMeals = productsQuery.data?.items.map(mapProductToMeal);
-  const mealsData = apiMeals && apiMeals.length > 0 ? apiMeals : (devMode ? meals : []);
+  const mealsData =
+    apiMeals && apiMeals.length > 0 ? apiMeals : devMode ? meals : [];
   const isLoadingMeals = productsQuery.isLoading;
   const displayTimeSlots = timeSlots;
 
@@ -95,7 +103,12 @@ export default function MealPlanPage() {
           label: tier.name,
         })),
       )
-    : (devMode ? planTiers.map(t => ({ ...t, tierId: undefined as string | undefined })) : []);
+    : devMode
+      ? planTiers.map((t) => ({
+          ...t,
+          tierId: undefined as string | undefined,
+        }))
+      : [];
 
   const selectedPlan = displayPlans.find((p) => p.id === selectedPlanId);
   const totalMealsSelected = selectedMeals.reduce(
@@ -156,7 +169,10 @@ export default function MealPlanPage() {
     }
   }
 
-  function toggleAddOn(mealId: number | string, addOn: { name: string; price: number }) {
+  function toggleAddOn(
+    mealId: number | string,
+    addOn: { name: string; price: number },
+  ) {
     setSelectedMeals((prev) =>
       prev.map((m) => {
         if (m.meal.id !== mealId) return m;
@@ -198,7 +214,9 @@ export default function MealPlanPage() {
     try {
       // Create the subscription if we have a real tier ID from the API
       if (selectedPlan.tierId) {
-        const sub = await createSubscription({ plan_tier_id: selectedPlan.tierId });
+        const sub = await createSubscription({
+          plan_tier_id: selectedPlan.tierId,
+        });
         // Set meal selections for the first cycle
         const validSelections = selectedMeals
           .filter((sm) => sm.meal.variantId)
@@ -236,24 +254,30 @@ export default function MealPlanPage() {
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#FEFAE0' }}>
+    <div className="min-h-screen" style={{ backgroundColor: "#FEFAE0" }}>
       {/* Header */}
-      <div style={{ backgroundColor: '#1B4332' }}>
+      <div style={{ backgroundColor: "#1B4332" }}>
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           <h1
             className="text-3xl font-bold sm:text-4xl"
-            style={{ fontFamily: "'DM Serif Display', serif", color: '#FEFAE0' }}
+            style={{
+              fontFamily: "'DM Serif Display', serif",
+              color: "#FEFAE0",
+            }}
           >
             Build Your Meal Plan
           </h1>
-          <p className="mt-2 text-base" style={{ color: 'rgba(254,250,224,0.75)' }}>
+          <p
+            className="mt-2 text-base"
+            style={{ color: "rgba(254,250,224,0.75)" }}
+          >
             Choose a plan, pick your meals, and we handle the rest.
           </p>
         </div>
       </div>
 
       {/* Step Indicator */}
-      <div className="bg-white" style={{ borderBottom: '1px solid #E5E7EB' }}>
+      <div className="bg-white" style={{ borderBottom: "1px solid #E5E7EB" }}>
         <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             {steps.map((step, idx) => (
@@ -268,8 +292,8 @@ export default function MealPlanPage() {
                     className="flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold transition-colors"
                     style={
                       currentStep >= step.num
-                        ? { backgroundColor: '#1B4332', color: '#FFFFFF' }
-                        : { backgroundColor: '#E5E7EB', color: '#6B7280' }
+                        ? { backgroundColor: "#1B4332", color: "#FFFFFF" }
+                        : { backgroundColor: "#E5E7EB", color: "#6B7280" }
                     }
                   >
                     {currentStep > step.num ? <Check size={16} /> : step.num}
@@ -277,7 +301,7 @@ export default function MealPlanPage() {
                   <span
                     className="hidden text-sm font-medium sm:block"
                     style={{
-                      color: currentStep >= step.num ? '#1A1A2E' : '#6B7280',
+                      color: currentStep >= step.num ? "#1A1A2E" : "#6B7280",
                     }}
                   >
                     {step.label}
@@ -287,7 +311,8 @@ export default function MealPlanPage() {
                   <div
                     className="mx-2 h-0.5 flex-1"
                     style={{
-                      backgroundColor: currentStep > step.num ? '#1B4332' : '#E5E7EB',
+                      backgroundColor:
+                        currentStep > step.num ? "#1B4332" : "#E5E7EB",
                     }}
                   />
                 )}
@@ -313,7 +338,7 @@ export default function MealPlanPage() {
               >
                 <h2
                   className="mb-6 text-xl font-bold"
-                  style={{ color: '#1A1A2E' }}
+                  style={{ color: "#1A1A2E" }}
                 >
                   Choose Your Plan
                 </h2>
@@ -322,97 +347,114 @@ export default function MealPlanPage() {
                     ? Array.from({ length: 4 }).map((_, i) => (
                         <Skeleton key={i} className="h-52 w-full rounded-2xl" />
                       ))
-                    : displayPlans.map(plan => {
-                    const isSelected = selectedPlanId === plan.id;
-                    const badge =
-                      plan.meals === 10
-                        ? 'Popular'
-                        : plan.meals === 15
-                        ? 'Best Value'
-                        : null;
-                    return (
-                      <motion.button
-                        key={plan.id}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => {
-                          setSelectedPlanId(plan.id);
-                          setSelectedMeals([]);
-                        }}
-                        className="relative rounded-2xl p-6 text-left transition-all duration-200"
-                        style={{
-                          backgroundColor: isSelected ? 'rgba(27,67,50,0.05)' : '#FFFFFF',
-                          border: isSelected
-                            ? '2px solid #1B4332'
-                            : '2px solid #E5E7EB',
-                        }}
-                      >
-                        {badge && (
-                          <span
-                            className="absolute -top-3 right-4 flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold text-white"
+                    : displayPlans.map((plan) => {
+                        const isSelected = selectedPlanId === plan.id;
+                        const badge =
+                          plan.meals === 10
+                            ? "Popular"
+                            : plan.meals === 15
+                              ? "Best Value"
+                              : null;
+                        return (
+                          <motion.button
+                            key={plan.id}
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() => {
+                              setSelectedPlanId(plan.id);
+                              setSelectedMeals([]);
+                            }}
+                            className="relative rounded-2xl p-6 text-left transition-all duration-200"
                             style={{
-                              backgroundColor:
-                                badge === 'Popular' ? '#E76F51' : '#059669',
+                              backgroundColor: isSelected
+                                ? "rgba(27,67,50,0.05)"
+                                : "#FFFFFF",
+                              border: isSelected
+                                ? "2px solid #1B4332"
+                                : "2px solid #E5E7EB",
                             }}
                           >
-                            {badge === 'Popular' ? (
-                              <Star size={12} />
-                            ) : (
-                              <Zap size={12} />
+                            {badge && (
+                              <span
+                                className="absolute -top-3 right-4 flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold text-white"
+                                style={{
+                                  backgroundColor:
+                                    badge === "Popular" ? "#E76F51" : "#059669",
+                                }}
+                              >
+                                {badge === "Popular" ? (
+                                  <Star size={12} />
+                                ) : (
+                                  <Zap size={12} />
+                                )}
+                                {badge}
+                              </span>
                             )}
-                            {badge}
-                          </span>
-                        )}
 
-                        {isSelected && (
-                          <div
-                            className="absolute right-4 top-4 flex h-6 w-6 items-center justify-center rounded-full"
-                            style={{ backgroundColor: '#1B4332' }}
-                          >
-                            <Check size={14} className="text-white" />
-                          </div>
-                        )}
+                            {isSelected && (
+                              <div
+                                className="absolute right-4 top-4 flex h-6 w-6 items-center justify-center rounded-full"
+                                style={{ backgroundColor: "#1B4332" }}
+                              >
+                                <Check size={14} className="text-white" />
+                              </div>
+                            )}
 
-                        <p className="text-sm font-medium" style={{ color: '#6B7280' }}>
-                          {plan.label}
-                        </p>
-                        <p
-                          className="mt-1 text-3xl font-bold"
-                          style={{ color: '#1A1A2E' }}
-                        >
-                          {plan.meals} meals
-                        </p>
-                        <p className="mt-1 text-sm" style={{ color: '#6B7280' }}>
-                          per week
-                        </p>
-
-                        <div className="mt-4" style={{ borderTop: '1px solid #E5E7EB' }}>
-                          <div className="mt-4 flex items-baseline gap-1">
-                            <span
-                              className="text-2xl font-bold"
-                              style={{ color: '#1B4332' }}
-                            >
-                              {formatPeso(plan.price)}
-                            </span>
-                            <span className="text-sm" style={{ color: '#6B7280' }}>
-                              /week
-                            </span>
-                          </div>
-                          <p className="mt-1 text-sm" style={{ color: '#6B7280' }}>
-                            {formatPeso(plan.perMeal)} per meal
-                          </p>
-                          {plan.savings > 0 && (
                             <p
-                              className="mt-2 text-sm font-semibold"
-                              style={{ color: '#059669' }}
+                              className="text-sm font-medium"
+                              style={{ color: "#6B7280" }}
                             >
-                              Save {plan.savings}% vs a la carte
+                              {plan.label}
                             </p>
-                          )}
-                        </div>
-                      </motion.button>
-                    );
-                  })}
+                            <p
+                              className="mt-1 text-3xl font-bold"
+                              style={{ color: "#1A1A2E" }}
+                            >
+                              {plan.meals} meals
+                            </p>
+                            <p
+                              className="mt-1 text-sm"
+                              style={{ color: "#6B7280" }}
+                            >
+                              per week
+                            </p>
+
+                            <div
+                              className="mt-4"
+                              style={{ borderTop: "1px solid #E5E7EB" }}
+                            >
+                              <div className="mt-4 flex items-baseline gap-1">
+                                <span
+                                  className="text-2xl font-bold"
+                                  style={{ color: "#1B4332" }}
+                                >
+                                  {formatPeso(plan.price)}
+                                </span>
+                                <span
+                                  className="text-sm"
+                                  style={{ color: "#6B7280" }}
+                                >
+                                  /week
+                                </span>
+                              </div>
+                              <p
+                                className="mt-1 text-sm"
+                                style={{ color: "#6B7280" }}
+                              >
+                                {formatPeso(plan.perMeal)} per meal
+                              </p>
+                              {plan.savings > 0 && (
+                                <p
+                                  className="mt-2 text-sm font-semibold"
+                                  style={{ color: "#059669" }}
+                                >
+                                  Save {plan.savings}% vs a la carte
+                                </p>
+                              )}
+                            </div>
+                          </motion.button>
+                        );
+                      })}
                 </div>
               </motion.div>
             )}
@@ -429,23 +471,24 @@ export default function MealPlanPage() {
                 <div className="mb-6">
                   <h2
                     className="text-xl font-bold"
-                    style={{ color: '#1A1A2E' }}
+                    style={{ color: "#1A1A2E" }}
                   >
                     Pick Your Meals
                   </h2>
                   {/* Progress bar */}
                   <div className="mt-4">
                     <div className="flex items-center justify-between text-sm">
-                      <span style={{ color: '#6B7280' }}>
-                        {totalMealsSelected} of {selectedPlan.meals} meals selected
+                      <span style={{ color: "#6B7280" }}>
+                        {totalMealsSelected} of {selectedPlan.meals} meals
+                        selected
                       </span>
                       <span
                         className="font-semibold"
                         style={{
                           color:
                             totalMealsSelected === selectedPlan.meals
-                              ? '#059669'
-                              : '#1B4332',
+                              ? "#059669"
+                              : "#1B4332",
                         }}
                       >
                         {totalMealsSelected === selectedPlan.meals
@@ -455,11 +498,11 @@ export default function MealPlanPage() {
                     </div>
                     <div
                       className="mt-2 h-3 overflow-hidden rounded-full"
-                      style={{ backgroundColor: '#E5E7EB' }}
+                      style={{ backgroundColor: "#E5E7EB" }}
                     >
                       <motion.div
                         className="h-full rounded-full"
-                        style={{ backgroundColor: '#1B4332' }}
+                        style={{ backgroundColor: "#1B4332" }}
                         initial={{ width: 0 }}
                         animate={{
                           width: `${(totalMealsSelected / selectedPlan.meals) * 100}%`,
@@ -475,107 +518,115 @@ export default function MealPlanPage() {
                     ? Array.from({ length: 6 }).map((_, i) => (
                         <SkeletonMealCard key={i} />
                       ))
-                    : mealsData.map(meal => {
-                    const qty = getMealQuantity(meal.id);
-                    const isSelected = qty > 0;
-                    return (
-                      <motion.div
-                        key={meal.id}
-                        whileHover={{ scale: 1.01 }}
-                        className="relative overflow-hidden rounded-2xl bg-white transition-shadow hover:shadow-lg"
-                        style={{
-                          border: isSelected
-                            ? '2px solid #1B4332'
-                            : '2px solid transparent',
-                          boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
-                        }}
-                      >
-                        {/* Checkmark overlay */}
-                        {isSelected && (
-                          <div
-                            className="absolute right-3 top-3 z-10 flex h-7 w-7 items-center justify-center rounded-full"
-                            style={{ backgroundColor: '#059669' }}
+                    : mealsData.map((meal) => {
+                        const qty = getMealQuantity(meal.id);
+                        const isSelected = qty > 0;
+                        return (
+                          <motion.div
+                            key={meal.id}
+                            whileHover={{ scale: 1.01 }}
+                            className="relative overflow-hidden rounded-2xl bg-white transition-shadow hover:shadow-lg"
+                            style={{
+                              border: isSelected
+                                ? "2px solid #1B4332"
+                                : "2px solid transparent",
+                              boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+                            }}
                           >
-                            <Check size={16} className="text-white" />
-                          </div>
-                        )}
+                            {/* Checkmark overlay */}
+                            {isSelected && (
+                              <div
+                                className="absolute right-3 top-3 z-10 flex h-7 w-7 items-center justify-center rounded-full"
+                                style={{ backgroundColor: "#059669" }}
+                              >
+                                <Check size={16} className="text-white" />
+                              </div>
+                            )}
 
-                        <div className="relative" style={{ aspectRatio: '16/10' }}>
-                          <MealImage
-                            src={meal.image}
-                            alt={meal.name}
-                            className="h-full w-full object-cover"
-                          />
-                          {meal.tags.length > 0 && (
-                            <div className="absolute left-2 top-2 flex flex-wrap gap-1">
-                              {meal.tags.slice(0, 2).map(tag => (
-                                <span
-                                  key={tag}
-                                  className="rounded-full px-2 py-0.5 text-xs font-medium text-white"
-                                  style={{ backgroundColor: 'rgba(27,67,50,0.85)' }}
-                                >
-                                  {tag}
-                                </span>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="p-4">
-                          <h3
-                            className="text-sm font-semibold leading-snug"
-                            style={{ color: '#1A1A2E' }}
-                          >
-                            {meal.name}
-                          </h3>
-                          <div
-                            className="mt-1 flex gap-3 text-xs"
-                            style={{ color: '#6B7280' }}
-                          >
-                            <span>{meal.calories} cal</span>
-                            <span>{meal.protein}g protein</span>
-                          </div>
-                          <div className="mt-3 flex items-center justify-between">
-                            <span
-                              className="font-bold"
-                              style={{ color: '#1B4332' }}
+                            <div
+                              className="relative"
+                              style={{ aspectRatio: "16/10" }}
                             >
-                              {formatPeso(meal.price)}
-                            </span>
-
-                            {/* Quantity selector */}
-                            <div className="flex items-center gap-2">
-                              <button
-                                onClick={() => updateMealQuantity(meal, -1)}
-                                disabled={qty === 0}
-                                className="flex h-8 w-8 items-center justify-center rounded-full transition-colors disabled:opacity-30"
-                                style={{
-                                  backgroundColor: qty > 0 ? '#1B4332' : '#E5E7EB',
-                                  color: qty > 0 ? '#FFFFFF' : '#6B7280',
-                                }}
-                              >
-                                <Minus size={14} />
-                              </button>
-                              <span
-                                className="w-6 text-center text-sm font-bold"
-                                style={{ color: '#1A1A2E' }}
-                              >
-                                {qty}
-                              </span>
-                              <button
-                                onClick={() => updateMealQuantity(meal, 1)}
-                                disabled={totalMealsSelected >= selectedPlan.meals}
-                                className="flex h-8 w-8 items-center justify-center rounded-full text-white transition-colors disabled:opacity-30"
-                                style={{ backgroundColor: '#E76F51' }}
-                              >
-                                <Plus size={14} />
-                              </button>
+                              <MealImage
+                                src={meal.image}
+                                alt={meal.name}
+                                className="h-full w-full object-cover"
+                              />
+                              {meal.tags.length > 0 && (
+                                <div className="absolute left-2 top-2 flex flex-wrap gap-1">
+                                  {meal.tags.slice(0, 2).map((tag) => (
+                                    <span
+                                      key={tag}
+                                      className="rounded-full px-2 py-0.5 text-xs font-medium text-white"
+                                      style={{
+                                        backgroundColor: "rgba(27,67,50,0.85)",
+                                      }}
+                                    >
+                                      {tag}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
                             </div>
-                          </div>
-                        </div>
-                      </motion.div>
-                    );
-                  })}
+
+                            <div className="p-4">
+                              <h3
+                                className="text-sm font-semibold leading-snug"
+                                style={{ color: "#1A1A2E" }}
+                              >
+                                {meal.name}
+                              </h3>
+                              <div
+                                className="mt-1 flex gap-3 text-xs"
+                                style={{ color: "#6B7280" }}
+                              >
+                                <span>{meal.calories} cal</span>
+                                <span>{meal.protein}g protein</span>
+                              </div>
+                              <div className="mt-3 flex items-center justify-between">
+                                <span
+                                  className="font-bold"
+                                  style={{ color: "#1B4332" }}
+                                >
+                                  {formatPeso(meal.price)}
+                                </span>
+
+                                {/* Quantity selector */}
+                                <div className="flex items-center gap-2">
+                                  <button
+                                    onClick={() => updateMealQuantity(meal, -1)}
+                                    disabled={qty === 0}
+                                    className="flex h-8 w-8 items-center justify-center rounded-full transition-colors disabled:opacity-30"
+                                    style={{
+                                      backgroundColor:
+                                        qty > 0 ? "#1B4332" : "#E5E7EB",
+                                      color: qty > 0 ? "#FFFFFF" : "#6B7280",
+                                    }}
+                                  >
+                                    <Minus size={14} />
+                                  </button>
+                                  <span
+                                    className="w-6 text-center text-sm font-bold"
+                                    style={{ color: "#1A1A2E" }}
+                                  >
+                                    {qty}
+                                  </span>
+                                  <button
+                                    onClick={() => updateMealQuantity(meal, 1)}
+                                    disabled={
+                                      totalMealsSelected >= selectedPlan.meals
+                                    }
+                                    className="flex h-8 w-8 items-center justify-center rounded-full text-white transition-colors disabled:opacity-30"
+                                    style={{ backgroundColor: "#E76F51" }}
+                                  >
+                                    <Plus size={14} />
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          </motion.div>
+                        );
+                      })}
                 </div>
               </motion.div>
             )}
@@ -591,13 +642,13 @@ export default function MealPlanPage() {
               >
                 <h2
                   className="mb-6 text-xl font-bold"
-                  style={{ color: '#1A1A2E' }}
+                  style={{ color: "#1A1A2E" }}
                 >
                   Customize Your Meals
                 </h2>
 
                 {selectedMeals.length === 0 ? (
-                  <p style={{ color: '#6B7280' }}>No meals selected.</p>
+                  <p style={{ color: "#6B7280" }}>No meals selected.</p>
                 ) : (
                   <div className="space-y-3">
                     {selectedMeals.map((sm) => {
@@ -606,7 +657,7 @@ export default function MealPlanPage() {
                         <div
                           key={sm.meal.id}
                           className="overflow-hidden rounded-xl bg-white"
-                          style={{ border: '1px solid #E5E7EB' }}
+                          style={{ border: "1px solid #E5E7EB" }}
                         >
                           <button
                             onClick={() =>
@@ -623,12 +674,15 @@ export default function MealPlanPage() {
                               <div>
                                 <p
                                   className="text-sm font-semibold"
-                                  style={{ color: '#1A1A2E' }}
+                                  style={{ color: "#1A1A2E" }}
                                 >
                                   {sm.meal.name}
                                 </p>
-                                <p className="text-xs" style={{ color: '#6B7280' }}>
-                                  Qty: {sm.quantity} &middot;{' '}
+                                <p
+                                  className="text-xs"
+                                  style={{ color: "#6B7280" }}
+                                >
+                                  Qty: {sm.quantity} &middot;{" "}
                                   {formatPeso(sm.meal.price * sm.quantity)}
                                   {sm.addOns.length > 0 &&
                                     ` + ${formatPeso(
@@ -643,9 +697,9 @@ export default function MealPlanPage() {
                             <ChevronRight
                               size={18}
                               className={`transition-transform duration-200 ${
-                                isExpanded ? 'rotate-90' : ''
+                                isExpanded ? "rotate-90" : ""
                               }`}
-                              style={{ color: '#6B7280' }}
+                              style={{ color: "#6B7280" }}
                             />
                           </button>
 
@@ -660,11 +714,11 @@ export default function MealPlanPage() {
                               >
                                 <div
                                   className="px-4 pb-4"
-                                  style={{ borderTop: '1px solid #E5E7EB' }}
+                                  style={{ borderTop: "1px solid #E5E7EB" }}
                                 >
                                   <p
                                     className="mb-3 mt-3 text-sm font-medium"
-                                    style={{ color: '#1A1A2E' }}
+                                    style={{ color: "#1A1A2E" }}
                                   >
                                     Add-ons (per serving)
                                   </p>
@@ -685,18 +739,18 @@ export default function MealPlanPage() {
                                               toggleAddOn(sm.meal.id, addon)
                                             }
                                             className="h-4 w-4 rounded"
-                                            style={{ accentColor: '#1B4332' }}
+                                            style={{ accentColor: "#1B4332" }}
                                           />
                                           <span
                                             className="text-sm"
-                                            style={{ color: '#1A1A2E' }}
+                                            style={{ color: "#1A1A2E" }}
                                           >
                                             {addon.name}
                                           </span>
                                         </div>
                                         <span
                                           className="text-sm font-medium"
-                                          style={{ color: '#059669' }}
+                                          style={{ color: "#059669" }}
                                         >
                                           +{formatPeso(addon.price)}
                                         </span>
@@ -726,7 +780,7 @@ export default function MealPlanPage() {
               >
                 <h2
                   className="mb-6 text-xl font-bold"
-                  style={{ color: '#1A1A2E' }}
+                  style={{ color: "#1A1A2E" }}
                 >
                   Delivery Schedule
                 </h2>
@@ -735,13 +789,13 @@ export default function MealPlanPage() {
                 <div className="mb-8">
                   <p
                     className="mb-3 text-sm font-medium"
-                    style={{ color: '#1A1A2E' }}
+                    style={{ color: "#1A1A2E" }}
                   >
                     Delivery Frequency
                   </p>
                   <div
                     className="inline-flex overflow-hidden rounded-xl"
-                    style={{ border: '1px solid #E5E7EB' }}
+                    style={{ border: "1px solid #E5E7EB" }}
                   >
                     {(["weekly", "biweekly"] as const).map((freq) => (
                       <button
@@ -750,8 +804,8 @@ export default function MealPlanPage() {
                         className="px-6 py-2.5 text-sm font-medium transition-colors"
                         style={
                           frequency === freq
-                            ? { backgroundColor: '#1B4332', color: '#FFFFFF' }
-                            : { backgroundColor: '#FFFFFF', color: '#1A1A2E' }
+                            ? { backgroundColor: "#1B4332", color: "#FFFFFF" }
+                            : { backgroundColor: "#FFFFFF", color: "#1A1A2E" }
                         }
                       >
                         {freq === "weekly" ? "Weekly" : "Bi-weekly"}
@@ -764,7 +818,7 @@ export default function MealPlanPage() {
                 <div className="mb-8">
                   <p
                     className="mb-3 text-sm font-medium"
-                    style={{ color: '#1A1A2E' }}
+                    style={{ color: "#1A1A2E" }}
                   >
                     Preferred Delivery Day(s)
                   </p>
@@ -778,11 +832,11 @@ export default function MealPlanPage() {
                           className="flex h-14 w-14 items-center justify-center rounded-xl text-sm font-semibold transition-all duration-150"
                           style={
                             isSelected
-                              ? { backgroundColor: '#1B4332', color: '#FFFFFF' }
+                              ? { backgroundColor: "#1B4332", color: "#FFFFFF" }
                               : {
-                                  backgroundColor: '#FFFFFF',
-                                  color: '#1A1A2E',
-                                  border: '1px solid #E5E7EB',
+                                  backgroundColor: "#FFFFFF",
+                                  color: "#1A1A2E",
+                                  border: "1px solid #E5E7EB",
                                 }
                           }
                         >
@@ -797,7 +851,7 @@ export default function MealPlanPage() {
                 <div>
                   <p
                     className="mb-3 text-sm font-medium"
-                    style={{ color: '#1A1A2E' }}
+                    style={{ color: "#1A1A2E" }}
                   >
                     Preferred Time Slot
                   </p>
@@ -811,11 +865,11 @@ export default function MealPlanPage() {
                           className="flex items-center justify-center gap-2 rounded-xl px-3 py-3 text-sm font-medium transition-all duration-150"
                           style={
                             isSelected
-                              ? { backgroundColor: '#1B4332', color: '#FFFFFF' }
+                              ? { backgroundColor: "#1B4332", color: "#FFFFFF" }
                               : {
-                                  backgroundColor: '#FFFFFF',
-                                  color: '#1A1A2E',
-                                  border: '1px solid #E5E7EB',
+                                  backgroundColor: "#FFFFFF",
+                                  color: "#1A1A2E",
+                                  border: "1px solid #E5E7EB",
                                 }
                           }
                         >
@@ -836,14 +890,11 @@ export default function MealPlanPage() {
           <div
             className="sticky top-24 rounded-2xl bg-white p-6"
             style={{
-              border: '1px solid #E5E7EB',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
+              border: "1px solid #E5E7EB",
+              boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
             }}
           >
-            <h3
-              className="text-lg font-bold"
-              style={{ color: '#1A1A2E' }}
-            >
+            <h3 className="text-lg font-bold" style={{ color: "#1A1A2E" }}>
               Plan Summary
             </h3>
 
@@ -851,9 +902,12 @@ export default function MealPlanPage() {
               <>
                 <div
                   className="mt-3 rounded-lg px-3 py-2"
-                  style={{ backgroundColor: 'rgba(27,67,50,0.05)' }}
+                  style={{ backgroundColor: "rgba(27,67,50,0.05)" }}
                 >
-                  <p className="text-sm font-semibold" style={{ color: '#1B4332' }}>
+                  <p
+                    className="text-sm font-semibold"
+                    style={{ color: "#1B4332" }}
+                  >
                     {selectedPlan.label} — {selectedPlan.meals} meals/week
                   </p>
                 </div>
@@ -862,28 +916,28 @@ export default function MealPlanPage() {
                 {selectedMeals.length > 0 && (
                   <div
                     className="mt-4 max-h-48 overflow-y-auto"
-                    style={{ borderTop: '1px solid #E5E7EB' }}
+                    style={{ borderTop: "1px solid #E5E7EB" }}
                   >
                     {selectedMeals.map((sm) => (
                       <div
                         key={sm.meal.id}
                         className="flex items-center justify-between py-2 text-sm"
-                        style={{ borderBottom: '1px solid #f3f4f6' }}
+                        style={{ borderBottom: "1px solid #f3f4f6" }}
                       >
                         <div className="flex-1 pr-2">
                           <p
                             className="font-medium leading-tight"
-                            style={{ color: '#1A1A2E' }}
+                            style={{ color: "#1A1A2E" }}
                           >
                             {sm.meal.name}
                           </p>
                           {sm.addOns.length > 0 && (
-                            <p className="text-xs" style={{ color: '#059669' }}>
-                              +{sm.addOns.map(a => a.name).join(', ')}
+                            <p className="text-xs" style={{ color: "#059669" }}>
+                              +{sm.addOns.map((a) => a.name).join(", ")}
                             </p>
                           )}
                         </div>
-                        <span style={{ color: '#6B7280' }}>x{sm.quantity}</span>
+                        <span style={{ color: "#6B7280" }}>x{sm.quantity}</span>
                       </div>
                     ))}
                   </div>
@@ -892,38 +946,45 @@ export default function MealPlanPage() {
                 {/* Totals */}
                 <div className="mt-4 space-y-2">
                   <div className="flex justify-between text-sm">
-                    <span style={{ color: '#6B7280' }}>Plan price</span>
-                    <span style={{ color: '#1A1A2E' }}>
+                    <span style={{ color: "#6B7280" }}>Plan price</span>
+                    <span style={{ color: "#1A1A2E" }}>
                       {formatPeso(selectedPlan.price)}
                     </span>
                   </div>
                   {addOnsTotal > 0 && (
                     <div className="flex justify-between text-sm">
-                      <span style={{ color: '#6B7280' }}>Add-ons</span>
-                      <span style={{ color: '#1A1A2E' }}>
+                      <span style={{ color: "#6B7280" }}>Add-ons</span>
+                      <span style={{ color: "#1A1A2E" }}>
                         {formatPeso(addOnsTotal)}
                       </span>
                     </div>
                   )}
                   {savings > 0 && (
                     <div className="flex justify-between text-sm">
-                      <span style={{ color: '#059669' }}>Subscription savings</span>
-                      <span className="font-semibold" style={{ color: '#059669' }}>
+                      <span style={{ color: "#059669" }}>
+                        Subscription savings
+                      </span>
+                      <span
+                        className="font-semibold"
+                        style={{ color: "#059669" }}
+                      >
                         -{formatPeso(savings)}
                       </span>
                     </div>
                   )}
                   <div
                     className="flex justify-between pt-2 text-base font-bold"
-                    style={{ borderTop: '1px solid #E5E7EB' }}
+                    style={{ borderTop: "1px solid #E5E7EB" }}
                   >
-                    <span style={{ color: '#1A1A2E' }}>Total</span>
-                    <span style={{ color: '#1B4332' }}>{formatPeso(subtotal)}</span>
+                    <span style={{ color: "#1A1A2E" }}>Total</span>
+                    <span style={{ color: "#1B4332" }}>
+                      {formatPeso(subtotal)}
+                    </span>
                   </div>
                 </div>
               </>
             ) : (
-              <p className="mt-3 text-sm" style={{ color: '#6B7280' }}>
+              <p className="mt-3 text-sm" style={{ color: "#6B7280" }}>
                 Select a plan to get started.
               </p>
             )}
@@ -937,7 +998,7 @@ export default function MealPlanPage() {
                     disabled={!canProceed() || isSubmitting}
                     className="flex w-full items-center justify-center gap-2 rounded-xl py-3 text-base font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
                     style={{
-                      backgroundColor: '#E76F51',
+                      backgroundColor: "#E76F51",
                     }}
                   >
                     <ShoppingBag size={18} />
@@ -945,14 +1006,17 @@ export default function MealPlanPage() {
                   </button>
                 ) : (
                   <>
-                    <p className="text-center text-sm" style={{ color: '#6B7280' }}>
+                    <p
+                      className="text-center text-sm"
+                      style={{ color: "#6B7280" }}
+                    >
                       Sign in or create an account to proceed.
                     </p>
                     <button
                       onClick={() => openAuthModal("login")}
                       disabled={!canProceed()}
                       className="flex w-full items-center justify-center gap-2 rounded-xl py-3 text-base font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-40"
-                      style={{ backgroundColor: '#E76F51' }}
+                      style={{ backgroundColor: "#E76F51" }}
                     >
                       <LogIn size={18} />
                       Sign In to Proceed
@@ -961,7 +1025,7 @@ export default function MealPlanPage() {
                       onClick={() => openAuthModal("register")}
                       disabled={!canProceed()}
                       className="flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold transition-colors hover:bg-gray-50 disabled:opacity-40"
-                      style={{ color: '#1B4332', border: '2px solid #1B4332' }}
+                      style={{ color: "#1B4332", border: "2px solid #1B4332" }}
                     >
                       <UserPlus size={16} />
                       Create Account
@@ -973,7 +1037,7 @@ export default function MealPlanPage() {
                   onClick={() => setCurrentStep((prev) => prev + 1)}
                   disabled={!canProceed()}
                   className="flex w-full items-center justify-center gap-2 rounded-xl py-3 text-base font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-40"
-                  style={{ backgroundColor: '#E76F51' }}
+                  style={{ backgroundColor: "#E76F51" }}
                 >
                   Continue
                   <ChevronRight size={18} />
@@ -982,11 +1046,11 @@ export default function MealPlanPage() {
 
               {currentStep > 1 && (
                 <button
-                  onClick={() => setCurrentStep(prev => prev - 1)}
+                  onClick={() => setCurrentStep((prev) => prev - 1)}
                   className="flex w-full items-center justify-center gap-2 rounded-xl py-3 text-base font-semibold transition-colors hover:bg-gray-50"
                   style={{
-                    color: '#1A1A2E',
-                    border: '1px solid #E5E7EB',
+                    color: "#1A1A2E",
+                    border: "1px solid #E5E7EB",
                   }}
                 >
                   <ChevronLeft size={18} />
