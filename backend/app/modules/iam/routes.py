@@ -80,6 +80,7 @@ async def update_me(
 
 # ── Admin Endpoints (admin or superadmin) ─────────────────────────────
 
+
 @router.get("/users", response_model=UserListResponse)
 async def list_users(
     current_user: SuperUser,

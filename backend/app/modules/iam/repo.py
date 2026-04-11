@@ -33,9 +33,7 @@ class UserRepo:
         return result.scalar_one_or_none()
 
     async def get_by_email_and_tenant(self, email: str, tenant_id: UUID) -> User | None:
-        result = await self.db.execute(
-            select(User).where(User.email == email, User.tenant_id == tenant_id)
-        )
+        result = await self.db.execute(select(User).where(User.email == email, User.tenant_id == tenant_id))
         return result.scalar_one_or_none()
 
     async def create(self, user: User) -> User:
@@ -56,8 +54,12 @@ class UserRepo:
         return False
 
     async def list_by_tenant(
-        self, tenant_id: UUID, offset: int = 0, limit: int = 20,
-        is_active: bool | None = None, role: str | None = None,
+        self,
+        tenant_id: UUID,
+        offset: int = 0,
+        limit: int = 20,
+        is_active: bool | None = None,
+        role: str | None = None,
     ) -> tuple[list[User], int]:
         query = select(User).where(User.tenant_id == tenant_id)
         count_query = select(func.count()).select_from(User).where(User.tenant_id == tenant_id)

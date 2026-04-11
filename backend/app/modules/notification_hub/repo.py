@@ -26,10 +26,7 @@ class NotificationTemplateRepo:
         return list(result.scalars().all())
 
     async def get_by_id(self, template_id: UUID) -> NotificationTemplate | None:
-        result = await self.db.execute(
-            select(NotificationTemplate)
-            .where(NotificationTemplate.id == template_id)
-        )
+        result = await self.db.execute(select(NotificationTemplate).where(NotificationTemplate.id == template_id))
         return result.scalar_one_or_none()
 
     async def get_by_event_and_channel(
@@ -55,9 +52,7 @@ class NotificationTemplateRepo:
 
     async def update(self, template_id: UUID, **kwargs) -> NotificationTemplate | None:
         await self.db.execute(
-            update(NotificationTemplate)
-            .where(NotificationTemplate.id == template_id)
-            .values(**kwargs)
+            update(NotificationTemplate).where(NotificationTemplate.id == template_id).values(**kwargs)
         )
         return await self.get_by_id(template_id)
 
@@ -73,9 +68,7 @@ class NotificationRepo:
 
     async def get_by_id(self, notification_id: UUID) -> Notification | None:
         result = await self.db.execute(
-            select(Notification)
-            .options(selectinload(Notification.logs))
-            .where(Notification.id == notification_id)
+            select(Notification).options(selectinload(Notification.logs)).where(Notification.id == notification_id)
         )
         return result.scalar_one_or_none()
 
@@ -93,11 +86,7 @@ class NotificationRepo:
             .limit(limit)
             .order_by(Notification.created_at.desc())
         )
-        count_query = (
-            select(func.count())
-            .select_from(Notification)
-            .where(Notification.tenant_id == tenant_id)
-        )
+        count_query = select(func.count()).select_from(Notification).where(Notification.tenant_id == tenant_id)
 
         result = await self.db.execute(query)
         count_result = await self.db.execute(count_query)
@@ -120,11 +109,7 @@ class NotificationRepo:
         return list(result.scalars().all())
 
     async def update(self, notification_id: UUID, **kwargs) -> Notification | None:
-        await self.db.execute(
-            update(Notification)
-            .where(Notification.id == notification_id)
-            .values(**kwargs)
-        )
+        await self.db.execute(update(Notification).where(Notification.id == notification_id).values(**kwargs))
         return await self.get_by_id(notification_id)
 
     async def add_log(self, log: NotificationLog) -> NotificationLog:

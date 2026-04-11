@@ -110,14 +110,20 @@ export default function MealDetailModal({
 
               {/* Description */}
               {meal.description && (
-                <p className="mt-2 text-sm leading-relaxed" style={{ color: "#6B7280" }}>
+                <p
+                  className="mt-2 text-sm leading-relaxed"
+                  style={{ color: "#6B7280" }}
+                >
                   {meal.description}
                 </p>
               )}
 
               {/* Macros grid */}
               <div className="mt-4">
-                <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider" style={{ color: "#9CA3AF" }}>
+                <h3
+                  className="mb-2 text-xs font-semibold uppercase tracking-wider"
+                  style={{ color: "#9CA3AF" }}
+                >
                   Nutrition Facts
                 </h3>
                 <div className="grid grid-cols-4 gap-2">
@@ -132,11 +138,17 @@ export default function MealDetailModal({
                         style={{ color: "#1A1A2E" }}
                       >
                         {value}
-                        <span className="text-xs font-normal" style={{ color: "#9CA3AF" }}>
+                        <span
+                          className="text-xs font-normal"
+                          style={{ color: "#9CA3AF" }}
+                        >
                           {unit}
                         </span>
                       </p>
-                      <p className="mt-0.5 text-xs" style={{ color: "#6B7280" }}>
+                      <p
+                        className="mt-0.5 text-xs"
+                        style={{ color: "#6B7280" }}
+                      >
                         {label}
                       </p>
                     </div>
@@ -147,7 +159,10 @@ export default function MealDetailModal({
               {/* Allergens */}
               {meal.allergens.length > 0 && (
                 <div className="mt-4">
-                  <h3 className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider" style={{ color: "#9CA3AF" }}>
+                  <h3
+                    className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider"
+                    style={{ color: "#9CA3AF" }}
+                  >
                     <AlertTriangle size={12} style={{ color: "#F59E0B" }} />
                     Allergens
                   </h3>
@@ -168,7 +183,10 @@ export default function MealDetailModal({
               {/* Ingredients */}
               {meal.ingredients.length > 0 && (
                 <div className="mt-4">
-                  <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider" style={{ color: "#9CA3AF" }}>
+                  <h3
+                    className="mb-2 text-xs font-semibold uppercase tracking-wider"
+                    style={{ color: "#9CA3AF" }}
+                  >
                     Main Ingredients
                   </h3>
                   <p className="text-sm" style={{ color: "#374151" }}>
@@ -179,7 +197,10 @@ export default function MealDetailModal({
 
               {/* Price + CTA */}
               <div className="mt-5 flex items-center justify-between">
-                <span className="text-2xl font-bold" style={{ color: "#1B4332" }}>
+                <span
+                  className="text-2xl font-bold"
+                  style={{ color: "#1B4332" }}
+                >
                   {formatPeso(meal.price)}
                 </span>
                 <button

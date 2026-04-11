@@ -20,6 +20,7 @@ security = HTTPBearer(auto_error=False)
 
 # ── Token helpers ────────────────────────────────────────────────────
 
+
 def create_access_token(subject: str | UUID, role: str | None = None, expires_delta: timedelta | None = None) -> str:
     expire = datetime.now(timezone.utc) + (expires_delta or timedelta(minutes=settings.access_token_expire_minutes))
     payload = {
@@ -48,6 +49,7 @@ def decode_token(token: str) -> dict:
 
 
 # ── Dependencies ─────────────────────────────────────────────────────
+
 
 async def get_current_user(
     credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(security)],

@@ -66,7 +66,11 @@ export default function AuthModal() {
     e.preventDefault();
     setError("");
     try {
-      await login({ email: loginEmail, password: loginPassword, tenant_slug: "default" });
+      await login({
+        email: loginEmail,
+        password: loginPassword,
+        tenant_slug: "default",
+      });
       showToast("Welcome back!", "success");
       resetForms();
     } catch (err) {

@@ -12,6 +12,7 @@ from app.shared.models import Base, TenantMixin, TimestampMixin, UUIDPrimaryKeyM
 
 # ── Enums ───────────────────────────────────────────────────────────────
 
+
 class NotificationChannel(str, enum.Enum):
     email = "email"
     sms = "sms"
@@ -34,13 +35,12 @@ class LogStatus(str, enum.Enum):
 
 # ── Notification Template ──────────────────────────────────────────────
 
+
 class NotificationTemplate(UUIDPrimaryKeyMixin, TenantMixin, TimestampMixin, Base):
     __tablename__ = "notification_templates"
 
     event_type: Mapped[str] = mapped_column(String(100), nullable=False)
-    channel: Mapped[NotificationChannel] = mapped_column(
-        Enum(NotificationChannel), nullable=False
-    )
+    channel: Mapped[NotificationChannel] = mapped_column(Enum(NotificationChannel), nullable=False)
     subject: Mapped[str | None] = mapped_column(String(255), nullable=True)
     body_template: Mapped[str] = mapped_column(Text, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
@@ -53,6 +53,7 @@ class NotificationTemplate(UUIDPrimaryKeyMixin, TenantMixin, TimestampMixin, Bas
 
 # ── Notification ───────────────────────────────────────────────────────
 
+
 class Notification(UUIDPrimaryKeyMixin, TenantMixin, TimestampMixin, Base):
     __tablename__ = "notifications"
 
@@ -60,21 +61,15 @@ class Notification(UUIDPrimaryKeyMixin, TenantMixin, TimestampMixin, Base):
         UUID(as_uuid=True), ForeignKey("notification_templates.id"), nullable=True
     )
     user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False, index=True)
-    channel: Mapped[NotificationChannel] = mapped_column(
-        Enum(NotificationChannel), nullable=False
-    )
+    channel: Mapped[NotificationChannel] = mapped_column(Enum(NotificationChannel), nullable=False)
     recipient: Mapped[str] = mapped_column(String(255), nullable=False)
     subject: Mapped[str | None] = mapped_column(String(255), nullable=True)
     body: Mapped[str] = mapped_column(Text, nullable=False)
     status: Mapped[NotificationStatus] = mapped_column(
         Enum(NotificationStatus), default=NotificationStatus.queued, nullable=False
     )
-    scheduled_for: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
-    sent_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    scheduled_for: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    sent_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # Relationships
     template: Mapped["NotificationTemplate | None"] = relationship(
@@ -87,6 +82,7 @@ class Notification(UUIDPrimaryKeyMixin, TenantMixin, TimestampMixin, Base):
 
 # ── Notification Log ──────────────────────────────────────────────────
 
+
 class NotificationLog(UUIDPrimaryKeyMixin, Base):
     __tablename__ = "notification_logs"
 
@@ -97,11 +93,7 @@ class NotificationLog(UUIDPrimaryKeyMixin, Base):
     status: Mapped[LogStatus] = mapped_column(Enum(LogStatus), nullable=False)
     provider_response: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
     error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), nullable=False
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
     # Relationships
-    notification: Mapped["Notification"] = relationship(
-        "Notification", back_populates="logs"
-    )
+    notification: Mapped["Notification"] = relationship("Notification", back_populates="logs")
