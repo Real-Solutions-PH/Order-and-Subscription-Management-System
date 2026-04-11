@@ -76,7 +76,7 @@ export default function MealPlanPage() {
   const apiMeals = productsQuery.data?.items.map(mapProductToMeal);
   const mealsData = apiMeals && apiMeals.length > 0 ? apiMeals : (devMode ? meals : []);
   const isLoadingMeals = productsQuery.isLoading;
-  const displayTimeSlots = devMode ? timeSlots : [];
+  const displayTimeSlots = timeSlots;
 
   const displayPlans = plansQuery.data?.length
     ? plansQuery.data.flatMap((plan) =>

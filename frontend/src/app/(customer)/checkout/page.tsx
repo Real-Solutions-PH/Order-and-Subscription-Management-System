@@ -70,8 +70,8 @@ export default function CheckoutPage() {
     return devMode ? mockDeliveryZones : [];
   }, [apiZones, devMode]);
 
-  const displayTimeSlots = devMode ? timeSlots : [];
-  const displayPaymentMethods = devMode ? paymentMethods : [];
+  const displayTimeSlots = timeSlots;
+  const displayPaymentMethods = paymentMethods;
 
   // Auth
   const { isAuthenticated, user, openAuthModal } = useAuthContext();
