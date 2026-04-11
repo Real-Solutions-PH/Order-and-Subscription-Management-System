@@ -65,7 +65,7 @@ export default function MealPlanPage() {
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string>("");
   const [expandedMealId, setExpandedMealId] = useState<number | string | null>(null);
-  const { addItem } = useCart();
+  const { addItem, setPlanTotal } = useCart();
   const { showToast } = useToast();
   const { isAuthenticated, openAuthModal } = useAuthContext();
 
@@ -190,6 +190,7 @@ export default function MealPlanPage() {
     selectedMeals.forEach((sm) => {
       addItem(sm.meal, sm.quantity);
     });
+    setPlanTotal(subtotal);
     showToast("Meal plan added to cart!", "success");
   }
 

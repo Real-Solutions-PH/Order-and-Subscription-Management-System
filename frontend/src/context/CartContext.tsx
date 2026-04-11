@@ -9,6 +9,7 @@ import React, {
 } from "react";
 import { useServerCart } from "@/hooks/useCart";
 import type { Meal } from "@/lib/mock-data";
+import { computeOrderSubtotal } from "@/lib/order-utils";
 
 export interface CartItem {
   meal: Meal;
@@ -25,6 +26,8 @@ interface CartContextType {
   total: number;
   itemCount: number;
   isLoading: boolean;
+  planTotal: number | null;
+  setPlanTotal: (total: number | null) => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -36,6 +39,7 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
  */
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
+  const [planTotal, setPlanTotal] = useState<number | null>(null);
   const serverCart = useServerCart();
 
   const addItem = useCallback(
@@ -89,10 +93,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const clearCart = useCallback(() => {
     setItems([]);
+    setPlanTotal(null);
     serverCart.clearCart().catch(() => {});
   }, [serverCart]);
 
-  const total = items.reduce((sum, i) => sum + i.meal.price * i.quantity, 0);
+  const total = computeOrderSubtotal(items, planTotal);
   const itemCount = items.reduce((sum, i) => sum + i.quantity, 0);
 
   return (
@@ -106,6 +111,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
         total,
         itemCount,
         isLoading: serverCart.isLoading,
+        planTotal,
+        setPlanTotal,
       }}
     >
       {children}
