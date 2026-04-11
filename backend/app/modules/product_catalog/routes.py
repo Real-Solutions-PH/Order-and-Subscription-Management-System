@@ -54,9 +54,7 @@ async def list_products(
     tenant_id: UUID | None = None,
 ):
     # Authenticated users use their tenant; public requires tenant_id param
-    resolved_tenant_id = (
-        current_user.tenant_id if current_user else tenant_id
-    )
+    resolved_tenant_id = current_user.tenant_id if current_user else tenant_id
     if not resolved_tenant_id:
         return ProductListResponse(total=0, page=page, per_page=per_page, items=[])
 
@@ -141,11 +139,10 @@ async def get_active_catalog(
     current_user: OptionalUser = None,
     tenant_id: UUID | None = None,
 ):
-    resolved_tenant_id = (
-        current_user.tenant_id if current_user else tenant_id
-    )
+    resolved_tenant_id = current_user.tenant_id if current_user else tenant_id
     if not resolved_tenant_id:
         from app.exceptions import BadRequestError
+
         raise BadRequestError("tenant_id is required")
     return await catalog_service.get_active_catalog(resolved_tenant_id)
 

@@ -23,6 +23,7 @@ from app.shared.models import Base, TenantMixin, TimestampMixin, UUIDPrimaryKeyM
 
 # ── Enums ───────────────────────────────────────────────────────────────
 
+
 class ProductStatus(str, enum.Enum):
     draft = "draft"
     active = "active"
@@ -45,6 +46,7 @@ class CatalogStatus(str, enum.Enum):
 
 # ── Product Category ────────────────────────────────────────────────────
 
+
 class ProductCategory(UUIDPrimaryKeyMixin, TenantMixin, TimestampMixin, Base):
     __tablename__ = "product_categories"
 
@@ -64,20 +66,17 @@ class ProductCategory(UUIDPrimaryKeyMixin, TenantMixin, TimestampMixin, Base):
 
 # ── Product ─────────────────────────────────────────────────────────────
 
+
 class Product(UUIDPrimaryKeyMixin, TenantMixin, TimestampMixin, Base):
     __tablename__ = "products"
-    __table_args__ = (
-        UniqueConstraint("tenant_id", "slug", name="uq_product_tenant_slug"),
-    )
+    __table_args__ = (UniqueConstraint("tenant_id", "slug", name="uq_product_tenant_slug"),)
 
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     slug: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     short_description: Mapped[str | None] = mapped_column(String(500), nullable=True)
     sku: Mapped[str | None] = mapped_column(String(100), nullable=True)
-    status: Mapped[ProductStatus] = mapped_column(
-        Enum(ProductStatus), default=ProductStatus.draft, nullable=False
-    )
+    status: Mapped[ProductStatus] = mapped_column(Enum(ProductStatus), default=ProductStatus.draft, nullable=False)
     is_subscribable: Mapped[bool] = mapped_column(Boolean, default=False)
     is_standalone: Mapped[bool] = mapped_column(Boolean, default=True)
     metadata_: Mapped[dict | None] = mapped_column("metadata", JSONB, nullable=True)
@@ -95,6 +94,7 @@ class Product(UUIDPrimaryKeyMixin, TenantMixin, TimestampMixin, Base):
 
 
 # ── Product Variant ─────────────────────────────────────────────────────
+
 
 class ProductVariant(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     __tablename__ = "product_variants"
@@ -118,6 +118,7 @@ class ProductVariant(UUIDPrimaryKeyMixin, TimestampMixin, Base):
 
 # ── Product Attribute ───────────────────────────────────────────────────
 
+
 class ProductAttribute(UUIDPrimaryKeyMixin, TenantMixin, Base):
     __tablename__ = "product_attributes"
 
@@ -130,6 +131,7 @@ class ProductAttribute(UUIDPrimaryKeyMixin, TenantMixin, Base):
 
 
 # ── Product Attribute Value ─────────────────────────────────────────────
+
 
 class ProductAttributeValue(UUIDPrimaryKeyMixin, Base):
     __tablename__ = "product_attribute_values"
@@ -148,6 +150,7 @@ class ProductAttributeValue(UUIDPrimaryKeyMixin, Base):
 
 # ── Product Image ───────────────────────────────────────────────────────
 
+
 class ProductImage(UUIDPrimaryKeyMixin, Base):
     __tablename__ = "product_images"
 
@@ -164,15 +167,14 @@ class ProductImage(UUIDPrimaryKeyMixin, Base):
 
 # ── Catalog ─────────────────────────────────────────────────────────────
 
+
 class Catalog(UUIDPrimaryKeyMixin, TenantMixin, TimestampMixin, Base):
     __tablename__ = "catalogs"
 
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     slug: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
-    status: Mapped[CatalogStatus] = mapped_column(
-        Enum(CatalogStatus), default=CatalogStatus.draft, nullable=False
-    )
+    status: Mapped[CatalogStatus] = mapped_column(Enum(CatalogStatus), default=CatalogStatus.draft, nullable=False)
     published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # Relationships
@@ -185,6 +187,7 @@ class Catalog(UUIDPrimaryKeyMixin, TenantMixin, TimestampMixin, Base):
 
 
 # ── Catalog Item ────────────────────────────────────────────────────────
+
 
 class CatalogItem(UUIDPrimaryKeyMixin, Base):
     __tablename__ = "catalog_items"
@@ -204,6 +207,7 @@ class CatalogItem(UUIDPrimaryKeyMixin, Base):
 
 
 # ── Catalog Schedule ────────────────────────────────────────────────────
+
 
 class CatalogSchedule(UUIDPrimaryKeyMixin, Base):
     __tablename__ = "catalog_schedules"

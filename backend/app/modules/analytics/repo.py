@@ -30,16 +30,13 @@ class AnalyticsRepo:
         thirty_days_ago = now - timedelta(days=30)
 
         # Total orders this month & revenue
-        order_stats_stmt = (
-            select(
-                func.count(Order.id).label("total_orders"),
-                func.coalesce(func.sum(Order.total), 0).label("revenue"),
-            )
-            .where(
-                Order.tenant_id == tenant_id,
-                Order.status.notin_([OrderStatus.CANCELLED, OrderStatus.REFUNDED]),
-                cast(Order.placed_at, Date) >= month_start,
-            )
+        order_stats_stmt = select(
+            func.count(Order.id).label("total_orders"),
+            func.coalesce(func.sum(Order.total), 0).label("revenue"),
+        ).where(
+            Order.tenant_id == tenant_id,
+            Order.status.notin_([OrderStatus.CANCELLED, OrderStatus.REFUNDED]),
+            cast(Order.placed_at, Date) >= month_start,
         )
         order_result = await self.db.execute(order_stats_stmt)
         order_row = order_result.one()
@@ -50,12 +47,9 @@ class AnalyticsRepo:
         aov = revenue / total_orders if total_orders > 0 else Decimal("0.00")
 
         # Active subscribers count
-        active_subs_stmt = (
-            select(func.count(Subscription.id))
-            .where(
-                Subscription.tenant_id == tenant_id,
-                Subscription.status == SubscriptionStatus.active,
-            )
+        active_subs_stmt = select(func.count(Subscription.id)).where(
+            Subscription.tenant_id == tenant_id,
+            Subscription.status == SubscriptionStatus.active,
         )
         active_subs_result = await self.db.execute(active_subs_stmt)
         active_subscribers = active_subs_result.scalar_one()
@@ -74,22 +68,17 @@ class AnalyticsRepo:
         mrr = Decimal(str(mrr_result.scalar_one()))
 
         # Churn rate: cancelled in last 30 days / (active + cancelled in last 30 days)
-        cancelled_stmt = (
-            select(func.count(Subscription.id))
-            .where(
-                Subscription.tenant_id == tenant_id,
-                Subscription.status == SubscriptionStatus.cancelled,
-                Subscription.cancelled_at >= thirty_days_ago,
-            )
+        cancelled_stmt = select(func.count(Subscription.id)).where(
+            Subscription.tenant_id == tenant_id,
+            Subscription.status == SubscriptionStatus.cancelled,
+            Subscription.cancelled_at >= thirty_days_ago,
         )
         cancelled_result = await self.db.execute(cancelled_stmt)
         cancelled_count = cancelled_result.scalar_one()
 
         denominator = active_subscribers + cancelled_count
         churn_rate = (
-            Decimal(str(cancelled_count)) / Decimal(str(denominator)) * 100
-            if denominator > 0
-            else Decimal("0.00")
+            Decimal(str(cancelled_count)) / Decimal(str(denominator)) * 100 if denominator > 0 else Decimal("0.00")
         )
 
         return {
@@ -141,12 +130,9 @@ class AnalyticsRepo:
         thirty_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
 
         # Count active subscriptions for churn rate denominator
-        active_stmt = (
-            select(func.count(Subscription.id))
-            .where(
-                Subscription.tenant_id == tenant_id,
-                Subscription.status == SubscriptionStatus.active,
-            )
+        active_stmt = select(func.count(Subscription.id)).where(
+            Subscription.tenant_id == tenant_id,
+            Subscription.status == SubscriptionStatus.active,
         )
         active_result = await self.db.execute(active_stmt)
         active_count = active_result.scalar_one()
@@ -171,9 +157,7 @@ class AnalyticsRepo:
         total_cancelled = sum(row.count for row in reason_rows)
         denominator = active_count + total_cancelled
         churn_rate = (
-            Decimal(str(total_cancelled)) / Decimal(str(denominator)) * 100
-            if denominator > 0
-            else Decimal("0.00")
+            Decimal(str(total_cancelled)) / Decimal(str(denominator)) * 100 if denominator > 0 else Decimal("0.00")
         )
 
         reasons = [{"reason": row.reason, "count": row.count} for row in reason_rows]

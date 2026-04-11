@@ -369,8 +369,7 @@ async def _seed_notification_templates(session: AsyncSession, tenant_id: uuid.UU
             "channel": NotificationChannel.email,
             "subject": "Order Confirmed — #{{order_number}}",
             "body_template": (
-                "Hi {{first_name}}, your order #{{order_number}} has been confirmed."
-                " Total: {{currency}} {{total}}."
+                "Hi {{first_name}}, your order #{{order_number}} has been confirmed. Total: {{currency}} {{total}}."
             ),
         },
         {

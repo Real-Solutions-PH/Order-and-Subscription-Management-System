@@ -153,11 +153,7 @@ class CartService:
         # For now, store the code string in metadata for downstream processing.
         current_meta = cart.metadata_ or {}
         current_meta["promo_code"] = promo_code
-        await self.cart_repo.db.execute(
-            Cart.__table__.update()
-            .where(Cart.id == cart.id)
-            .values(metadata=current_meta)
-        )
+        await self.cart_repo.db.execute(Cart.__table__.update().where(Cart.id == cart.id).values(metadata=current_meta))
         await self.cart_repo.db.flush()
         return await self.cart_repo.get_by_id(cart.id)  # type: ignore[return-value]
 
@@ -299,9 +295,7 @@ class OrderService:
 
         allowed = _STATUS_TRANSITIONS.get(order.status, set())
         if target not in allowed:
-            raise BadRequestError(
-                f"Cannot transition from '{order.status.value}' to '{target.value}'"
-            )
+            raise BadRequestError(f"Cannot transition from '{order.status.value}' to '{target.value}'")
 
         update_fields: dict = {"status": target}
         now = datetime.now(timezone.utc)
@@ -337,9 +331,7 @@ class OrderService:
 
         allowed = _STATUS_TRANSITIONS.get(order.status, set())
         if OrderStatus.CANCELLED not in allowed:
-            raise BadRequestError(
-                f"Cannot cancel order in '{order.status.value}' status"
-            )
+            raise BadRequestError(f"Cannot cancel order in '{order.status.value}' status")
 
         now = datetime.now(timezone.utc)
         await self.order_repo.update(

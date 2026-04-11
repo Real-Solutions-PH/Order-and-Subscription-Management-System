@@ -74,7 +74,11 @@ export default function DashboardPage() {
         phone: user.phone ?? "",
       }
     : customer
-      ? { name: customer?.name ?? "", email: customer?.email ?? "", phone: customer?.phone ?? "" }
+      ? {
+          name: customer?.name ?? "",
+          email: customer?.email ?? "",
+          phone: customer?.phone ?? "",
+        }
       : { name: "", email: "", phone: "" };
 
   // Map API orders to display format
@@ -469,13 +473,17 @@ export default function DashboardPage() {
                           <td className="py-2 text-center">
                             <Switch
                               checked={notifications[row.emailKey]}
-                              onCheckedChange={() => toggleNotification(row.emailKey)}
+                              onCheckedChange={() =>
+                                toggleNotification(row.emailKey)
+                              }
                             />
                           </td>
                           <td className="py-2 text-center">
                             <Switch
                               checked={notifications[row.smsKey]}
-                              onCheckedChange={() => toggleNotification(row.smsKey)}
+                              onCheckedChange={() =>
+                                toggleNotification(row.smsKey)
+                              }
                             />
                           </td>
                         </tr>
@@ -1012,7 +1020,6 @@ export default function DashboardPage() {
   );
 }
 
-
 /* Pause Subscription Content */
 function PauseSubscriptionContent({
   onClose,
@@ -1174,9 +1181,7 @@ function ChangePlanContent({
                 onClick={() => setSelectedPlan(tier.id)}
                 variant="outline"
                 className={`relative h-auto p-4 text-left flex-col items-start border-2 ${
-                  isSelected
-                    ? "border-primary bg-green-50"
-                    : "border-border"
+                  isSelected ? "border-primary bg-green-50" : "border-border"
                 }`}
               >
                 {isCurrent && (
