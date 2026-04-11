@@ -46,7 +46,7 @@ class SubscriptionPlanCreate(BaseModel):
 
 
 class SubscriptionPlanResponse(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
 
     id: UUID
     tenant_id: UUID
@@ -56,7 +56,7 @@ class SubscriptionPlanResponse(BaseModel):
     billing_interval: str
     is_active: bool
     sort_order: int
-    metadata_: dict | None = Field(None, alias="metadata")
+    metadata_: dict | None = Field(None, alias="metadata", validation_alias="metadata_")
     tiers: list[SubscriptionPlanTierSchema] = []
     created_at: datetime
     updated_at: datetime
@@ -71,7 +71,7 @@ class SubscriptionCreate(BaseModel):
 
 
 class SubscriptionResponse(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
 
     id: UUID
     tenant_id: UUID
@@ -86,7 +86,7 @@ class SubscriptionResponse(BaseModel):
     cancelled_at: datetime | None = None
     cancellation_reason: str | None = None
     payment_method_id: UUID | None = None
-    metadata_: dict | None = Field(None, alias="metadata")
+    metadata_: dict | None = Field(None, alias="metadata", validation_alias="metadata_")
     created_at: datetime
     updated_at: datetime
 

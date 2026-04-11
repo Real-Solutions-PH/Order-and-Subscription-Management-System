@@ -4,11 +4,18 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api-client";
 import { queryKeys } from "./query-keys";
 
-/** Subscription plans list. */
+/** Subscription plans list. Reads tenant_id from tenant config so it works for unauthenticated users too. */
 export function useSubscriptionPlans() {
+  const tenantQuery = useQuery({
+    queryKey: queryKeys.tenantConfig,
+    queryFn: () => api.tenant.getConfig(),
+  });
+  const tenant_id = tenantQuery.data?.tenant_id;
+
   return useQuery({
     queryKey: queryKeys.subscriptionPlans,
-    queryFn: () => api.subscriptions.listPlans(),
+    queryFn: () => api.subscriptions.listPlans(tenant_id!),
+    enabled: !!tenant_id,
   });
 }
 

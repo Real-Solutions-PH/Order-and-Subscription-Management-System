@@ -720,7 +720,8 @@ export const api = {
 
   // Subscriptions
   subscriptions: {
-    listPlans: () => get<PlanResponse[]>("/subscription-plans"),
+    listPlans: (tenant_id: string) =>
+      get<PlanResponse[]>("/subscription-plans", { tenant_id }),
     createPlan: (data: {
       name: string;
       description?: string;
