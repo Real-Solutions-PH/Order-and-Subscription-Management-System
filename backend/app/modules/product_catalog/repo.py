@@ -76,9 +76,7 @@ class ProductRepo:
         return product
 
     async def update(self, product_id: UUID, **kwargs) -> Product | None:
-        await self.db.execute(
-            update(Product).where(Product.id == product_id).values(**kwargs)
-        )
+        await self.db.execute(update(Product).where(Product.id == product_id).values(**kwargs))
         return await self.get_by_id(product_id)
 
     async def soft_delete(self, product_id: UUID) -> Product | None:
@@ -149,9 +147,7 @@ class CatalogRepo:
     async def publish(self, catalog_id: UUID) -> Catalog | None:
         now = datetime.now(timezone.utc)
         await self.db.execute(
-            update(Catalog)
-            .where(Catalog.id == catalog_id)
-            .values(status=CatalogStatus.published, published_at=now)
+            update(Catalog).where(Catalog.id == catalog_id).values(status=CatalogStatus.published, published_at=now)
         )
         return await self.get_by_id(catalog_id)
 

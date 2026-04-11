@@ -2,8 +2,7 @@ import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cn } from "@/lib/utils";
 
-export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   asChild?: boolean;
   variant?:
     | "default"
@@ -17,28 +16,19 @@ export interface ButtonProps
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   (
-    {
-      className,
-      variant = "default",
-      size = "md",
-      asChild = false,
-      ...props
-    },
+    { className, variant = "default", size = "md", asChild = false, ...props },
     ref,
   ) => {
     const Comp = asChild ? Slot : "button";
 
     const variantClasses = {
-      default:
-        "bg-primary text-white hover:opacity-90 disabled:opacity-50",
+      default: "bg-primary text-white hover:opacity-90 disabled:opacity-50",
       outline:
         "border border-border bg-transparent text-text-primary hover:bg-gray-100 disabled:opacity-50",
       ghost:
         "bg-transparent text-text-primary hover:bg-gray-100 disabled:opacity-50",
-      destructive:
-        "bg-red-600 text-white hover:bg-red-700 disabled:opacity-50",
-      warning:
-        "bg-warning text-white hover:opacity-90 disabled:opacity-50",
+      destructive: "bg-red-600 text-white hover:bg-red-700 disabled:opacity-50",
+      warning: "bg-warning text-white hover:opacity-90 disabled:opacity-50",
       link: "text-primary underline-offset-4 hover:underline disabled:opacity-50",
     };
 

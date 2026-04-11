@@ -20,9 +20,7 @@ class SubscriptionPlanRepo:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    async def list_by_tenant(
-        self, tenant_id: UUID, active_only: bool = True
-    ) -> list[SubscriptionPlan]:
+    async def list_by_tenant(self, tenant_id: UUID, active_only: bool = True) -> list[SubscriptionPlan]:
         query = (
             select(SubscriptionPlan)
             .where(SubscriptionPlan.tenant_id == tenant_id)
@@ -34,9 +32,7 @@ class SubscriptionPlanRepo:
         return list(result.scalars().all())
 
     async def get_by_id(self, plan_id: UUID) -> SubscriptionPlan | None:
-        result = await self.db.execute(
-            select(SubscriptionPlan).where(SubscriptionPlan.id == plan_id)
-        )
+        result = await self.db.execute(select(SubscriptionPlan).where(SubscriptionPlan.id == plan_id))
         return result.scalar_one_or_none()
 
     async def create(self, plan: SubscriptionPlan) -> SubscriptionPlan:
@@ -64,15 +60,11 @@ class SubscriptionRepo:
 
     async def get_by_id(self, sub_id: UUID) -> Subscription | None:
         result = await self.db.execute(
-            select(Subscription)
-            .options(selectinload(Subscription.plan_tier))
-            .where(Subscription.id == sub_id)
+            select(Subscription).options(selectinload(Subscription.plan_tier)).where(Subscription.id == sub_id)
         )
         return result.scalar_one_or_none()
 
-    async def get_by_user(
-        self, user_id: UUID, tenant_id: UUID
-    ) -> list[Subscription]:
+    async def get_by_user(self, user_id: UUID, tenant_id: UUID) -> list[Subscription]:
         result = await self.db.execute(
             select(Subscription)
             .options(selectinload(Subscription.plan_tier))
@@ -90,9 +82,7 @@ class SubscriptionRepo:
         return sub
 
     async def update(self, sub_id: UUID, **kwargs) -> Subscription | None:
-        await self.db.execute(
-            update(Subscription).where(Subscription.id == sub_id).values(**kwargs)
-        )
+        await self.db.execute(update(Subscription).where(Subscription.id == sub_id).values(**kwargs))
         return await self.get_by_id(sub_id)
 
     # ── Cycles ──────────────────────────────────────────────────────────
@@ -119,28 +109,18 @@ class SubscriptionRepo:
         return cycle
 
     async def update_cycle(self, cycle_id: UUID, **kwargs) -> SubscriptionCycle | None:
-        await self.db.execute(
-            update(SubscriptionCycle)
-            .where(SubscriptionCycle.id == cycle_id)
-            .values(**kwargs)
-        )
+        await self.db.execute(update(SubscriptionCycle).where(SubscriptionCycle.id == cycle_id).values(**kwargs))
         return await self.get_cycle(cycle_id)
 
     # ── Selections ──────────────────────────────────────────────────────
 
-    async def create_selection(
-        self, selection: SubscriptionSelection
-    ) -> SubscriptionSelection:
+    async def create_selection(self, selection: SubscriptionSelection) -> SubscriptionSelection:
         self.db.add(selection)
         await self.db.flush()
         return selection
 
     async def delete_selections_for_cycle(self, cycle_id: UUID) -> None:
-        result = await self.db.execute(
-            select(SubscriptionSelection).where(
-                SubscriptionSelection.cycle_id == cycle_id
-            )
-        )
+        result = await self.db.execute(select(SubscriptionSelection).where(SubscriptionSelection.cycle_id == cycle_id))
         for sel in result.scalars().all():
             await self.db.delete(sel)
         await self.db.flush()

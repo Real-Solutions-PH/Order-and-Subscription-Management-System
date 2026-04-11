@@ -33,9 +33,7 @@ class TenantConfig(UUIDPrimaryKeyMixin, TimestampMixin, Base):
 
 class FeatureFlag(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     __tablename__ = "feature_flags"
-    __table_args__ = (
-        UniqueConstraint("tenant_id", "flag_key", name="uq_feature_flag_tenant_key"),
-    )
+    __table_args__ = (UniqueConstraint("tenant_id", "flag_key", name="uq_feature_flag_tenant_key"),)
 
     tenant_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("tenants.id"), nullable=False, index=True
