@@ -408,7 +408,7 @@ async def _seed_notification_templates(session: AsyncSession, tenant_id: uuid.UU
     ]
     for t in templates:
         if await _exists(
-            session, NotificationTemplate, tenant_id=tenant_id, event_type=t["event_type"], channel=channel
+            session, NotificationTemplate, tenant_id=tenant_id, event_type=t["event_type"], channel=t["channel"]
         ):
             continue
         session.add(
@@ -416,7 +416,7 @@ async def _seed_notification_templates(session: AsyncSession, tenant_id: uuid.UU
                 id=uuid.uuid4(),
                 tenant_id=tenant_id,
                 event_type=t["event_type"],
-                channel=channel,
+                channel=t["channel"],
                 subject=t["subject"],
                 body_template=t["body_template"],
                 is_active=True,
