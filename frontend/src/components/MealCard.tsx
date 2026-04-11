@@ -2,19 +2,21 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { Plus } from "lucide-react";
+import { Plus, Info } from "lucide-react";
 import { Meal, formatPeso } from "@/lib/mock-data";
 import MealImage from "@/components/MealImage";
 
 interface MealCardProps {
   meal: Meal;
   onAdd: (meal: Meal) => void;
+  onViewDetails?: (meal: Meal) => void;
   compact?: boolean;
 }
 
 export default function MealCard({
   meal,
   onAdd,
+  onViewDetails,
   compact = false,
 }: MealCardProps) {
   return (
@@ -23,8 +25,12 @@ export default function MealCard({
       className="group overflow-hidden rounded-2xl bg-white transition-all duration-200 hover:shadow-lg"
       style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)' }}
     >
-      {/* Image */}
-      <div className="relative" style={{ aspectRatio: "16/9" }}>
+      {/* Image — clickable to view details */}
+      <div
+        className="relative"
+        style={{ aspectRatio: "16/9", cursor: onViewDetails ? 'pointer' : 'default' }}
+        onClick={() => onViewDetails?.(meal)}
+      >
         <MealImage
           src={meal.image}
           alt={meal.name}
@@ -47,13 +53,22 @@ export default function MealCard({
       </div>
 
       {/* Content */}
-      <div className={compact ? 'p-3' : 'p-4'}>
-        <h3
-          className={`font-semibold leading-snug ${compact ? 'text-sm' : 'text-base'}`}
-          style={{ color: '#1A1A2E' }}
-        >
-          {meal.name}
-        </h3>
+      <div
+        className={compact ? 'p-3' : 'p-4'}
+        style={{ cursor: onViewDetails ? 'pointer' : 'default' }}
+        onClick={() => onViewDetails?.(meal)}
+      >
+        <div className="flex items-start gap-1">
+          <h3
+            className={`flex-1 font-semibold leading-snug ${compact ? 'text-sm' : 'text-base'}`}
+            style={{ color: '#1A1A2E' }}
+          >
+            {meal.name}
+          </h3>
+          {onViewDetails && (
+            <Info size={14} className="mt-0.5 shrink-0" style={{ color: '#9CA3AF' }} />
+          )}
+        </div>
 
         {/* Macros row */}
         <div
@@ -67,7 +82,10 @@ export default function MealCard({
         </div>
 
         {/* Price + Add button */}
-        <div className="mt-3 flex items-center justify-between">
+        <div
+          className="mt-3 flex items-center justify-between"
+          onClick={(e) => e.stopPropagation()}
+        >
           <span
             className={`font-bold ${compact ? 'text-base' : 'text-lg'}`}
             style={{ color: '#1B4332' }}
