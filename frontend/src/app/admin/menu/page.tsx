@@ -170,7 +170,7 @@ export default function MenuManagementPage() {
   const { showToast } = useToast();
   const devMode = useDevMode();
 
-  const productsQuery = useProducts();
+  const productsQuery = useProducts({ status: "active" });
   const { updateProduct, isUpdating } = useProductMutations();
   const isLoadingProducts = productsQuery.isLoading;
 

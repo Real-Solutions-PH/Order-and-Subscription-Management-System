@@ -10,18 +10,23 @@ interface MealCardProps {
   meal: Meal;
   onAdd: (meal: Meal) => void;
   compact?: boolean;
+  isAvailable?: boolean;
 }
 
 export default function MealCard({
   meal,
   onAdd,
   compact = false,
+  isAvailable = true,
 }: MealCardProps) {
   return (
     <motion.div
-      whileHover={{ scale: 1.02 }}
+      whileHover={{ scale: isAvailable ? 1.02 : 1 }}
       className="group overflow-hidden rounded-2xl bg-white transition-all duration-200 hover:shadow-lg"
-      style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)' }}
+      style={{
+        boxShadow: '0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)',
+        opacity: isAvailable ? 1 : 0.75,
+      }}
     >
       {/* Image */}
       <div className="relative" style={{ aspectRatio: "16/9" }}>
@@ -31,7 +36,7 @@ export default function MealCard({
           className="h-full w-full object-cover"
         />
         {/* Dietary tags */}
-        {meal.tags.length > 0 && (
+        {isAvailable && meal.tags.length > 0 && (
           <div className="absolute left-2 top-2 flex flex-wrap gap-1">
             {meal.tags.map((tag) => (
               <span
@@ -42,6 +47,14 @@ export default function MealCard({
                 {tag}
               </span>
             ))}
+          </div>
+        )}
+        {/* Not Available overlay */}
+        {!isAvailable && (
+          <div className="absolute inset-0 flex items-center justify-center" style={{ backgroundColor: 'rgba(0,0,0,0.45)' }}>
+            <span className="rounded-full px-3 py-1 text-xs font-semibold text-white" style={{ backgroundColor: 'rgba(0,0,0,0.6)', border: '1px solid rgba(255,255,255,0.3)' }}>
+              Not Available
+            </span>
           </div>
         )}
       </div>
@@ -74,14 +87,20 @@ export default function MealCard({
           >
             {formatPeso(meal.price)}
           </span>
-          <button
-            onClick={() => onAdd(meal)}
-            className="flex items-center gap-1 rounded-full px-3 py-1.5 text-sm font-medium text-white transition-colors duration-150 hover:opacity-90"
-            style={{ backgroundColor: '#E76F51' }}
-          >
-            <Plus size={16} />
-            Add
-          </button>
+          {isAvailable ? (
+            <button
+              onClick={() => onAdd(meal)}
+              className="flex items-center gap-1 rounded-full px-3 py-1.5 text-sm font-medium text-white transition-colors duration-150 hover:opacity-90"
+              style={{ backgroundColor: '#E76F51' }}
+            >
+              <Plus size={16} />
+              Add
+            </button>
+          ) : (
+            <span className="rounded-full px-3 py-1.5 text-xs font-medium" style={{ backgroundColor: '#F3F4F6', color: '#9CA3AF' }}>
+              Unavailable
+            </span>
+          )}
         </div>
       </div>
     </motion.div>

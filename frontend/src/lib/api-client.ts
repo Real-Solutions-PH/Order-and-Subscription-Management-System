@@ -265,6 +265,47 @@ export interface AdminCreateUserRequest {
   role?: string;
 }
 
+// Ingredients
+export interface IngredientResponse {
+  id: string;
+  tenant_id: string;
+  name: string;
+  default_unit: string | null;
+  description: string | null;
+  created_at: string;
+  updated_at: string;
+}
+export interface IngredientWithUsageResponse extends IngredientResponse {
+  used_in_products: { id: string; name: string; status: string }[];
+}
+export interface IngredientListResponse {
+  total: number;
+  page: number;
+  per_page: number;
+  items: IngredientWithUsageResponse[];
+}
+export interface ProductIngredientResponse {
+  id: string;
+  product_id: string;
+  ingredient_id: string;
+  quantity: number | null;
+  unit: string | null;
+  notes: string | null;
+  ingredient: IngredientResponse;
+}
+export interface ProductIngredientAdd {
+  name: string;
+  default_unit?: string;
+  quantity?: number;
+  unit?: string;
+  notes?: string;
+}
+export interface ProductIngredientUpdate {
+  quantity?: number | null;
+  unit?: string | null;
+  notes?: string | null;
+}
+
 // Products
 export interface VariantResponse {
   id: string;
@@ -297,6 +338,7 @@ export interface ProductResponse {
   metadata: Record<string, unknown> | null;
   variants: VariantResponse[];
   images: ImageResponse[];
+  ingredients: ProductIngredientResponse[];
   created_at: string;
   updated_at: string;
 }
@@ -304,17 +346,16 @@ export interface ProductListResponse {
   items: ProductResponse[];
   total: number;
   page: number;
-  page_size: number;
-  pages: number;
+  per_page: number;
 }
 export interface ProductCreate {
   name: string;
   description?: string;
   short_description?: string;
   sku?: string;
+  status?: string;
   is_subscribable?: boolean;
   is_standalone?: boolean;
-  category_ids?: string[];
   metadata?: Record<string, unknown>;
 }
 export interface ProductUpdate extends Partial<ProductCreate> {
@@ -670,10 +711,13 @@ export const api = {
     list: (params?: {
       skip?: number;
       limit?: number;
+      page?: number;
+      per_page?: number;
       status?: string;
       is_subscribable?: boolean;
       is_standalone?: boolean;
       category_id?: string;
+      search?: string;
       q?: string;
     }) =>
       get<ProductListResponse>(
@@ -684,7 +728,11 @@ export const api = {
     create: (data: ProductCreate) => post<ProductResponse>("/products", data),
     update: (id: string, data: ProductUpdate) =>
       patch<ProductResponse>(`/products/${id}`, data),
-    archive: (id: string) => del<ProductResponse>(`/products/${id}`),
+    delete: (id: string) => del<void>(`/products/${id}`),
+    archive: (id: string) => del<void>(`/products/${id}`),
+    activate: (id: string) => post<ProductResponse>(`/products/${id}/activate`),
+    deactivate: (id: string) =>
+      post<ProductResponse>(`/products/${id}/deactivate`),
     addVariant: (
       productId: string,
       data: { name: string; price: number; sku?: string; is_default?: boolean },
@@ -693,6 +741,40 @@ export const api = {
       productId: string,
       data: { url: string; alt_text?: string; is_primary?: boolean },
     ) => post<ImageResponse>(`/products/${productId}/images`, data),
+    listIngredients: (productId: string) =>
+      get<ProductIngredientResponse[]>(`/products/${productId}/ingredients`),
+    addIngredient: (productId: string, data: ProductIngredientAdd) =>
+      post<ProductIngredientResponse>(
+        `/products/${productId}/ingredients`,
+        data,
+      ),
+    updateIngredient: (
+      productId: string,
+      itemId: string,
+      data: ProductIngredientUpdate,
+    ) =>
+      patch<ProductIngredientResponse>(
+        `/products/${productId}/ingredients/${itemId}`,
+        data,
+      ),
+    removeIngredient: (productId: string, itemId: string) =>
+      del<void>(`/products/${productId}/ingredients/${itemId}`),
+  },
+
+  // Ingredients
+  ingredients: {
+    list: (params?: {
+      page?: number;
+      per_page?: number;
+      search?: string;
+      sort_by?: string;
+      sort_dir?: string;
+    }) =>
+      get<IngredientListResponse>(
+        "/ingredients",
+        params as Record<string, string | number>,
+      ),
+    get: (id: string) => get<IngredientWithUsageResponse>(`/ingredients/${id}`),
   },
 
   // Catalogs

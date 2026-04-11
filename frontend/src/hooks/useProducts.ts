@@ -1,7 +1,13 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { api, type ProductCreate, type ProductUpdate } from "@/lib/api-client";
+import {
+  api,
+  type ProductCreate,
+  type ProductIngredientAdd,
+  type ProductIngredientUpdate,
+  type ProductUpdate,
+} from "@/lib/api-client";
 import { queryKeys } from "./query-keys";
 
 interface ProductListParams {
@@ -46,17 +52,75 @@ export function useProductMutations() {
     onSuccess: invalidate,
   });
 
+  const deleteProduct = useMutation({
+    mutationFn: (id: string) => api.products.delete(id),
+    onSuccess: invalidate,
+  });
+
   const archiveProduct = useMutation({
     mutationFn: (id: string) => api.products.archive(id),
+    onSuccess: invalidate,
+  });
+
+  const activateProduct = useMutation({
+    mutationFn: (id: string) => api.products.activate(id),
+    onSuccess: invalidate,
+  });
+
+  const deactivateProduct = useMutation({
+    mutationFn: (id: string) => api.products.deactivate(id),
+    onSuccess: invalidate,
+  });
+
+  const addIngredient = useMutation({
+    mutationFn: ({
+      productId,
+      data,
+    }: {
+      productId: string;
+      data: ProductIngredientAdd;
+    }) => api.products.addIngredient(productId, data),
+    onSuccess: invalidate,
+  });
+
+  const updateIngredient = useMutation({
+    mutationFn: ({
+      productId,
+      itemId,
+      data,
+    }: {
+      productId: string;
+      itemId: string;
+      data: ProductIngredientUpdate;
+    }) => api.products.updateIngredient(productId, itemId, data),
+    onSuccess: invalidate,
+  });
+
+  const removeIngredient = useMutation({
+    mutationFn: ({
+      productId,
+      itemId,
+    }: {
+      productId: string;
+      itemId: string;
+    }) => api.products.removeIngredient(productId, itemId),
     onSuccess: invalidate,
   });
 
   return {
     createProduct: createProduct.mutateAsync,
     updateProduct: updateProduct.mutateAsync,
+    deleteProduct: deleteProduct.mutateAsync,
     archiveProduct: archiveProduct.mutateAsync,
+    activateProduct: activateProduct.mutateAsync,
+    deactivateProduct: deactivateProduct.mutateAsync,
+    addIngredient: addIngredient.mutateAsync,
+    updateIngredient: updateIngredient.mutateAsync,
+    removeIngredient: removeIngredient.mutateAsync,
     isCreating: createProduct.isPending,
     isUpdating: updateProduct.isPending,
+    isDeleting: deleteProduct.isPending,
+    isTogglingStatus: activateProduct.isPending || deactivateProduct.isPending,
   };
 }
 

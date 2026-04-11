@@ -83,11 +83,22 @@ def get_catalog_repo(db: SessionDep):
     return CatalogRepo(db)
 
 
+def get_ingredient_repo(db: SessionDep):
+    from app.modules.product_catalog.repo import IngredientRepo
+    return IngredientRepo(db)
+
+
+def get_product_ingredient_repo(db: SessionDep):
+    from app.modules.product_catalog.repo import ProductIngredientRepo
+    return ProductIngredientRepo(db)
+
+
 def get_product_service(
     product_repo: Annotated[object, Depends(get_product_repo)],
+    product_ingredient_repo: Annotated[object, Depends(get_product_ingredient_repo)],
 ):
     from app.modules.product_catalog.services import ProductService
-    return ProductService(product_repo)
+    return ProductService(product_repo, product_ingredient_repo)
 
 
 def get_catalog_service(
@@ -95,6 +106,13 @@ def get_catalog_service(
 ):
     from app.modules.product_catalog.services import CatalogService
     return CatalogService(catalog_repo)
+
+
+def get_ingredient_service(
+    ingredient_repo: Annotated[object, Depends(get_ingredient_repo)],
+):
+    from app.modules.product_catalog.services import IngredientService
+    return IngredientService(ingredient_repo)
 
 
 # ── Subscription Engine Repos & Services ─────────────────────────────

@@ -92,6 +92,9 @@ class Product(UUIDPrimaryKeyMixin, TenantMixin, TimestampMixin, Base):
     attribute_values: Mapped[list["ProductAttributeValue"]] = relationship(
         "ProductAttributeValue", back_populates="product", lazy="selectin", cascade="all, delete-orphan"
     )
+    product_ingredients: Mapped[list["ProductIngredient"]] = relationship(
+        "ProductIngredient", back_populates="product", lazy="selectin", cascade="all, delete-orphan"
+    )
 
 
 # ── Product Variant ─────────────────────────────────────────────────────
@@ -216,3 +219,44 @@ class CatalogSchedule(UUIDPrimaryKeyMixin, Base):
     recurrence_rule: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
     catalog: Mapped["Catalog"] = relationship("Catalog", back_populates="schedules")
+
+
+# ── Ingredient ───────────────────────────────────────────────────────────
+
+class Ingredient(UUIDPrimaryKeyMixin, TenantMixin, TimestampMixin, Base):
+    __tablename__ = "ingredients"
+    __table_args__ = (
+        UniqueConstraint("tenant_id", "name", name="uq_ingredient_tenant_name"),
+    )
+
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    default_unit: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    product_ingredients: Mapped[list["ProductIngredient"]] = relationship(
+        "ProductIngredient", back_populates="ingredient", lazy="selectin"
+    )
+
+
+# ── Product Ingredient (Recipe join) ────────────────────────────────────
+
+class ProductIngredient(UUIDPrimaryKeyMixin, Base):
+    __tablename__ = "product_ingredients"
+    __table_args__ = (
+        UniqueConstraint("product_id", "ingredient_id", name="uq_product_ingredient"),
+    )
+
+    product_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("products.id", ondelete="CASCADE"), nullable=False
+    )
+    ingredient_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("ingredients.id", ondelete="CASCADE"), nullable=False
+    )
+    quantity: Mapped[Decimal | None] = mapped_column(Numeric(10, 3), nullable=True)
+    unit: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    notes: Mapped[str | None] = mapped_column(String(255), nullable=True)
+
+    product: Mapped["Product"] = relationship("Product", back_populates="product_ingredients")
+    ingredient: Mapped["Ingredient"] = relationship(
+        "Ingredient", back_populates="product_ingredients", lazy="selectin"
+    )

@@ -42,10 +42,15 @@ export default function LandingPage() {
 
   const devMode = useDevMode();
 
-  // Fetch products from API; only fall back to mock data when DEV_MODE is on
-  const productsQuery = useProducts({ status: "active" });
-  const apiMeals = productsQuery.data?.items.map(mapProductToMeal);
+  // Fetch all non-draft products; show archived as "Not Available"
+  const productsQuery = useProducts();
+  const apiProducts = productsQuery.data?.items.filter((p) => p.status !== "draft");
+  const apiMeals = apiProducts?.map(mapProductToMeal);
   const mealsData = apiMeals && apiMeals.length > 0 ? apiMeals : (devMode ? meals : []);
+  // Track availability by product id
+  const availabilityMap = new Map(
+    (apiProducts ?? []).map((p) => [String(p.id), p.status === "active"])
+  );
   const isLoadingMeals = productsQuery.isLoading;
   // Show filters when there are meals to filter (from API or dev mode mock data)
   const displayFilters = mealsData.length > 0 ? dietaryFilters : [];
@@ -253,7 +258,11 @@ export default function LandingPage() {
                     exit={{ opacity: 0, scale: 0.9 }}
                     transition={{ duration: 0.25 }}
                   >
-                    <MealCard meal={meal} onAdd={handleAddToCart} />
+                    <MealCard
+                      meal={meal}
+                      onAdd={handleAddToCart}
+                      isAvailable={availabilityMap.has(String(meal.id)) ? availabilityMap.get(String(meal.id)) : true}
+                    />
                   </motion.div>
                 ))}
           </AnimatePresence>

@@ -8,6 +8,8 @@ import {
   ClipboardList,
   ChefHat,
   UtensilsCrossed,
+  Utensils,
+  Leaf,
   Users,
   Shield,
   Settings,
@@ -26,6 +28,8 @@ export default function AdminSidebar() {
     { label: "Orders", href: "/admin/orders", icon: ClipboardList },
     { label: "Production", href: "/admin/production", icon: ChefHat },
     { label: "Menu", href: "/admin/menu", icon: UtensilsCrossed },
+    { label: "Menu Items", href: "/admin/menu-items", icon: Utensils },
+    { label: "Ingredients", href: "/admin/ingredients", icon: Leaf },
     { label: "Customers", href: "/admin/customers", icon: Users },
     ...(isSuperAdmin
       ? [{ label: "User Management", href: "/admin/user-management", icon: Shield }]

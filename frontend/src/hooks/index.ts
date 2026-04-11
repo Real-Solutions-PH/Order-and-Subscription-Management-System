@@ -45,3 +45,4 @@ export {
 export { useUsers, useUser, useUserMutations } from "./useUsers";
 export { useDevMode } from "./useDevMode";
 export { queryKeys } from "./query-keys";
+export { useIngredients, useIngredient } from "./useIngredients";

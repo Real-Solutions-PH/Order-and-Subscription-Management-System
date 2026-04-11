@@ -70,11 +70,15 @@ export default function MealPlanPage() {
   const { isAuthenticated, openAuthModal } = useAuthContext();
 
   const devMode = useDevMode();
-  const productsQuery = useProducts({ status: "active" });
+  const productsQuery = useProducts();
   const plansQuery = useSubscriptionPlans();
 
-  const apiMeals = productsQuery.data?.items.map(mapProductToMeal);
+  const apiProducts = productsQuery.data?.items.filter((p) => p.status !== "draft");
+  const apiMeals = apiProducts?.map(mapProductToMeal);
   const mealsData = apiMeals && apiMeals.length > 0 ? apiMeals : (devMode ? meals : []);
+  const availabilityMap = new Map(
+    (apiProducts ?? []).map((p) => [String(p.id), p.status === "active"])
+  );
   const isLoadingMeals = productsQuery.isLoading;
   const displayTimeSlots = devMode ? timeSlots : [];
 
@@ -436,16 +440,18 @@ export default function MealPlanPage() {
                     : mealsData.map(meal => {
                     const qty = getMealQuantity(meal.id);
                     const isSelected = qty > 0;
+                    const isAvailable = availabilityMap.has(String(meal.id)) ? availabilityMap.get(String(meal.id)) : true;
                     return (
                       <motion.div
                         key={meal.id}
-                        whileHover={{ scale: 1.01 }}
+                        whileHover={{ scale: isAvailable ? 1.01 : 1 }}
                         className="relative overflow-hidden rounded-2xl bg-white transition-shadow hover:shadow-lg"
                         style={{
                           border: isSelected
                             ? '2px solid #1B4332'
                             : '2px solid transparent',
                           boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
+                          opacity: isAvailable ? 1 : 0.75,
                         }}
                       >
                         {/* Checkmark overlay */}
@@ -464,7 +470,7 @@ export default function MealPlanPage() {
                             alt={meal.name}
                             className="h-full w-full object-cover"
                           />
-                          {meal.tags.length > 0 && (
+                          {isAvailable && meal.tags.length > 0 && (
                             <div className="absolute left-2 top-2 flex flex-wrap gap-1">
                               {meal.tags.slice(0, 2).map(tag => (
                                 <span
@@ -475,6 +481,13 @@ export default function MealPlanPage() {
                                   {tag}
                                 </span>
                               ))}
+                            </div>
+                          )}
+                          {!isAvailable && (
+                            <div className="absolute inset-0 flex items-center justify-center" style={{ backgroundColor: 'rgba(0,0,0,0.45)' }}>
+                              <span className="rounded-full px-3 py-1 text-xs font-semibold text-white" style={{ backgroundColor: 'rgba(0,0,0,0.6)', border: '1px solid rgba(255,255,255,0.3)' }}>
+                                Not Available
+                              </span>
                             </div>
                           )}
                         </div>
@@ -502,33 +515,39 @@ export default function MealPlanPage() {
                             </span>
 
                             {/* Quantity selector */}
-                            <div className="flex items-center gap-2">
-                              <button
-                                onClick={() => updateMealQuantity(meal, -1)}
-                                disabled={qty === 0}
-                                className="flex h-8 w-8 items-center justify-center rounded-full transition-colors disabled:opacity-30"
-                                style={{
-                                  backgroundColor: qty > 0 ? '#1B4332' : '#E5E7EB',
-                                  color: qty > 0 ? '#FFFFFF' : '#6B7280',
-                                }}
-                              >
-                                <Minus size={14} />
-                              </button>
-                              <span
-                                className="w-6 text-center text-sm font-bold"
-                                style={{ color: '#1A1A2E' }}
-                              >
-                                {qty}
+                            {isAvailable ? (
+                              <div className="flex items-center gap-2">
+                                <button
+                                  onClick={() => updateMealQuantity(meal, -1)}
+                                  disabled={qty === 0}
+                                  className="flex h-8 w-8 items-center justify-center rounded-full transition-colors disabled:opacity-30"
+                                  style={{
+                                    backgroundColor: qty > 0 ? '#1B4332' : '#E5E7EB',
+                                    color: qty > 0 ? '#FFFFFF' : '#6B7280',
+                                  }}
+                                >
+                                  <Minus size={14} />
+                                </button>
+                                <span
+                                  className="w-6 text-center text-sm font-bold"
+                                  style={{ color: '#1A1A2E' }}
+                                >
+                                  {qty}
+                                </span>
+                                <button
+                                  onClick={() => updateMealQuantity(meal, 1)}
+                                  disabled={totalMealsSelected >= selectedPlan.meals}
+                                  className="flex h-8 w-8 items-center justify-center rounded-full text-white transition-colors disabled:opacity-30"
+                                  style={{ backgroundColor: '#E76F51' }}
+                                >
+                                  <Plus size={14} />
+                                </button>
+                              </div>
+                            ) : (
+                              <span className="rounded-full px-3 py-1.5 text-xs font-medium" style={{ backgroundColor: '#F3F4F6', color: '#9CA3AF' }}>
+                                Unavailable
                               </span>
-                              <button
-                                onClick={() => updateMealQuantity(meal, 1)}
-                                disabled={totalMealsSelected >= selectedPlan.meals}
-                                className="flex h-8 w-8 items-center justify-center rounded-full text-white transition-colors disabled:opacity-30"
-                                style={{ backgroundColor: '#E76F51' }}
-                              >
-                                <Plus size={14} />
-                              </button>
-                            </div>
+                            )}
                           </div>
                         </div>
                       </motion.div>
