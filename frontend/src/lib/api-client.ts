@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * API Client — thin HTTP wrapper for the PrepFlow backend.
  *
@@ -11,39 +13,34 @@ const TENANT_ID =
   process.env.NEXT_PUBLIC_TENANT_ID ?? "00000000-0000-0000-0000-000000000001";
 
 // ---------------------------------------------------------------------------
-// Token helpers (stored in memory; persist in localStorage for refresh)
+// Token helpers
+// Access token: memory-only (never persisted to storage — XSS-safe).
+// Refresh token: sessionStorage (scoped to tab; cleared on browser close).
+//   Full fix requires HttpOnly cookies from the backend.
 // ---------------------------------------------------------------------------
 let accessToken: string | null = null;
 
 export function setAccessToken(token: string | null) {
   accessToken = token;
-  if (token) {
-    localStorage.setItem("prepflow_access_token", token);
-  } else {
-    localStorage.removeItem("prepflow_access_token");
-  }
 }
 
 export function getAccessToken(): string | null {
-  if (accessToken) return accessToken;
-  if (typeof window !== "undefined") {
-    accessToken = localStorage.getItem("prepflow_access_token");
-  }
   return accessToken;
 }
 
 export function getRefreshToken(): string | null {
   if (typeof window !== "undefined") {
-    return localStorage.getItem("prepflow_refresh_token");
+    return sessionStorage.getItem("prepflow_refresh_token");
   }
   return null;
 }
 
 export function setRefreshToken(token: string | null) {
+  if (typeof window === "undefined") return;
   if (token) {
-    localStorage.setItem("prepflow_refresh_token", token);
+    sessionStorage.setItem("prepflow_refresh_token", token);
   } else {
-    localStorage.removeItem("prepflow_refresh_token");
+    sessionStorage.removeItem("prepflow_refresh_token");
   }
 }
 
@@ -91,7 +88,9 @@ async function handleResponse<T>(res: Response): Promise<T> {
     const body = await res.json().catch(() => ({ detail: res.statusText }));
     const detail = body.detail ?? res.statusText;
     const message = Array.isArray(detail)
-      ? detail.map((e: { msg?: string }) => e.msg ?? JSON.stringify(e)).join("; ")
+      ? detail
+          .map((e: { msg?: string }) => e.msg ?? JSON.stringify(e))
+          .join("; ")
       : String(detail);
     throw new ApiError(res.status, message);
   }
@@ -244,12 +243,21 @@ export interface UserResponse {
   last_login_at: string | null;
   created_at: string;
   updated_at: string;
+  dietary_preferences: string[];
+  allergens: string[];
+}
+export interface UserMetricsResponse {
+  this_month_total: number;
+  total_savings: number;
+  favorite_meal: string;
 }
 export interface UserUpdate {
   first_name?: string;
   last_name?: string;
   phone?: string;
   avatar_url?: string;
+  dietary_preferences?: string[];
+  allergens?: string[];
 }
 export interface AdminUserUpdate extends UserUpdate {
   is_active?: boolean;
@@ -263,6 +271,47 @@ export interface AdminCreateUserRequest {
   phone?: string;
   password: string;
   role?: string;
+}
+
+// Ingredients
+export interface IngredientResponse {
+  id: string;
+  tenant_id: string;
+  name: string;
+  default_unit: string | null;
+  description: string | null;
+  created_at: string;
+  updated_at: string;
+}
+export interface IngredientWithUsageResponse extends IngredientResponse {
+  used_in_products: { id: string; name: string; status: string }[];
+}
+export interface IngredientListResponse {
+  total: number;
+  page: number;
+  per_page: number;
+  items: IngredientWithUsageResponse[];
+}
+export interface ProductIngredientResponse {
+  id: string;
+  product_id: string;
+  ingredient_id: string;
+  quantity: number | null;
+  unit: string | null;
+  notes: string | null;
+  ingredient: IngredientResponse;
+}
+export interface ProductIngredientAdd {
+  name: string;
+  default_unit?: string;
+  quantity?: number;
+  unit?: string;
+  notes?: string;
+}
+export interface ProductIngredientUpdate {
+  quantity?: number | null;
+  unit?: string | null;
+  notes?: string | null;
 }
 
 // Products
@@ -297,6 +346,7 @@ export interface ProductResponse {
   metadata: Record<string, unknown> | null;
   variants: VariantResponse[];
   images: ImageResponse[];
+  ingredients: ProductIngredientResponse[];
   created_at: string;
   updated_at: string;
 }
@@ -304,17 +354,16 @@ export interface ProductListResponse {
   items: ProductResponse[];
   total: number;
   page: number;
-  page_size: number;
-  pages: number;
+  per_page: number;
 }
 export interface ProductCreate {
   name: string;
   description?: string;
   short_description?: string;
   sku?: string;
+  status?: string;
   is_subscribable?: boolean;
   is_standalone?: boolean;
-  category_ids?: string[];
   metadata?: Record<string, unknown>;
 }
 export interface ProductUpdate extends Partial<ProductCreate> {
@@ -362,15 +411,19 @@ export interface PlanResponse {
 export interface SubscriptionResponse {
   id: string;
   user_id: string;
-  plan_tier: TierResponse;
+  plan_tier_id: string;
+  plan_tier: TierResponse | null;
   status: string;
   current_cycle_start: string;
   current_cycle_end: string;
   next_billing_date: string;
   paused_at: string | null;
+  pause_expires_at: string | null;
   cancelled_at: string | null;
   cancellation_reason: string | null;
+  payment_method_id: string | null;
   created_at: string;
+  updated_at: string;
 }
 export interface CycleResponse {
   id: string;
@@ -644,6 +697,7 @@ export const api = {
       post<{ message: string }>("/auth/logout", { refresh_token }),
     me: () => get<UserResponse>("/users/me"),
     updateMe: (data: UserUpdate) => patch<UserResponse>("/users/me", data),
+    getMetrics: () => get<UserMetricsResponse>("/users/me/metrics"),
   },
 
   // Users (admin)
@@ -670,10 +724,13 @@ export const api = {
     list: (params?: {
       skip?: number;
       limit?: number;
+      page?: number;
+      per_page?: number;
       status?: string;
       is_subscribable?: boolean;
       is_standalone?: boolean;
       category_id?: string;
+      search?: string;
       q?: string;
     }) =>
       get<ProductListResponse>(
@@ -684,7 +741,12 @@ export const api = {
     create: (data: ProductCreate) => post<ProductResponse>("/products", data),
     update: (id: string, data: ProductUpdate) =>
       patch<ProductResponse>(`/products/${id}`, data),
-    archive: (id: string) => del<ProductResponse>(`/products/${id}`),
+    delete: (id: string) => del<void>(`/products/${id}`),
+    archive: (id: string) =>
+      post<ProductResponse>(`/products/${id}/deactivate`),
+    activate: (id: string) => post<ProductResponse>(`/products/${id}/activate`),
+    deactivate: (id: string) =>
+      post<ProductResponse>(`/products/${id}/deactivate`),
     addVariant: (
       productId: string,
       data: { name: string; price: number; sku?: string; is_default?: boolean },
@@ -693,6 +755,40 @@ export const api = {
       productId: string,
       data: { url: string; alt_text?: string; is_primary?: boolean },
     ) => post<ImageResponse>(`/products/${productId}/images`, data),
+    listIngredients: (productId: string) =>
+      get<ProductIngredientResponse[]>(`/products/${productId}/ingredients`),
+    addIngredient: (productId: string, data: ProductIngredientAdd) =>
+      post<ProductIngredientResponse>(
+        `/products/${productId}/ingredients`,
+        data,
+      ),
+    updateIngredient: (
+      productId: string,
+      itemId: string,
+      data: ProductIngredientUpdate,
+    ) =>
+      patch<ProductIngredientResponse>(
+        `/products/${productId}/ingredients/${itemId}`,
+        data,
+      ),
+    removeIngredient: (productId: string, itemId: string) =>
+      del<void>(`/products/${productId}/ingredients/${itemId}`),
+  },
+
+  // Ingredients
+  ingredients: {
+    list: (params?: {
+      page?: number;
+      per_page?: number;
+      search?: string;
+      sort_by?: string;
+      sort_dir?: string;
+    }) =>
+      get<IngredientListResponse>(
+        "/ingredients",
+        params as Record<string, string | number>,
+      ),
+    get: (id: string) => get<IngredientWithUsageResponse>(`/ingredients/${id}`),
   },
 
   // Catalogs
@@ -720,6 +816,7 @@ export const api = {
 
   // Subscriptions
   subscriptions: {
+    list: () => get<SubscriptionResponse[]>("/subscriptions"),
     listPlans: (tenant_id: string) =>
       get<PlanResponse[]>("/subscription-plans", { tenant_id }),
     createPlan: (data: {
@@ -744,11 +841,11 @@ export const api = {
     setSelections: (
       subId: string,
       cycleId: string,
-      selections: { product_variant_id: string; quantity?: number }[],
+      items: { product_variant_id: string; quantity?: number }[],
     ) =>
       post<SelectionResponse[]>(
         `/subscriptions/${subId}/cycles/${cycleId}/selections`,
-        selections,
+        { items },
       ),
     skipCycle: (subId: string, cycleId: string) =>
       post<CycleResponse>(`/subscriptions/${subId}/cycles/${cycleId}/skip`),
@@ -777,6 +874,7 @@ export const api = {
       payment_method: string;
       promo_code?: string;
       notes?: string;
+      plan_total_override?: number;
     }) => post<OrderResponse>("/orders/checkout", data),
     list: (params?: { status?: string; skip?: number; limit?: number }) =>
       get<OrderListResponse>(
@@ -829,7 +927,13 @@ export const api = {
       paymongo_method_id?: string;
       last_four?: string;
       card_brand?: string;
+      is_default?: boolean;
     }) => post<PaymentMethodResponse>("/payment-methods", data),
+    updateMethod: (
+      id: string,
+      data: { display_name?: string; is_default?: boolean },
+    ) => patch<PaymentMethodResponse>(`/payment-methods/${id}`, data),
+    deleteMethod: (id: string) => del<void>(`/payment-methods/${id}`),
     validatePromo: (data: { code: string; order_amount: number }) =>
       post<PromoCodeResponse>("/promo-codes/validate", data),
     listPromos: (params?: { skip?: number; limit?: number }) =>

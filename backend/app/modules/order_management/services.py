@@ -4,6 +4,9 @@ import uuid
 from datetime import datetime, timezone
 from decimal import Decimal
 
+from sqlalchemy import select
+from sqlalchemy.orm import selectinload
+
 from app.exceptions import BadRequestError, NotFoundError
 from app.modules.order_management.models import (
     Cart,
@@ -153,11 +156,7 @@ class CartService:
         # For now, store the code string in metadata for downstream processing.
         current_meta = cart.metadata_ or {}
         current_meta["promo_code"] = promo_code
-        await self.cart_repo.db.execute(
-            Cart.__table__.update()
-            .where(Cart.id == cart.id)
-            .values(metadata=current_meta)
-        )
+        await self.cart_repo.db.execute(Cart.__table__.update().where(Cart.id == cart.id).values(metadata=current_meta))
         await self.cart_repo.db.flush()
         return await self.cart_repo.get_by_id(cart.id)  # type: ignore[return-value]
 
@@ -166,6 +165,7 @@ class OrderService:
     def __init__(self, order_repo: OrderRepo, cart_repo: CartRepo) -> None:
         self.order_repo = order_repo
         self.cart_repo = cart_repo
+        self.db = order_repo.db
 
     async def checkout(
         self,
@@ -175,6 +175,7 @@ class OrderService:
         delivery_slot_id: uuid.UUID | None,
         payment_method: str,
         notes: str | None = None,
+        plan_total_override: Decimal | None = None,
     ) -> Order:
         """Orchestrates checkout: cart -> order."""
         cart = await self.cart_repo.get_by_user(user_id, tenant_id)
@@ -188,6 +189,9 @@ class OrderService:
             for cust in item.customizations:
                 item_total += cust.price_adjustment * item.quantity
             subtotal += item_total
+
+        if plan_total_override is not None:
+            subtotal = plan_total_override
 
         # TODO: Calculate discount from promo, tax, and delivery fee via external services
         discount_amount = Decimal("0.00")
@@ -218,17 +222,32 @@ class OrderService:
         )
         order = await self.order_repo.create(order)
 
+        # Resolve product names from catalog
+        from app.modules.product_catalog.models import ProductVariant
+
+        variant_ids = [item.product_variant_id for item in cart.items]
+        variants_result = await self.db.execute(
+            select(ProductVariant)
+            .options(selectinload(ProductVariant.product))
+            .where(ProductVariant.id.in_(variant_ids))
+        )
+        variants_map = {v.id: v for v in variants_result.scalars().all()}
+
         # Create order items from cart items
         for cart_item in cart.items:
             item_total = cart_item.unit_price * cart_item.quantity
             for cust in cart_item.customizations:
                 item_total += cust.price_adjustment * cart_item.quantity
 
+            variant = variants_map.get(cart_item.product_variant_id)
+            product_name = variant.product.name if variant and variant.product else ""
+            variant_name = variant.name if variant else ""
+
             order_item = OrderItem(
                 order_id=order.id,
                 product_variant_id=cart_item.product_variant_id,
-                product_name="",  # TODO: resolve from product catalog
-                variant_name="",  # TODO: resolve from product catalog
+                product_name=product_name,
+                variant_name=variant_name,
                 quantity=cart_item.quantity,
                 unit_price=cart_item.unit_price,
                 total_price=item_total,
@@ -299,9 +318,7 @@ class OrderService:
 
         allowed = _STATUS_TRANSITIONS.get(order.status, set())
         if target not in allowed:
-            raise BadRequestError(
-                f"Cannot transition from '{order.status.value}' to '{target.value}'"
-            )
+            raise BadRequestError(f"Cannot transition from '{order.status.value}' to '{target.value}'")
 
         update_fields: dict = {"status": target}
         now = datetime.now(timezone.utc)
@@ -337,9 +354,7 @@ class OrderService:
 
         allowed = _STATUS_TRANSITIONS.get(order.status, set())
         if OrderStatus.CANCELLED not in allowed:
-            raise BadRequestError(
-                f"Cannot cancel order in '{order.status.value}' status"
-            )
+            raise BadRequestError(f"Cannot cancel order in '{order.status.value}' status")
 
         now = datetime.now(timezone.utc)
         await self.order_repo.update(

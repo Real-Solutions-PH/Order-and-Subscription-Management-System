@@ -18,6 +18,10 @@ export interface Meal {
   protein: number;
   carbs: number;
   fat: number;
+  fiber: number;
+  sugar: number;
+  sodium: number;
+  serving_size: string;
   tags: string[];
   image: string;
   description: string;

@@ -1,4 +1,4 @@
-export { useAuth } from "./useAuth";
+export { useAuth, useUserMetrics } from "./useAuth";
 export {
   useProducts,
   useProduct,
@@ -6,6 +6,7 @@ export {
   useActiveCatalog,
 } from "./useProducts";
 export {
+  useUserSubscriptions,
   useSubscriptionPlans,
   useSubscription,
   useSubscriptionCycles,
@@ -45,3 +46,4 @@ export {
 export { useUsers, useUser, useUserMutations } from "./useUsers";
 export { useDevMode } from "./useDevMode";
 export { queryKeys } from "./query-keys";
+export { useIngredients, useIngredient } from "./useIngredients";

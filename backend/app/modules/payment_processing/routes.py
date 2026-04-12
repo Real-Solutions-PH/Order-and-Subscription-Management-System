@@ -3,7 +3,7 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Response
 
 from app.dependencies import get_invoice_service, get_payment_service, get_promo_code_service
 from app.modules.payment_processing.schemas import (
@@ -16,6 +16,7 @@ from app.modules.payment_processing.schemas import (
     PaymentIntentResponse,
     PaymentMethodCreate,
     PaymentMethodResponse,
+    PaymentMethodUpdate,
     PaymentResponse,
     PromoCodeListResponse,
     PromoValidateRequest,
@@ -33,6 +34,7 @@ router = APIRouter(tags=["Payments"])
 
 
 # ── Payment Intent ──────────────────────────────────────────────────────
+
 
 @router.post("/payments/intent", response_model=PaymentIntentResponse, status_code=201)
 async def create_payment_intent(
@@ -106,6 +108,7 @@ async def refund_payment(
 
 # ── COD ─────────────────────────────────────────────────────────────────
 
+
 @router.post("/payments/cod", response_model=PaymentResponse, status_code=201)
 async def create_cod_payment(
     body: CODCreateRequest,
@@ -138,6 +141,7 @@ async def collect_cod_payment(
 
 
 # ── Payment Methods ─────────────────────────────────────────────────────
+
 
 @router.get("/payment-methods", response_model=list[PaymentMethodResponse])
 async def list_payment_methods(
@@ -172,7 +176,36 @@ async def create_payment_method(
     )
 
 
+@router.patch("/payment-methods/{method_id}", response_model=PaymentMethodResponse)
+async def update_payment_method(
+    method_id: UUID,
+    body: PaymentMethodUpdate,
+    user: CurrentUser,
+    payment_service: Annotated[PaymentService, Depends(get_payment_service)],
+):
+    """Update a payment method (display name or set as default)."""
+    return await payment_service.update_payment_method(
+        method_id=method_id,
+        user_id=user.id,
+        tenant_id=user.tenant_id,
+        display_name=body.display_name,
+        is_default=body.is_default,
+    )
+
+
+@router.delete("/payment-methods/{method_id}", status_code=204)
+async def delete_payment_method(
+    method_id: UUID,
+    user: CurrentUser,
+    payment_service: Annotated[PaymentService, Depends(get_payment_service)],
+):
+    """Delete a saved payment method."""
+    await payment_service.delete_payment_method(method_id=method_id, user_id=user.id)
+    return Response(status_code=204)
+
+
 # ── Promo Codes ─────────────────────────────────────────────────────────
+
 
 @router.post("/promo-codes/validate", response_model=PromoValidateResponse)
 async def validate_promo_code(
@@ -207,6 +240,7 @@ async def list_promo_codes(
 
 
 # ── Invoices ────────────────────────────────────────────────────────────
+
 
 @router.get("/invoices", response_model=InvoiceListResponse)
 async def list_invoices(

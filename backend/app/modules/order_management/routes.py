@@ -26,12 +26,14 @@ router = APIRouter(tags=["Orders"])
 
 # ── Helpers ─────────────────────────────────────────────────────────────
 
+
 def _extract_session_id(request: Request) -> str | None:
     """Get guest session id from header or cookie."""
     return request.headers.get("X-Session-ID") or request.cookies.get("session_id")
 
 
 # ── Cart Endpoints ──────────────────────────────────────────────────────
+
 
 @router.get("/cart", response_model=CartResponse | None)
 async def get_cart(
@@ -49,9 +51,7 @@ async def get_cart(
         # This is a simplified approach; in production you'd resolve tenant from domain.
         return None
 
-    cart = await cart_service.get_cart(
-        tenant_id=tenant_id, user_id=user_id, session_id=session_id
-    )
+    cart = await cart_service.get_cart(tenant_id=tenant_id, user_id=user_id, session_id=session_id)
     return cart
 
 
@@ -69,11 +69,10 @@ async def add_cart_item(
 
     if tenant_id is None:
         from app.exceptions import BadRequestError
+
         raise BadRequestError("Tenant context required")
 
-    customizations = (
-        [c.model_dump() for c in body.customizations] if body.customizations else None
-    )
+    customizations = [c.model_dump() for c in body.customizations] if body.customizations else None
 
     item = await cart_service.add_item(
         tenant_id=tenant_id,
@@ -95,9 +94,7 @@ async def update_cart_item(
     cart_service: Annotated[CartService, Depends(get_cart_service)],
 ):
     """Update a cart item's quantity or customizations."""
-    customizations = (
-        [c.model_dump() for c in body.customizations] if body.customizations else None
-    )
+    customizations = [c.model_dump() for c in body.customizations] if body.customizations else None
     item = await cart_service.update_item(
         item_id=item_id,
         quantity=body.quantity,
@@ -129,11 +126,10 @@ async def clear_cart(
 
     if tenant_id is None:
         from app.exceptions import BadRequestError
+
         raise BadRequestError("Tenant context required")
 
-    await cart_service.clear_cart(
-        tenant_id=tenant_id, user_id=user_id, session_id=session_id
-    )
+    await cart_service.clear_cart(tenant_id=tenant_id, user_id=user_id, session_id=session_id)
 
 
 @router.post("/cart/promo", response_model=CartResponse)
@@ -150,6 +146,7 @@ async def apply_promo(
 
     if tenant_id is None:
         from app.exceptions import BadRequestError
+
         raise BadRequestError("Tenant context required")
 
     cart = await cart_service.apply_promo(
@@ -162,6 +159,7 @@ async def apply_promo(
 
 
 # ── Order Endpoints ─────────────────────────────────────────────────────
+
 
 @router.post("/orders/checkout", response_model=OrderResponse, status_code=201)
 async def checkout(
@@ -177,6 +175,7 @@ async def checkout(
         delivery_slot_id=body.delivery_slot_id,
         payment_method=body.payment_method,
         notes=body.notes,
+        plan_total_override=body.plan_total_override,
     )
     return order
 

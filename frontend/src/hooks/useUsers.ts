@@ -35,33 +35,28 @@ export function useUserMutations() {
 
   const createUser = useMutation({
     mutationFn: (data: AdminCreateUserRequest) => api.users.create(data),
-    onSuccess: () =>
-      qc.invalidateQueries({ queryKey: queryKeys.users.list() }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.users.list() }),
   });
 
   const updateUser = useMutation({
     mutationFn: ({ id, data }: { id: string; data: AdminUserUpdate }) =>
       api.users.update(id, data),
-    onSuccess: () =>
-      qc.invalidateQueries({ queryKey: queryKeys.users.list() }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.users.list() }),
   });
 
   const activateUser = useMutation({
     mutationFn: (id: string) => api.users.activate(id),
-    onSuccess: () =>
-      qc.invalidateQueries({ queryKey: queryKeys.users.list() }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.users.list() }),
   });
 
   const deactivateUser = useMutation({
     mutationFn: (id: string) => api.users.deactivate(id),
-    onSuccess: () =>
-      qc.invalidateQueries({ queryKey: queryKeys.users.list() }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.users.list() }),
   });
 
   const deleteUser = useMutation({
     mutationFn: (id: string) => api.users.delete(id),
-    onSuccess: () =>
-      qc.invalidateQueries({ queryKey: queryKeys.users.list() }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.users.list() }),
   });
 
   return {

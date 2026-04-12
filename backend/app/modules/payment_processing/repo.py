@@ -27,11 +27,7 @@ class PaymentRepo:
         return payment
 
     async def get_by_id(self, payment_id: uuid.UUID) -> Payment | None:
-        stmt = (
-            select(Payment)
-            .options(selectinload(Payment.transactions))
-            .where(Payment.id == payment_id)
-        )
+        stmt = select(Payment).options(selectinload(Payment.transactions)).where(Payment.id == payment_id)
         result = await self.db.execute(stmt)
         return result.scalar_one_or_none()
 
@@ -45,9 +41,7 @@ class PaymentRepo:
         await self.db.flush()
         return transaction
 
-    async def list_methods_by_user(
-        self, user_id: uuid.UUID, tenant_id: uuid.UUID
-    ) -> list[PaymentMethod]:
+    async def list_methods_by_user(self, user_id: uuid.UUID, tenant_id: uuid.UUID) -> list[PaymentMethod]:
         stmt = (
             select(PaymentMethod)
             .where(PaymentMethod.user_id == user_id, PaymentMethod.tenant_id == tenant_id)
@@ -61,16 +55,37 @@ class PaymentRepo:
         await self.db.flush()
         return method
 
+    async def get_method_by_id(self, method_id: uuid.UUID) -> PaymentMethod | None:
+        stmt = select(PaymentMethod).where(PaymentMethod.id == method_id)
+        result = await self.db.execute(stmt)
+        return result.scalar_one_or_none()
+
+    async def update_method(self, method_id: uuid.UUID, **kwargs) -> PaymentMethod | None:
+        await self.db.execute(update(PaymentMethod).where(PaymentMethod.id == method_id).values(**kwargs))
+        await self.db.flush()
+        return await self.get_method_by_id(method_id)
+
+    async def clear_default_methods(self, user_id: uuid.UUID, tenant_id: uuid.UUID) -> None:
+        await self.db.execute(
+            update(PaymentMethod)
+            .where(PaymentMethod.user_id == user_id, PaymentMethod.tenant_id == tenant_id)
+            .values(is_default=False)
+        )
+        await self.db.flush()
+
+    async def delete_method(self, method_id: uuid.UUID) -> None:
+        method = await self.get_method_by_id(method_id)
+        if method:
+            await self.db.delete(method)
+            await self.db.flush()
+
 
 class PromoCodeRepo:
     def __init__(self, db: AsyncSession) -> None:
         self.db = db
 
     async def get_by_code(self, code: str, tenant_id: uuid.UUID) -> PromoCode | None:
-        stmt = (
-            select(PromoCode)
-            .where(PromoCode.code == code, PromoCode.tenant_id == tenant_id)
-        )
+        stmt = select(PromoCode).where(PromoCode.code == code, PromoCode.tenant_id == tenant_id)
         result = await self.db.execute(stmt)
         return result.scalar_one_or_none()
 
@@ -83,21 +98,12 @@ class PromoCodeRepo:
         count_result = await self.db.execute(count_stmt)
         total = count_result.scalar_one()
 
-        stmt = (
-            base
-            .order_by(PromoCode.created_at.desc())
-            .offset(offset)
-            .limit(limit)
-        )
+        stmt = base.order_by(PromoCode.created_at.desc()).offset(offset).limit(limit)
         result = await self.db.execute(stmt)
         return list(result.scalars().all()), total
 
     async def get_usage_count(self, promo_id: uuid.UUID) -> int:
-        stmt = (
-            select(func.count())
-            .select_from(PromoCodeUsage)
-            .where(PromoCodeUsage.promo_code_id == promo_id)
-        )
+        stmt = select(func.count()).select_from(PromoCodeUsage).where(PromoCodeUsage.promo_code_id == promo_id)
         result = await self.db.execute(stmt)
         return result.scalar_one()
 
@@ -129,17 +135,11 @@ class InvoiceRepo:
         return invoice
 
     async def get_by_id(self, invoice_id: uuid.UUID) -> Invoice | None:
-        stmt = (
-            select(Invoice)
-            .options(selectinload(Invoice.line_items))
-            .where(Invoice.id == invoice_id)
-        )
+        stmt = select(Invoice).options(selectinload(Invoice.line_items)).where(Invoice.id == invoice_id)
         result = await self.db.execute(stmt)
         return result.scalar_one_or_none()
 
-    async def list_by_tenant(
-        self, tenant_id: uuid.UUID, offset: int = 0, limit: int = 20
-    ) -> tuple[list[Invoice], int]:
+    async def list_by_tenant(self, tenant_id: uuid.UUID, offset: int = 0, limit: int = 20) -> tuple[list[Invoice], int]:
         base = select(Invoice).where(Invoice.tenant_id == tenant_id)
 
         count_stmt = select(func.count()).select_from(base.subquery())
@@ -186,11 +186,7 @@ class InvoiceRepo:
         return item
 
     async def get_next_invoice_number(self, tenant_id: uuid.UUID) -> str:
-        stmt = (
-            select(func.count())
-            .select_from(Invoice)
-            .where(Invoice.tenant_id == tenant_id)
-        )
+        stmt = select(func.count()).select_from(Invoice).where(Invoice.tenant_id == tenant_id)
         result = await self.db.execute(stmt)
         count = result.scalar_one()
         return f"INV-{count + 1:05d}"

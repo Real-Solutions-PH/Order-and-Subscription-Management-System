@@ -10,6 +10,7 @@ from app.shared.schemas import BaseSchema, IDTimestampSchema
 
 # ── Cart Schemas ────────────────────────────────────────────────────────
 
+
 class CartItemCustomizationRequest(BaseModel):
     key: str = Field(..., max_length=100)
     value: str = Field(..., max_length=255)
@@ -55,20 +56,24 @@ class CartResponse(IDTimestampSchema):
 
 # ── Promo ───────────────────────────────────────────────────────────────
 
+
 class PromoApplyRequest(BaseModel):
     code: str = Field(..., min_length=1, max_length=50)
 
 
 # ── Checkout / Order Create ─────────────────────────────────────────────
 
+
 class CheckoutRequest(BaseModel):
     delivery_address_id: UUID | None = None
     delivery_slot_id: UUID | None = None
     payment_method: str = Field(..., max_length=50)
     notes: str | None = Field(default=None, max_length=1000)
+    plan_total_override: Decimal | None = Field(default=None, decimal_places=2)
 
 
 # ── Order Schemas ───────────────────────────────────────────────────────
+
 
 class OrderItemCustomizationResponse(BaseSchema):
     id: UUID
@@ -121,6 +126,7 @@ class OrderListResponse(BaseSchema):
 
 
 # ── Status / Cancel ─────────────────────────────────────────────────────
+
 
 class OrderStatusUpdateRequest(BaseModel):
     status: str

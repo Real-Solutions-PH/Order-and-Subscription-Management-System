@@ -11,9 +11,7 @@ class TenantConfigRepo:
         self.db = db
 
     async def get_by_tenant(self, tenant_id: UUID) -> TenantConfig | None:
-        result = await self.db.execute(
-            select(TenantConfig).where(TenantConfig.tenant_id == tenant_id)
-        )
+        result = await self.db.execute(select(TenantConfig).where(TenantConfig.tenant_id == tenant_id))
         return result.scalar_one_or_none()
 
     async def create(self, config: TenantConfig) -> TenantConfig:
@@ -22,11 +20,7 @@ class TenantConfigRepo:
         return config
 
     async def update(self, tenant_id: UUID, **kwargs) -> TenantConfig | None:
-        await self.db.execute(
-            update(TenantConfig)
-            .where(TenantConfig.tenant_id == tenant_id)
-            .values(**kwargs)
-        )
+        await self.db.execute(update(TenantConfig).where(TenantConfig.tenant_id == tenant_id).values(**kwargs))
         return await self.get_by_tenant(tenant_id)
 
 
@@ -36,9 +30,7 @@ class FeatureFlagRepo:
 
     async def list_by_tenant(self, tenant_id: UUID) -> list[FeatureFlag]:
         result = await self.db.execute(
-            select(FeatureFlag)
-            .where(FeatureFlag.tenant_id == tenant_id)
-            .order_by(FeatureFlag.flag_key)
+            select(FeatureFlag).where(FeatureFlag.tenant_id == tenant_id).order_by(FeatureFlag.flag_key)
         )
         return list(result.scalars().all())
 

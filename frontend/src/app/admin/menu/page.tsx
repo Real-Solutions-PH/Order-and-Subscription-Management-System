@@ -33,39 +33,17 @@ const FULL_DAYS = [
   "Sunday",
 ];
 
-const ALL_ALLERGENS = [
-  "Dairy",
-  "Eggs",
-  "Gluten",
-  "Soy",
-  "Peanuts",
-  "Fish",
-  "Shellfish",
-  "Sesame",
-];
-const ALL_TAGS = [
-  "High Protein",
-  "Keto-Friendly",
-  "Vegan",
-  "Vegetarian",
-  "Gluten-Free",
-  "Filipino Classic",
-  "Dairy-Free",
-  "Low Carb",
-  "Diabetic-Friendly",
-  "Spicy",
-  "Filipino Fusion",
-  "Halal",
-];
+import { ALL_ALLERGENS, ALL_TAGS } from "@/lib/constants";
 
-const initialCalendar: Record<string, (number | string)[]> = {
-  Mon: [1, 4, 7],
-  Tue: [2, 5, 8],
-  Wed: [3, 6, 9],
-  Thu: [1, 10, 11],
-  Fri: [2, 4, 12],
-  Sat: [3, 7],
-  Sun: [5, 9],
+// Calendar initialised empty — populated from API when catalog integration is ready
+const initialCalendar: Record<string, string[]> = {
+  Mon: [],
+  Tue: [],
+  Wed: [],
+  Thu: [],
+  Fri: [],
+  Sat: [],
+  Sun: [],
 };
 
 function getWeekLabel(offset: number): string {
@@ -162,7 +140,7 @@ function mapProductToMeal(p: ProductResponse): Meal {
 }
 
 interface DragData {
-  mealId: number | string;
+  mealId: string;
   sourceDay?: string; // undefined if from library
 }
 
@@ -170,7 +148,7 @@ export default function MenuManagementPage() {
   const { showToast } = useToast();
   const devMode = useDevMode();
 
-  const productsQuery = useProducts();
+  const productsQuery = useProducts({ status: "active" });
   const { updateProduct, isUpdating } = useProductMutations();
   const isLoadingProducts = productsQuery.isLoading;
 
@@ -180,7 +158,7 @@ export default function MenuManagementPage() {
 
   const [weekOffset, setWeekOffset] = useState(0);
   const [calendar, setCalendar] =
-    useState<Record<string, (number | string)[]>>(initialCalendar);
+    useState<Record<string, string[]>>(initialCalendar);
   const [searchQuery, setSearchQuery] = useState("");
   const [publishModalOpen, setPublishModalOpen] = useState(false);
   const [editingMeal, setEditingMeal] = useState<Meal | null>(null);
@@ -212,13 +190,13 @@ export default function MenuManagementPage() {
   }, [searchQuery, mealsData]);
 
   const getMealById = useCallback(
-    (id: number | string) => mealsData.find((m) => m.id === id),
+    (id: string) => mealsData.find((m) => String(m.id) === id),
     [mealsData],
   );
 
   // --- Drag and Drop ---
   const handleDragStart = useCallback(
-    (e: DragEvent, mealId: number | string, sourceDay?: string) => {
+    (e: DragEvent, mealId: string, sourceDay?: string) => {
       const data: DragData = { mealId, sourceDay };
       e.dataTransfer.setData("application/json", JSON.stringify(data));
       e.dataTransfer.effectAllowed = "move";
@@ -284,7 +262,7 @@ export default function MenuManagementPage() {
   );
 
   // Remove meal from day
-  function handleRemoveFromDay(day: string, mealId: number | string) {
+  function handleRemoveFromDay(day: string, mealId: string) {
     setCalendar((prev) => ({
       ...prev,
       [day]: (prev[day] || []).filter((id) => id !== mealId),
@@ -332,18 +310,25 @@ export default function MenuManagementPage() {
               },
             },
           });
-        } catch {
-          // Fall back to local-only update
+          showToast(`"${editForm.name}" updated successfully`);
+        } catch (err) {
+          const msg =
+            err instanceof Error ? err.message : "Failed to save changes";
+          showToast(msg, "error");
+          return;
         }
+      } else {
+        // Local-only update for meals not yet linked to a product
+        showToast(`"${editForm.name}" updated (local only)`);
       }
     }
-    showToast(`"${editForm.name}" updated successfully`);
     setEditingMeal(null);
   }
 
   function handlePublish() {
     setPublishModalOpen(false);
-    showToast("Menu published! 127 subscribers notified.");
+    // TODO: wire to POST /catalogs/{id}/publish once catalog integration is complete
+    showToast("Menu published! (Catalog publish API integration pending)");
   }
 
   function toggleTag(tag: string) {
@@ -369,29 +354,48 @@ export default function MenuManagementPage() {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold" style={{ fontFamily: "'DM Serif Display', serif", color: '#1A1A2E' }}>
+          <h1
+            className="text-2xl font-bold"
+            style={{
+              fontFamily: "'DM Serif Display', serif",
+              color: "#1A1A2E",
+            }}
+          >
             Menu Management
           </h1>
-          <p className="mt-1 text-sm" style={{ color: '#6B7280' }}>
-            Drag meals from the library or between days to organize your weekly menu.
+          <p className="mt-1 text-sm" style={{ color: "#6B7280" }}>
+            Drag meals from the library or between days to organize your weekly
+            menu.
           </p>
         </div>
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 rounded-lg bg-white px-3 py-2 shadow-sm" style={{ border: '1px solid #E5E7EB' }}>
-            <button onClick={() => setWeekOffset((w) => w - 1)} className="rounded p-1 transition-colors hover:bg-gray-100">
-              <ChevronLeft size={18} style={{ color: '#6B7280' }} />
+          <div
+            className="flex items-center gap-2 rounded-lg bg-white px-3 py-2 shadow-sm"
+            style={{ border: "1px solid #E5E7EB" }}
+          >
+            <button
+              onClick={() => setWeekOffset((w) => w - 1)}
+              className="rounded p-1 transition-colors hover:bg-gray-100"
+            >
+              <ChevronLeft size={18} style={{ color: "#6B7280" }} />
             </button>
-            <span className="min-w-[180px] text-center text-sm font-medium" style={{ color: '#1A1A2E' }}>
+            <span
+              className="min-w-[180px] text-center text-sm font-medium"
+              style={{ color: "#1A1A2E" }}
+            >
               {getWeekLabel(weekOffset)}
             </span>
-            <button onClick={() => setWeekOffset((w) => w + 1)} className="rounded p-1 transition-colors hover:bg-gray-100">
-              <ChevronRight size={18} style={{ color: '#6B7280' }} />
+            <button
+              onClick={() => setWeekOffset((w) => w + 1)}
+              className="rounded p-1 transition-colors hover:bg-gray-100"
+            >
+              <ChevronRight size={18} style={{ color: "#6B7280" }} />
             </button>
           </div>
           <button
             onClick={() => setPublishModalOpen(true)}
             className="rounded-lg px-4 py-2 text-sm font-semibold text-white transition-colors hover:opacity-90"
-            style={{ backgroundColor: '#E76F51' }}
+            style={{ backgroundColor: "#E76F51" }}
           >
             Publish Menu
           </button>
@@ -402,8 +406,14 @@ export default function MenuManagementPage() {
       <div className="flex flex-col gap-6 xl:flex-row">
         {/* Weekly Calendar */}
         <div className="flex-1">
-          <div className="rounded-xl bg-white p-4 shadow-sm" style={{ border: '1px solid #E5E7EB' }}>
-            <h2 className="mb-4 text-lg font-semibold" style={{ color: '#1A1A2E' }}>
+          <div
+            className="rounded-xl bg-white p-4 shadow-sm"
+            style={{ border: "1px solid #E5E7EB" }}
+          >
+            <h2
+              className="mb-4 text-lg font-semibold"
+              style={{ color: "#1A1A2E" }}
+            >
               Weekly Calendar
             </h2>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7">
@@ -417,16 +427,24 @@ export default function MenuManagementPage() {
                     onDrop={(e) => handleDrop(e, day)}
                     className="rounded-lg p-3 transition-all duration-200"
                     style={{
-                      border: isOver ? '2px solid #40916C' : '1px solid #E5E7EB',
-                      backgroundColor: isOver ? '#ECFDF5' : '#FAFAFA',
+                      border: isOver
+                        ? "2px solid #40916C"
+                        : "1px solid #E5E7EB",
+                      backgroundColor: isOver ? "#ECFDF5" : "#FAFAFA",
                       minHeight: 200,
                     }}
                   >
                     <div className="mb-2 text-center">
-                      <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: '#6B7280' }}>
+                      <span
+                        className="text-xs font-semibold uppercase tracking-wide"
+                        style={{ color: "#6B7280" }}
+                      >
                         {FULL_DAYS[idx]}
                       </span>
-                      <div className="mt-0.5 text-[10px]" style={{ color: '#9CA3AF' }}>
+                      <div
+                        className="mt-0.5 text-[10px]"
+                        style={{ color: "#9CA3AF" }}
+                      >
                         {(calendar[day] || []).length} meals
                       </div>
                     </div>
@@ -442,12 +460,21 @@ export default function MenuManagementPage() {
                             initial={{ opacity: 0, scale: 0.9 }}
                             animate={{ opacity: 1, scale: 1 }}
                             draggable
-                            onDragStart={(e) => handleDragStart(e as unknown as DragEvent, mealId, day)}
+                            onDragStart={(e) =>
+                              handleDragStart(
+                                e as unknown as DragEvent,
+                                mealId,
+                                day,
+                              )
+                            }
                             className="group relative cursor-grab rounded-md bg-white p-2 shadow-sm active:cursor-grabbing"
-                            style={{ border: '1px solid #E5E7EB' }}
+                            style={{ border: "1px solid #E5E7EB" }}
                           >
                             <div className="absolute left-1 top-1/2 -translate-y-1/2 opacity-0 transition-opacity group-hover:opacity-50">
-                              <GripVertical size={12} style={{ color: '#9CA3AF' }} />
+                              <GripVertical
+                                size={12}
+                                style={{ color: "#9CA3AF" }}
+                              />
                             </div>
                             <button
                               onClick={() => openMealEditor(meal)}
@@ -458,8 +485,13 @@ export default function MenuManagementPage() {
                                 alt={meal.name}
                                 className="mb-1 h-12 w-full rounded object-cover pointer-events-none"
                               />
-                              <p className="text-xs font-medium leading-tight" style={{ color: '#1A1A2E' }}>
-                                {meal.name.length > 28 ? meal.name.substring(0, 28) + '...' : meal.name}
+                              <p
+                                className="text-xs font-medium leading-tight"
+                                style={{ color: "#1A1A2E" }}
+                              >
+                                {meal.name.length > 28
+                                  ? meal.name.substring(0, 28) + "..."
+                                  : meal.name}
                               </p>
                             </button>
                             <button
@@ -481,10 +513,18 @@ export default function MenuManagementPage() {
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
                           className="flex items-center justify-center rounded-md border-2 border-dashed py-3"
-                          style={{ borderColor: '#40916C', backgroundColor: '#D1FAE5' }}
+                          style={{
+                            borderColor: "#40916C",
+                            backgroundColor: "#D1FAE5",
+                          }}
                         >
-                          <Plus size={16} style={{ color: '#059669' }} />
-                          <span className="ml-1 text-xs font-medium" style={{ color: '#059669' }}>Drop here</span>
+                          <Plus size={16} style={{ color: "#059669" }} />
+                          <span
+                            className="ml-1 text-xs font-medium"
+                            style={{ color: "#059669" }}
+                          >
+                            Drop here
+                          </span>
                         </motion.div>
                       )}
                     </div>
@@ -497,81 +537,115 @@ export default function MenuManagementPage() {
 
         {/* Meal Library Sidebar */}
         <div className="w-full xl:w-80">
-          <div className="rounded-xl bg-white p-4 shadow-sm" style={{ border: '1px solid #E5E7EB' }}>
-            <h2 className="mb-1 text-lg font-semibold" style={{ color: '#1A1A2E' }}>
+          <div
+            className="rounded-xl bg-white p-4 shadow-sm"
+            style={{ border: "1px solid #E5E7EB" }}
+          >
+            <h2
+              className="mb-1 text-lg font-semibold"
+              style={{ color: "#1A1A2E" }}
+            >
               Meal Library
             </h2>
-            <p className="mb-3 text-xs" style={{ color: '#9CA3AF' }}>
+            <p className="mb-3 text-xs" style={{ color: "#9CA3AF" }}>
               Drag meals onto calendar days
             </p>
             <div className="relative mb-3">
-              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: '#6B7280' }} />
+              <Search
+                size={16}
+                className="absolute left-3 top-1/2 -translate-y-1/2"
+                style={{ color: "#6B7280" }}
+              />
               <input
                 type="text"
                 placeholder="Search meals..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                aria-label="Search meal library"
                 className="w-full rounded-lg py-2 pl-9 pr-3 text-sm transition-all duration-200 focus:outline-none focus:ring-2"
-                style={{ border: '1px solid #E5E7EB', color: '#1A1A2E', '--tw-ring-color': '#1B4332' } as React.CSSProperties}
+                style={
+                  {
+                    border: "1px solid #E5E7EB",
+                    color: "#1A1A2E",
+                    "--tw-ring-color": "#1B4332",
+                  } as React.CSSProperties
+                }
               />
             </div>
             <div className="max-h-[600px] space-y-2 overflow-y-auto pr-1">
-              {isLoadingProducts ? (
-                Array.from({ length: 6 }).map((_, i) => (
-                  <SkeletonMealCard key={i} />
-                ))
-              ) : filteredMeals.map((meal) => (
-                <div
-                  key={meal.id}
-                  draggable
-                  onDragStart={(e) => handleDragStart(e, meal.id)}
-                  className="flex cursor-grab items-start gap-3 rounded-lg p-2 transition-all duration-150 hover:bg-gray-50 hover:shadow-sm active:cursor-grabbing active:shadow-md"
-                  style={{ border: '1px solid #E5E7EB' }}
-                >
-                  <div className="flex flex-shrink-0 items-center self-center">
-                    <GripVertical size={14} style={{ color: '#D1D5DB' }} />
-                  </div>
-                  <div onClick={() => openMealEditor(meal)} className="cursor-pointer">
-                    <MealImage
-                      src={meal.image}
-                      alt={meal.name}
-                      className="h-12 w-12 flex-shrink-0 rounded object-cover pointer-events-none"
-                    />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p
-                      className="cursor-pointer truncate text-sm font-medium hover:underline"
-                      style={{ color: '#1A1A2E' }}
-                      onClick={() => openMealEditor(meal)}
+              {isLoadingProducts
+                ? Array.from({ length: 6 }).map((_, i) => (
+                    <SkeletonMealCard key={i} />
+                  ))
+                : filteredMeals.map((meal) => (
+                    <div
+                      key={meal.id}
+                      draggable
+                      onDragStart={(e) => handleDragStart(e, String(meal.id))}
+                      className="flex cursor-grab items-start gap-3 rounded-lg p-2 transition-all duration-150 hover:bg-gray-50 hover:shadow-sm active:cursor-grabbing active:shadow-md"
+                      style={{ border: "1px solid #E5E7EB" }}
                     >
-                      {meal.name}
-                    </p>
-                    <p className="text-xs" style={{ color: '#6B7280' }}>
-                      {formatPeso(meal.price)}
-                    </p>
-                    <div className="mt-1 flex flex-wrap gap-1">
-                      {meal.tags.slice(0, 2).map((tag) => (
-                        <span key={tag} className="rounded-full px-1.5 py-0.5 text-[10px] font-medium" style={{ backgroundColor: '#D1FAE5', color: '#065F46' }}>
-                          {tag}
-                        </span>
-                      ))}
+                      <div className="flex flex-shrink-0 items-center self-center">
+                        <GripVertical size={14} style={{ color: "#D1D5DB" }} />
+                      </div>
+                      <div
+                        onClick={() => openMealEditor(meal)}
+                        className="cursor-pointer"
+                      >
+                        <MealImage
+                          src={meal.image}
+                          alt={meal.name}
+                          className="h-12 w-12 flex-shrink-0 rounded object-cover pointer-events-none"
+                        />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p
+                          className="cursor-pointer truncate text-sm font-medium hover:underline"
+                          style={{ color: "#1A1A2E" }}
+                          onClick={() => openMealEditor(meal)}
+                        >
+                          {meal.name}
+                        </p>
+                        <p className="text-xs" style={{ color: "#6B7280" }}>
+                          {formatPeso(meal.price)}
+                        </p>
+                        <div className="mt-1 flex flex-wrap gap-1">
+                          {meal.tags.slice(0, 2).map((tag) => (
+                            <span
+                              key={tag}
+                              className="rounded-full px-1.5 py-0.5 text-[10px] font-medium"
+                              style={{
+                                backgroundColor: "#D1FAE5",
+                                color: "#065F46",
+                              }}
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              ))}
+                  ))}
             </div>
           </div>
         </div>
       </div>
 
       {/* Menu History */}
-      <div className="rounded-xl bg-white p-4 shadow-sm" style={{ border: '1px solid #E5E7EB' }}>
-        <h2 className="mb-3 text-lg font-semibold" style={{ color: '#1A1A2E' }}>
+      <div
+        className="rounded-xl bg-white p-4 shadow-sm"
+        style={{ border: "1px solid #E5E7EB" }}
+      >
+        <h2 className="mb-3 text-lg font-semibold" style={{ color: "#1A1A2E" }}>
           Menu History
         </h2>
         <div className="space-y-2">
           {menuHistory.map((week, idx) => (
-            <div key={idx} className="rounded-lg" style={{ border: '1px solid #E5E7EB' }}>
+            <div
+              key={idx}
+              className="rounded-lg"
+              style={{ border: "1px solid #E5E7EB" }}
+            >
               <button
                 onClick={() =>
                   setExpandedHistory(expandedHistory === idx ? null : idx)
@@ -579,18 +653,30 @@ export default function MenuManagementPage() {
                 className="flex w-full items-center justify-between p-3 text-left transition-colors hover:bg-gray-50"
               >
                 <div className="flex items-center gap-3">
-                  <span className="text-sm font-medium" style={{ color: '#1A1A2E' }}>
+                  <span
+                    className="text-sm font-medium"
+                    style={{ color: "#1A1A2E" }}
+                  >
                     Week of {week.weekLabel}
                   </span>
-                  <span className="rounded-full px-2 py-0.5 text-xs font-medium" style={{ backgroundColor: '#F3F4F6', color: '#6B7280' }}>
+                  <span
+                    className="rounded-full px-2 py-0.5 text-xs font-medium"
+                    style={{ backgroundColor: "#F3F4F6", color: "#6B7280" }}
+                  >
                     {week.mealCount} meals
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
                   {expandedHistory !== idx && (
-                    <span className="text-xs" style={{ color: '#6B7280' }}>View</span>
+                    <span className="text-xs" style={{ color: "#6B7280" }}>
+                      View
+                    </span>
                   )}
-                  {expandedHistory === idx ? <ChevronUp size={16} style={{ color: '#6B7280' }} /> : <ChevronDown size={16} style={{ color: '#6B7280' }} />}
+                  {expandedHistory === idx ? (
+                    <ChevronUp size={16} style={{ color: "#6B7280" }} />
+                  ) : (
+                    <ChevronDown size={16} style={{ color: "#6B7280" }} />
+                  )}
                 </div>
               </button>
               <AnimatePresence>
@@ -602,10 +688,20 @@ export default function MenuManagementPage() {
                     transition={{ duration: 0.2 }}
                     className="overflow-hidden"
                   >
-                    <div className="border-t px-3 pb-3 pt-2" style={{ borderColor: '#E5E7EB' }}>
+                    <div
+                      className="border-t px-3 pb-3 pt-2"
+                      style={{ borderColor: "#E5E7EB" }}
+                    >
                       <div className="flex flex-wrap gap-2">
                         {week.meals.map((name) => (
-                          <span key={name} className="rounded-md px-2 py-1 text-xs font-medium" style={{ backgroundColor: '#F3F4F6', color: '#1A1A2E' }}>
+                          <span
+                            key={name}
+                            className="rounded-md px-2 py-1 text-xs font-medium"
+                            style={{
+                              backgroundColor: "#F3F4F6",
+                              color: "#1A1A2E",
+                            }}
+                          >
                             {name}
                           </span>
                         ))}
@@ -627,22 +723,22 @@ export default function MenuManagementPage() {
         size="sm"
       >
         <div className="space-y-4">
-          <p className="text-sm" style={{ color: '#6B7280' }}>
-            This will notify <strong>127 subscribers</strong> about the new menu for{' '}
-            <strong>{getWeekLabel(weekOffset)}</strong>. Publish?
+          <p className="text-sm" style={{ color: "#6B7280" }}>
+            This will notify <strong>127 subscribers</strong> about the new menu
+            for <strong>{getWeekLabel(weekOffset)}</strong>. Publish?
           </p>
           <div className="flex justify-end gap-3">
             <button
               onClick={() => setPublishModalOpen(false)}
               className="rounded-lg px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-100"
-              style={{ color: '#6B7280', border: '1px solid #E5E7EB' }}
+              style={{ color: "#6B7280", border: "1px solid #E5E7EB" }}
             >
               Cancel
             </button>
             <button
               onClick={handlePublish}
               className="rounded-lg px-4 py-2 text-sm font-semibold text-white transition-colors hover:opacity-90"
-              style={{ backgroundColor: '#E76F51' }}
+              style={{ backgroundColor: "#E76F51" }}
             >
               Publish Menu
             </button>
@@ -659,18 +755,36 @@ export default function MenuManagementPage() {
       >
         <div className="max-h-[70vh] space-y-4 overflow-y-auto overflow-x-hidden pr-1">
           <div>
-            <label className="mb-1 block text-sm font-medium" style={{ color: '#1A1A2E' }}>Name</label>
+            <label
+              className="mb-1 block text-sm font-medium"
+              style={{ color: "#1A1A2E" }}
+            >
+              Name
+            </label>
             <input
               type="text"
               value={editForm.name}
-              onChange={(e) => setEditForm((f) => ({ ...f, name: e.target.value }))}
+              onChange={(e) =>
+                setEditForm((f) => ({ ...f, name: e.target.value }))
+              }
               className="w-full rounded-lg px-3 py-2 text-sm transition-all duration-200 focus:outline-none focus:ring-2"
-              style={{ border: '1px solid #E5E7EB', color: '#1A1A2E', '--tw-ring-color': '#1B4332' } as React.CSSProperties}
+              style={
+                {
+                  border: "1px solid #E5E7EB",
+                  color: "#1A1A2E",
+                  "--tw-ring-color": "#1B4332",
+                } as React.CSSProperties
+              }
             />
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium" style={{ color: '#1A1A2E' }}>Description</label>
+            <label
+              className="mb-1 block text-sm font-medium"
+              style={{ color: "#1A1A2E" }}
+            >
+              Description
+            </label>
             <textarea
               value={editForm.description}
               onChange={(e) =>
@@ -678,26 +792,53 @@ export default function MenuManagementPage() {
               }
               rows={3}
               className="w-full rounded-lg px-3 py-2 text-sm transition-all duration-200 focus:outline-none focus:ring-2"
-              style={{ border: '1px solid #E5E7EB', color: '#1A1A2E', '--tw-ring-color': '#1B4332' } as React.CSSProperties}
+              style={
+                {
+                  border: "1px solid #E5E7EB",
+                  color: "#1A1A2E",
+                  "--tw-ring-color": "#1B4332",
+                } as React.CSSProperties
+              }
             />
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium" style={{ color: '#1A1A2E' }}>Price</label>
+            <label
+              className="mb-1 block text-sm font-medium"
+              style={{ color: "#1A1A2E" }}
+            >
+              Price
+            </label>
             <input
               type="number"
               value={editForm.price}
-              onChange={(e) => setEditForm((f) => ({ ...f, price: Number(e.target.value) }))}
+              onChange={(e) =>
+                setEditForm((f) => ({ ...f, price: Number(e.target.value) }))
+              }
               className="w-full rounded-lg px-3 py-2 text-sm transition-all duration-200 focus:outline-none focus:ring-2"
-              style={{ border: '1px solid #E5E7EB', color: '#1A1A2E', '--tw-ring-color': '#1B4332' } as React.CSSProperties}
+              style={
+                {
+                  border: "1px solid #E5E7EB",
+                  color: "#1A1A2E",
+                  "--tw-ring-color": "#1B4332",
+                } as React.CSSProperties
+              }
             />
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium" style={{ color: '#1A1A2E' }}>Photo</label>
+            <label
+              className="mb-1 block text-sm font-medium"
+              style={{ color: "#1A1A2E" }}
+            >
+              Photo
+            </label>
             <div className="flex items-start gap-4">
               {editForm.image && (
-                <div className="relative h-24 w-32 flex-shrink-0 overflow-hidden rounded-lg shadow-sm" style={{ border: '1px solid #E5E7EB' }}>
+                <div
+                  className="relative h-24 w-32 flex-shrink-0 overflow-hidden rounded-lg shadow-sm"
+                  style={{ border: "1px solid #E5E7EB" }}
+                >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={editForm.image}
@@ -708,46 +849,91 @@ export default function MenuManagementPage() {
               )}
               <div
                 className="flex flex-1 cursor-pointer items-center justify-center rounded-lg py-6 transition-colors hover:bg-gray-50"
-                style={{ border: '2px dashed #E5E7EB', backgroundColor: '#F9FAFB' }}
+                style={{
+                  border: "2px dashed #E5E7EB",
+                  backgroundColor: "#F9FAFB",
+                }}
               >
                 <div className="text-center">
-                  <Upload size={20} className="mx-auto mb-2" style={{ color: '#6B7280' }} />
-                  <p className="text-sm" style={{ color: '#6B7280' }}>Drop image here or click to upload</p>
-                  <p className="text-xs" style={{ color: '#9CA3AF' }}>PNG, JPG up to 5MB</p>
+                  <Upload
+                    size={20}
+                    className="mx-auto mb-2"
+                    style={{ color: "#6B7280" }}
+                  />
+                  <p className="text-sm" style={{ color: "#6B7280" }}>
+                    Drop image here or click to upload
+                  </p>
+                  <p className="text-xs" style={{ color: "#9CA3AF" }}>
+                    PNG, JPG up to 5MB
+                  </p>
                 </div>
               </div>
             </div>
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium" style={{ color: '#1A1A2E' }}>Nutritional Info</label>
+            <label
+              className="mb-2 block text-sm font-medium"
+              style={{ color: "#1A1A2E" }}
+            >
+              Nutritional Info
+            </label>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-              {(['calories', 'protein', 'carbs', 'fat'] as const).map((field) => (
-                <div key={field}>
-                  <label className="mb-1 block text-xs capitalize" style={{ color: '#6B7280' }}>
-                    {field} {field === 'calories' ? '(kcal)' : '(g)'}
-                  </label>
-                  <input
-                    type="number"
-                    value={editForm[field]}
-                    onChange={(e) => setEditForm((f) => ({ ...f, [field]: Number(e.target.value) }))}
-                    className="w-full rounded-lg px-3 py-2 text-sm transition-all duration-200 focus:outline-none focus:ring-2"
-                    style={{ border: '1px solid #E5E7EB', color: '#1A1A2E', '--tw-ring-color': '#1B4332' } as React.CSSProperties}
-                  />
-                </div>
-              ))}
+              {(["calories", "protein", "carbs", "fat"] as const).map(
+                (field) => (
+                  <div key={field}>
+                    <label
+                      className="mb-1 block text-xs capitalize"
+                      style={{ color: "#6B7280" }}
+                    >
+                      {field} {field === "calories" ? "(kcal)" : "(g)"}
+                    </label>
+                    <input
+                      type="number"
+                      value={editForm[field]}
+                      onChange={(e) =>
+                        setEditForm((f) => ({
+                          ...f,
+                          [field]: Number(e.target.value),
+                        }))
+                      }
+                      className="w-full rounded-lg px-3 py-2 text-sm transition-all duration-200 focus:outline-none focus:ring-2"
+                      style={
+                        {
+                          border: "1px solid #E5E7EB",
+                          color: "#1A1A2E",
+                          "--tw-ring-color": "#1B4332",
+                        } as React.CSSProperties
+                      }
+                    />
+                  </div>
+                ),
+              )}
             </div>
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium" style={{ color: '#1A1A2E' }}>Dietary Tags</label>
+            <label
+              className="mb-2 block text-sm font-medium"
+              style={{ color: "#1A1A2E" }}
+            >
+              Dietary Tags
+            </label>
             <div className="flex flex-wrap gap-2">
               {ALL_TAGS.map((tag) => (
-                <label key={tag} className="flex cursor-pointer items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors" style={{
-                  backgroundColor: editForm.tags.includes(tag) ? '#D1FAE5' : '#F3F4F6',
-                  color: editForm.tags.includes(tag) ? '#065F46' : '#6B7280',
-                  border: editForm.tags.includes(tag) ? '1px solid #6EE7B7' : '1px solid #E5E7EB',
-                }}>
+                <label
+                  key={tag}
+                  className="flex cursor-pointer items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors"
+                  style={{
+                    backgroundColor: editForm.tags.includes(tag)
+                      ? "#D1FAE5"
+                      : "#F3F4F6",
+                    color: editForm.tags.includes(tag) ? "#065F46" : "#6B7280",
+                    border: editForm.tags.includes(tag)
+                      ? "1px solid #6EE7B7"
+                      : "1px solid #E5E7EB",
+                  }}
+                >
                   <input
                     type="checkbox"
                     checked={editForm.tags.includes(tag)}
@@ -761,14 +947,29 @@ export default function MenuManagementPage() {
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium" style={{ color: '#1A1A2E' }}>Allergens</label>
+            <label
+              className="mb-2 block text-sm font-medium"
+              style={{ color: "#1A1A2E" }}
+            >
+              Allergens
+            </label>
             <div className="flex flex-wrap gap-2">
               {ALL_ALLERGENS.map((a) => (
-                <label key={a} className="flex cursor-pointer items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors" style={{
-                  backgroundColor: editForm.allergens.includes(a) ? '#FEE2E2' : '#F3F4F6',
-                  color: editForm.allergens.includes(a) ? '#991B1B' : '#6B7280',
-                  border: editForm.allergens.includes(a) ? '1px solid #FCA5A5' : '1px solid #E5E7EB',
-                }}>
+                <label
+                  key={a}
+                  className="flex cursor-pointer items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors"
+                  style={{
+                    backgroundColor: editForm.allergens.includes(a)
+                      ? "#FEE2E2"
+                      : "#F3F4F6",
+                    color: editForm.allergens.includes(a)
+                      ? "#991B1B"
+                      : "#6B7280",
+                    border: editForm.allergens.includes(a)
+                      ? "1px solid #FCA5A5"
+                      : "1px solid #E5E7EB",
+                  }}
+                >
                   <input
                     type="checkbox"
                     checked={editForm.allergens.includes(a)}
@@ -782,11 +983,17 @@ export default function MenuManagementPage() {
           </div>
 
           <div className="flex items-center justify-between">
-            <label className="text-sm font-medium" style={{ color: '#1A1A2E' }}>Available</label>
+            <label className="text-sm font-medium" style={{ color: "#1A1A2E" }}>
+              Available
+            </label>
             <button
-              onClick={() => setEditForm((f) => ({ ...f, available: !f.available }))}
+              onClick={() =>
+                setEditForm((f) => ({ ...f, available: !f.available }))
+              }
               className="relative flex h-6 w-11 shrink-0 items-center rounded-full transition-colors"
-              style={{ backgroundColor: editForm.available ? '#40916C' : '#D1D5DB' }}
+              style={{
+                backgroundColor: editForm.available ? "#40916C" : "#D1D5DB",
+              }}
             >
               <span
                 className={`absolute left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${editForm.available ? "translate-x-5" : "translate-x-0"}`}
@@ -794,11 +1001,14 @@ export default function MenuManagementPage() {
             </button>
           </div>
 
-          <div className="flex justify-end gap-3 pt-2" style={{ borderTop: '1px solid #E5E7EB' }}>
+          <div
+            className="flex justify-end gap-3 pt-2"
+            style={{ borderTop: "1px solid #E5E7EB" }}
+          >
             <button
               onClick={() => setEditingMeal(null)}
               className="rounded-lg px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-100"
-              style={{ color: '#6B7280', border: '1px solid #E5E7EB' }}
+              style={{ color: "#6B7280", border: "1px solid #E5E7EB" }}
             >
               Cancel
             </button>
@@ -806,7 +1016,7 @@ export default function MenuManagementPage() {
               onClick={handleSaveMeal}
               disabled={isUpdating}
               className="rounded-lg px-4 py-2 text-sm font-semibold text-white transition-colors hover:opacity-90 disabled:opacity-50"
-              style={{ backgroundColor: '#1B4332' }}
+              style={{ backgroundColor: "#1B4332" }}
             >
               {isUpdating ? "Saving..." : "Save Changes"}
             </button>

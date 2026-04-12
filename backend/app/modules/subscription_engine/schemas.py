@@ -77,6 +77,7 @@ class SubscriptionResponse(BaseModel):
     tenant_id: UUID
     user_id: UUID
     plan_tier_id: UUID
+    plan_tier: SubscriptionPlanTierSchema | None = None
     status: str
     current_cycle_start: datetime
     current_cycle_end: datetime

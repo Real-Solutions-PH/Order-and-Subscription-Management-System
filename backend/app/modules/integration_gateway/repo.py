@@ -45,9 +45,7 @@ class IntegrationConfigRepo:
         self.db = db
 
     async def list_by_tenant(self, tenant_id: UUID) -> list[IntegrationConfig]:
-        result = await self.db.execute(
-            select(IntegrationConfig).where(IntegrationConfig.tenant_id == tenant_id)
-        )
+        result = await self.db.execute(select(IntegrationConfig).where(IntegrationConfig.tenant_id == tenant_id))
         return list(result.scalars().all())
 
     async def get_by_system_type(self, tenant_id: UUID, system_type: str) -> IntegrationConfig | None:
@@ -69,9 +67,7 @@ class AuditLogRepo:
         await self.db.flush()
         return log
 
-    async def list_by_resource(
-        self, tenant_id: UUID, resource_type: str, resource_id: UUID
-    ) -> list[AuditLog]:
+    async def list_by_resource(self, tenant_id: UUID, resource_type: str, resource_id: UUID) -> list[AuditLog]:
         result = await self.db.execute(
             select(AuditLog)
             .where(

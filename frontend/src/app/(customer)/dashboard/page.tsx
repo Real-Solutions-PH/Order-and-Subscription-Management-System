@@ -38,7 +38,18 @@ import {
   Meal,
 } from "@/lib/mock-data";
 import { useToast } from "@/context/ToastContext";
-import { useAuth, useOrders, useDevMode } from "@/hooks";
+import {
+  useAuth,
+  useUserMetrics,
+  useOrders,
+  useDevMode,
+  useUserSubscriptions,
+  useSubscriptionCycles,
+  useSubscriptionMutations,
+  useSubscriptionPlans,
+  useAddresses,
+  usePaymentMethods,
+} from "@/hooks";
 import { SkeletonCard } from "@/components/ui/skeleton";
 import {
   Select,
@@ -60,8 +71,25 @@ export default function DashboardPage() {
   const devMode = useDevMode();
 
   // --- API hooks; only fall back to mock data when DEV_MODE is on ---
-  const { user, isLoading: isLoadingUser } = useAuth();
+  const { user, isLoading: isLoadingUser, updateProfile } = useAuth();
   const ordersQuery = useOrders();
+  const metricsQuery = useUserMetrics();
+  const subscriptionsQuery = useUserSubscriptions();
+  const addressesQuery = useAddresses();
+  const paymentMethodsQuery = usePaymentMethods();
+
+  // Derive active subscription and its cycles
+  const activeSub =
+    subscriptionsQuery.data?.find(
+      (s) => s.status === "active" || s.status === "paused",
+    ) ??
+    subscriptionsQuery.data?.[0] ??
+    null;
+  const cyclesQuery = useSubscriptionCycles(activeSub?.id);
+  const upcomingCycle =
+    cyclesQuery.data?.find(
+      (c) => c.status === "selection_open" || c.status === "upcoming",
+    ) ?? null;
 
   const customer = devMode ? customers[0] : null;
   const nextDeliveryMeals = devMode ? meals.slice(0, 5) : [];
@@ -74,7 +102,11 @@ export default function DashboardPage() {
         phone: user.phone ?? "",
       }
     : customer
-      ? { name: customer?.name ?? "", email: customer?.email ?? "", phone: customer?.phone ?? "" }
+      ? {
+          name: customer?.name ?? "",
+          email: customer?.email ?? "",
+          phone: customer?.phone ?? "",
+        }
       : { name: "", email: "", phone: "" };
 
   // Map API orders to display format
@@ -100,10 +132,14 @@ export default function DashboardPage() {
   const [userEmail, setUserEmail] = useState(displayUser.email);
   const [userPhone, setUserPhone] = useState(displayUser.phone);
   const [userDietary, setUserDietary] = useState<string[]>(
-    customer?.dietaryPreferences ?? [],
+    user?.dietary_preferences ?? customer?.dietaryPreferences ?? [],
   );
-  const [userAllergens, setUserAllergens] = useState<string[]>(["Shellfish"]);
-  const [favoriteMeal, setFavoriteMeal] = useState("Garlic Butter Chicken");
+  const [userAllergens, setUserAllergens] = useState<string[]>(
+    user?.allergens ?? ["Shellfish"],
+  );
+  const [favoriteMeal, setFavoriteMeal] = useState(
+    metricsQuery.data?.favorite_meal ?? "Garlic Butter Chicken",
+  );
   // Notification preferences state
   const [notifications, setNotifications] = useState({
     orderUpdatesEmail: true,
@@ -122,7 +158,15 @@ export default function DashboardPage() {
   };
 
   // Progress ring for days until next delivery
-  const daysUntilDelivery = 6;
+  const daysUntilDelivery = activeSub?.current_cycle_end
+    ? Math.max(
+        0,
+        Math.ceil(
+          (new Date(activeSub.current_cycle_end).getTime() - Date.now()) /
+            (1000 * 60 * 60 * 24),
+        ),
+      )
+    : 6;
   const totalDays = 7;
   const progress = ((totalDays - daysUntilDelivery) / totalDays) * 100;
   const circumference = 2 * Math.PI * 36;
@@ -229,7 +273,11 @@ export default function DashboardPage() {
                         className="text-lg font-bold"
                         style={{ color: "#1A1A2E" }}
                       >
-                        {formatPeso(4500)}
+                        {metricsQuery.data
+                          ? formatPeso(
+                              Number(metricsQuery.data.this_month_total),
+                            )
+                          : formatPeso(0)}
                       </p>
                     </div>
                   </div>
@@ -254,7 +302,9 @@ export default function DashboardPage() {
                         className="text-lg font-bold"
                         style={{ color: "#059669" }}
                       >
-                        {formatPeso(680)}
+                        {metricsQuery.data
+                          ? formatPeso(Number(metricsQuery.data.total_savings))
+                          : formatPeso(0)}
                       </p>
                     </div>
                     <div
@@ -277,7 +327,9 @@ export default function DashboardPage() {
                         className="text-sm font-bold leading-tight"
                         style={{ color: "#1A1A2E" }}
                       >
-                        {favoriteMeal}
+                        {metricsQuery.data?.favorite_meal ||
+                          favoriteMeal ||
+                          "—"}
                       </p>
                     </div>
                   </div>
@@ -305,7 +357,13 @@ export default function DashboardPage() {
                         className="text-sm font-medium"
                         style={{ color: "#1A1A2E" }}
                       >
-                        {customer?.address ?? ""}
+                        {(() => {
+                          const addr =
+                            addressesQuery.data?.find((a) => a.is_default) ??
+                            addressesQuery.data?.[0];
+                          if (addr) return `${addr.line_1}, ${addr.city}`;
+                          return customer?.address ?? "No address saved";
+                        })()}
                       </p>
                     </div>
                   </div>
@@ -328,7 +386,14 @@ export default function DashboardPage() {
                         className="text-sm font-medium"
                         style={{ color: "#1A1A2E" }}
                       >
-                        GCash ending in ****4567
+                        {(() => {
+                          const pm =
+                            paymentMethodsQuery.data?.find(
+                              (m) => m.is_default,
+                            ) ?? paymentMethodsQuery.data?.[0];
+                          if (pm) return pm.display_name;
+                          return "No payment method saved";
+                        })()}
                       </p>
                     </div>
                   </div>
@@ -469,13 +534,17 @@ export default function DashboardPage() {
                           <td className="py-2 text-center">
                             <Switch
                               checked={notifications[row.emailKey]}
-                              onCheckedChange={() => toggleNotification(row.emailKey)}
+                              onCheckedChange={() =>
+                                toggleNotification(row.emailKey)
+                              }
                             />
                           </td>
                           <td className="py-2 text-center">
                             <Switch
                               checked={notifications[row.smsKey]}
-                              onCheckedChange={() => toggleNotification(row.smsKey)}
+                              onCheckedChange={() =>
+                                toggleNotification(row.smsKey)
+                              }
                             />
                           </td>
                         </tr>
@@ -524,7 +593,9 @@ export default function DashboardPage() {
                       className="text-xl font-bold text-white mb-4"
                       style={{ fontFamily: "'DM Serif Display', serif" }}
                     >
-                      {customer?.planType ?? "No Plan"}
+                      {activeSub?.plan_tier?.name ??
+                        customer?.planType ??
+                        "No Active Plan"}
                     </h2>
                     <div className="flex flex-wrap gap-3 sm:gap-4 lg:gap-5">
                       <div
@@ -547,7 +618,15 @@ export default function DashboardPage() {
                             Next Delivery
                           </p>
                           <p className="text-white font-medium text-[13px] leading-none">
-                            April 7, 2026
+                            {activeSub?.current_cycle_end
+                              ? new Date(
+                                  activeSub.current_cycle_end,
+                                ).toLocaleDateString("en-US", {
+                                  month: "short",
+                                  day: "numeric",
+                                  year: "numeric",
+                                })
+                              : "April 7, 2026"}
                           </p>
                         </div>
                       </div>
@@ -572,7 +651,15 @@ export default function DashboardPage() {
                             Next Billing
                           </p>
                           <p className="text-white font-medium text-[13px] leading-none">
-                            April 5, 2026
+                            {activeSub?.next_billing_date
+                              ? new Date(
+                                  activeSub.next_billing_date,
+                                ).toLocaleDateString("en-US", {
+                                  month: "short",
+                                  day: "numeric",
+                                  year: "numeric",
+                                })
+                              : "April 5, 2026"}
                           </p>
                         </div>
                       </div>
@@ -601,7 +688,9 @@ export default function DashboardPage() {
                             className="font-bold text-[14px] leading-none tracking-wide"
                             style={{ color: "#FCD34D" }}
                           >
-                            {formatPeso(4500)}
+                            {activeSub?.plan_tier?.price
+                              ? formatPeso(Number(activeSub.plan_tier.price))
+                              : formatPeso(0)}
                           </p>
                         </div>
                       </div>
@@ -753,37 +842,71 @@ export default function DashboardPage() {
                 className="flex gap-3 overflow-x-auto pb-1"
                 style={{ scrollbarWidth: "thin" }}
               >
-                {nextDeliveryMeals.map((meal) => (
-                  <div
-                    key={meal.id}
-                    className="flex-shrink-0 w-32 sm:w-36 rounded-xl overflow-hidden"
-                    style={{ border: "1px solid #E5E7EB" }}
-                  >
-                    <div className="h-20 overflow-hidden">
-                      <MealImage
-                        src={meal.image}
-                        alt={meal.name}
-                        className="h-full w-full object-cover"
-                      />
+                {upcomingCycle?.selections &&
+                upcomingCycle.selections.length > 0 ? (
+                  upcomingCycle.selections.map((sel) => (
+                    <div
+                      key={sel.id}
+                      className="flex-shrink-0 w-32 sm:w-36 rounded-xl overflow-hidden"
+                      style={{ border: "1px solid #E5E7EB" }}
+                    >
+                      <div className="p-3 h-20 flex items-center justify-center bg-gray-50">
+                        <p
+                          className="text-xs text-center font-medium"
+                          style={{ color: "#6B7280" }}
+                        >
+                          Meal ×{sel.quantity}
+                        </p>
+                      </div>
+                      <div className="p-2">
+                        <p
+                          className="text-xs font-medium leading-tight"
+                          style={{ color: "#1A1A2E" }}
+                        >
+                          Qty: {sel.quantity}
+                        </p>
+                      </div>
                     </div>
-                    <div className="p-2">
-                      <p
-                        className="text-xs font-medium leading-tight mb-0.5"
-                        style={{ color: "#1A1A2E" }}
-                      >
-                        {meal.name.length > 25
-                          ? meal.name.slice(0, 25) + "..."
-                          : meal.name}
-                      </p>
-                      <p
-                        className="text-xs font-semibold"
-                        style={{ color: "#1B4332" }}
-                      >
-                        {formatPeso(meal.price)}
-                      </p>
+                  ))
+                ) : nextDeliveryMeals.length > 0 ? (
+                  nextDeliveryMeals.map((meal) => (
+                    <div
+                      key={meal.id}
+                      className="flex-shrink-0 w-32 sm:w-36 rounded-xl overflow-hidden"
+                      style={{ border: "1px solid #E5E7EB" }}
+                    >
+                      <div className="h-20 overflow-hidden">
+                        <MealImage
+                          src={meal.image}
+                          alt={meal.name}
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                      <div className="p-2">
+                        <p
+                          className="text-xs font-medium leading-tight mb-0.5"
+                          style={{ color: "#1A1A2E" }}
+                        >
+                          {meal.name.length > 25
+                            ? meal.name.slice(0, 25) + "..."
+                            : meal.name}
+                        </p>
+                        <p
+                          className="text-xs font-semibold"
+                          style={{ color: "#1B4332" }}
+                        >
+                          {formatPeso(meal.price)}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  <p className="text-sm py-4" style={{ color: "#6B7280" }}>
+                    {activeSub
+                      ? "No meals selected for next delivery."
+                      : "No active subscription."}
+                  </p>
+                )}
               </div>
             </div>
 
@@ -955,11 +1078,19 @@ export default function DashboardPage() {
         >
           {subscriptionModalMode === "pause" ? (
             <PauseSubscriptionContent
+              subscriptionId={activeSub?.id}
               onClose={() => setSubscriptionModalOpen(false)}
               showToast={showToast}
             />
           ) : (
             <ChangePlanContent
+              subscriptionId={activeSub?.id}
+              currentTierId={activeSub?.plan_tier_id}
+              currentTierPrice={
+                activeSub?.plan_tier?.price
+                  ? Number(activeSub.plan_tier.price)
+                  : 0
+              }
               onClose={() => setSubscriptionModalOpen(false)}
               showToast={showToast}
             />
@@ -980,7 +1111,21 @@ export default function DashboardPage() {
             initialDietary={userDietary}
             initialAllergens={userAllergens}
             initialFavoriteMeal={favoriteMeal}
-            onSave={(data) => {
+            onSave={async (data) => {
+              const nameParts = data.name.trim().split(" ");
+              const firstName = nameParts[0] ?? "";
+              const lastName = nameParts.slice(1).join(" ") || firstName;
+              try {
+                await updateProfile({
+                  first_name: firstName,
+                  last_name: lastName,
+                  phone: data.phone || undefined,
+                  dietary_preferences: data.dietary,
+                  allergens: data.allergens,
+                });
+              } catch {
+                // State update proceeds regardless
+              }
               setUserName(data.name);
               setUserEmail(data.email);
               setUserPhone(data.phone);
@@ -1012,18 +1157,20 @@ export default function DashboardPage() {
   );
 }
 
-
 /* Pause Subscription Content */
 function PauseSubscriptionContent({
+  subscriptionId,
   onClose,
   showToast,
 }: {
+  subscriptionId?: string;
   onClose: () => void;
   showToast: (
     msg: string,
     type?: "success" | "error" | "info" | "warning",
   ) => void;
 }) {
+  const { pauseSubscription } = useSubscriptionMutations();
   const [pauseDays, setPauseDays] = useState(7);
 
   const presets = [
@@ -1122,7 +1269,17 @@ function PauseSubscriptionContent({
           Cancel
         </Button>
         <Button
-          onClick={() => {
+          onClick={async () => {
+            if (subscriptionId) {
+              try {
+                await pauseSubscription({
+                  id: subscriptionId,
+                  resume_date: resumeDate.toISOString(),
+                });
+              } catch {
+                // toast still shows
+              }
+            }
             onClose();
             showToast(
               `Subscription paused for ${pauseDays} day${pauseDays !== 1 ? "s" : ""} — resumes ${resumeLabel}`,
@@ -1141,70 +1298,82 @@ function PauseSubscriptionContent({
 
 /* Change Plan Content */
 function ChangePlanContent({
+  subscriptionId,
+  currentTierId,
+  currentTierPrice,
   onClose,
   showToast,
 }: {
+  subscriptionId?: string;
+  currentTierId?: string;
+  currentTierPrice: number;
   onClose: () => void;
   showToast: (
     msg: string,
     type?: "success" | "error" | "info" | "warning",
   ) => void;
 }) {
-  const [selectedPlan, setSelectedPlan] = useState(10);
+  const { modifyPlan } = useSubscriptionMutations();
+  const plansQuery = useSubscriptionPlans();
+  const [selectedTierId, setSelectedTierId] = useState<string | null>(null);
+
+  const allTiers =
+    plansQuery.data?.flatMap((plan) =>
+      plan.tiers.map((tier) => ({
+        id: tier.id,
+        meals: tier.items_per_cycle,
+        price: Number(tier.price),
+        label: tier.name,
+      })),
+    ) ?? planTiers.map((t) => ({ ...t, id: String(t.id) }));
+
+  const selectedTier = allTiers.find(
+    (t) => t.id === (selectedTierId ?? currentTierId),
+  );
+  const effectiveSelectedId = selectedTierId ?? currentTierId ?? null;
 
   return (
     <div className="space-y-4">
       <p className="text-text-secondary">Select your new plan:</p>
       <div className="grid grid-cols-2 gap-3">
-        {planTiers.map(
-          (tier: {
-            id: number;
-            meals: number;
-            price: number;
-            perMeal: number;
-            savings: number;
-            label: string;
-          }) => {
-            const isSelected = selectedPlan === tier.id;
-            const isCurrent = tier.id === 10;
-            const diff = tier.price - 4500;
-            return (
-              <Button
-                key={tier.id}
-                onClick={() => setSelectedPlan(tier.id)}
-                variant="outline"
-                className={`relative h-auto p-4 text-left flex-col items-start border-2 ${
-                  isSelected
-                    ? "border-primary bg-green-50"
-                    : "border-border"
-                }`}
-              >
-                {isCurrent && (
-                  <Badge className="absolute -top-2.5 left-3 bg-primary text-white">
-                    Current
-                  </Badge>
-                )}
-                <p className="font-bold text-lg text-text-primary">
-                  {tier.meals} meals
+        {allTiers.map((tier) => {
+          const isSelected = effectiveSelectedId === tier.id;
+          const isCurrent = tier.id === currentTierId;
+          const diff = tier.price - currentTierPrice;
+          return (
+            <Button
+              key={tier.id}
+              onClick={() => setSelectedTierId(tier.id)}
+              variant="outline"
+              className={`relative h-auto p-4 text-left flex-col items-start border-2 ${
+                isSelected ? "border-primary bg-green-50" : "border-border"
+              }`}
+            >
+              {isCurrent && (
+                <Badge className="absolute -top-2.5 left-3 bg-primary text-white">
+                  Current
+                </Badge>
+              )}
+              <p className="font-bold text-lg text-text-primary">
+                {tier.meals} meals
+              </p>
+              <p className="text-sm text-text-secondary">{tier.label}</p>
+              <p className="font-semibold mt-1 text-primary">
+                {formatPeso(tier.price)}/wk
+              </p>
+              {!isCurrent && currentTierPrice > 0 && (
+                <p
+                  className={`text-xs mt-1 font-medium ${diff > 0 ? "text-warning" : "text-success"}`}
+                >
+                  {diff > 0 ? "+" : ""}
+                  {formatPeso(Math.abs(diff))}/wk
                 </p>
-                <p className="text-sm text-text-secondary">{tier.label}</p>
-                <p className="font-semibold mt-1 text-primary">
-                  {formatPeso(tier.price)}/mo
-                </p>
-                {!isCurrent && (
-                  <p
-                    className={`text-xs mt-1 font-medium ${diff > 0 ? "text-warning" : "text-success"}`}
-                  >
-                    {diff > 0 ? "+" : ""}
-                    {formatPeso(Math.abs(diff))}/mo
-                  </p>
-                )}
-              </Button>
-            );
-          },
-        )}
+              )}
+            </Button>
+          );
+        })}
       </div>
-      {selectedPlan !== 10 && (
+      {selectedTierId && selectedTierId !== currentTierId && (
         <div className="rounded-xl p-3 bg-blue-50 border border-blue-200">
           <p className="text-sm text-blue-800">
             Your billing will be pro-rated for the remainder of the current
@@ -1217,11 +1386,26 @@ function ChangePlanContent({
           Cancel
         </Button>
         <Button
-          onClick={() => {
+          onClick={async () => {
+            if (
+              subscriptionId &&
+              selectedTierId &&
+              selectedTierId !== currentTierId
+            ) {
+              try {
+                await modifyPlan({
+                  id: subscriptionId,
+                  new_plan_tier_id: selectedTierId,
+                });
+              } catch {
+                // toast still shows
+              }
+            }
             onClose();
-            if (selectedPlan !== 10) {
+            if (selectedTierId && selectedTierId !== currentTierId) {
+              const tier = allTiers.find((t) => t.id === selectedTierId);
               showToast(
-                `Plan changed to ${selectedPlan} meals/week`,
+                `Plan changed to ${tier?.meals ?? ""} meals/week`,
                 "success",
               );
             }

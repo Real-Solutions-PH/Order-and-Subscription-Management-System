@@ -11,6 +11,15 @@ import {
 } from "@/lib/api-client";
 import { queryKeys } from "./query-keys";
 
+/** Current user metrics (this month's spend, total savings, favorite meal). */
+export function useUserMetrics() {
+  return useQuery({
+    queryKey: queryKeys.userMetrics,
+    queryFn: () => api.auth.getMetrics(),
+    retry: false,
+  });
+}
+
 /** Current user profile query + auth mutations. */
 export function useAuth() {
   const qc = useQueryClient();
@@ -35,7 +44,11 @@ export function useAuth() {
       // Backend register returns UserResponse, not tokens.
       // Chain a login call to get tokens after successful registration.
       await api.auth.register(data);
-      return api.auth.login({ email: data.email, password: data.password, tenant_slug: data.tenant_slug });
+      return api.auth.login({
+        email: data.email,
+        password: data.password,
+        tenant_slug: data.tenant_slug,
+      });
     },
     onSuccess: (res) => {
       setAccessToken(res.access_token);

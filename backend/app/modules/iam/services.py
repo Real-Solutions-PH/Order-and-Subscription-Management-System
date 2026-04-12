@@ -11,15 +11,11 @@ from app.shared.auth import create_access_token, create_refresh_token, decode_to
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return bcrypt.checkpw(
-        plain_password.encode("utf-8"), hashed_password.encode("utf-8")
-    )
+    return bcrypt.checkpw(plain_password.encode("utf-8"), hashed_password.encode("utf-8"))
 
 
 def get_password_hash(password: str) -> str:
-    return bcrypt.hashpw(
-        password.encode("utf-8"), bcrypt.gensalt()
-    ).decode("utf-8")
+    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
 
 class AuthService:
@@ -91,14 +87,24 @@ class UserService:
         return user
 
     async def list_users(
-        self, tenant_id: UUID, offset: int = 0, limit: int = 20,
-        is_active: bool | None = None, role: str | None = None,
+        self,
+        tenant_id: UUID,
+        offset: int = 0,
+        limit: int = 20,
+        is_active: bool | None = None,
+        role: str | None = None,
     ) -> tuple[list[User], int]:
         return await self.user_repo.list_by_tenant(tenant_id, offset, limit, is_active, role)
 
     async def create_user(
-        self, tenant_id: UUID, email: str, first_name: str, last_name: str,
-        password: str, role: str = "admin", phone: str | None = None,
+        self,
+        tenant_id: UUID,
+        email: str,
+        first_name: str,
+        last_name: str,
+        password: str,
+        role: str = "admin",
+        phone: str | None = None,
     ) -> User:
         existing = await self.user_repo.get_by_email_and_tenant(email, tenant_id)
         if existing:

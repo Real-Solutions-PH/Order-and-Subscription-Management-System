@@ -6,7 +6,7 @@ export default function CustomerLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#FEFAE0' }}>
+    <div className="min-h-screen" style={{ backgroundColor: "#FEFAE0" }}>
       <CustomerNav />
       <main className="page-enter">{children}</main>
     </div>
