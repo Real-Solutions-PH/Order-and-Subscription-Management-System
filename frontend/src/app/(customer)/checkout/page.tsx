@@ -45,8 +45,15 @@ import {
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { items, updateQuantity, removeItem, clearCart, total, itemCount } =
-    useCart();
+  const {
+    items,
+    updateQuantity,
+    removeItem,
+    clearCart,
+    total,
+    itemCount,
+    planTotal,
+  } = useCart();
   const { showToast } = useToast();
 
   const devMode = useDevMode();
@@ -174,6 +181,7 @@ export default function CheckoutPage() {
       await checkout({
         payment_method: selectedPayment,
         promo_code: appliedPromo || undefined,
+        plan_total_override: planTotal ?? undefined,
         notes: undefined,
       });
       showToast(
@@ -608,17 +616,24 @@ export default function CheckoutPage() {
                   setPromoError("");
                 }}
                 placeholder="Enter promo code"
-                className="flex-1 rounded-lg px-4 py-2.5 text-sm uppercase outline-none"
+                disabled={planTotal !== null}
+                className="flex-1 rounded-lg px-4 py-2.5 text-sm uppercase outline-none disabled:opacity-50"
                 style={{ border: "1px solid #E5E7EB", color: "#1A1A2E" }}
               />
               <button
                 onClick={handleApplyPromo}
-                className="shrink-0 rounded-lg px-5 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+                disabled={planTotal !== null}
+                className="shrink-0 rounded-lg px-5 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{ backgroundColor: "#1B4332" }}
               >
                 Apply
               </button>
             </div>
+            {planTotal !== null && (
+              <p className="mt-2 text-xs" style={{ color: "#6B7280" }}>
+                Promo codes cannot be combined with subscription pricing.
+              </p>
+            )}
             {promoError && (
               <p className="mt-2 text-sm" style={{ color: "#DC2626" }}>
                 {promoError}

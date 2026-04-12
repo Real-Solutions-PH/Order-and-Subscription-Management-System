@@ -69,6 +69,7 @@ class CheckoutRequest(BaseModel):
     delivery_slot_id: UUID | None = None
     payment_method: str = Field(..., max_length=50)
     notes: str | None = Field(default=None, max_length=1000)
+    plan_total_override: Decimal | None = Field(default=None, decimal_places=2)
 
 
 # ── Order Schemas ───────────────────────────────────────────────────────
