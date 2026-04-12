@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * API Client — thin HTTP wrapper for the PrepFlow backend.
  *
@@ -11,39 +13,34 @@ const TENANT_ID =
   process.env.NEXT_PUBLIC_TENANT_ID ?? "00000000-0000-0000-0000-000000000001";
 
 // ---------------------------------------------------------------------------
-// Token helpers (stored in memory; persist in localStorage for refresh)
+// Token helpers
+// Access token: memory-only (never persisted to storage — XSS-safe).
+// Refresh token: sessionStorage (scoped to tab; cleared on browser close).
+//   Full fix requires HttpOnly cookies from the backend.
 // ---------------------------------------------------------------------------
 let accessToken: string | null = null;
 
 export function setAccessToken(token: string | null) {
   accessToken = token;
-  if (token) {
-    localStorage.setItem("prepflow_access_token", token);
-  } else {
-    localStorage.removeItem("prepflow_access_token");
-  }
 }
 
 export function getAccessToken(): string | null {
-  if (accessToken) return accessToken;
-  if (typeof window !== "undefined") {
-    accessToken = localStorage.getItem("prepflow_access_token");
-  }
   return accessToken;
 }
 
 export function getRefreshToken(): string | null {
   if (typeof window !== "undefined") {
-    return localStorage.getItem("prepflow_refresh_token");
+    return sessionStorage.getItem("prepflow_refresh_token");
   }
   return null;
 }
 
 export function setRefreshToken(token: string | null) {
+  if (typeof window === "undefined") return;
   if (token) {
-    localStorage.setItem("prepflow_refresh_token", token);
+    sessionStorage.setItem("prepflow_refresh_token", token);
   } else {
-    localStorage.removeItem("prepflow_refresh_token");
+    sessionStorage.removeItem("prepflow_refresh_token");
   }
 }
 
@@ -267,6 +264,47 @@ export interface AdminCreateUserRequest {
   role?: string;
 }
 
+// Ingredients
+export interface IngredientResponse {
+  id: string;
+  tenant_id: string;
+  name: string;
+  default_unit: string | null;
+  description: string | null;
+  created_at: string;
+  updated_at: string;
+}
+export interface IngredientWithUsageResponse extends IngredientResponse {
+  used_in_products: { id: string; name: string; status: string }[];
+}
+export interface IngredientListResponse {
+  total: number;
+  page: number;
+  per_page: number;
+  items: IngredientWithUsageResponse[];
+}
+export interface ProductIngredientResponse {
+  id: string;
+  product_id: string;
+  ingredient_id: string;
+  quantity: number | null;
+  unit: string | null;
+  notes: string | null;
+  ingredient: IngredientResponse;
+}
+export interface ProductIngredientAdd {
+  name: string;
+  default_unit?: string;
+  quantity?: number;
+  unit?: string;
+  notes?: string;
+}
+export interface ProductIngredientUpdate {
+  quantity?: number | null;
+  unit?: string | null;
+  notes?: string | null;
+}
+
 // Products
 export interface VariantResponse {
   id: string;
@@ -299,6 +337,7 @@ export interface ProductResponse {
   metadata: Record<string, unknown> | null;
   variants: VariantResponse[];
   images: ImageResponse[];
+  ingredients: ProductIngredientResponse[];
   created_at: string;
   updated_at: string;
 }
@@ -306,17 +345,16 @@ export interface ProductListResponse {
   items: ProductResponse[];
   total: number;
   page: number;
-  page_size: number;
-  pages: number;
+  per_page: number;
 }
 export interface ProductCreate {
   name: string;
   description?: string;
   short_description?: string;
   sku?: string;
+  status?: string;
   is_subscribable?: boolean;
   is_standalone?: boolean;
-  category_ids?: string[];
   metadata?: Record<string, unknown>;
 }
 export interface ProductUpdate extends Partial<ProductCreate> {
@@ -672,10 +710,13 @@ export const api = {
     list: (params?: {
       skip?: number;
       limit?: number;
+      page?: number;
+      per_page?: number;
       status?: string;
       is_subscribable?: boolean;
       is_standalone?: boolean;
       category_id?: string;
+      search?: string;
       q?: string;
     }) =>
       get<ProductListResponse>(
@@ -686,7 +727,12 @@ export const api = {
     create: (data: ProductCreate) => post<ProductResponse>("/products", data),
     update: (id: string, data: ProductUpdate) =>
       patch<ProductResponse>(`/products/${id}`, data),
-    archive: (id: string) => del<ProductResponse>(`/products/${id}`),
+    delete: (id: string) => del<void>(`/products/${id}`),
+    archive: (id: string) =>
+      post<ProductResponse>(`/products/${id}/deactivate`),
+    activate: (id: string) => post<ProductResponse>(`/products/${id}/activate`),
+    deactivate: (id: string) =>
+      post<ProductResponse>(`/products/${id}/deactivate`),
     addVariant: (
       productId: string,
       data: { name: string; price: number; sku?: string; is_default?: boolean },
@@ -695,6 +741,40 @@ export const api = {
       productId: string,
       data: { url: string; alt_text?: string; is_primary?: boolean },
     ) => post<ImageResponse>(`/products/${productId}/images`, data),
+    listIngredients: (productId: string) =>
+      get<ProductIngredientResponse[]>(`/products/${productId}/ingredients`),
+    addIngredient: (productId: string, data: ProductIngredientAdd) =>
+      post<ProductIngredientResponse>(
+        `/products/${productId}/ingredients`,
+        data,
+      ),
+    updateIngredient: (
+      productId: string,
+      itemId: string,
+      data: ProductIngredientUpdate,
+    ) =>
+      patch<ProductIngredientResponse>(
+        `/products/${productId}/ingredients/${itemId}`,
+        data,
+      ),
+    removeIngredient: (productId: string, itemId: string) =>
+      del<void>(`/products/${productId}/ingredients/${itemId}`),
+  },
+
+  // Ingredients
+  ingredients: {
+    list: (params?: {
+      page?: number;
+      per_page?: number;
+      search?: string;
+      sort_by?: string;
+      sort_dir?: string;
+    }) =>
+      get<IngredientListResponse>(
+        "/ingredients",
+        params as Record<string, string | number>,
+      ),
+    get: (id: string) => get<IngredientWithUsageResponse>(`/ingredients/${id}`),
   },
 
   // Catalogs

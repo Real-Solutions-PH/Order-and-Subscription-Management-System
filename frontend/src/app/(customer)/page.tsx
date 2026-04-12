@@ -48,13 +48,20 @@ export default function LandingPage() {
 
   const devMode = useDevMode();
 
-  // Fetch products from API; only fall back to mock data when DEV_MODE is on
-  const productsQuery = useProducts({ status: "active" });
-  const apiMeals = productsQuery.data?.items.map(mapProductToMeal);
+  // Fetch all non-draft products; show archived as "Not Available"
+  const productsQuery = useProducts();
+  const apiProducts = productsQuery.data?.items.filter(
+    (p) => p.status !== "draft",
+  );
+  const apiMeals = apiProducts?.map(mapProductToMeal);
   const rawMeals =
     apiMeals && apiMeals.length > 0 ? apiMeals : devMode ? meals : [];
   const mealsData = rawMeals.filter(
     (m) => m.image && m.image !== "/images/meals/placeholder.png",
+  );
+  // Track availability by product id
+  const availabilityMap = new Map(
+    (apiProducts ?? []).map((p) => [String(p.id), p.status === "active"]),
   );
   const isLoadingMeals = productsQuery.isLoading;
   // Show filters when there are meals to filter (from API or dev mode mock data)
@@ -292,6 +299,11 @@ export default function LandingPage() {
                     <MealCard
                       meal={meal}
                       onAdd={handleAddToCart}
+                      isAvailable={
+                        availabilityMap.has(String(meal.id))
+                          ? availabilityMap.get(String(meal.id))
+                          : true
+                      }
                       onViewDetails={setDetailMeal}
                     />
                   </motion.div>

@@ -33,39 +33,17 @@ const FULL_DAYS = [
   "Sunday",
 ];
 
-const ALL_ALLERGENS = [
-  "Dairy",
-  "Eggs",
-  "Gluten",
-  "Soy",
-  "Peanuts",
-  "Fish",
-  "Shellfish",
-  "Sesame",
-];
-const ALL_TAGS = [
-  "High Protein",
-  "Keto-Friendly",
-  "Vegan",
-  "Vegetarian",
-  "Gluten-Free",
-  "Filipino Classic",
-  "Dairy-Free",
-  "Low Carb",
-  "Diabetic-Friendly",
-  "Spicy",
-  "Filipino Fusion",
-  "Halal",
-];
+import { ALL_ALLERGENS, ALL_TAGS } from "@/lib/constants";
 
-const initialCalendar: Record<string, (number | string)[]> = {
-  Mon: [1, 4, 7],
-  Tue: [2, 5, 8],
-  Wed: [3, 6, 9],
-  Thu: [1, 10, 11],
-  Fri: [2, 4, 12],
-  Sat: [3, 7],
-  Sun: [5, 9],
+// Calendar initialised empty — populated from API when catalog integration is ready
+const initialCalendar: Record<string, string[]> = {
+  Mon: [],
+  Tue: [],
+  Wed: [],
+  Thu: [],
+  Fri: [],
+  Sat: [],
+  Sun: [],
 };
 
 function getWeekLabel(offset: number): string {
@@ -162,7 +140,7 @@ function mapProductToMeal(p: ProductResponse): Meal {
 }
 
 interface DragData {
-  mealId: number | string;
+  mealId: string;
   sourceDay?: string; // undefined if from library
 }
 
@@ -170,7 +148,7 @@ export default function MenuManagementPage() {
   const { showToast } = useToast();
   const devMode = useDevMode();
 
-  const productsQuery = useProducts();
+  const productsQuery = useProducts({ status: "active" });
   const { updateProduct, isUpdating } = useProductMutations();
   const isLoadingProducts = productsQuery.isLoading;
 
@@ -180,7 +158,7 @@ export default function MenuManagementPage() {
 
   const [weekOffset, setWeekOffset] = useState(0);
   const [calendar, setCalendar] =
-    useState<Record<string, (number | string)[]>>(initialCalendar);
+    useState<Record<string, string[]>>(initialCalendar);
   const [searchQuery, setSearchQuery] = useState("");
   const [publishModalOpen, setPublishModalOpen] = useState(false);
   const [editingMeal, setEditingMeal] = useState<Meal | null>(null);
@@ -212,13 +190,13 @@ export default function MenuManagementPage() {
   }, [searchQuery, mealsData]);
 
   const getMealById = useCallback(
-    (id: number | string) => mealsData.find((m) => m.id === id),
+    (id: string) => mealsData.find((m) => String(m.id) === id),
     [mealsData],
   );
 
   // --- Drag and Drop ---
   const handleDragStart = useCallback(
-    (e: DragEvent, mealId: number | string, sourceDay?: string) => {
+    (e: DragEvent, mealId: string, sourceDay?: string) => {
       const data: DragData = { mealId, sourceDay };
       e.dataTransfer.setData("application/json", JSON.stringify(data));
       e.dataTransfer.effectAllowed = "move";
@@ -284,7 +262,7 @@ export default function MenuManagementPage() {
   );
 
   // Remove meal from day
-  function handleRemoveFromDay(day: string, mealId: number | string) {
+  function handleRemoveFromDay(day: string, mealId: string) {
     setCalendar((prev) => ({
       ...prev,
       [day]: (prev[day] || []).filter((id) => id !== mealId),
@@ -332,18 +310,25 @@ export default function MenuManagementPage() {
               },
             },
           });
-        } catch {
-          // Fall back to local-only update
+          showToast(`"${editForm.name}" updated successfully`);
+        } catch (err) {
+          const msg =
+            err instanceof Error ? err.message : "Failed to save changes";
+          showToast(msg, "error");
+          return;
         }
+      } else {
+        // Local-only update for meals not yet linked to a product
+        showToast(`"${editForm.name}" updated (local only)`);
       }
     }
-    showToast(`"${editForm.name}" updated successfully`);
     setEditingMeal(null);
   }
 
   function handlePublish() {
     setPublishModalOpen(false);
-    showToast("Menu published! 127 subscribers notified.");
+    // TODO: wire to POST /catalogs/{id}/publish once catalog integration is complete
+    showToast("Menu published! (Catalog publish API integration pending)");
   }
 
   function toggleTag(tag: string) {
@@ -576,6 +561,7 @@ export default function MenuManagementPage() {
                 placeholder="Search meals..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                aria-label="Search meal library"
                 className="w-full rounded-lg py-2 pl-9 pr-3 text-sm transition-all duration-200 focus:outline-none focus:ring-2"
                 style={
                   {
@@ -595,7 +581,7 @@ export default function MenuManagementPage() {
                     <div
                       key={meal.id}
                       draggable
-                      onDragStart={(e) => handleDragStart(e, meal.id)}
+                      onDragStart={(e) => handleDragStart(e, String(meal.id))}
                       className="flex cursor-grab items-start gap-3 rounded-lg p-2 transition-all duration-150 hover:bg-gray-50 hover:shadow-sm active:cursor-grabbing active:shadow-md"
                       style={{ border: "1px solid #E5E7EB" }}
                     >

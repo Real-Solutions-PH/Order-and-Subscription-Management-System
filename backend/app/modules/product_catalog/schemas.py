@@ -4,9 +4,77 @@ from datetime import datetime
 from decimal import Decimal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from app.modules.product_catalog.models import CatalogStatus, ProductStatus
+
+
+# ── Ingredient ───────────────────────────────────────────────────────────
+
+
+class IngredientResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    tenant_id: UUID
+    name: str
+    default_unit: str | None
+    description: str | None
+    created_at: datetime
+    updated_at: datetime
+
+
+class ProductSummaryForIngredient(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    name: str
+    status: ProductStatus
+
+
+class IngredientWithUsageResponse(IngredientResponse):
+    used_in_products: list[ProductSummaryForIngredient] = []
+
+
+class IngredientListResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    total: int
+    page: int
+    per_page: int
+    items: list[IngredientWithUsageResponse]
+
+
+# ── Product Ingredient (Recipe) ──────────────────────────────────────────
+
+
+class ProductIngredientAdd(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    name: str = Field(..., max_length=255)
+    default_unit: str | None = Field(None, max_length=50)
+    quantity: Decimal | None = Field(None, gt=0)
+    unit: str | None = Field(None, max_length=50)
+    notes: str | None = Field(None, max_length=255)
+
+
+class ProductIngredientUpdate(BaseModel):
+    quantity: Decimal | None = Field(None, gt=0)
+    unit: str | None = Field(None, max_length=50)
+    notes: str | None = Field(None, max_length=255)
+
+
+class ProductIngredientResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    product_id: UUID
+    ingredient_id: UUID
+    quantity: Decimal | None
+    unit: str | None
+    notes: str | None
+    ingredient: IngredientResponse
+
 
 # ── Product Image ───────────────────────────────────────────────────────
 
@@ -109,6 +177,8 @@ class ProductResponse(BaseModel):
     metadata_: dict | None = Field(None, alias="metadata")
     variants: list[ProductVariantResponse] = []
     images: list[ProductImageResponse] = []
+    # Field name matches the ORM relationship 'product_ingredients' on the Product model
+    product_ingredients: list["ProductIngredientResponse"] = []
     created_at: datetime
     updated_at: datetime
 
@@ -134,6 +204,12 @@ class CatalogScheduleCreate(BaseModel):
     starts_at: datetime
     ends_at: datetime
     recurrence_rule: str | None = None
+
+    @model_validator(mode="after")
+    def ends_after_starts(self) -> "CatalogScheduleCreate":
+        if self.ends_at <= self.starts_at:
+            raise ValueError("ends_at must be after starts_at")
+        return self
 
 
 class CatalogScheduleResponse(BaseModel):
