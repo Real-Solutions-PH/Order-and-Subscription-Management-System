@@ -17,9 +17,10 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     # ALTER TYPE ADD VALUE cannot run inside a transaction in PostgreSQL < 12.
-    # Use AUTOCOMMIT to be safe across all supported versions.
+    # Use a raw DBAPI connection with autocommit to avoid the active transaction conflict.
     connection = op.get_bind()
-    connection.execution_options(isolation_level="AUTOCOMMIT").execute(
+    connection.execute(sa.text("COMMIT"))
+    connection.execute(
         sa.text("ALTER TYPE productstatus ADD VALUE IF NOT EXISTS 'inactive'")
     )
 
