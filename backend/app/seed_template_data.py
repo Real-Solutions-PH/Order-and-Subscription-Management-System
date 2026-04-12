@@ -397,8 +397,17 @@ DELIVERY_ZONES: list[dict] = [
         "min_order_amount": Decimal("500.00"),
         "boundaries": {
             "postal_codes": [
-                "1000", "1001", "1002", "1003", "1004",
-                "1005", "1006", "1007", "1008", "1009", "1010",
+                "1000",
+                "1001",
+                "1002",
+                "1003",
+                "1004",
+                "1005",
+                "1006",
+                "1007",
+                "1008",
+                "1009",
+                "1010",
             ],
         },
         "slots": [
@@ -426,45 +435,34 @@ NOTIFICATION_TEMPLATES: list[dict] = [
         "channel": "email",
         "subject": "Order Confirmed \u2014 #{{order_number}}",
         "body_template": (
-            "Hi {{first_name}}, your order #{{order_number}} has been confirmed. "
-            "Total: {{currency}} {{total}}."
+            "Hi {{first_name}}, your order #{{order_number}} has been confirmed. Total: {{currency}} {{total}}."
         ),
     },
     {
         "event_type": "order_delivered",
         "channel": "email",
         "subject": "Order Delivered \u2014 #{{order_number}}",
-        "body_template": (
-            "Hi {{first_name}}, your order #{{order_number}} has been delivered. "
-            "Enjoy your meal!"
-        ),
+        "body_template": ("Hi {{first_name}}, your order #{{order_number}} has been delivered. Enjoy your meal!"),
     },
     {
         "event_type": "payment_received",
         "channel": "email",
         "subject": "Payment Received",
-        "body_template": (
-            "Hi {{first_name}}, we received your payment of {{currency}} {{amount}}. "
-            "Thank you!"
-        ),
+        "body_template": ("Hi {{first_name}}, we received your payment of {{currency}} {{amount}}. Thank you!"),
     },
     {
         "event_type": "subscription_activated",
         "channel": "email",
         "subject": "Subscription Activated",
         "body_template": (
-            "Hi {{first_name}}, your {{plan_name}} subscription is now active. "
-            "Next billing: {{next_billing_date}}."
+            "Hi {{first_name}}, your {{plan_name}} subscription is now active. Next billing: {{next_billing_date}}."
         ),
     },
     {
         "event_type": "subscription_cancelled",
         "channel": "email",
         "subject": "Subscription Cancelled",
-        "body_template": (
-            "Hi {{first_name}}, your subscription has been cancelled. "
-            "You can resubscribe anytime."
-        ),
+        "body_template": ("Hi {{first_name}}, your subscription has been cancelled. You can resubscribe anytime."),
     },
     {
         "event_type": "order_confirmed",

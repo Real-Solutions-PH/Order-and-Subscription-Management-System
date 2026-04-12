@@ -13,6 +13,7 @@ from app.modules.notification_hub.models import (
 
 # ── Notification Template ──────────────────────────────────────────────
 
+
 class NotificationTemplateCreate(BaseModel):
     event_type: str = Field(..., max_length=100)
     channel: NotificationChannel
@@ -41,6 +42,7 @@ class NotificationTemplateResponse(BaseModel):
 
 
 # ── Notification ───────────────────────────────────────────────────────
+
 
 class SendNotificationRequest(BaseModel):
     user_id: UUID

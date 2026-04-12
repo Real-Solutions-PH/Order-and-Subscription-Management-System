@@ -59,7 +59,5 @@ class AuditService:
         )
         return await self.audit_repo.create(audit_log)
 
-    async def get_audit_trail(
-        self, tenant_id: UUID, resource_type: str, resource_id: UUID
-    ) -> list[AuditLog]:
+    async def get_audit_trail(self, tenant_id: UUID, resource_type: str, resource_id: UUID) -> list[AuditLog]:
         return await self.audit_repo.list_by_resource(tenant_id, resource_type, resource_id)

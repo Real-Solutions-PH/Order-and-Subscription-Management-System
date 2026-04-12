@@ -22,6 +22,7 @@ from app.shared.models import Base, TenantMixin, TimestampMixin, UUIDPrimaryKeyM
 
 # ── Enums ───────────────────────────────────────────────────────────────
 
+
 class OrderStatus(str, enum.Enum):
     PENDING = "pending"
     CONFIRMED = "confirmed"
@@ -42,6 +43,7 @@ class OrderType(str, enum.Enum):
 
 # ── Cart ────────────────────────────────────────────────────────────────
 
+
 class Cart(UUIDPrimaryKeyMixin, TenantMixin, TimestampMixin, Base):
     __tablename__ = "carts"
 
@@ -52,9 +54,7 @@ class Cart(UUIDPrimaryKeyMixin, TenantMixin, TimestampMixin, Base):
     metadata_: Mapped[dict | None] = mapped_column("metadata", JSONB, nullable=True)
 
     # relationships
-    items: Mapped[list["CartItem"]] = relationship(
-        back_populates="cart", cascade="all, delete-orphan", lazy="selectin"
-    )
+    items: Mapped[list["CartItem"]] = relationship(back_populates="cart", cascade="all, delete-orphan", lazy="selectin")
 
 
 class CartItem(UUIDPrimaryKeyMixin, Base):
@@ -90,6 +90,7 @@ class CartItemCustomization(UUIDPrimaryKeyMixin, Base):
 
 # ── Order ───────────────────────────────────────────────────────────────
 
+
 class Order(UUIDPrimaryKeyMixin, TenantMixin, TimestampMixin, Base):
     __tablename__ = "orders"
 
@@ -119,9 +120,7 @@ class Order(UUIDPrimaryKeyMixin, TenantMixin, TimestampMixin, Base):
     promo_code_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
 
-    placed_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, server_default=func.now()
-    )
+    placed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
     confirmed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     delivered_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     cancelled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
@@ -133,7 +132,9 @@ class Order(UUIDPrimaryKeyMixin, TenantMixin, TimestampMixin, Base):
         back_populates="order", cascade="all, delete-orphan", lazy="selectin"
     )
     status_history: Mapped[list["OrderStatusHistory"]] = relationship(
-        back_populates="order", cascade="all, delete-orphan", lazy="selectin",
+        back_populates="order",
+        cascade="all, delete-orphan",
+        lazy="selectin",
         order_by="OrderStatusHistory.created_at",
     )
 
@@ -182,9 +183,7 @@ class OrderStatusHistory(UUIDPrimaryKeyMixin, Base):
     to_status: Mapped[str] = mapped_column(String(30), nullable=False)
     changed_by: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), nullable=False
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
     # relationships
     order: Mapped["Order"] = relationship(back_populates="status_history")

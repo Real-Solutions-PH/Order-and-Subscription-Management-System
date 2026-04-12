@@ -77,9 +77,5 @@ async def list_notifications(
     per_page: int = Query(20, ge=1, le=100),
 ):
     offset = (page - 1) * per_page
-    notifications, total = await notification_service.list_notifications(
-        current_user.tenant_id, offset, per_page
-    )
-    return NotificationListResponse(
-        total=total, page=page, per_page=per_page, items=notifications
-    )
+    notifications, total = await notification_service.list_notifications(current_user.tenant_id, offset, per_page)
+    return NotificationListResponse(total=total, page=page, per_page=per_page, items=notifications)

@@ -30,9 +30,7 @@ class NotificationService:
     async def list_templates(self, tenant_id: UUID) -> list[NotificationTemplate]:
         return await self.template_repo.list_by_tenant(tenant_id)
 
-    async def create_template(
-        self, tenant_id: UUID, data: NotificationTemplateCreate
-    ) -> NotificationTemplate:
+    async def create_template(self, tenant_id: UUID, data: NotificationTemplateCreate) -> NotificationTemplate:
         template = NotificationTemplate(
             tenant_id=tenant_id,
             event_type=data.event_type,
@@ -42,9 +40,7 @@ class NotificationService:
         )
         return await self.template_repo.create(template)
 
-    async def update_template(
-        self, template_id: UUID, data: NotificationTemplateUpdate
-    ) -> NotificationTemplate:
+    async def update_template(self, template_id: UUID, data: NotificationTemplateUpdate) -> NotificationTemplate:
         update_data = data.model_dump(exclude_unset=True)
         template = await self.template_repo.update(template_id, **update_data)
         if not template:
@@ -53,9 +49,7 @@ class NotificationService:
 
     # ── Notification operations ────────────────────────────────────────
 
-    async def send_notification(
-        self, tenant_id: UUID, data: SendNotificationRequest
-    ) -> Notification:
+    async def send_notification(self, tenant_id: UUID, data: SendNotificationRequest) -> Notification:
         notification = Notification(
             tenant_id=tenant_id,
             template_id=data.template_id,

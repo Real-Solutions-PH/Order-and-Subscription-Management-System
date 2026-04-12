@@ -34,6 +34,7 @@ router = APIRouter(tags=["Payments"])
 
 # ── Payment Intent ──────────────────────────────────────────────────────
 
+
 @router.post("/payments/intent", response_model=PaymentIntentResponse, status_code=201)
 async def create_payment_intent(
     body: PaymentIntentCreate,
@@ -106,6 +107,7 @@ async def refund_payment(
 
 # ── COD ─────────────────────────────────────────────────────────────────
 
+
 @router.post("/payments/cod", response_model=PaymentResponse, status_code=201)
 async def create_cod_payment(
     body: CODCreateRequest,
@@ -138,6 +140,7 @@ async def collect_cod_payment(
 
 
 # ── Payment Methods ─────────────────────────────────────────────────────
+
 
 @router.get("/payment-methods", response_model=list[PaymentMethodResponse])
 async def list_payment_methods(
@@ -174,6 +177,7 @@ async def create_payment_method(
 
 # ── Promo Codes ─────────────────────────────────────────────────────────
 
+
 @router.post("/promo-codes/validate", response_model=PromoValidateResponse)
 async def validate_promo_code(
     body: PromoValidateRequest,
@@ -207,6 +211,7 @@ async def list_promo_codes(
 
 
 # ── Invoices ────────────────────────────────────────────────────────────
+
 
 @router.get("/invoices", response_model=InvoiceListResponse)
 async def list_invoices(

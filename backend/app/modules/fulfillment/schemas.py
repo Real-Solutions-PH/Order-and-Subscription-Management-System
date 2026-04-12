@@ -10,6 +10,7 @@ from app.shared.schemas import BaseSchema, IDTimestampSchema
 
 # ── Address ─────────────────────────────────────────────────────────────
 
+
 class AddressCreate(BaseModel):
     label: str = Field(..., max_length=50)
     line_1: str = Field(..., max_length=255)
@@ -56,6 +57,7 @@ class AddressResponse(IDTimestampSchema):
 
 # ── Delivery Slot ───────────────────────────────────────────────────────
 
+
 class DeliverySlotCreate(BaseModel):
     day_of_week: int = Field(..., ge=0, le=6)
     start_time: time
@@ -87,6 +89,7 @@ class DeliverySlotAvailability(BaseSchema):
 
 # ── Delivery Zone ───────────────────────────────────────────────────────
 
+
 class DeliveryZoneCreate(BaseModel):
     name: str = Field(..., max_length=100)
     description: str | None = None
@@ -111,6 +114,7 @@ class DeliveryZoneResponse(IDTimestampSchema):
 
 
 # ── Fulfillment Order ──────────────────────────────────────────────────
+
 
 class FulfillmentCreate(BaseModel):
     order_id: UUID
@@ -146,6 +150,7 @@ class FulfillmentStatusUpdate(BaseModel):
 
 
 # ── Production Report ──────────────────────────────────────────────────
+
 
 class ProductionReportItem(BaseSchema):
     product_name: str
