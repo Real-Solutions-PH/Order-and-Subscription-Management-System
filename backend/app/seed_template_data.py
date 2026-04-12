@@ -75,7 +75,17 @@ PRODUCT_CATEGORIES: list[dict] = [
 #   price           - Retail price as Decimal
 #   image_url       - Path or URL for the product image (optional)
 #   metadata        - Optional dict with nutritional info for frontend display:
-#                     calories, protein, carbs, fat, tags, allergens, ingredients
+#                     calories      - kcal per serving
+#                     protein       - grams
+#                     carbs         - grams
+#                     fat           - grams
+#                     fiber         - grams
+#                     sugar         - grams
+#                     sodium        - milligrams
+#                     serving_size  - human-readable string (e.g. "1 box (380g)")
+#                     tags          - list of dietary filter labels
+#                     allergens     - list of allergen strings
+#                     ingredients   - list of main ingredient strings
 PRODUCTS: list[dict] = [
     {
         "name": "Garlic Butter Chicken with Jasmine Rice",
@@ -94,6 +104,10 @@ PRODUCTS: list[dict] = [
             "protein": 42,
             "carbs": 45,
             "fat": 18,
+            "fiber": 3,
+            "sugar": 4,
+            "sodium": 680,
+            "serving_size": "1 box (380g)",
             "tags": ["High Protein", "Gluten-Free"],
             "allergens": ["Dairy"],
             "ingredients": ["Chicken Breast", "Butter", "Garlic", "Jasmine Rice", "Herbs"],
@@ -116,6 +130,10 @@ PRODUCTS: list[dict] = [
             "protein": 38,
             "carbs": 52,
             "fat": 24,
+            "fiber": 2,
+            "sugar": 6,
+            "sodium": 820,
+            "serving_size": "1 box (400g)",
             "tags": ["Filipino Classic"],
             "allergens": ["Eggs", "Soy"],
             "ingredients": ["Beef Sirloin", "Garlic Rice", "Egg", "Vinegar", "Soy Sauce"],
@@ -138,6 +156,10 @@ PRODUCTS: list[dict] = [
             "protein": 35,
             "carbs": 48,
             "fat": 16,
+            "fiber": 4,
+            "sugar": 8,
+            "sodium": 740,
+            "serving_size": "1 box (360g)",
             "tags": ["Keto-Friendly"],
             "allergens": ["Fish", "Soy", "Gluten"],
             "ingredients": ["Salmon Fillet", "Teriyaki Sauce", "Brown Rice", "Edamame", "Sesame"],
@@ -160,6 +182,10 @@ PRODUCTS: list[dict] = [
             "protein": 18,
             "carbs": 55,
             "fat": 12,
+            "fiber": 9,
+            "sugar": 10,
+            "sodium": 390,
+            "serving_size": "1 box (370g)",
             "tags": ["Vegan", "Dairy-Free"],
             "allergens": ["Sesame"],
             "ingredients": ["Quinoa", "Sweet Potato", "Chickpeas", "Kale", "Tahini"],
@@ -182,6 +208,10 @@ PRODUCTS: list[dict] = [
             "protein": 40,
             "carbs": 42,
             "fat": 15,
+            "fiber": 2,
+            "sugar": 3,
+            "sodium": 760,
+            "serving_size": "1 box (375g)",
             "tags": ["Filipino Classic", "High Protein"],
             "allergens": ["Soy"],
             "ingredients": ["Chicken Thigh", "Soy Sauce", "Vinegar", "Bay Leaves", "Rice"],
@@ -204,6 +234,10 @@ PRODUCTS: list[dict] = [
             "protein": 22,
             "carbs": 48,
             "fat": 14,
+            "fiber": 7,
+            "sugar": 5,
+            "sodium": 510,
+            "serving_size": "1 box (350g)",
             "tags": ["Vegetarian", "Gluten-Free"],
             "allergens": ["Dairy"],
             "ingredients": ["Quinoa", "Feta Cheese", "Olives", "Cucumber", "Tomatoes"],
@@ -226,6 +260,10 @@ PRODUCTS: list[dict] = [
             "protein": 36,
             "carbs": 50,
             "fat": 22,
+            "fiber": 3,
+            "sugar": 7,
+            "sodium": 910,
+            "serving_size": "1 box (395g)",
             "tags": ["Spicy"],
             "allergens": ["Soy", "Gluten", "Sesame"],
             "ingredients": ["Beef Ribeye", "Kimchi", "Gochujang", "Rice", "Sesame Oil"],
@@ -248,6 +286,10 @@ PRODUCTS: list[dict] = [
             "protein": 32,
             "carbs": 28,
             "fat": 10,
+            "fiber": 5,
+            "sugar": 3,
+            "sodium": 580,
+            "serving_size": "1 box (420g)",
             "tags": ["Filipino Classic", "Low Carb", "Diabetic-Friendly"],
             "allergens": ["Fish"],
             "ingredients": ["Bangus", "Tamarind", "Tomatoes", "Kangkong", "Radish"],
@@ -270,6 +312,10 @@ PRODUCTS: list[dict] = [
             "protein": 20,
             "carbs": 52,
             "fat": 14,
+            "fiber": 6,
+            "sugar": 4,
+            "sodium": 620,
+            "serving_size": "1 box (360g)",
             "tags": ["Vegan", "Filipino Fusion"],
             "allergens": ["Soy"],
             "ingredients": ["Tofu", "Onions", "Chili", "Calamansi", "Brown Rice"],
@@ -292,6 +338,10 @@ PRODUCTS: list[dict] = [
             "protein": 38,
             "carbs": 35,
             "fat": 18,
+            "fiber": 4,
+            "sugar": 3,
+            "sodium": 590,
+            "serving_size": "1 box (370g)",
             "tags": ["Keto-Friendly"],
             "allergens": ["Dairy", "Gluten"],
             "ingredients": ["Pork Tenderloin", "Herbs", "Butter", "Potatoes", "Green Beans"],
@@ -314,6 +364,10 @@ PRODUCTS: list[dict] = [
             "protein": 28,
             "carbs": 58,
             "fat": 16,
+            "fiber": 3,
+            "sugar": 9,
+            "sodium": 780,
+            "serving_size": "1 box (375g)",
             "tags": ["Gluten-Free"],
             "allergens": ["Shellfish", "Peanuts", "Eggs"],
             "ingredients": ["Shrimp", "Rice Noodles", "Peanuts", "Bean Sprouts", "Lime"],
@@ -336,6 +390,10 @@ PRODUCTS: list[dict] = [
             "protein": 35,
             "carbs": 46,
             "fat": 20,
+            "fiber": 5,
+            "sugar": 6,
+            "sodium": 850,
+            "serving_size": "1 box (400g)",
             "tags": ["Filipino Classic"],
             "allergens": ["Peanuts", "Shellfish"],
             "ingredients": ["Chicken", "Peanut Butter", "Eggplant", "Banana Blossom", "Bagoong"],
