@@ -3,7 +3,10 @@
 from datetime import datetime, timezone
 from uuid import UUID
 
-from sqlalchemy import delete, func, select, update
+import json
+
+from sqlalchemy import cast, delete, exists, func, select, update
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -33,6 +36,9 @@ class ProductRepo:
         status: ProductStatus | None = None,
         search: str | None = None,
         category_id: UUID | None = None,
+        sort_by: str = "created_at",
+        sort_dir: str = "desc",
+        tag: str | None = None,
     ) -> tuple[list[Product], int]:
         query = select(Product).where(Product.tenant_id == tenant_id)
         count_query = select(func.count()).select_from(Product).where(Product.tenant_id == tenant_id)
@@ -46,6 +52,20 @@ class ProductRepo:
             query = query.where(Product.name.ilike(pattern))
             count_query = count_query.where(Product.name.ilike(pattern))
 
+        if tag:
+            # Filter products whose metadata JSONB 'tags' array contains the given tag value
+            tag_json = cast(json.dumps({"tags": [tag]}), JSONB)
+            query = query.where(Product.metadata_.op("@>")(tag_json))
+            count_query = count_query.where(Product.metadata_.op("@>")(tag_json))
+
+        # Sorting
+        sort_col = {
+            "name": Product.name,
+            "status": Product.status,
+            "created_at": Product.created_at,
+        }.get(sort_by, Product.created_at)
+        order = sort_col.asc() if sort_dir == "asc" else sort_col.desc()
+
         query = (
             query.options(
                 selectinload(Product.variants),
@@ -54,7 +74,7 @@ class ProductRepo:
             )
             .offset(offset)
             .limit(limit)
-            .order_by(Product.created_at.desc())
+            .order_by(order)
         )
 
         result = await self.db.execute(query)
@@ -88,6 +108,7 @@ class ProductRepo:
 
     async def hard_delete(self, product_id: UUID) -> None:
         await self.db.execute(delete(Product).where(Product.id == product_id))
+        await self.db.flush()
 
     async def add_variant(self, variant: ProductVariant) -> ProductVariant:
         self.db.add(variant)
@@ -166,22 +187,25 @@ class IngredientRepo:
         query = query.options(selectinload(Ingredient.product_ingredients).selectinload(ProductIngredient.product))
 
         # Sorting
-        if sort_by == "name":
+        if sort_by == "usage_count":
+            # Join a COUNT subquery so pagination is applied after ordering
+            usage_subq = (
+                select(ProductIngredient.ingredient_id, func.count().label("cnt"))
+                .group_by(ProductIngredient.ingredient_id)
+                .subquery()
+            )
+            query = query.outerjoin(usage_subq, usage_subq.c.ingredient_id == Ingredient.id).order_by(
+                usage_subq.c.cnt.desc() if sort_dir == "desc" else usage_subq.c.cnt.asc()
+            )
+        else:
             col = Ingredient.name
             query = query.order_by(col.asc() if sort_dir == "asc" else col.desc())
-        else:
-            # usage_count sort is handled post-query
-            query = query.order_by(Ingredient.name.asc())
 
         query = query.offset(offset).limit(limit)
 
         result = await self.db.execute(query)
         count_result = await self.db.execute(count_query)
         items = list(result.scalars().all())
-
-        if sort_by == "usage_count":
-            reverse = sort_dir == "desc"
-            items = sorted(items, key=lambda i: len(i.product_ingredients), reverse=reverse)
 
         return items, count_result.scalar_one()
 
@@ -194,8 +218,12 @@ class IngredientRepo:
         return result.scalar_one_or_none()
 
     async def get_by_name_and_tenant(self, name: str, tenant_id: UUID) -> Ingredient | None:
+        # Case-insensitive lookup — name is pre-normalized to lowercase by the service layer
         result = await self.db.execute(
-            select(Ingredient).where(Ingredient.name == name, Ingredient.tenant_id == tenant_id)
+            select(Ingredient).where(
+                func.lower(Ingredient.name) == name.lower().strip(),
+                Ingredient.tenant_id == tenant_id,
+            )
         )
         return result.scalar_one_or_none()
 
@@ -219,9 +247,15 @@ class CatalogRepo:
     async def get_active(self, tenant_id: UUID) -> Catalog | None:
         """Find catalog with published status and an active schedule (now between starts_at and ends_at)."""
         now = datetime.now(timezone.utc)
+        # Use EXISTS subquery instead of JOIN to avoid row multiplication
+        # when a catalog has multiple concurrent active schedule windows.
+        active_sched = exists().where(
+            CatalogSchedule.catalog_id == Catalog.id,
+            CatalogSchedule.starts_at <= now,
+            CatalogSchedule.ends_at >= now,
+        )
         result = await self.db.execute(
             select(Catalog)
-            .join(CatalogSchedule, CatalogSchedule.catalog_id == Catalog.id)
             .options(
                 selectinload(Catalog.items).selectinload(CatalogItem.product_variant),
                 selectinload(Catalog.schedules),
@@ -229,8 +263,7 @@ class CatalogRepo:
             .where(
                 Catalog.tenant_id == tenant_id,
                 Catalog.status == CatalogStatus.published,
-                CatalogSchedule.starts_at <= now,
-                CatalogSchedule.ends_at >= now,
+                active_sched,
             )
             .order_by(Catalog.published_at.desc())
             .limit(1)

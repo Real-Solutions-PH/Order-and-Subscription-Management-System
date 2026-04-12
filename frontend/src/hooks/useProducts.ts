@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   api,
@@ -18,6 +19,9 @@ interface ProductListParams {
   is_standalone?: boolean;
   category_id?: string;
   q?: string;
+  sort_by?: string;
+  sort_dir?: string;
+  tag?: string;
 }
 
 /** Products catalog: list, detail, CRUD. */
@@ -38,8 +42,13 @@ export function useProduct(id: string | undefined) {
 
 export function useProductMutations() {
   const qc = useQueryClient();
-  const invalidate = () =>
+  // Track which individual product IDs have a status toggle in flight
+  const [togglingIds, setTogglingIds] = useState<Set<string>>(new Set());
+
+  const invalidate = () => {
     qc.invalidateQueries({ queryKey: queryKeys.products.all });
+    qc.invalidateQueries({ queryKey: queryKeys.ingredients.all });
+  };
 
   const createProduct = useMutation({
     mutationFn: (data: ProductCreate) => api.products.create(data),
@@ -63,13 +72,33 @@ export function useProductMutations() {
   });
 
   const activateProduct = useMutation({
-    mutationFn: (id: string) => api.products.activate(id),
-    onSuccess: invalidate,
+    mutationFn: (id: string) => {
+      setTogglingIds((prev) => new Set(prev).add(id));
+      return api.products.activate(id);
+    },
+    onSettled: (_data, _err, id) => {
+      setTogglingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
+      invalidate();
+    },
   });
 
   const deactivateProduct = useMutation({
-    mutationFn: (id: string) => api.products.deactivate(id),
-    onSuccess: invalidate,
+    mutationFn: (id: string) => {
+      setTogglingIds((prev) => new Set(prev).add(id));
+      return api.products.deactivate(id);
+    },
+    onSettled: (_data, _err, id) => {
+      setTogglingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
+      invalidate();
+    },
   });
 
   const addIngredient = useMutation({
@@ -120,7 +149,8 @@ export function useProductMutations() {
     isCreating: createProduct.isPending,
     isUpdating: updateProduct.isPending,
     isDeleting: deleteProduct.isPending,
-    isTogglingStatus: activateProduct.isPending || deactivateProduct.isPending,
+    /** Set of product IDs currently having their status toggled. */
+    togglingIds,
   };
 }
 

@@ -112,10 +112,11 @@ def get_product_ingredient_repo(db: SessionDep):
 def get_product_service(
     product_repo: Annotated[object, Depends(get_product_repo)],
     product_ingredient_repo: Annotated[object, Depends(get_product_ingredient_repo)],
+    ingredient_repo: Annotated[object, Depends(get_ingredient_repo)],
 ):
     from app.modules.product_catalog.services import ProductService
 
-    return ProductService(product_repo, product_ingredient_repo)
+    return ProductService(product_repo, product_ingredient_repo, ingredient_repo)
 
 
 def get_catalog_service(

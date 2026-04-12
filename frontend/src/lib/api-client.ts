@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * API Client — thin HTTP wrapper for the PrepFlow backend.
  *
@@ -11,39 +13,34 @@ const TENANT_ID =
   process.env.NEXT_PUBLIC_TENANT_ID ?? "00000000-0000-0000-0000-000000000001";
 
 // ---------------------------------------------------------------------------
-// Token helpers (stored in memory; persist in localStorage for refresh)
+// Token helpers
+// Access token: memory-only (never persisted to storage — XSS-safe).
+// Refresh token: sessionStorage (scoped to tab; cleared on browser close).
+//   Full fix requires HttpOnly cookies from the backend.
 // ---------------------------------------------------------------------------
 let accessToken: string | null = null;
 
 export function setAccessToken(token: string | null) {
   accessToken = token;
-  if (token) {
-    localStorage.setItem("prepflow_access_token", token);
-  } else {
-    localStorage.removeItem("prepflow_access_token");
-  }
 }
 
 export function getAccessToken(): string | null {
-  if (accessToken) return accessToken;
-  if (typeof window !== "undefined") {
-    accessToken = localStorage.getItem("prepflow_access_token");
-  }
   return accessToken;
 }
 
 export function getRefreshToken(): string | null {
   if (typeof window !== "undefined") {
-    return localStorage.getItem("prepflow_refresh_token");
+    return sessionStorage.getItem("prepflow_refresh_token");
   }
   return null;
 }
 
 export function setRefreshToken(token: string | null) {
+  if (typeof window === "undefined") return;
   if (token) {
-    localStorage.setItem("prepflow_refresh_token", token);
+    sessionStorage.setItem("prepflow_refresh_token", token);
   } else {
-    localStorage.removeItem("prepflow_refresh_token");
+    sessionStorage.removeItem("prepflow_refresh_token");
   }
 }
 
@@ -731,7 +728,7 @@ export const api = {
     update: (id: string, data: ProductUpdate) =>
       patch<ProductResponse>(`/products/${id}`, data),
     delete: (id: string) => del<void>(`/products/${id}`),
-    archive: (id: string) => del<void>(`/products/${id}`),
+    archive: (id: string) => post<ProductResponse>(`/products/${id}/deactivate`),
     activate: (id: string) => post<ProductResponse>(`/products/${id}/activate`),
     deactivate: (id: string) =>
       post<ProductResponse>(`/products/${id}/deactivate`),

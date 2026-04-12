@@ -3,7 +3,9 @@
 import re
 from uuid import UUID
 
-from app.exceptions import ConflictError, NotFoundError
+from sqlalchemy import select
+
+from app.exceptions import ConflictError, ForbiddenError, NotFoundError
 from app.modules.product_catalog.models import (
     Catalog,
     CatalogItem,
@@ -44,9 +46,15 @@ def _slugify(text: str) -> str:
 
 
 class ProductService:
-    def __init__(self, product_repo: ProductRepo, product_ingredient_repo: ProductIngredientRepo):
+    def __init__(
+        self,
+        product_repo: ProductRepo,
+        product_ingredient_repo: ProductIngredientRepo,
+        ingredient_repo: IngredientRepo,
+    ):
         self.product_repo = product_repo
         self.product_ingredient_repo = product_ingredient_repo
+        self.ingredient_repo = ingredient_repo
 
     async def list_products(
         self,
@@ -56,13 +64,25 @@ class ProductService:
         status: ProductStatus | None = None,
         search: str | None = None,
         category_id: UUID | None = None,
+        sort_by: str = "created_at",
+        sort_dir: str = "desc",
+        tag: str | None = None,
     ) -> tuple[list[Product], int]:
-        return await self.product_repo.list_by_tenant(tenant_id, offset, limit, status, search, category_id)
+        return await self.product_repo.list_by_tenant(
+            tenant_id, offset, limit, status, search, category_id, sort_by, sort_dir, tag
+        )
 
     async def get_product(self, product_id: UUID) -> Product:
         product = await self.product_repo.get_by_id(product_id)
         if not product:
             raise NotFoundError("Product not found")
+        return product
+
+    async def _get_product_for_tenant(self, product_id: UUID, tenant_id: UUID) -> Product:
+        """Fetch product and verify it belongs to the given tenant. Raises 403 on mismatch."""
+        product = await self.get_product(product_id)
+        if product.tenant_id != tenant_id:
+            raise ForbiddenError("Not authorized to modify this product")
         return product
 
     async def create_product(self, tenant_id: UUID, data: ProductCreate) -> Product:
@@ -80,7 +100,8 @@ class ProductService:
         )
         return await self.product_repo.create(product)
 
-    async def update_product(self, product_id: UUID, data: ProductUpdate) -> Product:
+    async def update_product(self, product_id: UUID, tenant_id: UUID, data: ProductUpdate) -> Product:
+        await self._get_product_for_tenant(product_id, tenant_id)
         update_data = data.model_dump(exclude_unset=True)
 
         # Re-slug if name changed
@@ -92,26 +113,54 @@ class ProductService:
             raise NotFoundError("Product not found")
         return product
 
-    async def delete_product(self, product_id: UUID) -> None:
-        product = await self.product_repo.get_by_id(product_id)
-        if not product:
-            raise NotFoundError("Product not found")
+    async def delete_product(self, product_id: UUID, tenant_id: UUID) -> None:
+        """Soft-delete: sets status to 'archived'. Use force_delete_product for hard delete."""
+        await self._get_product_for_tenant(product_id, tenant_id)
+        await self.product_repo.soft_delete(product_id)
+
+    async def force_delete_product(self, product_id: UUID, tenant_id: UUID) -> None:
+        """Hard-delete after verifying no active order/cart references."""
+        product = await self._get_product_for_tenant(product_id, tenant_id)
+
+        # Check for references in order items or cart items (bare UUID refs — no FK cascade)
+        from app.modules.order_management.models import CartItem, OrderItem
+
+        variant_ids = [v.id for v in product.variants]
+        if variant_ids:
+            db = self.product_repo.db
+            cart_ref = await db.execute(
+                select(CartItem.id).where(CartItem.product_variant_id.in_(variant_ids)).limit(1)
+            )
+            if cart_ref.scalar_one_or_none():
+                raise ConflictError(
+                    "Cannot delete: product variants are referenced by active cart items"
+                )
+            order_ref = await db.execute(
+                select(OrderItem.id).where(OrderItem.product_variant_id.in_(variant_ids)).limit(1)
+            )
+            if order_ref.scalar_one_or_none():
+                raise ConflictError(
+                    "Cannot delete: product variants are referenced by existing orders"
+                )
+
         await self.product_repo.hard_delete(product_id)
 
-    async def activate_product(self, product_id: UUID) -> Product:
+    async def activate_product(self, product_id: UUID, tenant_id: UUID) -> Product:
+        await self._get_product_for_tenant(product_id, tenant_id)
         product = await self.product_repo.update(product_id, status=ProductStatus.active)
         if not product:
             raise NotFoundError("Product not found")
         return product
 
-    async def deactivate_product(self, product_id: UUID) -> Product:
-        product = await self.product_repo.update(product_id, status=ProductStatus.archived)
+    async def deactivate_product(self, product_id: UUID, tenant_id: UUID) -> Product:
+        await self._get_product_for_tenant(product_id, tenant_id)
+        product = await self.product_repo.update(product_id, status=ProductStatus.inactive)
         if not product:
             raise NotFoundError("Product not found")
         return product
 
-    async def add_variant(self, product_id: UUID, data: ProductVariantCreate) -> ProductVariant:
-        await self.get_product(product_id)
+    async def add_variant(self, product_id: UUID, tenant_id: UUID, data: ProductVariantCreate) -> ProductVariant:
+        await self._get_product_for_tenant(product_id, tenant_id)
         variant = ProductVariant(
             product_id=product_id,
             name=data.name,
@@ -127,8 +176,8 @@ class ProductService:
         )
         return await self.product_repo.add_variant(variant)
 
-    async def add_image(self, product_id: UUID, data: ProductImageCreate) -> ProductImage:
-        await self.get_product(product_id)
+    async def add_image(self, product_id: UUID, tenant_id: UUID, data: ProductImageCreate) -> ProductImage:
+        await self._get_product_for_tenant(product_id, tenant_id)
         image = ProductImage(
             product_id=product_id,
             url=data.url,
@@ -143,29 +192,31 @@ class ProductService:
         product_id: UUID,
         tenant_id: UUID,
         data: ProductIngredientAdd,
-        ingredient_repo: IngredientRepo,
     ) -> ProductIngredient:
-        await self.get_product(product_id)
+        await self._get_product_for_tenant(product_id, tenant_id)
+
+        # Normalize name: strip whitespace and lowercase for consistent dedup
+        normalized_name = data.name.strip().lower()
 
         # Find or create the ingredient by name within the tenant
-        ingredient = await ingredient_repo.get_by_name_and_tenant(data.name, tenant_id)
+        ingredient = await self.ingredient_repo.get_by_name_and_tenant(normalized_name, tenant_id)
         if not ingredient:
-            ingredient = await ingredient_repo.create(
+            ingredient = await self.ingredient_repo.create(
                 Ingredient(
                     tenant_id=tenant_id,
-                    name=data.name,
+                    name=normalized_name,
                     default_unit=data.default_unit,
                 )
             )
         else:
             # Update default_unit if provided and ingredient doesn't have one yet
             if data.default_unit and not ingredient.default_unit:
-                await ingredient_repo.update(ingredient.id, default_unit=data.default_unit)
+                await self.ingredient_repo.update(ingredient.id, default_unit=data.default_unit)
 
         # Check for duplicate ingredient in this product's recipe
         existing = await self.product_ingredient_repo.get_by_product_and_ingredient(product_id, ingredient.id)
         if existing:
-            raise ConflictError(f"Ingredient '{data.name}' is already in this recipe")
+            raise ConflictError(f"Ingredient '{normalized_name}' is already in this recipe")
 
         item = ProductIngredient(
             product_id=product_id,
@@ -176,17 +227,29 @@ class ProductService:
         )
         return await self.product_ingredient_repo.add(item)
 
-    async def update_recipe_ingredient(self, item_id: UUID, data: ProductIngredientUpdate) -> ProductIngredient:
+    async def update_recipe_ingredient(
+        self, item_id: UUID, product_id: UUID, tenant_id: UUID, data: ProductIngredientUpdate
+    ) -> ProductIngredient:
+        item = await self.product_ingredient_repo.get_by_id(item_id)
+        if not item:
+            raise NotFoundError("Recipe ingredient not found")
+        if item.product_id != product_id:
+            raise ForbiddenError("Recipe ingredient does not belong to this product")
+        await self._get_product_for_tenant(product_id, tenant_id)
+
         update_data = data.model_dump(exclude_unset=True)
         item = await self.product_ingredient_repo.update(item_id, **update_data)
         if not item:
             raise NotFoundError("Recipe ingredient not found")
         return item
 
-    async def remove_recipe_ingredient(self, item_id: UUID) -> None:
+    async def remove_recipe_ingredient(self, item_id: UUID, product_id: UUID, tenant_id: UUID) -> None:
         item = await self.product_ingredient_repo.get_by_id(item_id)
         if not item:
             raise NotFoundError("Recipe ingredient not found")
+        if item.product_id != product_id:
+            raise ForbiddenError("Recipe ingredient does not belong to this product")
+        await self._get_product_for_tenant(product_id, tenant_id)
         await self.product_ingredient_repo.delete(item_id)
 
     async def list_recipe_ingredients(self, product_id: UUID) -> list[ProductIngredient]:
@@ -269,3 +332,7 @@ class CatalogService:
             recurrence_rule=data.recurrence_rule,
         )
         return await self.catalog_repo.add_schedule(schedule)
+
+    async def list_catalog_items(self, catalog_id: UUID) -> list[CatalogItem]:
+        await self.get_catalog(catalog_id)
+        return await self.catalog_repo.list_items(catalog_id)

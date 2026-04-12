@@ -7,10 +7,10 @@ from fastapi import APIRouter, Depends, Query, Response
 
 from app.dependencies import (
     get_catalog_service,
-    get_ingredient_repo,
     get_ingredient_service,
     get_product_service,
 )
+from app.exceptions import BadRequestError
 from app.modules.product_catalog.models import ProductStatus
 from app.modules.product_catalog.schemas import (
     CatalogCreate,
@@ -56,21 +56,19 @@ async def create_product(
 @router.get("/products", response_model=ProductListResponse)
 async def list_products(
     product_service: Annotated[ProductService, Depends(get_product_service)],
-    current_user: OptionalUser = None,
+    current_user: SuperUser,
     page: int = Query(1, ge=1),
     per_page: int = Query(20, ge=1, le=100),
     status: ProductStatus | None = None,
     search: str | None = None,
     category_id: UUID | None = None,
-    tenant_id: UUID | None = None,
+    sort_by: str = Query("created_at", pattern="^(name|status|created_at)$"),
+    sort_dir: str = Query("desc", pattern="^(asc|desc)$"),
+    tag: str | None = None,
 ):
-    resolved_tenant_id = current_user.tenant_id if current_user else tenant_id
-    if not resolved_tenant_id:
-        return ProductListResponse(total=0, page=page, per_page=per_page, items=[])
-
     offset = (page - 1) * per_page
     products, total = await product_service.list_products(
-        resolved_tenant_id, offset, per_page, status, search, category_id
+        current_user.tenant_id, offset, per_page, status, search, category_id, sort_by, sort_dir, tag
     )
     return ProductListResponse(total=total, page=page, per_page=per_page, items=products)
 
@@ -78,8 +76,8 @@ async def list_products(
 @router.get("/products/{product_id}", response_model=ProductResponse)
 async def get_product(
     product_id: UUID,
+    current_user: SuperUser,
     product_service: Annotated[ProductService, Depends(get_product_service)],
-    current_user: OptionalUser = None,
 ):
     return await product_service.get_product(product_id)
 
@@ -91,7 +89,7 @@ async def update_product(
     current_user: SuperAdminUser,
     product_service: Annotated[ProductService, Depends(get_product_service)],
 ):
-    return await product_service.update_product(product_id, data)
+    return await product_service.update_product(product_id, current_user.tenant_id, data)
 
 
 @router.delete("/products/{product_id}", status_code=204)
@@ -99,8 +97,12 @@ async def delete_product(
     product_id: UUID,
     current_user: SuperAdminUser,
     product_service: Annotated[ProductService, Depends(get_product_service)],
+    force: bool = Query(False, description="Hard-delete; blocked if active orders reference this product"),
 ):
-    await product_service.delete_product(product_id)
+    if force:
+        await product_service.force_delete_product(product_id, current_user.tenant_id)
+    else:
+        await product_service.delete_product(product_id, current_user.tenant_id)
     return Response(status_code=204)
 
 
@@ -110,7 +112,7 @@ async def activate_product(
     current_user: SuperAdminUser,
     product_service: Annotated[ProductService, Depends(get_product_service)],
 ):
-    return await product_service.activate_product(product_id)
+    return await product_service.activate_product(product_id, current_user.tenant_id)
 
 
 @router.post("/products/{product_id}/deactivate", response_model=ProductResponse)
@@ -119,7 +121,7 @@ async def deactivate_product(
     current_user: SuperAdminUser,
     product_service: Annotated[ProductService, Depends(get_product_service)],
 ):
-    return await product_service.deactivate_product(product_id)
+    return await product_service.deactivate_product(product_id, current_user.tenant_id)
 
 
 @router.post(
@@ -133,7 +135,7 @@ async def add_variant(
     current_user: SuperAdminUser,
     product_service: Annotated[ProductService, Depends(get_product_service)],
 ):
-    return await product_service.add_variant(product_id, data)
+    return await product_service.add_variant(product_id, current_user.tenant_id, data)
 
 
 @router.post(
@@ -147,7 +149,7 @@ async def add_image(
     current_user: SuperAdminUser,
     product_service: Annotated[ProductService, Depends(get_product_service)],
 ):
-    return await product_service.add_image(product_id, data)
+    return await product_service.add_image(product_id, current_user.tenant_id, data)
 
 
 # ── Recipe / Ingredient Endpoints ──────────────────────────────────────
@@ -175,9 +177,8 @@ async def add_recipe_ingredient(
     data: ProductIngredientAdd,
     current_user: SuperAdminUser,
     product_service: Annotated[ProductService, Depends(get_product_service)],
-    ingredient_repo: Annotated[object, Depends(get_ingredient_repo)],
 ):
-    return await product_service.add_recipe_ingredient(product_id, current_user.tenant_id, data, ingredient_repo)
+    return await product_service.add_recipe_ingredient(product_id, current_user.tenant_id, data)
 
 
 @router.patch(
@@ -191,7 +192,7 @@ async def update_recipe_ingredient(
     current_user: SuperAdminUser,
     product_service: Annotated[ProductService, Depends(get_product_service)],
 ):
-    return await product_service.update_recipe_ingredient(item_id, data)
+    return await product_service.update_recipe_ingredient(item_id, product_id, current_user.tenant_id, data)
 
 
 @router.delete("/products/{product_id}/ingredients/{item_id}", status_code=204)
@@ -201,7 +202,7 @@ async def remove_recipe_ingredient(
     current_user: SuperAdminUser,
     product_service: Annotated[ProductService, Depends(get_product_service)],
 ):
-    await product_service.remove_recipe_ingredient(item_id)
+    await product_service.remove_recipe_ingredient(item_id, product_id, current_user.tenant_id)
     return Response(status_code=204)
 
 
@@ -287,10 +288,11 @@ async def get_active_catalog(
     current_user: OptionalUser = None,
     tenant_id: UUID | None = None,
 ):
+    # Intentional public storefront pattern: unauthenticated callers may pass ?tenant_id=<uuid>
+    # to retrieve the published catalog (pricing, availability) for a known tenant.
+    # cost_price is not included in CatalogItemResponse → ProductVariantResponse for this endpoint.
     resolved_tenant_id = current_user.tenant_id if current_user else tenant_id
     if not resolved_tenant_id:
-        from app.exceptions import BadRequestError
-
         raise BadRequestError("tenant_id is required")
     return await catalog_service.get_active_catalog(resolved_tenant_id)
 
@@ -310,8 +312,8 @@ async def list_catalog_items(
     current_user: SuperUser,
     catalog_service: Annotated[CatalogService, Depends(get_catalog_service)],
 ):
-    catalog = await catalog_service.get_catalog(catalog_id)
-    return catalog.items
+    # Uses list_items directly — avoids loading schedules and other unused data
+    return await catalog_service.list_catalog_items(catalog_id)
 
 
 @router.post(

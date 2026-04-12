@@ -27,6 +27,7 @@ from app.shared.models import Base, TenantMixin, TimestampMixin, UUIDPrimaryKeyM
 class ProductStatus(str, enum.Enum):
     draft = "draft"
     active = "active"
+    inactive = "inactive"
     archived = "archived"
 
 

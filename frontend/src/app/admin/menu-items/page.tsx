@@ -27,33 +27,8 @@ import type {
   ProductIngredientAdd,
   ProductIngredientResponse,
 } from "@/lib/api-client";
-
-// ── Constants ────────────────────────────────────────────────────────
-
-const ALL_TAGS = [
-  "High Protein",
-  "Keto-Friendly",
-  "Vegan",
-  "Vegetarian",
-  "Gluten-Free",
-  "Filipino Classic",
-  "Dairy-Free",
-  "Low Carb",
-  "Diabetic-Friendly",
-  "Spicy",
-  "Filipino Fusion",
-  "Halal",
-];
-const ALL_ALLERGENS = [
-  "Dairy",
-  "Eggs",
-  "Gluten",
-  "Soy",
-  "Peanuts",
-  "Fish",
-  "Shellfish",
-  "Sesame",
-];
+import { api } from "@/lib/api-client";
+import { ALL_TAGS, ALL_ALLERGENS } from "@/lib/constants";
 
 type StatusFilter = "all" | "active" | "draft" | "archived";
 type SortField = "name" | "price" | "status" | "created_at";
@@ -65,7 +40,8 @@ function StatusBadge({ status }: { status: string }) {
   const styles: Record<string, { bg: string; text: string; label: string }> = {
     active: { bg: "#D1FAE5", text: "#065F46", label: "Active" },
     draft: { bg: "#FEF3C7", text: "#92400E", label: "Draft" },
-    archived: { bg: "#F3F4F6", text: "#6B7280", label: "Deactivated" },
+    inactive: { bg: "#FEE2E2", text: "#991B1B", label: "Inactive" },
+    archived: { bg: "#F3F4F6", text: "#6B7280", label: "Archived" },
   };
   const s = styles[status] ?? styles.draft;
   return (
@@ -113,7 +89,8 @@ function getMeta(product: ProductResponse) {
 // ── Ingredient row in form ────────────────────────────────────────────
 
 interface IngredientRow {
-  id?: string; // set if already saved
+  id?: string;  // set if already saved to the backend
+  uid: string;  // client-side stable key for React (always set, even for unsaved rows)
   name: string;
   quantity: string;
   unit: string;
@@ -139,6 +116,9 @@ export default function MenuItemsPage() {
     per_page: 20,
     search: search || undefined,
     status: statusFilter !== "all" ? statusFilter : undefined,
+    sort_by: sortField !== "price" ? sortField : undefined, // price sort is client-side (not a backend param)
+    sort_dir: sortDir,
+    tag: tagFilter ?? undefined,
   });
 
   const {
@@ -153,7 +133,7 @@ export default function MenuItemsPage() {
     isCreating,
     isUpdating,
     isDeleting,
-    isTogglingStatus,
+    togglingIds,
   } = useProductMutations();
 
   // ── Modal state ──────────────────────────────────────────────────
@@ -187,6 +167,7 @@ export default function MenuItemsPage() {
   });
   const [ingredients, setIngredients] = useState<IngredientRow[]>([]);
   const [newIngredient, setNewIngredient] = useState<IngredientRow>({
+    uid: "",
     name: "",
     quantity: "",
     unit: "",
@@ -213,7 +194,7 @@ export default function MenuItemsPage() {
       allergens: [],
     });
     setIngredients([]);
-    setNewIngredient({ name: "", quantity: "", unit: "", notes: "" });
+    setNewIngredient({ uid: "", name: "", quantity: "", unit: "", notes: "" });
   }
 
   function openCreate() {
@@ -249,8 +230,9 @@ export default function MenuItemsPage() {
       allergens: (meta.allergens as string[]) ?? [],
     });
     setIngredients(
-      (product.ingredients ?? []).map((pi: ProductIngredientResponse) => ({
+      (product.product_ingredients ?? []).map((pi: ProductIngredientResponse) => ({
         id: pi.id,
+        uid: pi.id,
         name: pi.ingredient.name,
         quantity: pi.quantity != null ? String(pi.quantity) : "",
         unit: pi.unit ?? "",
@@ -296,36 +278,39 @@ export default function MenuItemsPage() {
           data: updateData,
         });
 
-        // Sync ingredients: remove deleted ones
+        // Sync ingredients: remove deleted ones (parallel)
         const existingIds = new Set(
           ingredients.filter((i) => i.id).map((i) => i.id!),
         );
         const originalIds = new Set(
-          (editingProduct.ingredients ?? []).map((pi) => pi.id),
+          (editingProduct.product_ingredients ?? []).map((pi) => pi.id),
         );
-        for (const origId of originalIds) {
-          if (!existingIds.has(origId)) {
-            await removeIngredient({
-              productId: editingProduct.id,
-              itemId: origId,
-            });
-          }
-        }
-        // Update existing ingredient quantities/units/notes
-        for (const ing of ingredients) {
-          if (ing.id) {
-            await updateIngredient({
-              productId: editingProduct.id,
-              itemId: ing.id,
-              data: {
-                quantity: ing.quantity ? Number(ing.quantity) : null,
-                unit: ing.unit || null,
-                notes: ing.notes || null,
-              },
-            });
-          }
-        }
-        // Add new ones (no id)
+        await Promise.all(
+          [...originalIds]
+            .filter((origId) => !existingIds.has(origId))
+            .map((origId) =>
+              removeIngredient({ productId: editingProduct.id, itemId: origId }),
+            ),
+        );
+
+        // Update existing ingredient quantities/units/notes (parallel)
+        await Promise.all(
+          ingredients
+            .filter((ing) => ing.id)
+            .map((ing) =>
+              updateIngredient({
+                productId: editingProduct.id,
+                itemId: ing.id!,
+                data: {
+                  quantity: ing.quantity ? Number(ing.quantity) : null,
+                  unit: ing.unit || null,
+                  notes: ing.notes || null,
+                },
+              }),
+            ),
+        );
+
+        // Add new ones (no id) — sequential to avoid duplicate-name race conditions
         for (const ing of ingredients) {
           if (!ing.id && ing.name.trim()) {
             await addIngredient({
@@ -353,10 +338,14 @@ export default function MenuItemsPage() {
         };
         savedProduct = await createProduct(createData);
 
-        // Add variant if price provided
+        // Add default variant if price provided
         if (form.price) {
-          // Variant is added via the API after product creation
-          // For now metadata holds the price; variant creation could be added here
+          await api.products.addVariant(savedProduct.id, {
+            name: "Default",
+            sku: `${savedProduct.id}-default`,
+            price: Number(form.price),
+            is_default: true,
+          });
         }
 
         // Add ingredients
@@ -418,8 +407,11 @@ export default function MenuItemsPage() {
   // ── Ingredient management in form ────────────────────────────────
   function addIngredientRow() {
     if (!newIngredient.name.trim()) return;
-    setIngredients((prev) => [...prev, { ...newIngredient }]);
-    setNewIngredient({ name: "", quantity: "", unit: "", notes: "" });
+    setIngredients((prev) => [
+      ...prev,
+      { ...newIngredient, uid: crypto.randomUUID() },
+    ]);
+    setNewIngredient({ name: "", quantity: "", unit: "", notes: "", uid: "" });
   }
 
   function removeIngredientRow(idx: number) {
@@ -454,32 +446,26 @@ export default function MenuItemsPage() {
     }));
   }
 
-  // ── Sorting client-side ──────────────────────────────────────────
-  const toggleSort = useCallback((field: SortField) => {
-    setSortField((prev) => {
-      if (prev === field) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+  // ── Sort toggle ──────────────────────────────────────────────────
+  const toggleSort = useCallback(
+    (field: SortField) => {
+      if (field === sortField) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
       else setSortDir("asc");
-      return field;
-    });
-  }, []);
+      setSortField(field);
+    },
+    [sortField],
+  );
 
+  // Tag filter and name/status/created_at sort are passed to the API.
+  // Price sort remains client-side (no backend support for variant-price ordering).
   const rawItems = productsQuery.data?.items ?? [];
-  const filteredByTag = tagFilter
-    ? rawItems.filter((p) => {
-        const tags = (getMeta(p).tags as string[]) ?? [];
-        return tags.includes(tagFilter);
-      })
-    : rawItems;
-
-  const sortedItems = [...filteredByTag].sort((a, b) => {
-    let cmp = 0;
-    if (sortField === "name") cmp = a.name.localeCompare(b.name);
-    else if (sortField === "price") cmp = getPrice(a) - getPrice(b);
-    else if (sortField === "status") cmp = a.status.localeCompare(b.status);
-    else
-      cmp = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
-    return sortDir === "asc" ? cmp : -cmp;
-  });
+  const sortedItems =
+    sortField === "price"
+      ? [...rawItems].sort((a, b) => {
+          const cmp = getPrice(a) - getPrice(b);
+          return sortDir === "asc" ? cmp : -cmp;
+        })
+      : rawItems;
 
   const total = productsQuery.data?.total ?? 0;
   const totalPages = Math.ceil(total / 20);
@@ -538,6 +524,7 @@ export default function MenuItemsPage() {
             />
             <input
               type="text"
+              aria-label="Search menu items"
               placeholder="Search menu items..."
               value={search}
               onChange={(e) => {
@@ -618,6 +605,7 @@ export default function MenuItemsPage() {
                   className="cursor-pointer px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide"
                   style={{ color: "#6B7280" }}
                   onClick={() => toggleSort("status")}
+                  aria-sort={sortField === "status" ? (sortDir === "asc" ? "ascending" : "descending") : "none"}
                 >
                   <span className="inline-flex items-center gap-1">
                     Status{" "}
@@ -632,6 +620,7 @@ export default function MenuItemsPage() {
                   className="cursor-pointer px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide"
                   style={{ color: "#6B7280" }}
                   onClick={() => toggleSort("price")}
+                  aria-sort={sortField === "price" ? (sortDir === "asc" ? "ascending" : "descending") : "none"}
                 >
                   <span className="inline-flex items-center gap-1">
                     Price{" "}
@@ -665,6 +654,14 @@ export default function MenuItemsPage() {
                       </td>
                     </tr>
                   ))
+                : productsQuery.isError
+                  ? (
+                    <tr>
+                      <td colSpan={5} className="px-4 py-8 text-center text-sm text-red-500">
+                        Failed to load menu items. Please refresh and try again.
+                      </td>
+                    </tr>
+                  )
                 : sortedItems.map((product) => {
                     const meta = getMeta(product);
                     const tags = (meta.tags as string[]) ?? [];
@@ -722,11 +719,14 @@ export default function MenuItemsPage() {
                           className="px-4 py-3 font-medium"
                           style={{ color: "#1A1A2E" }}
                         >
-                          {getPrice(product) > 0 ? (
-                            formatPeso(getPrice(product))
-                          ) : (
-                            <span style={{ color: "#9CA3AF" }}>—</span>
-                          )}
+                          {(() => {
+                            const price = getPrice(product);
+                            return price > 0 ? (
+                              formatPeso(price)
+                            ) : (
+                              <span style={{ color: "#9CA3AF" }}>—</span>
+                            );
+                          })()}
                         </td>
                         {/* Tags */}
                         <td className="px-4 py-3">
@@ -771,7 +771,14 @@ export default function MenuItemsPage() {
                               <>
                                 <button
                                   onClick={() => handleToggleStatus(product)}
-                                  disabled={isTogglingStatus}
+                                  disabled={togglingIds.has(product.id)}
+                                  role="switch"
+                                  aria-checked={product.status === "active"}
+                                  aria-label={
+                                    product.status === "active"
+                                      ? `Deactivate ${product.name}`
+                                      : `Activate ${product.name}`
+                                  }
                                   title={
                                     product.status === "active"
                                       ? "Deactivate"
@@ -1014,6 +1021,7 @@ export default function MenuItemsPage() {
                 >
                   <option value="draft">Draft</option>
                   <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
                   <option value="archived">Archived</option>
                 </select>
               </div>
@@ -1214,7 +1222,7 @@ export default function MenuItemsPage() {
                     style={{ borderColor: "#F3F4F6" }}
                   >
                     {ingredients.map((row, idx) => (
-                      <tr key={idx}>
+                      <tr key={row.uid || row.id || idx}>
                         <td className="px-3 py-2">
                           {isSuperAdmin ? (
                             <input

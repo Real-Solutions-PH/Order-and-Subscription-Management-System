@@ -105,6 +105,7 @@ export default function IngredientsPage() {
                 setSearch(e.target.value);
                 setPage(1);
               }}
+              aria-label="Search ingredients"
               className="w-full rounded-lg py-2 pl-9 pr-3 text-sm focus:outline-none focus:ring-2"
               style={
                 {
@@ -163,6 +164,7 @@ export default function IngredientsPage() {
                 <th
                   className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide"
                   style={{ color: "#6B7280" }}
+                  aria-sort={sortBy === "name" ? (sortDir === "asc" ? "ascending" : "descending") : "none"}
                 >
                   Ingredient
                 </th>
@@ -170,6 +172,7 @@ export default function IngredientsPage() {
                   className="cursor-pointer px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide"
                   style={{ color: "#6B7280" }}
                   onClick={() => toggleSort("usage_count")}
+                  aria-sort={sortBy === "usage_count" ? (sortDir === "asc" ? "ascending" : "descending") : "none"}
                 >
                   <span className="inline-flex items-center gap-1">
                     Used In{" "}
@@ -207,6 +210,14 @@ export default function IngredientsPage() {
                       </td>
                     </tr>
                   ))
+                : query.isError
+                  ? (
+                    <tr>
+                      <td colSpan={5} className="px-4 py-8 text-center" style={{ color: "#EF4444" }}>
+                        Failed to load ingredients. Please try again.
+                      </td>
+                    </tr>
+                  )
                 : items.map((ingredient) => {
                     const isExpanded = expandedId === ingredient.id;
                     const usageCount = ingredient.used_in_products.length;

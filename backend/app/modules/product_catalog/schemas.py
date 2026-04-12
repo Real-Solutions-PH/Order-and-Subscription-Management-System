@@ -4,7 +4,7 @@ from datetime import datetime
 from decimal import Decimal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from app.modules.product_catalog.models import CatalogStatus, ProductStatus
 
@@ -49,15 +49,17 @@ class IngredientListResponse(BaseModel):
 
 
 class ProductIngredientAdd(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True)
+
     name: str = Field(..., max_length=255)
     default_unit: str | None = Field(None, max_length=50)
-    quantity: Decimal | None = None
+    quantity: Decimal | None = Field(None, gt=0)
     unit: str | None = Field(None, max_length=50)
     notes: str | None = Field(None, max_length=255)
 
 
 class ProductIngredientUpdate(BaseModel):
-    quantity: Decimal | None = None
+    quantity: Decimal | None = Field(None, gt=0)
     unit: str | None = Field(None, max_length=50)
     notes: str | None = Field(None, max_length=255)
 
@@ -175,7 +177,8 @@ class ProductResponse(BaseModel):
     metadata_: dict | None = Field(None, alias="metadata")
     variants: list[ProductVariantResponse] = []
     images: list[ProductImageResponse] = []
-    ingredients: list["ProductIngredientResponse"] = []
+    # Field name matches the ORM relationship 'product_ingredients' on the Product model
+    product_ingredients: list["ProductIngredientResponse"] = []
     created_at: datetime
     updated_at: datetime
 
@@ -201,6 +204,12 @@ class CatalogScheduleCreate(BaseModel):
     starts_at: datetime
     ends_at: datetime
     recurrence_rule: str | None = None
+
+    @model_validator(mode="after")
+    def ends_after_starts(self) -> "CatalogScheduleCreate":
+        if self.ends_at <= self.starts_at:
+            raise ValueError("ends_at must be after starts_at")
+        return self
 
 
 class CatalogScheduleResponse(BaseModel):
