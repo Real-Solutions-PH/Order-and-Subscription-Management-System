@@ -4,6 +4,15 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api-client";
 import { queryKeys } from "./query-keys";
 
+/** Current user's subscriptions list. */
+export function useUserSubscriptions() {
+  return useQuery({
+    queryKey: queryKeys.subscriptions.list,
+    queryFn: () => api.subscriptions.list(),
+    retry: false,
+  });
+}
+
 /** Subscription plans list. Reads tenant_id from tenant config so it works for unauthenticated users too. */
 export function useSubscriptionPlans() {
   const tenantQuery = useQuery({
@@ -44,11 +53,14 @@ export function useSubscriptionMutations() {
   const invalidateSub = (id: string) => {
     qc.invalidateQueries({ queryKey: queryKeys.subscriptions.detail(id) });
     qc.invalidateQueries({ queryKey: queryKeys.subscriptions.cycles(id) });
+    qc.invalidateQueries({ queryKey: queryKeys.subscriptions.list });
   };
 
   const createSubscription = useMutation({
     mutationFn: (data: { plan_tier_id: string; payment_method_id?: string }) =>
       api.subscriptions.create(data),
+    onSuccess: () =>
+      qc.invalidateQueries({ queryKey: queryKeys.subscriptions.list }),
   });
 
   const pauseSubscription = useMutation({

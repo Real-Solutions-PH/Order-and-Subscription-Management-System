@@ -35,8 +35,32 @@ export function usePaymentMutations() {
   });
 
   const saveMethod = useMutation({
-    mutationFn: (data: { type: string; display_name: string }) =>
-      api.payments.saveMethods(data),
+    mutationFn: (data: {
+      type: string;
+      display_name: string;
+      paymongo_method_id?: string;
+      last_four?: string;
+      card_brand?: string;
+      is_default?: boolean;
+    }) => api.payments.saveMethods(data),
+    onSuccess: () =>
+      qc.invalidateQueries({ queryKey: queryKeys.paymentMethods }),
+  });
+
+  const updateMethod = useMutation({
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: { display_name?: string; is_default?: boolean };
+    }) => api.payments.updateMethod(id, data),
+    onSuccess: () =>
+      qc.invalidateQueries({ queryKey: queryKeys.paymentMethods }),
+  });
+
+  const deleteMethod = useMutation({
+    mutationFn: (id: string) => api.payments.deleteMethod(id),
     onSuccess: () =>
       qc.invalidateQueries({ queryKey: queryKeys.paymentMethods }),
   });
@@ -45,6 +69,10 @@ export function usePaymentMutations() {
     validatePromo: validatePromo.mutateAsync,
     createIntent: createIntent.mutateAsync,
     saveMethod: saveMethod.mutateAsync,
+    updateMethod: updateMethod.mutateAsync,
+    deleteMethod: deleteMethod.mutateAsync,
     isValidatingPromo: validatePromo.isPending,
+    isSavingMethod: saveMethod.isPending,
+    isDeletingMethod: deleteMethod.isPending,
   };
 }

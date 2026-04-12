@@ -6,6 +6,7 @@
 export const queryKeys = {
   // Auth / User
   me: ["me"] as const,
+  userMetrics: ["user-metrics"] as const,
 
   // Products & Catalog
   products: {
@@ -29,6 +30,7 @@ export const queryKeys = {
   // Subscriptions
   subscriptionPlans: ["subscription-plans"] as const,
   subscriptions: {
+    list: ["subscriptions", "list"] as const,
     detail: (id: string) => ["subscriptions", id] as const,
     cycles: (id: string) => ["subscriptions", id, "cycles"] as const,
   },

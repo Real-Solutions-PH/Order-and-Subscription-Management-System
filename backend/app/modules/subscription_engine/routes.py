@@ -52,6 +52,17 @@ async def list_plans(
 # ── Subscription Endpoints ──────────────────────────────────────────────
 
 
+@router.get("/subscriptions", response_model=list[SubscriptionResponse])
+async def list_subscriptions(
+    current_user: CurrentUser,
+    sub_service: Annotated[SubscriptionService, Depends(get_subscription_service)],
+):
+    return await sub_service.list_user_subscriptions(
+        user_id=current_user.id,
+        tenant_id=current_user.tenant_id,
+    )
+
+
 @router.post("/subscriptions", response_model=SubscriptionResponse)
 async def create_subscription(
     data: SubscriptionCreate,

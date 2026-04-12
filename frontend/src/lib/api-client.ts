@@ -243,12 +243,21 @@ export interface UserResponse {
   last_login_at: string | null;
   created_at: string;
   updated_at: string;
+  dietary_preferences: string[];
+  allergens: string[];
+}
+export interface UserMetricsResponse {
+  this_month_total: number;
+  total_savings: number;
+  favorite_meal: string;
 }
 export interface UserUpdate {
   first_name?: string;
   last_name?: string;
   phone?: string;
   avatar_url?: string;
+  dietary_preferences?: string[];
+  allergens?: string[];
 }
 export interface AdminUserUpdate extends UserUpdate {
   is_active?: boolean;
@@ -402,15 +411,19 @@ export interface PlanResponse {
 export interface SubscriptionResponse {
   id: string;
   user_id: string;
-  plan_tier: TierResponse;
+  plan_tier_id: string;
+  plan_tier: TierResponse | null;
   status: string;
   current_cycle_start: string;
   current_cycle_end: string;
   next_billing_date: string;
   paused_at: string | null;
+  pause_expires_at: string | null;
   cancelled_at: string | null;
   cancellation_reason: string | null;
+  payment_method_id: string | null;
   created_at: string;
+  updated_at: string;
 }
 export interface CycleResponse {
   id: string;
@@ -684,6 +697,7 @@ export const api = {
       post<{ message: string }>("/auth/logout", { refresh_token }),
     me: () => get<UserResponse>("/users/me"),
     updateMe: (data: UserUpdate) => patch<UserResponse>("/users/me", data),
+    getMetrics: () => get<UserMetricsResponse>("/users/me/metrics"),
   },
 
   // Users (admin)
@@ -802,6 +816,7 @@ export const api = {
 
   // Subscriptions
   subscriptions: {
+    list: () => get<SubscriptionResponse[]>("/subscriptions"),
     listPlans: (tenant_id: string) =>
       get<PlanResponse[]>("/subscription-plans", { tenant_id }),
     createPlan: (data: {
@@ -826,11 +841,11 @@ export const api = {
     setSelections: (
       subId: string,
       cycleId: string,
-      selections: { product_variant_id: string; quantity?: number }[],
+      items: { product_variant_id: string; quantity?: number }[],
     ) =>
       post<SelectionResponse[]>(
         `/subscriptions/${subId}/cycles/${cycleId}/selections`,
-        selections,
+        { items },
       ),
     skipCycle: (subId: string, cycleId: string) =>
       post<CycleResponse>(`/subscriptions/${subId}/cycles/${cycleId}/skip`),
@@ -912,7 +927,13 @@ export const api = {
       paymongo_method_id?: string;
       last_four?: string;
       card_brand?: string;
+      is_default?: boolean;
     }) => post<PaymentMethodResponse>("/payment-methods", data),
+    updateMethod: (
+      id: string,
+      data: { display_name?: string; is_default?: boolean },
+    ) => patch<PaymentMethodResponse>(`/payment-methods/${id}`, data),
+    deleteMethod: (id: string) => del<void>(`/payment-methods/${id}`),
     validatePromo: (data: { code: string; order_amount: number }) =>
       post<PromoCodeResponse>("/promo-codes/validate", data),
     listPromos: (params?: { skip?: number; limit?: number }) =>

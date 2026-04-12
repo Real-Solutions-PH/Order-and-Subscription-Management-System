@@ -48,12 +48,38 @@ export function useFulfillmentMutations() {
     mutationFn: (data: {
       label: string;
       line_1: string;
+      line_2?: string;
       city: string;
       province: string;
       postal_code: string;
       is_default?: boolean;
       notes?: string;
     }) => api.fulfillment.createAddress(data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.addresses }),
+  });
+
+  const updateAddress = useMutation({
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: Partial<{
+        label: string;
+        line_1: string;
+        line_2: string | null;
+        city: string;
+        province: string;
+        postal_code: string;
+        is_default: boolean;
+        notes: string | null;
+      }>;
+    }) => api.fulfillment.updateAddress(id, data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.addresses }),
+  });
+
+  const deleteAddress = useMutation({
+    mutationFn: (id: string) => api.fulfillment.deleteAddress(id),
     onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.addresses }),
   });
 
@@ -82,8 +108,12 @@ export function useFulfillmentMutations() {
 
   return {
     createAddress: createAddress.mutateAsync,
+    updateAddress: updateAddress.mutateAsync,
+    deleteAddress: deleteAddress.mutateAsync,
     createZone: createZone.mutateAsync,
     updateFulfillmentStatus: updateFulfillmentStatus.mutateAsync,
     isCreatingAddress: createAddress.isPending,
+    isUpdatingAddress: updateAddress.isPending,
+    isDeletingAddress: deleteAddress.isPending,
   };
 }

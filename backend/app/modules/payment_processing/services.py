@@ -241,6 +241,8 @@ class PaymentService:
         expires_at: datetime | None = None,
         metadata: dict | None = None,
     ) -> PaymentMethod:
+        if is_default:
+            await self.payment_repo.clear_default_methods(user_id, tenant_id)
         method = PaymentMethod(
             tenant_id=tenant_id,
             user_id=user_id,
@@ -254,6 +256,38 @@ class PaymentService:
             metadata_=metadata,
         )
         return await self.payment_repo.create_method(method)
+
+    async def update_payment_method(
+        self,
+        method_id: uuid.UUID,
+        user_id: uuid.UUID,
+        tenant_id: uuid.UUID,
+        display_name: str | None = None,
+        is_default: bool | None = None,
+    ) -> PaymentMethod:
+        method = await self.payment_repo.get_method_by_id(method_id)
+        if method is None or method.user_id != user_id:
+            raise NotFoundError("Payment method not found")
+        update_fields: dict = {}
+        if display_name is not None:
+            update_fields["display_name"] = display_name
+        if is_default is True:
+            await self.payment_repo.clear_default_methods(user_id, tenant_id)
+            update_fields["is_default"] = True
+        elif is_default is False:
+            update_fields["is_default"] = False
+        result = await self.payment_repo.update_method(method_id, **update_fields)
+        return result  # type: ignore[return-value]
+
+    async def delete_payment_method(
+        self,
+        method_id: uuid.UUID,
+        user_id: uuid.UUID,
+    ) -> None:
+        method = await self.payment_repo.get_method_by_id(method_id)
+        if method is None or method.user_id != user_id:
+            raise NotFoundError("Payment method not found")
+        await self.payment_repo.delete_method(method_id)
 
 
 class PromoCodeService:

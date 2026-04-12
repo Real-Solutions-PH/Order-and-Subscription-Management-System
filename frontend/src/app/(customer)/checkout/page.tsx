@@ -28,6 +28,10 @@ import { useToast } from "@/context/ToastContext";
 import { useAuthContext } from "@/context/AuthContext";
 import {
   useDeliveryZones,
+  useDeliverySlots,
+  useAddresses,
+  useFulfillmentMutations,
+  usePaymentMethods,
   usePaymentMutations,
   useOrderMutations,
   useDevMode,
@@ -60,8 +64,12 @@ export default function CheckoutPage() {
 
   // API hooks
   const { data: apiZones, isLoading: isLoadingZones } = useDeliveryZones();
+  const { data: addresses, isLoading: isLoadingAddresses } = useAddresses();
+  const { data: apiPaymentMethods, isLoading: isLoadingPayments } =
+    usePaymentMethods();
   const { validatePromo } = usePaymentMutations();
   const { checkout } = useOrderMutations();
+  const { createAddress } = useFulfillmentMutations();
 
   // Map API zones to the existing format; only fall back to mock data when DEV_MODE is on
   const deliveryZones = useMemo(() => {
@@ -69,33 +77,84 @@ export default function CheckoutPage() {
       return apiZones
         .filter((z) => z.is_active !== false)
         .map((z) => ({
+          id: z.id,
           name: z.name,
           fee: Number(z.delivery_fee),
           estimatedTime: z.description ?? "Contact for ETA",
         }));
     }
-    return devMode ? mockDeliveryZones : [];
+    return devMode ? mockDeliveryZones.map((z) => ({ ...z, id: "" })) : [];
   }, [apiZones, devMode]);
-
-  const displayTimeSlots = timeSlots;
-  const displayPaymentMethods = paymentMethods;
 
   // Auth
   const { isAuthenticated, user, openAuthModal } = useAuthContext();
 
-  // Address fields
+  // Address state
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(
+    null,
+  );
+  const [showNewAddressForm, setShowNewAddressForm] = useState(false);
   const [street, setStreet] = useState("");
   const [city, setCity] = useState("");
   const [barangay, setBarangay] = useState("");
   const [zip, setZip] = useState("");
   const [selectedZone, setSelectedZone] = useState("");
 
+  // Payment — declared early so useEffects below can reference it
+  const [selectedPayment, setSelectedPayment] = useState("");
+
+  // Auto-select default address and payment method once data loads
+  React.useEffect(() => {
+    if (addresses && addresses.length > 0 && selectedAddressId === null) {
+      const def = addresses.find((a) => a.is_default) ?? addresses[0];
+      setSelectedAddressId(def.id);
+    }
+  }, [addresses, selectedAddressId]);
+
+  React.useEffect(() => {
+    if (apiPaymentMethods && apiPaymentMethods.length > 0 && !selectedPayment) {
+      const def =
+        apiPaymentMethods.find((m) => m.is_default) ?? apiPaymentMethods[0];
+      setSelectedPayment(def.id);
+    }
+  }, [apiPaymentMethods, selectedPayment]);
+
+  const selectedZoneObj = deliveryZones.find((z) => z.name === selectedZone);
+  const selectedZoneId = selectedZoneObj?.id;
+
   // Delivery slot
   const [deliveryDate, setDeliveryDate] = useState("");
+  const [selectedSlotId, setSelectedSlotId] = useState("");
   const [deliveryTimeSlot, setDeliveryTimeSlot] = useState("");
 
-  // Payment
-  const [selectedPayment, setSelectedPayment] = useState("");
+  const { data: apiSlots, isLoading: isLoadingSlots } = useDeliverySlots(
+    selectedZoneId,
+    deliveryDate,
+  );
+
+  const displayTimeSlots = useMemo(() => {
+    if (apiSlots && apiSlots.length > 0) {
+      return apiSlots
+        .filter((s) => s.is_active)
+        .map((s) => ({
+          id: s.id,
+          label: `${s.start_time} - ${s.end_time}`,
+        }));
+    }
+    // Fallback to mock slots as label-only entries
+    return (devMode ? timeSlots : []).map((s) => ({ id: "", label: s }));
+  }, [apiSlots, devMode]);
+
+  const displayPaymentMethods = useMemo(() => {
+    if (apiPaymentMethods && apiPaymentMethods.length > 0) {
+      return apiPaymentMethods.map((pm) => ({
+        id: pm.id,
+        name: pm.display_name,
+        icon: pm.type === "gcash" ? "📱" : pm.type === "card" ? "💳" : "💰",
+      }));
+    }
+    return devMode ? paymentMethods : [];
+  }, [apiPaymentMethods, devMode]);
 
   // Promo
   const [promoCode, setPromoCode] = useState("");
@@ -128,8 +187,7 @@ export default function CheckoutPage() {
   }, []);
 
   // Delivery fee
-  const zone = deliveryZones.find((z) => z.name === selectedZone);
-  const deliveryFee = zone ? zone.fee : 0;
+  const deliveryFee = selectedZoneObj ? selectedZoneObj.fee : 0;
 
   // Discount
   const discount = promoDiscount
@@ -178,7 +236,23 @@ export default function CheckoutPage() {
       return;
     }
     try {
+      // If using new address form, create address first
+      let deliveryAddressId = selectedAddressId ?? undefined;
+      if (showNewAddressForm && street && city) {
+        const newAddr = await createAddress({
+          label: "Delivery Address",
+          line_1: street,
+          line_2: barangay || undefined,
+          city,
+          province: barangay,
+          postal_code: zip,
+        });
+        deliveryAddressId = newAddr.id;
+      }
+
       await checkout({
+        delivery_address_id: deliveryAddressId,
+        delivery_slot_id: selectedSlotId || undefined,
         payment_method: selectedPayment,
         promo_code: appliedPromo || undefined,
         plan_total_override: planTotal ?? undefined,
@@ -355,108 +429,197 @@ export default function CheckoutPage() {
               <MapPin size={18} style={{ color: "#1B4332" }} />
               Delivery Address
             </h2>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div className="sm:col-span-2">
-                <label
-                  className="mb-1 block text-sm font-medium"
-                  style={{ color: "#1A1A2E" }}
-                >
-                  Street Address
-                </label>
-                <input
-                  type="text"
-                  value={street}
-                  onChange={(e) => setStreet(e.target.value)}
-                  placeholder="123 Rizal Avenue"
-                  className="w-full rounded-lg px-4 py-2.5 text-sm outline-none transition-colors focus:ring-2"
-                  style={{ border: "1px solid #E5E7EB", color: "#1A1A2E" }}
-                />
+
+            {/* Saved addresses */}
+            {isLoadingAddresses ? (
+              <div className="space-y-2 mb-4">
+                <Skeleton className="h-14 w-full rounded-xl" />
+                <Skeleton className="h-14 w-full rounded-xl" />
               </div>
-              <div>
-                <label
-                  className="mb-1 block text-sm font-medium"
-                  style={{ color: "#1A1A2E" }}
+            ) : addresses && addresses.length > 0 ? (
+              <div className="space-y-2 mb-4">
+                {addresses.map((addr) => {
+                  const isSelected =
+                    !showNewAddressForm && selectedAddressId === addr.id;
+                  return (
+                    <label
+                      key={addr.id}
+                      className="flex cursor-pointer items-start gap-3 rounded-xl px-4 py-3 transition-all duration-150"
+                      style={
+                        isSelected
+                          ? {
+                              backgroundColor: "rgba(27,67,50,0.05)",
+                              border: "2px solid #1B4332",
+                            }
+                          : {
+                              backgroundColor: "#FFFFFF",
+                              border: "2px solid #E5E7EB",
+                            }
+                      }
+                    >
+                      <input
+                        type="radio"
+                        name="address"
+                        value={addr.id}
+                        checked={isSelected}
+                        onChange={() => {
+                          setSelectedAddressId(addr.id);
+                          setShowNewAddressForm(false);
+                        }}
+                        className="mt-0.5 h-4 w-4 shrink-0"
+                        style={{ accentColor: "#1B4332" }}
+                      />
+                      <div>
+                        <p
+                          className="text-sm font-semibold"
+                          style={{ color: "#1A1A2E" }}
+                        >
+                          {addr.label}
+                          {addr.is_default && (
+                            <span
+                              className="ml-2 text-xs font-normal"
+                              style={{ color: "#059669" }}
+                            >
+                              (Default)
+                            </span>
+                          )}
+                        </p>
+                        <p className="text-xs" style={{ color: "#6B7280" }}>
+                          {addr.line_1}
+                          {addr.line_2 ? `, ${addr.line_2}` : ""}, {addr.city},{" "}
+                          {addr.province} {addr.postal_code}
+                        </p>
+                      </div>
+                    </label>
+                  );
+                })}
+                <button
+                  onClick={() => {
+                    setShowNewAddressForm(!showNewAddressForm);
+                    setSelectedAddressId(null);
+                  }}
+                  className="text-sm font-medium underline"
+                  style={{ color: "#1B4332" }}
                 >
-                  City
-                </label>
-                <input
-                  type="text"
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  placeholder="Makati City"
-                  className="w-full rounded-lg px-4 py-2.5 text-sm outline-none transition-colors focus:ring-2"
-                  style={{ border: "1px solid #E5E7EB", color: "#1A1A2E" }}
-                />
+                  {showNewAddressForm
+                    ? "Use a saved address"
+                    : "+ Use a different address"}
+                </button>
               </div>
-              <div>
-                <label
-                  className="mb-1 block text-sm font-medium"
-                  style={{ color: "#1A1A2E" }}
-                >
-                  Barangay
-                </label>
-                <input
-                  type="text"
-                  value={barangay}
-                  onChange={(e) => setBarangay(e.target.value)}
-                  placeholder="Brgy. San Lorenzo"
-                  className="w-full rounded-lg px-4 py-2.5 text-sm outline-none transition-colors focus:ring-2"
-                  style={{ border: "1px solid #E5E7EB", color: "#1A1A2E" }}
-                />
-              </div>
-              <div>
-                <label
-                  className="mb-1 block text-sm font-medium"
-                  style={{ color: "#1A1A2E" }}
-                >
-                  Zip Code
-                </label>
-                <input
-                  type="text"
-                  value={zip}
-                  onChange={(e) => setZip(e.target.value)}
-                  placeholder="1229"
-                  className="w-full rounded-lg px-4 py-2.5 text-sm outline-none transition-colors focus:ring-2"
-                  style={{ border: "1px solid #E5E7EB", color: "#1A1A2E" }}
-                />
-              </div>
-              <div>
-                <label
-                  className="mb-1 block text-sm font-medium"
-                  style={{ color: "#1A1A2E" }}
-                >
-                  Delivery Zone
-                </label>
-                {isLoadingZones ? (
-                  <Skeleton className="h-10 w-full rounded-lg" />
-                ) : (
-                  <Select
-                    value={selectedZone}
-                    onValueChange={(value) => setSelectedZone(value)}
+            ) : null}
+
+            {/* New address form — shown if no saved addresses or user toggled it */}
+            {(showNewAddressForm || !addresses || addresses.length === 0) && (
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="sm:col-span-2">
+                  <label
+                    className="mb-1 block text-sm font-medium"
+                    style={{ color: "#1A1A2E" }}
                   >
-                    <SelectTrigger className="w-full bg-white text-sm">
-                      <SelectValue placeholder="Select your zone" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {deliveryZones.map((z) => (
-                        <SelectItem key={z.name} value={z.name}>
-                          {z.name} — {formatPeso(z.fee)} ({z.estimatedTime})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
+                    Street Address
+                  </label>
+                  <input
+                    type="text"
+                    value={street}
+                    onChange={(e) => setStreet(e.target.value)}
+                    placeholder="123 Rizal Avenue"
+                    className="w-full rounded-lg px-4 py-2.5 text-sm outline-none transition-colors focus:ring-2"
+                    style={{ border: "1px solid #E5E7EB", color: "#1A1A2E" }}
+                  />
+                </div>
+                <div>
+                  <label
+                    className="mb-1 block text-sm font-medium"
+                    style={{ color: "#1A1A2E" }}
+                  >
+                    City
+                  </label>
+                  <input
+                    type="text"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    placeholder="Makati City"
+                    className="w-full rounded-lg px-4 py-2.5 text-sm outline-none transition-colors focus:ring-2"
+                    style={{ border: "1px solid #E5E7EB", color: "#1A1A2E" }}
+                  />
+                </div>
+                <div>
+                  <label
+                    className="mb-1 block text-sm font-medium"
+                    style={{ color: "#1A1A2E" }}
+                  >
+                    Barangay / Province
+                  </label>
+                  <input
+                    type="text"
+                    value={barangay}
+                    onChange={(e) => setBarangay(e.target.value)}
+                    placeholder="Brgy. San Lorenzo"
+                    className="w-full rounded-lg px-4 py-2.5 text-sm outline-none transition-colors focus:ring-2"
+                    style={{ border: "1px solid #E5E7EB", color: "#1A1A2E" }}
+                  />
+                </div>
+                <div>
+                  <label
+                    className="mb-1 block text-sm font-medium"
+                    style={{ color: "#1A1A2E" }}
+                  >
+                    Zip Code
+                  </label>
+                  <input
+                    type="text"
+                    value={zip}
+                    onChange={(e) => setZip(e.target.value)}
+                    placeholder="1229"
+                    className="w-full rounded-lg px-4 py-2.5 text-sm outline-none transition-colors focus:ring-2"
+                    style={{ border: "1px solid #E5E7EB", color: "#1A1A2E" }}
+                  />
+                </div>
               </div>
+            )}
+
+            {/* Delivery zone selector */}
+            <div className="mt-4">
+              <label
+                className="mb-1 block text-sm font-medium"
+                style={{ color: "#1A1A2E" }}
+              >
+                Delivery Zone
+              </label>
+              {isLoadingZones ? (
+                <Skeleton className="h-10 w-full rounded-lg" />
+              ) : (
+                <Select
+                  value={selectedZone}
+                  onValueChange={(value) => {
+                    setSelectedZone(value);
+                    setSelectedSlotId("");
+                  }}
+                >
+                  <SelectTrigger className="w-full bg-white text-sm">
+                    <SelectValue placeholder="Select your zone" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {deliveryZones.map((z) => (
+                      <SelectItem key={z.name} value={z.name}>
+                        {z.name} — {formatPeso(z.fee)} ({z.estimatedTime})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             </div>
-            {zone && (
+
+            {selectedZoneObj && (
               <div
                 className="mt-4 flex items-center gap-2 rounded-lg px-4 py-2.5"
                 style={{ backgroundColor: "rgba(27,67,50,0.05)" }}
               >
                 <CheckCircle size={16} style={{ color: "#059669" }} />
                 <span className="text-sm" style={{ color: "#1A1A2E" }}>
-                  Delivery fee: <strong>{formatPeso(zone.fee)}</strong> &middot;
-                  Est. {zone.estimatedTime}
+                  Delivery fee:{" "}
+                  <strong>{formatPeso(selectedZoneObj.fee)}</strong> &middot;
+                  Est. {selectedZoneObj.estimatedTime}
                 </span>
               </div>
             )}
@@ -508,29 +671,48 @@ export default function CheckoutPage() {
               >
                 Time Slot
               </label>
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                {displayTimeSlots.map((slot) => {
-                  const isSelected = deliveryTimeSlot === slot;
-                  return (
-                    <button
-                      key={slot}
-                      onClick={() => setDeliveryTimeSlot(slot)}
-                      className="rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150"
-                      style={
-                        isSelected
-                          ? { backgroundColor: "#1B4332", color: "#FFFFFF" }
-                          : {
-                              backgroundColor: "#FFFFFF",
-                              color: "#1A1A2E",
-                              border: "1px solid #E5E7EB",
-                            }
-                      }
-                    >
-                      {slot}
-                    </button>
-                  );
-                })}
-              </div>
+              {isLoadingSlots ? (
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <Skeleton key={i} className="h-10 w-full rounded-xl" />
+                  ))}
+                </div>
+              ) : displayTimeSlots.length === 0 ? (
+                <p className="text-sm" style={{ color: "#6B7280" }}>
+                  {selectedZone && deliveryDate
+                    ? "No slots available for this zone/date."
+                    : "Select a zone and date to see available slots."}
+                </p>
+              ) : (
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  {displayTimeSlots.map((slot) => {
+                    const isSelected = slot.id
+                      ? selectedSlotId === slot.id
+                      : deliveryTimeSlot === slot.label;
+                    return (
+                      <button
+                        key={slot.id || slot.label}
+                        onClick={() => {
+                          if (slot.id) setSelectedSlotId(slot.id);
+                          setDeliveryTimeSlot(slot.label);
+                        }}
+                        className="rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150"
+                        style={
+                          isSelected
+                            ? { backgroundColor: "#1B4332", color: "#FFFFFF" }
+                            : {
+                                backgroundColor: "#FFFFFF",
+                                color: "#1A1A2E",
+                                border: "1px solid #E5E7EB",
+                              }
+                        }
+                      >
+                        {slot.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
 
@@ -547,12 +729,16 @@ export default function CheckoutPage() {
               Payment Method
             </h2>
             <div className="space-y-2">
-              {isLoadingZones ? (
+              {isLoadingPayments ? (
                 <>
                   <Skeleton className="h-12 w-full rounded-xl" />
                   <Skeleton className="h-12 w-full rounded-xl" />
                   <Skeleton className="h-12 w-full rounded-xl" />
                 </>
+              ) : displayPaymentMethods.length === 0 ? (
+                <p className="text-sm" style={{ color: "#6B7280" }}>
+                  No payment methods saved. Add one in your profile.
+                </p>
               ) : (
                 displayPaymentMethods.map((pm) => {
                   const isSelected = selectedPayment === pm.id;
