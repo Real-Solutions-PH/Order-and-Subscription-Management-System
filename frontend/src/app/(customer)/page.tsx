@@ -8,6 +8,7 @@ import { meals, dietaryFilters, formatPeso, type Meal } from "@/lib/mock-data";
 import { useCart } from "@/context/CartContext";
 import { useToast } from "@/context/ToastContext";
 import MealCard from "@/components/MealCard";
+import MealDetailModal from "@/components/MealDetailModal";
 import { useProducts, useDevMode } from "@/hooks";
 import { SkeletonMealCard } from "@/components/ui/skeleton";
 import type { ProductResponse } from "@/lib/api-client";
@@ -24,6 +25,10 @@ function mapProductToMeal(p: ProductResponse): Meal {
     protein: (meta.protein as number) ?? 0,
     carbs: (meta.carbs as number) ?? 0,
     fat: (meta.fat as number) ?? 0,
+    fiber: (meta.fiber as number) ?? 0,
+    sugar: (meta.sugar as number) ?? 0,
+    sodium: (meta.sodium as number) ?? 0,
+    serving_size: (meta.serving_size as string) ?? "",
     tags: (meta.tags as string[]) ?? [],
     image: primaryImage?.url ?? "/images/meals/placeholder.png",
     description: p.description ?? "",
@@ -34,6 +39,7 @@ function mapProductToMeal(p: ProductResponse): Meal {
 
 export default function LandingPage() {
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
+  const [detailMeal, setDetailMeal] = useState<(typeof meals)[0] | null>(null);
   const [isSticky, setIsSticky] = useState(false);
   const filterBarRef = useRef<HTMLDivElement>(null);
   const menuGridRef = useRef<HTMLDivElement>(null);
@@ -48,8 +54,11 @@ export default function LandingPage() {
     (p) => p.status !== "draft",
   );
   const apiMeals = apiProducts?.map(mapProductToMeal);
-  const mealsData =
+  const rawMeals =
     apiMeals && apiMeals.length > 0 ? apiMeals : devMode ? meals : [];
+  const mealsData = rawMeals.filter(
+    (m) => m.image && m.image !== "/images/meals/placeholder.png",
+  );
   // Track availability by product id
   const availabilityMap = new Map(
     (apiProducts ?? []).map((p) => [String(p.id), p.status === "active"]),
@@ -295,6 +304,7 @@ export default function LandingPage() {
                           ? availabilityMap.get(String(meal.id))
                           : true
                       }
+                      onViewDetails={setDetailMeal}
                     />
                   </motion.div>
                 ))}
@@ -316,6 +326,13 @@ export default function LandingPage() {
           </div>
         )}
       </section>
+
+      {/* Meal Detail Modal */}
+      <MealDetailModal
+        meal={detailMeal}
+        onClose={() => setDetailMeal(null)}
+        onAdd={handleAddToCart}
+      />
 
       {/* Sticky Bottom Cart Bar (mobile) */}
       <AnimatePresence>
