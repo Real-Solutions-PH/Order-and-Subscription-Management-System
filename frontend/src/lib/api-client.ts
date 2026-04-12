@@ -794,6 +794,7 @@ export const api = {
       payment_method: string;
       promo_code?: string;
       notes?: string;
+      plan_total_override?: number;
     }) => post<OrderResponse>("/orders/checkout", data),
     list: (params?: { status?: string; skip?: number; limit?: number }) =>
       get<OrderListResponse>(

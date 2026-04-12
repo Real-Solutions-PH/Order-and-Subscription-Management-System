@@ -175,6 +175,7 @@ class OrderService:
         delivery_slot_id: uuid.UUID | None,
         payment_method: str,
         notes: str | None = None,
+        plan_total_override: Decimal | None = None,
     ) -> Order:
         """Orchestrates checkout: cart -> order."""
         cart = await self.cart_repo.get_by_user(user_id, tenant_id)
@@ -188,6 +189,9 @@ class OrderService:
             for cust in item.customizations:
                 item_total += cust.price_adjustment * item.quantity
             subtotal += item_total
+
+        if plan_total_override is not None:
+            subtotal = plan_total_override
 
         # TODO: Calculate discount from promo, tax, and delivery fee via external services
         discount_amount = Decimal("0.00")
