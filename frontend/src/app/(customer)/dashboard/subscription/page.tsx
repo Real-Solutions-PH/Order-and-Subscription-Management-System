@@ -354,7 +354,8 @@ export default function SubscriptionPage() {
                           .toISOString()
                           .split("T")[0],
                       });
-                    } catch {
+                    } catch (err) {
+                      console.error(err);
                       // backend unavailable — continue with UI-only flow
                     }
                     setPauseConfirmed(false);
@@ -498,7 +499,8 @@ export default function SubscriptionPage() {
                       id: "current",
                       new_plan_tier_id: selectedTier.tierId as string,
                     });
-                  } catch {
+                  } catch (err) {
+                    console.error(err);
                     // backend unavailable — continue with UI-only flow
                   }
                 }
@@ -847,7 +849,8 @@ export default function SubscriptionPage() {
                           id: "current",
                           reason: cancelReasons.join(", "),
                         });
-                      } catch {
+                      } catch (err) {
+                        console.error(err);
                         // backend unavailable — continue with UI-only flow
                       }
                       setCancelStep(0);

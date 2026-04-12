@@ -9,6 +9,7 @@ export function computeOrderSubtotal(
   items: CartItem[],
   planTotal: number | null,
 ): number {
+  if (planTotal !== null && items.length === 0) return 0;
   if (planTotal !== null) return planTotal;
   return items.reduce((sum, i) => sum + i.meal.price * i.quantity, 0);
 }

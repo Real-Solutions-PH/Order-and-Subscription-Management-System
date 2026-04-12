@@ -175,6 +175,7 @@ async def checkout(
         delivery_slot_id=body.delivery_slot_id,
         payment_method=body.payment_method,
         notes=body.notes,
+        plan_total_override=body.plan_total_override,
     )
     return order
 

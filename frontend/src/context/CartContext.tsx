@@ -44,6 +44,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const addItem = useCallback(
     (meal: Meal, quantity = 1) => {
+      setPlanTotal(null);
       setItems((prev) => {
         const existing = prev.find((i) => i.meal.id === meal.id);
         if (existing) {
@@ -65,6 +66,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const removeItem = useCallback(
     (mealId: number | string) => {
+      setPlanTotal(null);
       const item = items.find((i) => i.meal.id === mealId);
       setItems((prev) => prev.filter((i) => i.meal.id !== mealId));
       if (item) {
@@ -76,6 +78,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const updateQuantity = useCallback(
     (mealId: number | string, quantity: number) => {
+      setPlanTotal(null);
       if (quantity <= 0) {
         setItems((prev) => prev.filter((i) => i.meal.id !== mealId));
         serverCart.removeItem(String(mealId)).catch(() => {});

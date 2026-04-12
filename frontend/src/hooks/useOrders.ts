@@ -40,6 +40,7 @@ export function useOrderMutations() {
       payment_method: string;
       promo_code?: string;
       notes?: string;
+      plan_total_override?: number;
     }) => api.orders.checkout(data),
     onSuccess: () => {
       invalidate();
