@@ -45,8 +45,15 @@ import {
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { items, updateQuantity, removeItem, clearCart, total, itemCount, planTotal } =
-    useCart();
+  const {
+    items,
+    updateQuantity,
+    removeItem,
+    clearCart,
+    total,
+    itemCount,
+    planTotal,
+  } = useCart();
   const { showToast } = useToast();
 
   const devMode = useDevMode();
