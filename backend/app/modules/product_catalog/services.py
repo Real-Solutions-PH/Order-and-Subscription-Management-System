@@ -320,6 +320,7 @@ class CatalogService:
         return catalog
 
     async def schedule_catalog(self, catalog_id: UUID, data: CatalogScheduleCreate) -> CatalogSchedule:
+        # Ensure catalog exists
         await self.get_catalog(catalog_id)
         schedule = CatalogSchedule(
             catalog_id=catalog_id,

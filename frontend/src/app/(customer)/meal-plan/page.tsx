@@ -85,7 +85,7 @@ export default function MealPlanPage() {
     (apiProducts ?? []).map((p) => [String(p.id), p.status === "active"]),
   );
   const isLoadingMeals = productsQuery.isLoading;
-  const displayTimeSlots = devMode ? timeSlots : [];
+  const displayTimeSlots = timeSlots;
 
   const displayPlans = plansQuery.data?.length
     ? plansQuery.data.flatMap((plan) =>
