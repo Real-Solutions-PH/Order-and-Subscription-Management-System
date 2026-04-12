@@ -19,7 +19,12 @@ import { useAuthContext } from "@/context/AuthContext";
 export default function AdminSidebar() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const { isSuperAdmin } = useAuthContext();
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const navItems = [
     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
@@ -27,7 +32,7 @@ export default function AdminSidebar() {
     { label: "Production", href: "/admin/production", icon: ChefHat },
     { label: "Menu", href: "/admin/menu", icon: UtensilsCrossed },
     { label: "Customers", href: "/admin/customers", icon: Users },
-    ...(isSuperAdmin
+    ...(mounted && isSuperAdmin
       ? [{ label: "User Management", href: "/admin/user-management", icon: Shield }]
       : []),
     { label: "Settings", href: "/admin/settings", icon: Settings },
