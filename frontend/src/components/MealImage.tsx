@@ -19,11 +19,13 @@ export default function MealImage({
   if (!src || hasError) {
     return (
       <div
-        className={`flex flex-col items-center justify-center bg-stone-100 ${className}`}
+        className={`flex flex-col items-center justify-center overflow-hidden bg-stone-100 ${className}`}
         style={{ color: "#9CA3AF" }}
       >
-        <UtensilsCrossed size={40} strokeWidth={1.5} />
-        <span className="mt-2 text-xs font-medium">{alt}</span>
+        <UtensilsCrossed size={24} strokeWidth={1.5} />
+        <span className="mt-1 w-full truncate px-1 text-center text-xs font-medium">
+          {alt}
+        </span>
       </div>
     );
   }
