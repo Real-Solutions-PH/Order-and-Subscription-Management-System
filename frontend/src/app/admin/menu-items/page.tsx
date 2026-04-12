@@ -89,8 +89,8 @@ function getMeta(product: ProductResponse) {
 // ── Ingredient row in form ────────────────────────────────────────────
 
 interface IngredientRow {
-  id?: string;  // set if already saved to the backend
-  uid: string;  // client-side stable key for React (always set, even for unsaved rows)
+  id?: string; // set if already saved to the backend
+  uid: string; // client-side stable key for React (always set, even for unsaved rows)
   name: string;
   quantity: string;
   unit: string;
@@ -230,14 +230,16 @@ export default function MenuItemsPage() {
       allergens: (meta.allergens as string[]) ?? [],
     });
     setIngredients(
-      (product.product_ingredients ?? []).map((pi: ProductIngredientResponse) => ({
-        id: pi.id,
-        uid: pi.id,
-        name: pi.ingredient.name,
-        quantity: pi.quantity != null ? String(pi.quantity) : "",
-        unit: pi.unit ?? "",
-        notes: pi.notes ?? "",
-      })),
+      (product.product_ingredients ?? []).map(
+        (pi: ProductIngredientResponse) => ({
+          id: pi.id,
+          uid: pi.id,
+          name: pi.ingredient.name,
+          quantity: pi.quantity != null ? String(pi.quantity) : "",
+          unit: pi.unit ?? "",
+          notes: pi.notes ?? "",
+        }),
+      ),
     );
     setNewIngredient({ name: "", quantity: "", unit: "", notes: "" });
     setEditingProduct(product);
@@ -289,7 +291,10 @@ export default function MenuItemsPage() {
           [...originalIds]
             .filter((origId) => !existingIds.has(origId))
             .map((origId) =>
-              removeIngredient({ productId: editingProduct.id, itemId: origId }),
+              removeIngredient({
+                productId: editingProduct.id,
+                itemId: origId,
+              }),
             ),
         );
 
@@ -449,7 +454,8 @@ export default function MenuItemsPage() {
   // ── Sort toggle ──────────────────────────────────────────────────
   const toggleSort = useCallback(
     (field: SortField) => {
-      if (field === sortField) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+      if (field === sortField)
+        setSortDir((d) => (d === "asc" ? "desc" : "asc"));
       else setSortDir("asc");
       setSortField(field);
     },
@@ -605,7 +611,13 @@ export default function MenuItemsPage() {
                   className="cursor-pointer px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide"
                   style={{ color: "#6B7280" }}
                   onClick={() => toggleSort("status")}
-                  aria-sort={sortField === "status" ? (sortDir === "asc" ? "ascending" : "descending") : "none"}
+                  aria-sort={
+                    sortField === "status"
+                      ? sortDir === "asc"
+                        ? "ascending"
+                        : "descending"
+                      : "none"
+                  }
                 >
                   <span className="inline-flex items-center gap-1">
                     Status{" "}
@@ -620,7 +632,13 @@ export default function MenuItemsPage() {
                   className="cursor-pointer px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide"
                   style={{ color: "#6B7280" }}
                   onClick={() => toggleSort("price")}
-                  aria-sort={sortField === "price" ? (sortDir === "asc" ? "ascending" : "descending") : "none"}
+                  aria-sort={
+                    sortField === "price"
+                      ? sortDir === "asc"
+                        ? "ascending"
+                        : "descending"
+                      : "none"
+                  }
                 >
                   <span className="inline-flex items-center gap-1">
                     Price{" "}
@@ -646,176 +664,179 @@ export default function MenuItemsPage() {
               </tr>
             </thead>
             <tbody className="divide-y" style={{ borderColor: "#F3F4F6" }}>
-              {productsQuery.isLoading
-                ? Array.from({ length: 6 }).map((_, i) => (
-                    <tr key={i}>
-                      <td colSpan={5} className="px-4 py-3">
-                        <SkeletonRow />
-                      </td>
-                    </tr>
-                  ))
-                : productsQuery.isError
-                  ? (
-                    <tr>
-                      <td colSpan={5} className="px-4 py-8 text-center text-sm text-red-500">
-                        Failed to load menu items. Please refresh and try again.
-                      </td>
-                    </tr>
-                  )
-                : sortedItems.map((product) => {
-                    const meta = getMeta(product);
-                    const tags = (meta.tags as string[]) ?? [];
-                    const primaryImage =
-                      product.images.find((img) => img.is_primary) ??
-                      product.images[0];
-                    return (
-                      <motion.tr
-                        key={product.id}
-                        layout
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="transition-colors hover:bg-gray-50"
-                      >
-                        {/* Item */}
-                        <td className="px-4 py-3">
-                          <div className="flex items-center gap-3">
-                            <div
-                              className="h-10 w-14 flex-shrink-0 overflow-hidden rounded-md"
-                              style={{ border: "1px solid #E5E7EB" }}
+              {productsQuery.isLoading ? (
+                Array.from({ length: 6 }).map((_, i) => (
+                  <tr key={i}>
+                    <td colSpan={5} className="px-4 py-3">
+                      <SkeletonRow />
+                    </td>
+                  </tr>
+                ))
+              ) : productsQuery.isError ? (
+                <tr>
+                  <td
+                    colSpan={5}
+                    className="px-4 py-8 text-center text-sm text-red-500"
+                  >
+                    Failed to load menu items. Please refresh and try again.
+                  </td>
+                </tr>
+              ) : (
+                sortedItems.map((product) => {
+                  const meta = getMeta(product);
+                  const tags = (meta.tags as string[]) ?? [];
+                  const primaryImage =
+                    product.images.find((img) => img.is_primary) ??
+                    product.images[0];
+                  return (
+                    <motion.tr
+                      key={product.id}
+                      layout
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="transition-colors hover:bg-gray-50"
+                    >
+                      {/* Item */}
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-3">
+                          <div
+                            className="h-10 w-14 flex-shrink-0 overflow-hidden rounded-md"
+                            style={{ border: "1px solid #E5E7EB" }}
+                          >
+                            <MealImage
+                              src={
+                                primaryImage?.url ??
+                                "/images/meals/placeholder.png"
+                              }
+                              alt={product.name}
+                              className="h-full w-full object-cover"
+                            />
+                          </div>
+                          <div>
+                            <p
+                              className="font-medium"
+                              style={{ color: "#1A1A2E" }}
                             >
-                              <MealImage
-                                src={
-                                  primaryImage?.url ??
-                                  "/images/meals/placeholder.png"
-                                }
-                                alt={product.name}
-                                className="h-full w-full object-cover"
-                              />
-                            </div>
-                            <div>
+                              {product.name}
+                            </p>
+                            {product.short_description && (
                               <p
-                                className="font-medium"
-                                style={{ color: "#1A1A2E" }}
+                                className="mt-0.5 max-w-xs truncate text-xs"
+                                style={{ color: "#9CA3AF" }}
                               >
-                                {product.name}
+                                {product.short_description}
                               </p>
-                              {product.short_description && (
-                                <p
-                                  className="mt-0.5 max-w-xs truncate text-xs"
-                                  style={{ color: "#9CA3AF" }}
-                                >
-                                  {product.short_description}
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                        </td>
-                        {/* Status */}
-                        <td className="px-4 py-3">
-                          <StatusBadge status={product.status} />
-                        </td>
-                        {/* Price */}
-                        <td
-                          className="px-4 py-3 font-medium"
-                          style={{ color: "#1A1A2E" }}
-                        >
-                          {(() => {
-                            const price = getPrice(product);
-                            return price > 0 ? (
-                              formatPeso(price)
-                            ) : (
-                              <span style={{ color: "#9CA3AF" }}>—</span>
-                            );
-                          })()}
-                        </td>
-                        {/* Tags */}
-                        <td className="px-4 py-3">
-                          <div className="flex flex-wrap gap-1">
-                            {tags.slice(0, 3).map((tag) => (
-                              <span
-                                key={tag}
-                                className="rounded-full px-2 py-0.5 text-[10px] font-medium"
-                                style={{
-                                  backgroundColor: "#D1FAE5",
-                                  color: "#065F46",
-                                }}
-                              >
-                                {tag}
-                              </span>
-                            ))}
-                            {tags.length > 3 && (
-                              <span
-                                className="rounded-full px-2 py-0.5 text-[10px]"
-                                style={{
-                                  backgroundColor: "#F3F4F6",
-                                  color: "#6B7280",
-                                }}
-                              >
-                                +{tags.length - 3}
-                              </span>
                             )}
                           </div>
-                        </td>
-                        {/* Actions */}
-                        <td className="px-4 py-3">
-                          <div className="flex items-center justify-end gap-2">
-                            <button
-                              onClick={() => openEdit(product)}
-                              title="Edit"
-                              className="rounded-lg p-1.5 transition-colors hover:bg-gray-100"
-                              style={{ color: "#6B7280" }}
+                        </div>
+                      </td>
+                      {/* Status */}
+                      <td className="px-4 py-3">
+                        <StatusBadge status={product.status} />
+                      </td>
+                      {/* Price */}
+                      <td
+                        className="px-4 py-3 font-medium"
+                        style={{ color: "#1A1A2E" }}
+                      >
+                        {(() => {
+                          const price = getPrice(product);
+                          return price > 0 ? (
+                            formatPeso(price)
+                          ) : (
+                            <span style={{ color: "#9CA3AF" }}>—</span>
+                          );
+                        })()}
+                      </td>
+                      {/* Tags */}
+                      <td className="px-4 py-3">
+                        <div className="flex flex-wrap gap-1">
+                          {tags.slice(0, 3).map((tag) => (
+                            <span
+                              key={tag}
+                              className="rounded-full px-2 py-0.5 text-[10px] font-medium"
+                              style={{
+                                backgroundColor: "#D1FAE5",
+                                color: "#065F46",
+                              }}
                             >
-                              <Pencil size={15} />
-                            </button>
-                            {isSuperAdmin && (
-                              <>
-                                <button
-                                  onClick={() => handleToggleStatus(product)}
-                                  disabled={togglingIds.has(product.id)}
-                                  role="switch"
-                                  aria-checked={product.status === "active"}
-                                  aria-label={
+                              {tag}
+                            </span>
+                          ))}
+                          {tags.length > 3 && (
+                            <span
+                              className="rounded-full px-2 py-0.5 text-[10px]"
+                              style={{
+                                backgroundColor: "#F3F4F6",
+                                color: "#6B7280",
+                              }}
+                            >
+                              +{tags.length - 3}
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      {/* Actions */}
+                      <td className="px-4 py-3">
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => openEdit(product)}
+                            title="Edit"
+                            className="rounded-lg p-1.5 transition-colors hover:bg-gray-100"
+                            style={{ color: "#6B7280" }}
+                          >
+                            <Pencil size={15} />
+                          </button>
+                          {isSuperAdmin && (
+                            <>
+                              <button
+                                onClick={() => handleToggleStatus(product)}
+                                disabled={togglingIds.has(product.id)}
+                                role="switch"
+                                aria-checked={product.status === "active"}
+                                aria-label={
+                                  product.status === "active"
+                                    ? `Deactivate ${product.name}`
+                                    : `Activate ${product.name}`
+                                }
+                                title={
+                                  product.status === "active"
+                                    ? "Deactivate"
+                                    : "Activate"
+                                }
+                                className="rounded-lg p-1.5 transition-colors hover:bg-gray-100 disabled:opacity-40"
+                                style={{
+                                  color:
                                     product.status === "active"
-                                      ? `Deactivate ${product.name}`
-                                      : `Activate ${product.name}`
-                                  }
-                                  title={
-                                    product.status === "active"
-                                      ? "Deactivate"
-                                      : "Activate"
-                                  }
-                                  className="rounded-lg p-1.5 transition-colors hover:bg-gray-100 disabled:opacity-40"
-                                  style={{
-                                    color:
-                                      product.status === "active"
-                                        ? "#40916C"
-                                        : "#9CA3AF",
-                                  }}
-                                >
-                                  {product.status === "active" ? (
-                                    <ToggleRight size={18} />
-                                  ) : (
-                                    <ToggleLeft size={18} />
-                                  )}
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    setDeleteTarget(product);
-                                    setDeleteModalOpen(true);
-                                  }}
-                                  title="Delete"
-                                  className="rounded-lg p-1.5 transition-colors hover:bg-red-50"
-                                  style={{ color: "#EF4444" }}
-                                >
-                                  <Trash2 size={15} />
-                                </button>
-                              </>
-                            )}
-                          </div>
-                        </td>
-                      </motion.tr>
-                    );
-                  })}
+                                      ? "#40916C"
+                                      : "#9CA3AF",
+                                }}
+                              >
+                                {product.status === "active" ? (
+                                  <ToggleRight size={18} />
+                                ) : (
+                                  <ToggleLeft size={18} />
+                                )}
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setDeleteTarget(product);
+                                  setDeleteModalOpen(true);
+                                }}
+                                title="Delete"
+                                className="rounded-lg p-1.5 transition-colors hover:bg-red-50"
+                                style={{ color: "#EF4444" }}
+                              >
+                                <Trash2 size={15} />
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </td>
+                    </motion.tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>

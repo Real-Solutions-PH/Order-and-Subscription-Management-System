@@ -312,7 +312,8 @@ export default function MenuManagementPage() {
           });
           showToast(`"${editForm.name}" updated successfully`);
         } catch (err) {
-          const msg = err instanceof Error ? err.message : "Failed to save changes";
+          const msg =
+            err instanceof Error ? err.message : "Failed to save changes";
           showToast(msg, "error");
           return;
         }

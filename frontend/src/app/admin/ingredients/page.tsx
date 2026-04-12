@@ -164,7 +164,13 @@ export default function IngredientsPage() {
                 <th
                   className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide"
                   style={{ color: "#6B7280" }}
-                  aria-sort={sortBy === "name" ? (sortDir === "asc" ? "ascending" : "descending") : "none"}
+                  aria-sort={
+                    sortBy === "name"
+                      ? sortDir === "asc"
+                        ? "ascending"
+                        : "descending"
+                      : "none"
+                  }
                 >
                   Ingredient
                 </th>
@@ -172,7 +178,13 @@ export default function IngredientsPage() {
                   className="cursor-pointer px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide"
                   style={{ color: "#6B7280" }}
                   onClick={() => toggleSort("usage_count")}
-                  aria-sort={sortBy === "usage_count" ? (sortDir === "asc" ? "ascending" : "descending") : "none"}
+                  aria-sort={
+                    sortBy === "usage_count"
+                      ? sortDir === "asc"
+                        ? "ascending"
+                        : "descending"
+                      : "none"
+                  }
                 >
                   <span className="inline-flex items-center gap-1">
                     Used In{" "}
@@ -199,155 +211,159 @@ export default function IngredientsPage() {
               </tr>
             </thead>
             <tbody className="divide-y" style={{ borderColor: "#F3F4F6" }}>
-              {query.isLoading
-                ? Array.from({ length: 8 }).map((_, i) => (
-                    <tr key={i}>
-                      <td colSpan={5} className="px-4 py-3">
-                        <div
-                          className="h-5 animate-pulse rounded"
-                          style={{ backgroundColor: "#F3F4F6" }}
-                        />
-                      </td>
-                    </tr>
-                  ))
-                : query.isError
-                  ? (
-                    <tr>
-                      <td colSpan={5} className="px-4 py-8 text-center" style={{ color: "#EF4444" }}>
-                        Failed to load ingredients. Please try again.
-                      </td>
-                    </tr>
-                  )
-                : items.map((ingredient) => {
-                    const isExpanded = expandedId === ingredient.id;
-                    const usageCount = ingredient.used_in_products.length;
-                    return (
-                      <React.Fragment key={ingredient.id}>
-                        <motion.tr
-                          layout
-                          className={`transition-colors ${usageCount > 0 ? "cursor-pointer hover:bg-gray-50" : ""}`}
-                          onClick={() =>
-                            usageCount > 0 &&
-                            setExpandedId(isExpanded ? null : ingredient.id)
-                          }
-                        >
-                          {/* Name */}
-                          <td className="px-4 py-3">
+              {query.isLoading ? (
+                Array.from({ length: 8 }).map((_, i) => (
+                  <tr key={i}>
+                    <td colSpan={5} className="px-4 py-3">
+                      <div
+                        className="h-5 animate-pulse rounded"
+                        style={{ backgroundColor: "#F3F4F6" }}
+                      />
+                    </td>
+                  </tr>
+                ))
+              ) : query.isError ? (
+                <tr>
+                  <td
+                    colSpan={5}
+                    className="px-4 py-8 text-center"
+                    style={{ color: "#EF4444" }}
+                  >
+                    Failed to load ingredients. Please try again.
+                  </td>
+                </tr>
+              ) : (
+                items.map((ingredient) => {
+                  const isExpanded = expandedId === ingredient.id;
+                  const usageCount = ingredient.used_in_products.length;
+                  return (
+                    <React.Fragment key={ingredient.id}>
+                      <motion.tr
+                        layout
+                        className={`transition-colors ${usageCount > 0 ? "cursor-pointer hover:bg-gray-50" : ""}`}
+                        onClick={() =>
+                          usageCount > 0 &&
+                          setExpandedId(isExpanded ? null : ingredient.id)
+                        }
+                      >
+                        {/* Name */}
+                        <td className="px-4 py-3">
+                          <span
+                            className="font-medium"
+                            style={{ color: "#1A1A2E" }}
+                          >
+                            {ingredient.name}
+                          </span>
+                        </td>
+                        {/* Usage count */}
+                        <td className="px-4 py-3">
+                          {usageCount > 0 ? (
                             <span
-                              className="font-medium"
-                              style={{ color: "#1A1A2E" }}
+                              className="rounded-full px-2.5 py-0.5 text-xs font-semibold"
+                              style={{
+                                backgroundColor: "#DBEAFE",
+                                color: "#1E40AF",
+                              }}
                             >
-                              {ingredient.name}
+                              {usageCount} item{usageCount !== 1 ? "s" : ""}
                             </span>
-                          </td>
-                          {/* Usage count */}
-                          <td className="px-4 py-3">
-                            {usageCount > 0 ? (
-                              <span
-                                className="rounded-full px-2.5 py-0.5 text-xs font-semibold"
-                                style={{
-                                  backgroundColor: "#DBEAFE",
-                                  color: "#1E40AF",
-                                }}
-                              >
-                                {usageCount} item{usageCount !== 1 ? "s" : ""}
-                              </span>
-                            ) : (
-                              <span
-                                className="text-xs"
-                                style={{ color: "#9CA3AF" }}
-                              >
-                                Unused
-                              </span>
-                            )}
-                          </td>
-                          {/* Unit */}
-                          <td
-                            className="px-4 py-3 text-sm"
-                            style={{ color: "#6B7280" }}
-                          >
-                            {ingredient.default_unit ?? (
-                              <span style={{ color: "#D1D5DB" }}>—</span>
-                            )}
-                          </td>
-                          {/* Description */}
-                          <td
-                            className="px-4 py-3 text-sm"
-                            style={{ color: "#6B7280" }}
-                          >
-                            {ingredient.description ? (
-                              <span className="max-w-xs truncate block">
-                                {ingredient.description}
-                              </span>
-                            ) : (
-                              <span style={{ color: "#D1D5DB" }}>—</span>
-                            )}
-                          </td>
-                          {/* Expand toggle */}
-                          <td className="px-4 py-3 text-right">
-                            {usageCount > 0 && (
-                              <ChevronRight
-                                size={15}
-                                className="ml-auto transition-transform"
-                                style={{
-                                  color: "#9CA3AF",
-                                  transform: isExpanded
-                                    ? "rotate(90deg)"
-                                    : "rotate(0deg)",
-                                }}
-                              />
-                            )}
-                          </td>
-                        </motion.tr>
-
-                        {/* Expanded: menu items using this ingredient */}
-                        <AnimatePresence>
-                          {isExpanded && (
-                            <tr>
-                              <td colSpan={5} className="px-0 py-0">
-                                <motion.div
-                                  initial={{ height: 0, opacity: 0 }}
-                                  animate={{ height: "auto", opacity: 1 }}
-                                  exit={{ height: 0, opacity: 0 }}
-                                  transition={{ duration: 0.2 }}
-                                  className="overflow-hidden"
-                                >
-                                  <div
-                                    className="flex flex-wrap gap-2 px-4 py-3"
-                                    style={{
-                                      backgroundColor: "#F9FAFB",
-                                      borderTop: "1px solid #F3F4F6",
-                                    }}
-                                  >
-                                    <span
-                                      className="mr-1 self-center text-xs font-medium"
-                                      style={{ color: "#9CA3AF" }}
-                                    >
-                                      Used in:
-                                    </span>
-                                    {ingredient.used_in_products.map((prod) => (
-                                      <div
-                                        key={prod.id}
-                                        className="flex items-center gap-1.5 rounded-lg px-3 py-1 text-xs font-medium"
-                                        style={{
-                                          backgroundColor: "#FFFFFF",
-                                          border: "1px solid #E5E7EB",
-                                          color: "#1A1A2E",
-                                        }}
-                                      >
-                                        {prod.name}
-                                        <StatusBadge status={prod.status} />
-                                      </div>
-                                    ))}
-                                  </div>
-                                </motion.div>
-                              </td>
-                            </tr>
+                          ) : (
+                            <span
+                              className="text-xs"
+                              style={{ color: "#9CA3AF" }}
+                            >
+                              Unused
+                            </span>
                           )}
-                        </AnimatePresence>
-                      </React.Fragment>
-                    );
-                  })}
+                        </td>
+                        {/* Unit */}
+                        <td
+                          className="px-4 py-3 text-sm"
+                          style={{ color: "#6B7280" }}
+                        >
+                          {ingredient.default_unit ?? (
+                            <span style={{ color: "#D1D5DB" }}>—</span>
+                          )}
+                        </td>
+                        {/* Description */}
+                        <td
+                          className="px-4 py-3 text-sm"
+                          style={{ color: "#6B7280" }}
+                        >
+                          {ingredient.description ? (
+                            <span className="max-w-xs truncate block">
+                              {ingredient.description}
+                            </span>
+                          ) : (
+                            <span style={{ color: "#D1D5DB" }}>—</span>
+                          )}
+                        </td>
+                        {/* Expand toggle */}
+                        <td className="px-4 py-3 text-right">
+                          {usageCount > 0 && (
+                            <ChevronRight
+                              size={15}
+                              className="ml-auto transition-transform"
+                              style={{
+                                color: "#9CA3AF",
+                                transform: isExpanded
+                                  ? "rotate(90deg)"
+                                  : "rotate(0deg)",
+                              }}
+                            />
+                          )}
+                        </td>
+                      </motion.tr>
+
+                      {/* Expanded: menu items using this ingredient */}
+                      <AnimatePresence>
+                        {isExpanded && (
+                          <tr>
+                            <td colSpan={5} className="px-0 py-0">
+                              <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: "auto", opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{ duration: 0.2 }}
+                                className="overflow-hidden"
+                              >
+                                <div
+                                  className="flex flex-wrap gap-2 px-4 py-3"
+                                  style={{
+                                    backgroundColor: "#F9FAFB",
+                                    borderTop: "1px solid #F3F4F6",
+                                  }}
+                                >
+                                  <span
+                                    className="mr-1 self-center text-xs font-medium"
+                                    style={{ color: "#9CA3AF" }}
+                                  >
+                                    Used in:
+                                  </span>
+                                  {ingredient.used_in_products.map((prod) => (
+                                    <div
+                                      key={prod.id}
+                                      className="flex items-center gap-1.5 rounded-lg px-3 py-1 text-xs font-medium"
+                                      style={{
+                                        backgroundColor: "#FFFFFF",
+                                        border: "1px solid #E5E7EB",
+                                        color: "#1A1A2E",
+                                      }}
+                                    >
+                                      {prod.name}
+                                      <StatusBadge status={prod.status} />
+                                    </div>
+                                  ))}
+                                </div>
+                              </motion.div>
+                            </td>
+                          </tr>
+                        )}
+                      </AnimatePresence>
+                    </React.Fragment>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>

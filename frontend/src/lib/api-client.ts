@@ -728,7 +728,8 @@ export const api = {
     update: (id: string, data: ProductUpdate) =>
       patch<ProductResponse>(`/products/${id}`, data),
     delete: (id: string) => del<void>(`/products/${id}`),
-    archive: (id: string) => post<ProductResponse>(`/products/${id}/deactivate`),
+    archive: (id: string) =>
+      post<ProductResponse>(`/products/${id}/deactivate`),
     activate: (id: string) => post<ProductResponse>(`/products/${id}/activate`),
     deactivate: (id: string) =>
       post<ProductResponse>(`/products/${id}/deactivate`),

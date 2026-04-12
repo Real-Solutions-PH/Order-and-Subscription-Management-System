@@ -132,16 +132,12 @@ class ProductService:
                 select(CartItem.id).where(CartItem.product_variant_id.in_(variant_ids)).limit(1)
             )
             if cart_ref.scalar_one_or_none():
-                raise ConflictError(
-                    "Cannot delete: product variants are referenced by active cart items"
-                )
+                raise ConflictError("Cannot delete: product variants are referenced by active cart items")
             order_ref = await db.execute(
                 select(OrderItem.id).where(OrderItem.product_variant_id.in_(variant_ids)).limit(1)
             )
             if order_ref.scalar_one_or_none():
-                raise ConflictError(
-                    "Cannot delete: product variants are referenced by existing orders"
-                )
+                raise ConflictError("Cannot delete: product variants are referenced by existing orders")
 
         await self.product_repo.hard_delete(product_id)
 
