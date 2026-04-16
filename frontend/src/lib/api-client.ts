@@ -732,6 +732,7 @@ export const api = {
       category_id?: string;
       search?: string;
       q?: string;
+      tenant_id?: string;
     }) =>
       get<ProductListResponse>(
         "/products",
@@ -1038,7 +1039,7 @@ export const api = {
 
   // Tenant Config
   tenant: {
-    getConfig: () => get<TenantConfigResponse>("/tenant/config"),
+    getConfig: () => get<TenantConfigResponse>("/tenant/config", { tenant_id: TENANT_ID }),
     updateConfig: (data: Partial<TenantConfigResponse>) =>
       patch<TenantConfigResponse>("/tenant/config", data),
     listFeatures: () =>

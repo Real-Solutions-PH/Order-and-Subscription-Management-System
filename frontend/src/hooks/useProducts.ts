@@ -22,13 +22,21 @@ interface ProductListParams {
   sort_by?: string;
   sort_dir?: string;
   tag?: string;
+  tenant_id?: string;
 }
 
-/** Products catalog: list, detail, CRUD. */
+/** Products catalog: list, detail, CRUD. Works for unauthenticated users via tenant_id. */
 export function useProducts(params?: ProductListParams) {
+  const tenantQuery = useQuery({
+    queryKey: queryKeys.tenantConfig,
+    queryFn: () => api.tenant.getConfig(),
+  });
+  const tenant_id = tenantQuery.data?.tenant_id;
+
   return useQuery({
     queryKey: queryKeys.products.list(params as Record<string, unknown>),
-    queryFn: () => api.products.list(params),
+    queryFn: () => api.products.list({ ...params, tenant_id }),
+    enabled: !!tenant_id,
   });
 }
 

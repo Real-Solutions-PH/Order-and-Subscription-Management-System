@@ -666,11 +666,7 @@ export default function MenuItemsPage() {
             <tbody className="divide-y" style={{ borderColor: "#F3F4F6" }}>
               {productsQuery.isLoading ? (
                 Array.from({ length: 6 }).map((_, i) => (
-                  <tr key={i}>
-                    <td colSpan={5} className="px-4 py-3">
-                      <SkeletonRow />
-                    </td>
-                  </tr>
+                  <SkeletonRow key={i} />
                 ))
               ) : productsQuery.isError ? (
                 <tr>

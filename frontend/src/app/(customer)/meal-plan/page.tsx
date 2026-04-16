@@ -67,7 +67,7 @@ const ADD_ON_OPTIONS = [
 export default function MealPlanPage() {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
-  const [selectedPlanId, setSelectedPlanId] = useState<number | null>(null);
+  const [selectedPlanId, setSelectedPlanId] = useState<string | number | null>(null);
   const [selectedMeals, setSelectedMeals] = useState<SelectedMeal[]>([]);
   const [frequency, setFrequency] = useState<"weekly" | "biweekly">("weekly");
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
@@ -100,7 +100,7 @@ export default function MealPlanPage() {
   const displayPlans = plansQuery.data?.length
     ? plansQuery.data.flatMap((plan) =>
         plan.tiers.map((tier) => ({
-          id: tier.items_per_cycle,
+          id: tier.id,
           tierId: tier.id,
           meals: tier.items_per_cycle,
           price: Number(tier.price),

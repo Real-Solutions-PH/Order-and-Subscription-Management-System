@@ -56,7 +56,8 @@ async def create_product(
 @router.get("/products", response_model=ProductListResponse)
 async def list_products(
     product_service: Annotated[ProductService, Depends(get_product_service)],
-    current_user: SuperUser,
+    current_user: OptionalUser = None,
+    tenant_id: UUID | None = None,
     page: int = Query(1, ge=1),
     per_page: int = Query(20, ge=1, le=100),
     status: ProductStatus | None = None,
@@ -66,9 +67,12 @@ async def list_products(
     sort_dir: str = Query("desc", pattern="^(asc|desc)$"),
     tag: str | None = None,
 ):
+    resolved_tenant_id = current_user.tenant_id if current_user else tenant_id
+    if not resolved_tenant_id:
+        raise BadRequestError("tenant_id is required")
     offset = (page - 1) * per_page
     products, total = await product_service.list_products(
-        current_user.tenant_id, offset, per_page, status, search, category_id, sort_by, sort_dir, tag
+        resolved_tenant_id, offset, per_page, status, search, category_id, sort_by, sort_dir, tag
     )
     return ProductListResponse(total=total, page=page, per_page=per_page, items=products)
 
@@ -76,8 +80,8 @@ async def list_products(
 @router.get("/products/{product_id}", response_model=ProductResponse)
 async def get_product(
     product_id: UUID,
-    current_user: SuperUser,
     product_service: Annotated[ProductService, Depends(get_product_service)],
+    current_user: OptionalUser = None,
 ):
     return await product_service.get_product(product_id)
 
