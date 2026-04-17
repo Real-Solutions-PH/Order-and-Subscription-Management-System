@@ -55,6 +55,10 @@ function mapProductToMeal(p: ProductResponse): Meal & { variantId?: string } {
     description: p.description ?? "",
     allergens: (meta.allergens as string[]) ?? [],
     ingredients: (meta.ingredients as string[]) ?? [],
+    fiber: (meta.fiber as number) ?? 0,
+    sugar: (meta.sugar as number) ?? 0,
+    sodium: (meta.sodium as number) ?? 0,
+    serving_size: (meta.serving_size as string) ?? "",
   };
 }
 

@@ -14,11 +14,14 @@ import { queryKeys } from "./query-keys";
 interface ProductListParams {
   skip?: number;
   limit?: number;
+  page?: number;
+  per_page?: number;
   status?: string;
   is_subscribable?: boolean;
   is_standalone?: boolean;
   category_id?: string;
   q?: string;
+  search?: string;
   sort_by?: string;
   sort_dir?: string;
   tag?: string;
