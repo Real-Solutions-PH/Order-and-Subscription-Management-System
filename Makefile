@@ -121,3 +121,9 @@ clean: ## Remove build artifacts and caches
 
 env: ## Copy .env.example to .env (if not exists)
 	@test -f backend/.env || cp backend/.env.example backend/.env && echo "Created backend/.env"
+
+requirements:
+	uv pip compile ./backend/pyproject.toml -o ./backend/requirements.txt
+
+deploy: 
+	requirements
