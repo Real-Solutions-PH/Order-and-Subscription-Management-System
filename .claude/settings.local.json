@@ -26,7 +26,8 @@
       "Bash(.venv/bin/python -m alembic revision --autogenerate -m \"test_detection\")",
       "Bash(.venv/bin/python -m alembic upgrade head)",
       "Bash(.venv/bin/python -m alembic downgrade base)",
-      "Bash(.venv/bin/python -m alembic revision --autogenerate -m \"init tables\")"
+      "Bash(.venv/bin/python -m alembic revision --autogenerate -m \"init tables\")",
+      "Bash(git commit -m ' *)"
     ]
   }
 }
