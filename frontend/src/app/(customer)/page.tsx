@@ -54,11 +54,8 @@ export default function LandingPage() {
     (p) => p.status !== "draft",
   );
   const apiMeals = apiProducts?.map(mapProductToMeal);
-  const rawMeals =
+  const mealsData =
     apiMeals && apiMeals.length > 0 ? apiMeals : devMode ? meals : [];
-  const mealsData = rawMeals.filter(
-    (m) => m.image && m.image !== "/images/meals/placeholder.png",
-  );
   // Track availability by product id
   const availabilityMap = new Map(
     (apiProducts ?? []).map((p) => [String(p.id), p.status === "active"]),
@@ -311,18 +308,22 @@ export default function LandingPage() {
           </AnimatePresence>
         </motion.div>
 
-        {filteredMeals.length === 0 && (
+        {!isLoadingMeals && filteredMeals.length === 0 && (
           <div className="py-20 text-center">
             <p className="text-lg font-medium" style={{ color: "#6B7280" }}>
-              No meals match your filters.
+              {activeFilters.length > 0
+                ? "No meals match your filters."
+                : "No meals available this week. Check back soon!"}
             </p>
-            <button
-              onClick={() => setActiveFilters([])}
-              className="mt-3 text-sm font-semibold underline"
-              style={{ color: "#E76F51" }}
-            >
-              Clear filters
-            </button>
+            {activeFilters.length > 0 && (
+              <button
+                onClick={() => setActiveFilters([])}
+                className="mt-3 text-sm font-semibold underline"
+                style={{ color: "#E76F51" }}
+              >
+                Clear filters
+              </button>
+            )}
           </div>
         )}
       </section>

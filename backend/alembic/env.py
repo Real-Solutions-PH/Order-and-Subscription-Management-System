@@ -26,7 +26,7 @@ settings = get_settings()
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-config.set_main_option("sqlalchemy.url", settings.database_url)
+config.set_main_option("sqlalchemy.url", settings.async_database_url)
 
 target_metadata = Base.metadata
 
@@ -44,7 +44,11 @@ def run_migrations_offline() -> None:
 
 
 def do_run_migrations(connection):
-    context.configure(connection=connection, target_metadata=target_metadata)
+    context.configure(
+        connection=connection,
+        target_metadata=target_metadata,
+        transaction_per_migration=True,  # each migration runs in its own txn — allows autocommit_block() for DDL like ALTER TYPE
+    )
     with context.begin_transaction():
         context.run_migrations()
 

@@ -230,7 +230,7 @@ export default function MenuItemsPage() {
       allergens: (meta.allergens as string[]) ?? [],
     });
     setIngredients(
-      (product.product_ingredients ?? []).map(
+      (product.ingredients ?? []).map(
         (pi: ProductIngredientResponse) => ({
           id: pi.id,
           uid: pi.id,
@@ -241,7 +241,7 @@ export default function MenuItemsPage() {
         }),
       ),
     );
-    setNewIngredient({ name: "", quantity: "", unit: "", notes: "" });
+    setNewIngredient({ uid: "", name: "", quantity: "", unit: "", notes: "" });
     setEditingProduct(product);
     setModalOpen(true);
   }
@@ -285,7 +285,7 @@ export default function MenuItemsPage() {
           ingredients.filter((i) => i.id).map((i) => i.id!),
         );
         const originalIds = new Set(
-          (editingProduct.product_ingredients ?? []).map((pi) => pi.id),
+          (editingProduct.ingredients ?? []).map((pi) => pi.id),
         );
         await Promise.all(
           [...originalIds]

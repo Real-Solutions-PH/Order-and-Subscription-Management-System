@@ -1,8 +1,10 @@
 from typing import Annotated
+from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 
 from app.dependencies import get_config_service, get_feature_flag_service
+from app.exceptions import BadRequestError
 from app.modules.tenant_config.schemas import (
     FeatureFlagListResponse,
     FeatureFlagResponse,
@@ -11,17 +13,21 @@ from app.modules.tenant_config.schemas import (
     TenantConfigUpdateRequest,
 )
 from app.modules.tenant_config.services import ConfigService, FeatureFlagService
-from app.shared.auth import CurrentUser
+from app.shared.auth import CurrentUser, OptionalUser
 
 router = APIRouter(tags=["Tenant Config"])
 
 
 @router.get("/tenant/config", response_model=TenantConfigResponse)
 async def get_tenant_config(
-    current_user: CurrentUser,
     config_service: Annotated[ConfigService, Depends(get_config_service)],
+    current_user: OptionalUser = None,
+    tenant_id: UUID | None = None,
 ):
-    config = await config_service.get_config(current_user.tenant_id)
+    resolved_tenant_id = current_user.tenant_id if current_user else tenant_id
+    if not resolved_tenant_id:
+        raise BadRequestError("tenant_id is required")
+    config = await config_service.get_config(resolved_tenant_id)
     return config
 
 

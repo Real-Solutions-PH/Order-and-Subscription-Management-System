@@ -1,8 +1,5 @@
 from contextlib import asynccontextmanager
 
-import boto3
-import redis.asyncio as aioredis
-from botocore.config import Config as BotoConfig
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
@@ -24,6 +21,8 @@ async def _ping_database() -> None:
 
 
 async def _ping_redis() -> None:
+    import redis.asyncio as aioredis
+
     client = aioredis.from_url(settings.redis_url, socket_connect_timeout=5)
     try:
         if not await client.ping():
@@ -34,6 +33,9 @@ async def _ping_redis() -> None:
 
 
 def _ping_minio() -> None:
+    import boto3
+    from botocore.config import Config as BotoConfig
+
     s3 = boto3.client(
         "s3",
         endpoint_url=settings.s3_endpoint,
@@ -49,19 +51,21 @@ async def _warmup() -> None:
     """Ping every external service at startup; log failures but don't block."""
     checks: list[tuple[str, callable]] = [
         ("Database", _ping_database()),
-        ("Redis", _ping_redis()),
     ]
+    if settings.enable_redis:
+        checks.append(("Redis", _ping_redis()))
     for name, coro in checks:
         try:
             await coro
         except Exception:
             logger.warning("%s warmup ping failed", name, exc_info=True)
 
-    # MinIO uses synchronous boto3
-    try:
-        _ping_minio()
-    except Exception:
-        logger.warning("MinIO warmup ping failed", exc_info=True)
+    if settings.enable_minio:
+        # MinIO uses synchronous boto3
+        try:
+            _ping_minio()
+        except Exception:
+            logger.warning("MinIO warmup ping failed", exc_info=True)
 
 
 @asynccontextmanager
@@ -131,17 +135,19 @@ async def health_check():
     except Exception:
         services["database"] = "unavailable"
 
-    try:
-        await _ping_redis()
-        services["redis"] = "ok"
-    except Exception:
-        services["redis"] = "unavailable"
+    if settings.enable_redis:
+        try:
+            await _ping_redis()
+            services["redis"] = "ok"
+        except Exception:
+            services["redis"] = "unavailable"
 
-    try:
-        _ping_minio()
-        services["minio"] = "ok"
-    except Exception:
-        services["minio"] = "unavailable"
+    if settings.enable_minio:
+        try:
+            _ping_minio()
+            services["minio"] = "ok"
+        except Exception:
+            services["minio"] = "unavailable"
 
     all_ok = all(v == "ok" for v in services.values())
     return {
