@@ -93,11 +93,24 @@ async def _seed_tenant(session: AsyncSession) -> uuid.UUID:
 
 
 async def _seed_admin_user(session: AsyncSession, tenant_id: uuid.UUID) -> uuid.UUID:
-    """Create the admin superuser for first-time login."""
-    if await _exists(session, User, tenant_id=tenant_id, email=settings.seed_admin_email):
-        return (
-            await session.execute(select(User.id).filter_by(tenant_id=tenant_id, email=settings.seed_admin_email))
-        ).scalar_one()
+    """Create the admin superuser for first-time login.
+
+    If the row already exists, ensure it stays active with the superadmin
+    role so a stale deactivation or pre-role-migration record doesn't
+    lock the tenant out of its only admin.
+    """
+    existing = (
+        await session.execute(select(User).filter_by(tenant_id=tenant_id, email=settings.seed_admin_email))
+    ).scalar_one_or_none()
+    if existing is not None:
+        if not existing.is_active:
+            existing.is_active = True
+            logger.info("Reactivated seed admin user: %s", settings.seed_admin_email)
+        if existing.role != "superadmin":
+            existing.role = "superadmin"
+            logger.info("Restored superadmin role on seed admin: %s", settings.seed_admin_email)
+        await session.flush()
+        return existing.id
     user_id = uuid.uuid4()
     session.add(
         User(
