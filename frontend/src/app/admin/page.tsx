@@ -215,9 +215,25 @@ export default function AdminDashboard() {
       ? {
           mrr: Number(dashMetrics.mrr),
           activeSubscribers: dashMetrics.active_subscribers,
-          churnRate: dashMetrics.churn_rate,
+          churnRate: Number(dashMetrics.churn_rate),
           avgOrderValue: Number(dashMetrics.aov),
-          todayRevenue: Number(dashMetrics.total_revenue),
+          todayRevenue: Number(dashMetrics.revenue),
+          todayGrossSales: Number(dashMetrics.today_gross_sales ?? 0),
+          todayNetSales: Number(dashMetrics.today_net_sales ?? 0),
+          todayTotalMeals: Number(dashMetrics.today_total_meals ?? 0),
+          orderFulfillmentRate: Number(dashMetrics.order_fulfillment_rate ?? 0),
+          avgPrepTimeMinutes: Number(dashMetrics.avg_prep_time_min ?? 0),
+          foodWastePercent: Number(dashMetrics.food_waste_rate ?? 0),
+          deliverySuccessRate: Number(dashMetrics.delivery_success_rate ?? 0),
+          revenueData: (dashMetrics.revenue_data ?? baseAnalytics.revenueData) as typeof baseAnalytics.revenueData,
+          subscriberTrend: (dashMetrics.subscriber_trend ?? baseAnalytics.subscriberTrend) as typeof baseAnalytics.subscriberTrend,
+          planDistribution: ((dashMetrics.plan_distribution as typeof baseAnalytics.planDistribution | undefined) ?? baseAnalytics.planDistribution),
+          menuContribution: ((dashMetrics.menu_contribution as unknown) as typeof baseAnalytics.menuContribution) ?? baseAnalytics.menuContribution,
+          weeklyMealPopularity: (dashMetrics.weekly_meal_popularity ?? baseAnalytics.weeklyMealPopularity) as typeof baseAnalytics.weeklyMealPopularity,
+          dailyPrepBreakdown: (dashMetrics.daily_prep_breakdown ?? baseAnalytics.dailyPrepBreakdown) as typeof baseAnalytics.dailyPrepBreakdown,
+          deliveryBreakdown: dashMetrics.delivery_breakdown ?? baseAnalytics.deliveryBreakdown,
+          fulfillmentTrend: (dashMetrics.fulfillment_trend ?? baseAnalytics.fulfillmentTrend) as typeof baseAnalytics.fulfillmentTrend,
+          cohortRetention: ((dashMetrics.cohort_retention as unknown) as typeof baseAnalytics.cohortRetention) ?? baseAnalytics.cohortRetention,
         }
       : {}),
   };
@@ -442,14 +458,43 @@ export default function AdminDashboard() {
     }));
   };
 
-  // Count orders by status
-  const statusCounts = (displayOrders as Array<{ status: string }>).reduce(
-    (acc: Record<string, number>, o) => {
-      acc[o.status] = (acc[o.status] || 0) + 1;
-      return acc;
-    },
-    {} as Record<string, number>,
-  );
+  // Map backend OrderStatus → UI status keys
+  const STATUS_MAP: Record<string, string> = {
+    pending: "new",
+    confirmed: "new",
+    processing: "preparing",
+    ready: "ready",
+    out_for_delivery: "delivering",
+    delivered: "delivered",
+    picked_up: "delivered",
+    cancelled: "cancelled",
+    refunded: "cancelled",
+    new: "new",
+    preparing: "preparing",
+    delivering: "delivering",
+  };
+
+  const apiStatusCounts = dashMetrics?.status_counts as
+    | Record<string, number>
+    | undefined;
+
+  const statusCounts: Record<string, number> = apiStatusCounts
+    ? Object.entries(apiStatusCounts).reduce(
+        (acc, [k, v]) => {
+          const ui = STATUS_MAP[k] ?? k;
+          acc[ui] = (acc[ui] || 0) + Number(v);
+          return acc;
+        },
+        {} as Record<string, number>,
+      )
+    : (displayOrders as Array<{ status: string }>).reduce(
+        (acc: Record<string, number>, o) => {
+          const ui = STATUS_MAP[o.status] ?? o.status;
+          acc[ui] = (acc[ui] || 0) + 1;
+          return acc;
+        },
+        {} as Record<string, number>,
+      );
 
   const orderStatuses = [
     {

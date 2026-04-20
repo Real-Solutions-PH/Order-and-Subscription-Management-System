@@ -17,6 +17,23 @@ class DashboardResponse(BaseSchema):
     active_subscribers: int
     churn_rate: Decimal
     aov: Decimal
+    today_gross_sales: Decimal
+    today_net_sales: Decimal
+    today_total_meals: int
+    status_counts: dict[str, int]
+    order_fulfillment_rate: Decimal
+    avg_prep_time_min: Decimal
+    food_waste_rate: Decimal
+    delivery_success_rate: Decimal
+    revenue_data: list[dict] = []
+    subscriber_trend: list[dict] = []
+    plan_distribution: list[dict] = []
+    menu_contribution: list[dict] = []
+    weekly_meal_popularity: list[dict] = []
+    daily_prep_breakdown: list[dict] = []
+    delivery_breakdown: dict = {}
+    fulfillment_trend: list[dict] = []
+    cohort_retention: list[dict] = []
     trends: dict | None = None
 
 

@@ -102,6 +102,7 @@ app.add_middleware(
 
 # ── Register module routers ──────────────────────────────────────────
 
+from app.admin_routes import router as admin_router  # noqa: E402
 from app.modules.analytics.routes import router as analytics_router  # noqa: E402
 from app.modules.fulfillment.routes import router as fulfillment_router  # noqa: E402
 from app.modules.iam.routes import router as iam_router  # noqa: E402
@@ -123,6 +124,7 @@ app.include_router(payment_router, prefix=api_prefix)
 app.include_router(fulfillment_router, prefix=api_prefix)
 app.include_router(notification_router, prefix=api_prefix)
 app.include_router(analytics_router, prefix=api_prefix)
+app.include_router(admin_router, prefix=api_prefix)
 
 
 @app.get("/health")

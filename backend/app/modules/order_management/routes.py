@@ -188,10 +188,11 @@ async def list_orders(
     per_page: int = Query(20, ge=1, le=100),
     status: str | None = Query(None),
 ):
-    """List orders for the current user."""
+    """List orders. Admins see every tenant order; customers see only their own."""
+    is_admin = getattr(user, "role", None) in ("admin", "superadmin")
     orders, total = await order_service.list_orders(
         tenant_id=user.tenant_id,
-        user_id=user.id,
+        user_id=None if is_admin else user.id,
         page=page,
         per_page=per_page,
         status=status,

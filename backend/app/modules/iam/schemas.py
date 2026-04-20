@@ -54,6 +54,7 @@ class UserResponse(BaseSchema):
     updated_at: datetime
     dietary_preferences: list[str] = []
     allergens: list[str] = []
+    status: str = "active"
 
     @model_validator(mode="before")
     @classmethod
@@ -62,10 +63,12 @@ class UserResponse(BaseSchema):
             meta = data.metadata_ or {}
             data.__dict__["dietary_preferences"] = meta.get("dietary_preferences", [])
             data.__dict__["allergens"] = meta.get("allergens", [])
+            data.__dict__["status"] = "active" if getattr(data, "is_active", True) else "churned"
         elif isinstance(data, dict):
             meta = data.get("metadata_") or {}
             data.setdefault("dietary_preferences", meta.get("dietary_preferences", []))
             data.setdefault("allergens", meta.get("allergens", []))
+            data.setdefault("status", "active" if data.get("is_active", True) else "churned")
         return data
 
 

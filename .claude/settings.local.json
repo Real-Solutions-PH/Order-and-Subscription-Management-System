@@ -27,7 +27,17 @@
       "Bash(.venv/bin/python -m alembic upgrade head)",
       "Bash(.venv/bin/python -m alembic downgrade base)",
       "Bash(.venv/bin/python -m alembic revision --autogenerate -m \"init tables\")",
-      "Bash(git commit -m ' *)"
+      "Bash(git commit -m ' *)",
+      "Bash(.venv/bin/python -c \"from app.seed_demo_data import seed_demo_data, clear_demo_data; from app.admin_routes import router; print\\('imports OK'\\)\")",
+      "Bash(.venv/bin/python -c \"from app.seed_demo_data import seed_demo_data, clear_demo_data; from app.admin_routes import router; from app.main import app; print\\('OK'\\); print\\([r.path for r in app.routes if 'demo' in r.path]\\)\")",
+      "Bash(.venv/bin/python -c ' *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:8000/health)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:8000/api/v1/health)",
+      "Bash(docker compose *)",
+      "Bash(PGPASSWORD=postgres psql -h localhost -p 5432 -U postgres -d osms_app -c \"SELECT \\(SELECT COUNT\\(*\\) FROM users WHERE email LIKE '%@demo.osms.local'\\) AS demo_users, \\(SELECT COUNT\\(*\\) FROM orders WHERE order_number LIKE 'DEMO-%'\\) AS demo_orders, \\(SELECT COUNT\\(*\\) FROM subscriptions\\) AS subs, \\(SELECT COUNT\\(*\\) FROM payments\\) AS payments;\")",
+      "Bash(curl -s http://localhost:8000/openapi.json)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\([p for p in d['paths'] if 'dashboard' in p]\\)\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8000/api/v1/analytics/dashboard)"
     ]
   }
 }

@@ -620,13 +620,31 @@ export interface TemplateResponse {
 
 // Analytics
 export interface DashboardResponse {
-  total_revenue: number;
+  revenue: number;
+  total_revenue?: number;
   total_orders: number;
   active_subscribers: number;
   mrr: number;
   churn_rate: number;
   aov: number;
-  period: string;
+  today_gross_sales: number;
+  today_net_sales: number;
+  today_total_meals: number;
+  status_counts: Record<string, number>;
+  order_fulfillment_rate: number;
+  avg_prep_time_min: number;
+  food_waste_rate: number;
+  delivery_success_rate: number;
+  revenue_data: Array<Record<string, number | string>>;
+  subscriber_trend: Array<{ week: string; new: number; churned: number }>;
+  plan_distribution: Array<{ name: string; value: number; color: string }>;
+  menu_contribution: Array<Record<string, number | string>>;
+  weekly_meal_popularity: Array<{ name: string; count: number }>;
+  daily_prep_breakdown: Array<{ meal: string; prepTime: number; orders: number; wasteKg: number }>;
+  delivery_breakdown: { onTime: number; late: number; failed: number; returned: number };
+  fulfillment_trend: Array<Record<string, number | string>>;
+  cohort_retention: Array<Record<string, number | string>>;
+  period?: string;
 }
 export interface MRRBreakdown {
   total: number;
