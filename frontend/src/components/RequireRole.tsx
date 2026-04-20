@@ -26,22 +26,25 @@ export default function RequireRole({
   const { isAuthenticated, isLoading, roles, openAuthModal } = useAuthContext();
   const router = useRouter();
 
+  const hasRole =
+    roles.includes(role) || (role === "admin" && roles.includes("superadmin"));
+
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       router.replace("/");
       openAuthModal("login");
       return;
     }
-    if (!isLoading && isAuthenticated && !roles.includes(role)) {
+    if (!isLoading && isAuthenticated && !hasRole) {
       router.replace("/");
     }
-  }, [isLoading, isAuthenticated, roles, role, router, openAuthModal]);
+  }, [isLoading, isAuthenticated, hasRole, router, openAuthModal]);
 
   if (isLoading) {
     return <>{fallback ?? <LoadingSkeleton />}</>;
   }
 
-  if (!isAuthenticated || !roles.includes(role)) {
+  if (!isAuthenticated || !hasRole) {
     return null;
   }
 
